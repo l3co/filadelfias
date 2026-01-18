@@ -1,4 +1,5 @@
 import { api } from '../lib/api';
+import { User } from '../types';
 
 export interface RegisterData {
     email: string;
@@ -9,15 +10,6 @@ export interface RegisterData {
 export interface LoginData {
     username: string; // OAuth2 uses 'username' field
     password: string;
-}
-
-export interface User {
-    id: string;
-    email: string;
-    name: string;
-    avatar_url: string | null;
-    is_active: boolean;
-    created_at: string;
 }
 
 export interface TokenResponse {

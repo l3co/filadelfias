@@ -1,62 +1,37 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { authService } from '../services/auth';
+import { authService, RegisterData, LoginData } from '../services/auth';
 
-// Define types inline to avoid import issues
-type RegisterData = {
-    email: string;
-    name: string;
-    password: string;
-};
+const USER_QUERY_KEY = ['currentUser'];
 
-type LoginData = {
-    username: string;
-    password: string;
-};
-
-/**
- * Hook for user registration
- */
 export const useRegister = () => {
     return useMutation({
         mutationFn: (data: RegisterData) => authService.register(data),
     });
 };
 
-/**
- * Hook for user login
- */
 export const useLogin = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: (data: LoginData) => authService.login(data),
         onSuccess: (response) => {
-            // Store token in localStorage
             localStorage.setItem('access_token', response.access_token);
-
-            // Invalidate user query to refetch
-            queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+            queryClient.invalidateQueries({ queryKey: USER_QUERY_KEY });
         },
     });
 };
 
-/**
- * Hook to get current authenticated user
- */
 export const useCurrentUser = () => {
-    const token = localStorage.getItem('access_token');
+    const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
 
     return useQuery({
-        queryKey: ['currentUser'],
+        queryKey: USER_QUERY_KEY,
         queryFn: authService.getCurrentUser,
-        enabled: !!token, // Only fetch if token exists
+        enabled: !!token,
         retry: false,
     });
 };
 
-/**
- * Hook for logout
- */
 export const useLogout = () => {
     const queryClient = useQueryClient();
 
@@ -66,8 +41,13 @@ export const useLogout = () => {
             return Promise.resolve();
         },
         onSuccess: () => {
-            // Clear all queries
             queryClient.clear();
         },
     });
 };
+
+export function useCurrentTenant() {
+    const { data: user } = useCurrentUser();
+    // For MVP, return the first tenant from memberships
+    return user?.memberships?.[0]?.tenant;
+}

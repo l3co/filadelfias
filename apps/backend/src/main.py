@@ -4,6 +4,8 @@ Filadelfias API - Main Application Entry Point
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from src.api.auth import router as auth_router
+
 app = FastAPI(
     title="Filadelfias API",
     description="Multi-tenant church management platform",
@@ -18,6 +20,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include routers
+app.include_router(auth_router)
 
 
 @app.get("/health", tags=["Health"])

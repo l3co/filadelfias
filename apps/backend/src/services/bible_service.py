@@ -44,7 +44,7 @@ class BibleService:
         if cls._loaded:
             return
         
-        path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "bible_aa.json")
+        path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "bible_acf.json")
         try:
             with open(path, "r", encoding="utf-8-sig") as f:
                 cls._data = json.load(f)

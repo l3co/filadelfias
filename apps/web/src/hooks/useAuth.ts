@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { authService, RegisterData, LoginData } from '../services/auth';
+import { authService } from '../services/auth';
+import type { RegisterData, LoginData } from '../services/auth';
 
 const USER_QUERY_KEY = ['currentUser'];
 

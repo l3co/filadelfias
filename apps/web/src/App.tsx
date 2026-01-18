@@ -9,7 +9,9 @@ import { OnboardingPage } from './routes/OnboardingPage';
 import { PublicLayout } from './components/layout/PublicLayout';
 import { LandingPage } from './routes/LandingPage';
 import { BiblePage } from './routes/bible/BiblePage';
+import { BibleReaderPage } from './routes/bible/BibleReaderPage';
 import { HymnalPage } from './routes/hymnal/HymnalPage';
+import { HymnalReaderPage } from './routes/hymnal/HymnalReaderPage';
 
 function App() {
   return (
@@ -18,7 +20,9 @@ function App() {
       <Route element={<PublicLayout />}>
         <Route path="/" element={<LandingPage />} />
         <Route path="/bible" element={<BiblePage />} />
+        <Route path="/bible/:book/:chapter" element={<BibleReaderPage />} />
         <Route path="/hymnal" element={<HymnalPage />} />
+        <Route path="/hymnal/:number" element={<HymnalReaderPage />} />
       </Route>
 
       {/* Autenticação (Sem Layout Específico) */}

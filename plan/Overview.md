@@ -7,14 +7,11 @@ Este documento define a arquitetura técnica e a estratégia de implementação 
 ### Backend (`/backend`)
 *   **Linguagem**: Python 3.11+
 *   **Framework**: FastAPI
+*   **Arquitetura**: Clean Architecture / Ports and Adapters.
 *   **ORM**: SQLAlchemy (Async)
 *   **Banco de Dados**: PostgreSQL (Gerenciado na DigitalOcean ou Docker local)
 *   **Migrações**: Alembic
 *   **Autenticação**: JWT (OAuth2 Password Bearer)
-### Backend (`/backend`)
-*   **Linguagem**: Python 3.11+
-*   **Framework**: FastAPI
-*   **Arquitetura**: Clean Architecture / Ports and Adapters.
 
 **Diagrama de Arquitetura Backend**:
 
@@ -128,6 +125,8 @@ O desenvolvimento será dividido em fases conforme os arquivos de planejamento:
     *   Funcionalidades MVP: Bíblia, Comunicados.
 *   **[Fase 2: Vida Comunitária](plan_2.md)**
     *   Membros, Visitas, Oração, Eventos, Escalas.
+*   **[Fase 2.1: Portal Público e Expansão](plan_2.1_portal.md)**
+    *   Landing Page, Bíblia Online, Hinário, Cadastro de Igrejas.
 *   **[Fase 3: Governo e Atos Oficiais](plan_3.md)**
     *   Assembleias, Votações, Atas, Cargos e Eleições.
 *   **[Fase 4: Tesouraria e Administração](plan_4.md)**

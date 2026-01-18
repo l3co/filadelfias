@@ -6,13 +6,26 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { MembersPage } from './routes/members/MembersPage';
 import { DashboardLayout } from './components/layout/DashboardLayout';
 import { OnboardingPage } from './routes/OnboardingPage';
+import { PublicLayout } from './components/layout/PublicLayout';
+import { LandingPage } from './routes/LandingPage';
+import { BiblePage } from './routes/bible/BiblePage';
+import { HymnalPage } from './routes/hymnal/HymnalPage';
 
 function App() {
   return (
     <Routes>
+      {/* Rotas Públicas com Layout Público */}
+      <Route element={<PublicLayout />}>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/bible" element={<BiblePage />} />
+        <Route path="/hymnal" element={<HymnalPage />} />
+      </Route>
+
+      {/* Autenticação (Sem Layout Específico) */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
 
+      {/* Onboarding Protegido */}
       <Route
         path="/onboarding"
         element={
@@ -22,8 +35,9 @@ function App() {
         }
       />
 
+      {/* Área Administrativa Protegida */}
       <Route
-        path="/"
+        path="/app"
         element={
           <ProtectedRoute>
             <DashboardLayout />
@@ -34,6 +48,8 @@ function App() {
         <Route path="members" element={<MembersPage />} />
         <Route path="events" element={<div className="p-8 text-center text-gray-500">Módulo de Eventos (Em breve)</div>} />
       </Route>
+
+      {/* Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

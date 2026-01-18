@@ -23,7 +23,7 @@ export function OnboardingPage() {
             await api.post('/tenants', data);
             // Refresh user to get new membership
             await queryClient.invalidateQueries({ queryKey: ['currentUser'] });
-            navigate('/');
+            navigate('/app');
         } catch (err: any) {
             setError(err.response?.data?.detail || 'Erro ao criar organização. Tente outro slug.');
         } finally {

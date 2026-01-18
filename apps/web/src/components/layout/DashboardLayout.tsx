@@ -5,9 +5,9 @@ import { useCurrentUser, useLogout } from '../../hooks/useAuth';
 import { cn } from '../../lib/utils';
 
 const navigation = [
-    { name: 'Dashboard', href: '/', icon: Home },
-    { name: 'Membros', href: '/members', icon: Users },
-    { name: 'Eventos', href: '/events', icon: Calendar },
+    { name: 'Dashboard', href: '/app', icon: Home },
+    { name: 'Membros', href: '/app/members', icon: Users },
+    { name: 'Eventos', href: '/app/events', icon: Calendar },
 ];
 
 export function DashboardLayout() {

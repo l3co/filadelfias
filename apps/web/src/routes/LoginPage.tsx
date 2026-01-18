@@ -16,7 +16,7 @@ export default function LoginPage() {
 
         login(formData, {
             onSuccess: () => {
-                navigate('/');
+                navigate('/app');
             },
         });
     };

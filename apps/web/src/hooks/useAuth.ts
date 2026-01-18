@@ -1,5 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { authService, RegisterData, LoginData } from '../services/auth';
+import { authService } from '../services/auth';
+
+// Define types inline to avoid import issues
+type RegisterData = {
+    email: string;
+    name: string;
+    password: string;
+};
+
+type LoginData = {
+    username: string;
+    password: string;
+};
 
 /**
  * Hook for user registration

@@ -1,131 +1,148 @@
 # Filadelfias
 
-Filadelfias é uma plataforma open-source criada para apoiar a vida da igreja local, unindo centralidade da Palavra, vida comunitária e boa governança eclesiástica, utilizando a tecnologia como meio de serviço.
+> Plataforma multi-tenant para gestão de igrejas reformadas presbiterianas
 
-O projeto nasce inspirado na tradição cristã histórica — com forte diálogo com o contexto reformado e presbiteriano — e busca oferecer uma solução digital simples, segura e fiel, sem substituir o culto público, a comunhão presencial ou a autoridade da igreja local.
+## 🎯 Visão Geral
 
-⸻
+Filadelfias é uma plataforma completa para gestão de igrejas, desenvolvida seguindo princípios de **Clean Architecture**, **Domain-Driven Design (DDD)** e **Software Craftsmanship**.
 
-## 📖 Propósito
+### Stack Tecnológica
 
-Auxiliar igrejas em sua organização e comunicação por meio de uma plataforma digital que respeita princípios bíblicos como:
-	•	centralidade das Escrituras
-	•	ordem e decência
-	•	transparência
-	•	serviço
-	•	amor fraternal
+- **Backend**: FastAPI + SQLAlchemy + PostgreSQL
+- **Frontend Web**: React + Vite + TypeScript + TailwindCSS
+- **Frontend Mobile**: React Native + Expo (em desenvolvimento)
+- **Infraestrutura**: Docker + Docker Compose + DigitalOcean
 
-O Filadelfias não pretende “digitalizar a fé”, mas servir a Igreja em suas atividades cotidianas.
+## 🚀 Quick Start
 
-⸻
+### Pré-requisitos
 
-## 🏛️ Visão
+- Docker e Docker Compose
+- Node.js 20+ (para desenvolvimento local)
+- Python 3.11+ (para desenvolvimento local)
 
-O Filadelfias foi concebido como uma plataforma multi-igrejas, onde:
-	•	cada igreja mantém sua autonomia
-	•	regras, cargos e fluxos são definidos localmente
-	•	a tecnologia apoia, mas não governa
+### Rodando o Projeto
 
-O projeto cresce de forma modular, permitindo que igrejas adotem apenas o que fizer sentido para sua realidade.
+```bash
+# Clone o repositório
+git clone https://github.com/seu-usuario/filadelfias.git
+cd filadelfias
 
-⸻
+# Suba os containers
+docker compose up -d --build
 
-## ✨ Funcionalidades (visão geral)
+# Acesse a aplicação
+# Web: http://localhost:5173
+# API: http://localhost:8000
+# API Docs: http://localhost:8000/docs
+```
 
-Palavra & Vida Espiritual
-	•	Bíblia (inicialmente textos em domínio público, como Almeida Revista e Corrigida)
-	•	Devocionais
-	•	Palavra do dia
-	•	Liturgia do culto
-	•	Hinário (índice, com possibilidade de expansão mediante licença)
+## 📁 Estrutura do Projeto
 
-### Comunicação & Comunidade
-	•	Boletins informativos
-	•	Avisos e comunicados
-	•	Eventos da igreja
-	•	Cadastro de membros
-	•	Aniversários
-	•	Pedidos de oração
-	•	Registros de visitação pastoral
+```
+filadelfias/
+├── apps/
+│   ├── backend/          # FastAPI + SQLAlchemy
+│   ├── web/              # React + Vite
+│   └── mobile/           # React Native + Expo (futuro)
+├── packages/
+│   └── contracts/        # Schemas compartilhados (Zod)
+├── docs/                 # Documentação técnica
+├── plan/                 # Planos de implementação
+└── docker-compose.yml    # Orquestração de containers
+```
 
-### Governo & Administração da Igreja
-	•	Assembleias
-	•	Votações (conforme permissões e quórum)
-	•	Registro de atas
-	•	Gestão de cargos e permissões
-	•	Tesouraria (receitas, despesas e prestação de contas)
+## ✅ Status de Implementação
 
-### Ministérios & Missões
-	•	Escalas de ministérios (mídia, liturgia, música, apoio)
-	•	Calendário de serviços
-	•	Missionários apoiados
-	•	Projetos missionários e sociais
+### Plano 1: Fundamentos e MVP Core ✅ COMPLETO
 
-⸻
+- [x] Setup do ambiente (Monorepo, Docker, CI/CD)
+- [x] Backend FastAPI com Clean Architecture
+- [x] Modelos de banco (Users, Tenants, Memberships)
+- [x] Autenticação JWT completa
+- [x] Frontend React com React Router + TanStack Query
+- [x] Telas de Login e Registro
+- [x] Proteção de rotas
+- [x] Integração Backend ↔ Frontend
 
-🧱 Arquitetura & Stack
-	•	Backend: FastAPI (Python)
-	•	Frontend Web: React
-	•	Mobile: React Native
-	•	Infraestrutura: DigitalOcean
-	•	App Platform
-	•	Banco de dados gerenciado
-	•	Object Storage (compatível com S3)
-	•	Arquitetura: preparada para multi-tenant (multi-igrejas)
+### Próximos Passos (Plano 2)
 
-⸻
+- [ ] Cadastro e perfil de membros
+- [ ] Pedidos de oração
+- [ ] Registros de visitação
+- [ ] Escalas de ministérios
+- [ ] Calendário de eventos
+- [ ] Geolocalização de igrejas
 
-## 📚 Conteúdo bíblico e direitos autorais
+## 🏗️ Arquitetura
 
-O Filadelfias inicia com conteúdos em domínio público.
-A arquitetura está preparada para integrações futuras com conteúdos licenciados, sempre respeitando direitos autorais, editoras e instituições responsáveis.
+### Backend (Clean Architecture)
 
-Nenhum conteúdo protegido será redistribuído sem autorização explícita.
+```
+src/
+├── api/           # Controllers (FastAPI routers)
+├── application/   # Use Cases (orquestração)
+├── domain/        # Entidades e regras de negócio
+└── infra/         # Repositories e adapters
+```
 
-⸻
+### Frontend (Feature-Based)
 
-## 🤝 Open Source & Contribuições
+```
+src/
+├── components/    # Componentes reutilizáveis
+├── hooks/         # React Query hooks
+├── routes/        # Páginas
+├── services/      # API clients (Axios)
+└── lib/           # Utilitários
+```
 
-Este é um projeto gratuito e open-source, criado com o objetivo de servir a Igreja.
+## 🔐 Autenticação
 
-Contribuições são bem-vindas, desde que:
-	•	estejam alinhadas com os valores do projeto
-	•	respeitem os princípios teológicos e institucionais
-	•	mantenham o foco em simplicidade, clareza e serviço
+- **JWT** para autenticação stateless
+- **Bcrypt** para hash de senhas
+- **OAuth2 Password Flow** para login
+- Suporte a **multi-tenancy** (usuário pode pertencer a múltiplas igrejas)
 
-Em breve:
-	•	CONTRIBUTING.md
-	•	guia de padrões de código
-	•	roadmap público
+## 📚 Documentação
 
-⸻
+- [Arquitetura](./docs/architecture.md)
+- [Módulos](./docs/modules.md)
+- [Modelo de Dados](./docs/entity-relationship.md)
+- [Glossário](./docs/glossary.md)
+- [Guia de Contribuição](./docs/contributing.md)
 
-## 🛠️ Documentação Técnica
+## 🧪 Testes
 
-O planejamento técnico do projeto está detalhado na pasta `plan/`.
-Consulte os documentos abaixo para entender a arquitetura e as fases de implementação:
+```bash
+# Backend
+cd apps/backend
+poetry run pytest
 
-*   **[Visão Geral e Arquitetura](plan/Overview.md)**
-*   **[Fase 1: Fundamentos e MVP](plan/plan_1.md)**
-*   **[Fase 2: Vida Comunitária](plan/plan_2.md)**
-*   **[Fase 3: Governo e Ordem](plan/plan_3.md)**
-*   **[Fase 4: Tesouraria e Administração](plan/plan_4.md)**
-*   **[Fase 5: Missões e Expansão](plan/plan_5.md)**
+# Frontend
+cd apps/web
+npm test
+```
 
-⸻
+## 📝 Commits
 
-## ⚠️ Aviso importante
+Seguimos **Conventional Commits**:
 
-O Filadelfias:
-	•	não substitui o culto público
-	•	não substitui a comunhão presencial
-	•	não governa a igreja
+- `feat:` Nova funcionalidade
+- `fix:` Correção de bug
+- `docs:` Documentação
+- `refactor:` Refatoração
+- `test:` Testes
+- `chore:` Tarefas de manutenção
 
-Ele existe para auxiliar, não para assumir funções espirituais que pertencem à vida comunitária da igreja local.
+## 👥 Contribuindo
 
-⸻
+Veja [CONTRIBUTING.md](./docs/contributing.md) para detalhes sobre como contribuir.
 
-📜 Licença
+## 📄 Licença
 
-Este projeto é distribuído sob licença open-source.
-Consulte o arquivo LICENSE para mais detalhes.
+Este projeto está sob licença MIT.
+
+---
+
+**Desenvolvido com ❤️ para a comunidade reformada presbiteriana**

@@ -39,10 +39,10 @@ export function BiblePage() {
                             <Link
                                 key={book.abbrev}
                                 to={`/bible/${book.abbrev}/1`}
-                                className="flex items-center justify-between p-3 rounded-lg hover:bg-green-50 border border-transparent hover:border-green-100 transition-all group"
+                                className="flex items-center justify-between gap-2 p-3 rounded-lg hover:bg-green-50 border border-transparent hover:border-green-100 transition-all group w-full"
                             >
-                                <span className="font-medium text-gray-700 group-hover:text-green-800">{book.name}</span>
-                                <span className="text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-full">{book.chapters_count} cap</span>
+                                <span className="font-medium text-gray-700 group-hover:text-green-800 text-left">{book.name}</span>
+                                <span className="text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-full shrink-0 whitespace-nowrap">{book.chapters_count} cap</span>
                             </Link>
                         ))}
                     </div>
@@ -59,10 +59,10 @@ export function BiblePage() {
                             <Link
                                 key={book.abbrev}
                                 to={`/bible/${book.abbrev}/1`}
-                                className="flex items-center justify-between p-3 rounded-lg hover:bg-green-50 border border-transparent hover:border-green-100 transition-all group"
+                                className="flex items-center justify-between gap-2 p-3 rounded-lg hover:bg-green-50 border border-transparent hover:border-green-100 transition-all group w-full"
                             >
-                                <span className="font-medium text-gray-700 group-hover:text-green-800">{book.name}</span>
-                                <span className="text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-full">{book.chapters_count} cap</span>
+                                <span className="font-medium text-gray-700 group-hover:text-green-800 text-left">{book.name}</span>
+                                <span className="text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-full shrink-0 whitespace-nowrap">{book.chapters_count} cap</span>
                             </Link>
                         ))}
                     </div>

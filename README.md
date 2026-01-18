@@ -100,6 +100,20 @@ Em breve:
 
 ⸻
 
+## 🛠️ Documentação Técnica
+
+O planejamento técnico do projeto está detalhado na pasta `plan/`.
+Consulte os documentos abaixo para entender a arquitetura e as fases de implementação:
+
+*   **[Visão Geral e Arquitetura](plan/Overview.md)**
+*   **[Fase 1: Fundamentos e MVP](plan/plan_1.md)**
+*   **[Fase 2: Vida Comunitária](plan/plan_2.md)**
+*   **[Fase 3: Governo e Ordem](plan/plan_3.md)**
+*   **[Fase 4: Tesouraria e Administração](plan/plan_4.md)**
+*   **[Fase 5: Missões e Expansão](plan/plan_5.md)**
+
+⸻
+
 ## ⚠️ Aviso importante
 
 O Filadelfias:

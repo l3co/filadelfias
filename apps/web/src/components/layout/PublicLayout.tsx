@@ -9,7 +9,7 @@ export function PublicLayout() {
                     <div className="flex justify-between items-center h-16">
                         {/* Logo */}
                         <Link to="/" className="flex items-center gap-2 group">
-                            <div className="bg-indigo-600 text-white p-1.5 rounded-lg group-hover:bg-indigo-700 transition-colors">
+                            <div className="bg-green-700 text-white p-1.5 rounded-lg group-hover:bg-green-800 transition-colors">
                                 <span className="font-bold text-xl leading-none">F</span>
                             </div>
                             <span className="font-bold text-xl tracking-tight text-gray-900">Filadélfias</span>
@@ -17,11 +17,11 @@ export function PublicLayout() {
 
                         {/* Nav Links (Desktop) */}
                         <nav className="hidden md:flex gap-8">
-                            <Link to="/bible" className="text-gray-600 hover:text-indigo-600 font-medium flex items-center gap-2 transition-colors">
+                            <Link to="/bible" className="text-gray-600 hover:text-green-700 font-medium flex items-center gap-2 transition-colors">
                                 <BookOpen size={18} />
                                 <span>Bíblia</span>
                             </Link>
-                            <Link to="/hymnal" className="text-gray-600 hover:text-indigo-600 font-medium flex items-center gap-2 transition-colors">
+                            <Link to="/hymnal" className="text-gray-600 hover:text-green-700 font-medium flex items-center gap-2 transition-colors">
                                 <Music size={18} />
                                 <span>Hinário</span>
                             </Link>
@@ -34,7 +34,7 @@ export function PublicLayout() {
                             </Link>
                             <Link
                                 to="/onboarding"
-                                className="bg-indigo-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-indigo-700 transition-all hover:shadow-md"
+                                className="bg-green-700 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-green-800 transition-all hover:shadow-md"
                             >
                                 Cadastre sua Igreja
                             </Link>
@@ -61,8 +61,8 @@ export function PublicLayout() {
                     <div>
                         <h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wider">Recursos</h3>
                         <ul className="space-y-2 text-sm text-gray-500">
-                            <li><Link to="/bible" className="hover:text-indigo-600">Bíblia Online</Link></li>
-                            <li><Link to="/hymnal" className="hover:text-indigo-600">Hinário</Link></li>
+                            <li><Link to="/bible" className="hover:text-green-700">Bíblia Online</Link></li>
+                            <li><Link to="/hymnal" className="hover:text-green-700">Hinário</Link></li>
                         </ul>
                     </div>
 

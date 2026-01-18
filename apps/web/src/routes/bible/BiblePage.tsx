@@ -12,7 +12,7 @@ export function BiblePage() {
     if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-700"></div>
             </div>
         );
     }
@@ -31,7 +31,7 @@ export function BiblePage() {
                 {/* Old Testament */}
                 <div>
                     <div className="flex items-center gap-3 mb-6 pb-2 border-b border-gray-200">
-                        <Scroll className="text-indigo-600" />
+                        <Scroll className="text-green-700" />
                         <h2 className="text-2xl font-serif font-bold text-gray-800">Antigo Testamento</h2>
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -39,9 +39,9 @@ export function BiblePage() {
                             <Link
                                 key={book.abbrev}
                                 to={`/bible/${book.abbrev}/1`}
-                                className="flex items-center justify-between p-3 rounded-lg hover:bg-indigo-50 border border-transparent hover:border-indigo-100 transition-all group"
+                                className="flex items-center justify-between p-3 rounded-lg hover:bg-green-50 border border-transparent hover:border-green-100 transition-all group"
                             >
-                                <span className="font-medium text-gray-700 group-hover:text-indigo-700">{book.name}</span>
+                                <span className="font-medium text-gray-700 group-hover:text-green-800">{book.name}</span>
                                 <span className="text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-full">{book.chapters_count} cap</span>
                             </Link>
                         ))}
@@ -51,7 +51,7 @@ export function BiblePage() {
                 {/* New Testament */}
                 <div>
                     <div className="flex items-center gap-3 mb-6 pb-2 border-b border-gray-200">
-                        <Book className="text-indigo-600" />
+                        <Book className="text-green-700" />
                         <h2 className="text-2xl font-serif font-bold text-gray-800">Novo Testamento</h2>
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">

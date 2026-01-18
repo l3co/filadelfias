@@ -15,7 +15,7 @@ export function HymnalPage() {
     if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-700"></div>
             </div>
         );
     }
@@ -30,7 +30,7 @@ export function HymnalPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div className="text-center mb-12">
                 <h1 className="text-4xl font-extrabold text-gray-900 mb-4 flex items-center justify-center gap-3">
-                    <Music className="text-indigo-600" size={32} />
+                    <Music className="text-green-700" size={32} />
                     Novo Cântico
                 </h1>
                 <p className="text-lg text-gray-500">Hinário Presbiteriano</p>
@@ -41,7 +41,7 @@ export function HymnalPage() {
                 <input
                     type="text"
                     placeholder="Buscar por número, título ou autor..."
-                    className="w-full pl-12 pr-4 py-3 rounded-full border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none shadow-sm transition-shadow"
+                    className="w-full pl-12 pr-4 py-3 rounded-full border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none shadow-sm transition-shadow"
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                 />
@@ -53,14 +53,14 @@ export function HymnalPage() {
                     <Link
                         key={hymn.number}
                         to={`/hymnal/${hymn.number}`}
-                        className="flex items-center justify-between p-4 bg-white rounded-xl shadow-sm hover:shadow-md border border-gray-100 hover:border-indigo-100 transition-all group"
+                        className="flex items-center justify-between p-4 bg-white rounded-xl shadow-sm hover:shadow-md border border-gray-100 hover:border-green-100 transition-all group"
                     >
                         <div className="flex items-center gap-4">
-                            <span className="flex items-center justify-center w-10 h-10 bg-indigo-50 text-indigo-700 font-bold rounded-full group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                            <span className="flex items-center justify-center w-10 h-10 bg-green-50 text-green-700 font-bold rounded-full group-hover:bg-green-700 group-hover:text-white transition-colors">
                                 {hymn.number}
                             </span>
                             <div>
-                                <h3 className="font-bold text-gray-800 text-lg group-hover:text-indigo-700 transition-colors">{hymn.title}</h3>
+                                <h3 className="font-bold text-gray-800 text-lg group-hover:text-green-700 transition-colors">{hymn.title}</h3>
                                 <p className="text-sm text-gray-500">{hymn.author}</p>
                             </div>
                         </div>

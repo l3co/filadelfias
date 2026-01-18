@@ -1,0 +1,46 @@
+"""
+Filadelfias API - Main Application Entry Point
+"""
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+app = FastAPI(
+    title="Filadelfias API",
+    description="Multi-tenant church management platform",
+    version="0.1.0",
+)
+
+# CORS Configuration
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # TODO: Configure properly in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+@app.get("/health", tags=["Health"])
+async def health_check():
+    """
+    Health check endpoint.
+    
+    Returns:
+        dict: Status of the API
+    """
+    return {"status": "healthy", "service": "filadelfias-api"}
+
+
+@app.get("/", tags=["Root"])
+async def root():
+    """
+    Root endpoint with API information.
+    
+    Returns:
+        dict: Welcome message and documentation link
+    """
+    return {
+        "message": "Filadelfias API",
+        "docs": "/docs",
+        "health": "/health",
+    }

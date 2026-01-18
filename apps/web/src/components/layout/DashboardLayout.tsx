@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, Navigate } from 'react-router-dom';
 import { Menu, Home, Users, Calendar, LogOut } from 'lucide-react';
 import { useCurrentUser, useLogout } from '../../hooks/useAuth';
 import { cn } from '../../lib/utils';
@@ -13,8 +13,16 @@ const navigation = [
 export function DashboardLayout() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const location = useLocation();
-    const { data: user } = useCurrentUser();
+    const { data: user, isLoading } = useCurrentUser();
     const logout = useLogout();
+
+    if (isLoading) {
+        return <div className="min-h-screen flex items-center justify-center bg-gray-50">Carregando...</div>;
+    }
+
+    if (user && (!user.memberships || user.memberships.length === 0)) {
+        return <Navigate to="/onboarding" replace />;
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 flex">

@@ -5,7 +5,7 @@ from typing import Optional, Sequence
 from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.infra.models import User, Member
+from src.infra.models import User, Member, Tenant
 from src.infra.security import get_password_hash
 
 
@@ -106,3 +106,22 @@ class MemberRepository:
             select(Member).where(Member.tenant_id == tenant_id)
         )
         return result.scalars().all()
+
+
+class TenantRepository:
+    """Repository for Tenant database operations."""
+    
+    def __init__(self, session: AsyncSession):
+        self.session = session
+        
+    async def create(self, tenant: Tenant) -> Tenant:
+        """Create a new tenant."""
+        self.session.add(tenant)
+        await self.session.commit()
+        await self.session.refresh(tenant)
+        return tenant
+        
+    async def get_by_slug(self, slug: str) -> Optional[Tenant]:
+        """Get tenant by slug."""
+        result = await self.session.execute(select(Tenant).where(Tenant.slug == slug))
+        return result.scalar_one_or_none()

@@ -2,10 +2,33 @@
 Pydantic schemas for authentication and user management.
 """
 from datetime import datetime, date
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel, EmailStr, Field
 from uuid import UUID
 from .enums import MemberStatus, EcclesiasticalRole, Gender, MaritalStatus
+
+
+class TenantResponse(BaseModel):
+    """Schema for tenant response."""
+    id: UUID
+    name: str
+    slug: str
+    logo_url: Optional[str] = None
+    
+    class Config:
+        from_attributes = True
+
+
+class MembershipResponse(BaseModel):
+    """Schema for membership response."""
+    id: UUID
+    tenant: TenantResponse
+    role: str
+    status: str
+    joined_at: datetime
+    
+    class Config:
+        from_attributes = True
 
 
 class UserBase(BaseModel):
@@ -31,6 +54,7 @@ class UserResponse(UserBase):
     avatar_url: Optional[str] = None
     is_active: bool
     created_at: datetime
+    memberships: List[MembershipResponse] = []
 
     class Config:
         from_attributes = True

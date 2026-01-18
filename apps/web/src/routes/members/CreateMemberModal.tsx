@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { Modal } from '../../components/ui/Modal';
 import { useCreateMember } from '../../hooks/useMembers';
-import { MemberCreateData } from '../../types';
+import type { MemberCreateData } from '../../types';
 
 type Props = {
     isOpen: boolean;

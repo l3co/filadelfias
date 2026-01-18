@@ -1,5 +1,5 @@
 import { api } from '../lib/api';
-import { Member, MemberCreateData } from '../types';
+import type { Member, MemberCreateData } from '../types';
 
 export const membersService = {
     /**

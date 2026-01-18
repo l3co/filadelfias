@@ -5,7 +5,8 @@ from typing import Optional, Sequence
 from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.infra.models import User, Member, Tenant
+from sqlalchemy.orm import selectinload
+from src.infra.models import User, Member, Tenant, UserChurchMembership # Add UserChurchMembership
 from src.infra.security import get_password_hash
 
 
@@ -40,12 +41,12 @@ class UserRepository:
         )
         self.session.add(user)
         await self.session.commit()
-        await self.session.refresh(user)
-        return user
+        # Refetch to get relationships loaded
+        return await self.get_by_email(email)
 
     async def get_by_email(self, email: str) -> Optional[User]:
         """
-        Get user by email.
+        Get user by email with eager loaded memberships.
         
         Args:
             email: User email
@@ -54,7 +55,11 @@ class UserRepository:
             Optional[User]: User instance or None if not found
         """
         result = await self.session.execute(
-            select(User).where(User.email == email)
+            select(User)
+            .where(User.email == email)
+            .options(
+                selectinload(User.memberships).selectinload(UserChurchMembership.tenant)
+            )
         )
         return result.scalar_one_or_none()
 
@@ -69,7 +74,11 @@ class UserRepository:
             Optional[User]: User instance or None if not found
         """
         result = await self.session.execute(
-            select(User).where(User.id == user_id)
+            select(User)
+            .where(User.id == user_id)
+            .options(
+                selectinload(User.memberships).selectinload(UserChurchMembership.tenant)
+            )
         )
         return result.scalar_one_or_none()
 

@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { membersService } from '../services/members';
-import { MemberCreateData } from '../types';
+import type { MemberCreateData } from '../types';
 
 export const MEMBERS_QUERY_KEY = 'members';
 

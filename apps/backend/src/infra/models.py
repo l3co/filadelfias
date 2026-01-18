@@ -1,9 +1,9 @@
 """
 Database models using SQLAlchemy ORM.
 """
-from datetime import datetime
+from datetime import datetime, date
 from typing import Optional
-from sqlalchemy import String, Boolean, DateTime, ForeignKey, Text, JSON
+from sqlalchemy import String, Boolean, DateTime, ForeignKey, Text, JSON, Date
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
@@ -39,6 +39,7 @@ class User(Base):
         foreign_keys="UserChurchMembership.user_id",
         cascade="all, delete-orphan"
     )
+    member_profile: Mapped[list["Member"]] = relationship(back_populates="user")
 
 
 class Tenant(Base):
@@ -65,6 +66,9 @@ class Tenant(Base):
 
     # Relationships
     memberships: Mapped[list["UserChurchMembership"]] = relationship(
+        back_populates="tenant", cascade="all, delete-orphan"
+    )
+    members: Mapped[list["Member"]] = relationship(
         back_populates="tenant", cascade="all, delete-orphan"
     )
 
@@ -102,3 +106,47 @@ class UserChurchMembership(Base):
         # Unique constraint: a user can only have one membership per church
         {"schema": None},
     )
+
+
+class Member(Base):
+    """
+    Church Member model.
+    Represents a person associated with a Tenant (Church).
+    """
+    __tablename__ = "members"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    tenant_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False
+    )
+    user_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    
+    # Personal Info
+    full_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    email: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    phone: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    birth_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    gender: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)
+    marital_status: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    address: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    photo_url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    
+    # Ecclesiastical Info
+    status: Mapped[str] = mapped_column(String(50), default="COMUNGANTE", nullable=False)
+    role: Mapped[str] = mapped_column(String(50), default="MEMBRO", nullable=False)
+    baptism_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+    )
+    
+    # Relationships
+    tenant: Mapped["Tenant"] = relationship(back_populates="members")
+    user: Mapped[Optional["User"]] = relationship(back_populates="member_profile")

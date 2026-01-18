@@ -1,10 +1,11 @@
 """
 Pydantic schemas for authentication and user management.
 """
-from datetime import datetime
+from datetime import datetime, date
 from typing import Optional
 from pydantic import BaseModel, EmailStr, Field
 from uuid import UUID
+from .enums import MemberStatus, EcclesiasticalRole, Gender, MaritalStatus
 
 
 class UserBase(BaseModel):
@@ -45,3 +46,53 @@ class TokenData(BaseModel):
     """Schema for decoded token data."""
     user_id: Optional[UUID] = None
     email: Optional[str] = None
+
+
+# --- Member Schemas ---
+
+class MemberBase(BaseModel):
+    """Base schema for church members."""
+    full_name: str = Field(..., min_length=1, max_length=255)
+    email: Optional[EmailStr] = None
+    phone: Optional[str] = None
+    birth_date: Optional[date] = None
+    gender: Optional[Gender] = None
+    marital_status: Optional[MaritalStatus] = None
+    address: Optional[str] = None
+    
+    # Ecclesiastical data
+    status: MemberStatus = MemberStatus.Comungante
+    role: EcclesiasticalRole = EcclesiasticalRole.Membro
+    baptism_date: Optional[date] = None
+
+
+class MemberCreate(MemberBase):
+    """Schema for creating a new member."""
+    pass
+
+
+class MemberUpdate(BaseModel):
+    """Schema for updating a member."""
+    full_name: Optional[str] = Field(None, min_length=1, max_length=255)
+    email: Optional[EmailStr] = None
+    phone: Optional[str] = None
+    birth_date: Optional[date] = None
+    gender: Optional[Gender] = None
+    marital_status: Optional[MaritalStatus] = None
+    address: Optional[str] = None
+    status: Optional[MemberStatus] = None
+    role: Optional[EcclesiasticalRole] = None
+    baptism_date: Optional[date] = None
+
+
+class MemberResponse(MemberBase):
+    """Schema for member response."""
+    id: UUID
+    tenant_id: UUID
+    user_id: Optional[UUID] = None
+    photo_url: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True

@@ -1,11 +1,11 @@
 """
 User repository for database operations.
 """
-from typing import Optional
+from typing import Optional, Sequence
 from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.infra.models import User
+from src.infra.models import User, Member
 from src.infra.security import get_password_hash
 
 
@@ -85,3 +85,24 @@ class UserRepository:
         """
         user = await self.get_by_email(email)
         return user is not None
+
+
+class MemberRepository:
+    """Repository for Member database operations."""
+
+    def __init__(self, session: AsyncSession):
+        self.session = session
+
+    async def create(self, member: Member) -> Member:
+        """Create a new member."""
+        self.session.add(member)
+        await self.session.commit()
+        await self.session.refresh(member)
+        return member
+
+    async def get_by_tenant(self, tenant_id: UUID) -> Sequence[Member]:
+        """List members by tenant."""
+        result = await self.session.execute(
+            select(Member).where(Member.tenant_id == tenant_id)
+        )
+        return result.scalars().all()

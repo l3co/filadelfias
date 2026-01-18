@@ -51,13 +51,13 @@ Ferramenta de louvor.
 ## 📝 Roadmap de Implementação
 
 ### Passo 1: Fundação Pública
-- [ ] Criar `PublicLayout`.
-- [ ] Implementar Landing Page em `/` com design moderno.
-- [ ] Mover Dashboard atual para `/dashboard` (roteamento).
+- [x] Criar `PublicLayout`.
+- [x] Implementar Landing Page em `/` com design moderno.
+- [x] Mover Dashboard atual para `/app` (roteamento).
 
 ### Passo 2: Recursos de Edificação
-- [ ] Implementar Leitor de Bíblia (JSON ARA).
-- [ ] Implementar Hinário (JSON Novo Cântico).
+- [x] Implementar Leitor de Bíblia (JSON ACF).
+- [x] Implementar Hinário (JSON Novo Cântico Parcial).
 
 ### Passo 3: Conexão
-- [ ] Linkar "Cadastre sua Igreja" ao fluxo de Onboarding existente.
+- [x] Linkar "Cadastre sua Igreja" ao fluxo de Onboarding existente.

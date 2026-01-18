@@ -1,7 +1,7 @@
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { hymnalService } from '../../services/hymnal';
-import { ArrowLeft, Music } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 
 export function HymnalReaderPage() {
     const { number } = useParams();

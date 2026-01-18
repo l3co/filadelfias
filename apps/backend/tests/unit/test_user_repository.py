@@ -108,6 +108,8 @@ class TestUserRepository:
         """
         Test that creating user with duplicate email fails.
         """
+        from sqlalchemy.exc import IntegrityError
+        
         repo = UserRepository(db_session)
         
         # Create first user
@@ -118,7 +120,7 @@ class TestUserRepository:
         )
         
         # Try to create second user with same email
-        with pytest.raises(Exception):  # Should raise IntegrityError
+        with pytest.raises(IntegrityError):
             await repo.create(
                 email="duplicate@example.com",
                 name="Second User",

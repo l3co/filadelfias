@@ -2,7 +2,6 @@
 Pytest configuration and fixtures for testing.
 """
 import pytest
-import asyncio
 from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.pool import NullPool
@@ -13,21 +12,11 @@ from src.infra.models import Base
 TEST_DATABASE_URL = "postgresql+asyncpg://postgres:postgres@localhost:5432/filadelfias_test"
 
 
-@pytest.fixture(scope="session")
-def event_loop():
-    """
-    Create an event loop for the test session.
-    """
-    policy = asyncio.get_event_loop_policy()
-    loop = policy.new_event_loop()
-    yield loop
-    loop.close()
-
-
-@pytest.fixture(scope="session")
+@pytest.fixture
 async def engine():
     """
     Create a test database engine.
+    Function scoped to ensure it runs in the same event loop as the test.
     """
     engine = create_async_engine(
         TEST_DATABASE_URL,
@@ -53,19 +42,22 @@ async def engine():
 async def db_session(engine) -> AsyncGenerator[AsyncSession, None]:
     """
     Create a fresh database session for each test.
+    This session runs in a transaction that rolls back after user.
     """
     connection = await engine.connect()
     transaction = await connection.begin()
     
-    async_session = async_sessionmaker(
+    session_maker = async_sessionmaker(
         bind=connection,
         class_=AsyncSession,
         expire_on_commit=False,
     )
     
-    async with async_session() as session:
-        yield session
-        
+    session = session_maker()
+    
+    yield session
+    
+    await session.close()
     await transaction.rollback()
     await connection.close()
 

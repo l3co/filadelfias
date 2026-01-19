@@ -26,7 +26,7 @@ describe('useAuth Hooks', () => {
                 access_token: 'test-token',
                 token_type: 'bearer',
             };
-            (authService.login as any).mockResolvedValue(mockTokenResponse);
+            vi.mocked(authService.login).mockResolvedValue(mockTokenResponse);
 
             const { result } = renderHook(() => useLogin(), {
                 wrapper: createWrapper(),
@@ -50,8 +50,10 @@ describe('useAuth Hooks', () => {
                 id: '1',
                 email: 'test@example.com',
                 name: 'Test User',
+                username: 'Test User',
+                memberships: []
             };
-            (authService.register as any).mockResolvedValue(mockUser);
+            vi.mocked(authService.register).mockResolvedValue(mockUser);
 
             const { result } = renderHook(() => useRegister(), {
                 wrapper: createWrapper(),
@@ -80,8 +82,10 @@ describe('useAuth Hooks', () => {
                 id: '1',
                 email: 'test@example.com',
                 name: 'Test User',
+                username: 'Test User',
+                memberships: []
             };
-            (authService.getCurrentUser as any).mockResolvedValue(mockUser);
+            vi.mocked(authService.getCurrentUser).mockResolvedValue(mockUser);
 
             const { result } = renderHook(() => useCurrentUser(), {
                 wrapper: createWrapper(),

@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useQueryClient } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
 
 type FormData = {
     name: string;
@@ -24,8 +25,9 @@ export function OnboardingPage() {
             // Refresh user to get new membership
             await queryClient.invalidateQueries({ queryKey: ['currentUser'] });
             navigate('/app');
-        } catch (err: any) {
-            setError(err.response?.data?.detail || 'Erro ao criar organização. Tente outro slug.');
+        } catch (err) {
+            const error = err as AxiosError<{ detail: string }>;
+            setError(error.response?.data?.detail || 'Erro ao criar organização. Tente outro slug.');
         } finally {
             setIsLoading(false);
         }

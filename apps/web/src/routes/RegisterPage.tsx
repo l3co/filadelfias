@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useRegister } from '../hooks/useAuth';
+import { AxiosError } from 'axios';
 
 export default function RegisterPage() {
     const navigate = useNavigate();
@@ -43,7 +44,7 @@ export default function RegisterPage() {
         );
     };
 
-    const errorMessage = validationError || (error as any)?.response?.data?.detail;
+    const errorMessage = validationError || (error as AxiosError<{ detail: string }>)?.response?.data?.detail;
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-mint-50">

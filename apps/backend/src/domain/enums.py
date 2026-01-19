@@ -1,6 +1,7 @@
 """
 Domain enums for the application.
 """
+
 from enum import Enum
 
 
@@ -16,6 +17,7 @@ class MemberStatus(str, Enum):
 
 class EcclesiasticalOffice(str, Enum):
     """Ofício ordenado - hierarquia eclesiástica (apenas um por membro)"""
+
     Membro = "MEMBRO"
     Diacono = "DIACONO"
     Presbitero = "PRESBITERO"
@@ -24,6 +26,7 @@ class EcclesiasticalOffice(str, Enum):
 
 class EcclesiasticalFunction(str, Enum):
     """Função exercida - pode ter múltiplas"""
+
     Tesoureiro = "TESOUREIRO"
     Secretario = "SECRETARIO"
     Evangelista = "EVANGELISTA"

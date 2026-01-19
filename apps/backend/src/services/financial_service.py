@@ -13,24 +13,14 @@ class FinancialService:
         self.repo = FinancialRepository(db)
 
     async def create_account(self, tenant_id: UUID, data: FinancialAccountCreate) -> FinancialAccount:
-        account = FinancialAccount(
-            tenant_id=tenant_id,
-            name=data.name,
-            type=data.type,
-            balance=data.balance
-        )
+        account = FinancialAccount(tenant_id=tenant_id, name=data.name, type=data.type, balance=data.balance)
         return await self.repo.create_account(account)
 
     async def list_accounts(self, tenant_id: UUID) -> List[FinancialAccount]:
         return await self.repo.get_accounts(tenant_id)
 
     async def create_category(self, tenant_id: UUID, data: TransactionCategoryCreate) -> TransactionCategory:
-        category = TransactionCategory(
-            tenant_id=tenant_id,
-            name=data.name,
-            type=data.type,
-            parent_id=data.parent_id
-        )
+        category = TransactionCategory(tenant_id=tenant_id, name=data.name, type=data.type, parent_id=data.parent_id)
         return await self.repo.create_category(category)
 
     async def list_categories(self, tenant_id: UUID) -> List[TransactionCategory]:
@@ -45,7 +35,7 @@ class FinancialService:
                 account.balance += data.amount
             else:
                 account.balance -= data.amount
-            self.repo.add(account) # Add to session to be committed with transaction
+            self.repo.add(account)  # Add to session to be committed with transaction
 
         transaction = Transaction(
             tenant_id=tenant_id,
@@ -56,7 +46,7 @@ class FinancialService:
             type=data.type,
             description=data.description,
             date=data.date,
-            attachment_url=data.attachment_url
+            attachment_url=data.attachment_url,
         )
         return await self.repo.create_transaction(transaction)
 

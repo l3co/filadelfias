@@ -20,7 +20,5 @@ class MissionaryRepository:
         return missionary
 
     async def get_by_tenant(self, tenant_id: UUID) -> Sequence[Missionary]:
-        result = await self.session.execute(
-            select(Missionary).where(Missionary.tenant_id == tenant_id)
-        )
+        result = await self.session.execute(select(Missionary).where(Missionary.tenant_id == tenant_id))
         return result.scalars().all()

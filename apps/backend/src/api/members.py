@@ -18,7 +18,7 @@ async def create_member(
     tenant_id: UUID,
     member_data: MemberCreate,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     """
     Create a new member in a tenant.
@@ -28,10 +28,7 @@ async def create_member(
     repo = MemberRepository(db)
 
     # Create DB model
-    member = Member(
-        tenant_id=tenant_id,
-        **member_data.model_dump(exclude_unset=True)
-    )
+    member = Member(tenant_id=tenant_id, **member_data.model_dump(exclude_unset=True))
 
     created_member = await repo.create(member)
     return created_member
@@ -39,9 +36,7 @@ async def create_member(
 
 @router.get("/tenants/{tenant_id}/members", response_model=List[MemberResponse])
 async def list_members(
-    tenant_id: UUID,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    tenant_id: UUID, current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)
 ):
     """
     List all members of a tenant.
@@ -55,10 +50,7 @@ async def list_members(
 
 @router.get("/tenants/{tenant_id}/members/{member_id}", response_model=MemberResponse)
 async def get_member(
-    tenant_id: UUID,
-    member_id: UUID,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    tenant_id: UUID, member_id: UUID, current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)
 ):
     """
     Get a specific member by ID.
@@ -67,10 +59,7 @@ async def get_member(
     member = await repo.get(member_id)
 
     if not member or member.tenant_id != tenant_id:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Membro não encontrado"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Membro não encontrado")
 
     return member
 
@@ -81,7 +70,7 @@ async def update_member(
     member_id: UUID,
     member_data: MemberUpdate,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     """
     Update a member's data.
@@ -90,10 +79,7 @@ async def update_member(
     member = await repo.get(member_id)
 
     if not member or member.tenant_id != tenant_id:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Membro não encontrado"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Membro não encontrado")
 
     # Update fields
     update_data = member_data.model_dump(exclude_unset=True)

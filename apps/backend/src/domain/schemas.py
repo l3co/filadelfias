@@ -1,6 +1,7 @@
 """
 Pydantic schemas for authentication and user management.
 """
+
 from datetime import date, datetime
 from typing import List, Optional
 from uuid import UUID
@@ -12,12 +13,14 @@ from .enums import EcclesiasticalFunction, EcclesiasticalOffice, EcclesiasticalR
 
 class TenantBase(BaseModel):
     """Base schema for tenant."""
+
     name: str = Field(..., min_length=2, max_length=255)
     slug: str = Field(..., min_length=2, max_length=100)
 
 
 class TenantResponse(TenantBase):
     """Schema for tenant response."""
+
     id: UUID
     logo_url: Optional[str] = None
     street: Optional[str] = None
@@ -37,6 +40,7 @@ class TenantResponse(TenantBase):
 
 class MembershipResponse(BaseModel):
     """Schema for membership response."""
+
     id: UUID
     tenant: TenantResponse
     role: str
@@ -49,23 +53,27 @@ class MembershipResponse(BaseModel):
 
 class UserBase(BaseModel):
     """Base user schema."""
+
     email: EmailStr
     name: str = Field(..., min_length=1, max_length=255)
 
 
 class UserCreate(UserBase):
     """Schema for user registration."""
+
     password: str = Field(..., min_length=8, max_length=100)
 
 
 class UserLogin(BaseModel):
     """Schema for user login."""
+
     email: EmailStr
     password: str
 
 
 class UserResponse(UserBase):
     """Schema for user response."""
+
     id: UUID
     avatar_url: Optional[str] = None
     is_active: bool
@@ -78,20 +86,24 @@ class UserResponse(UserBase):
 
 class Token(BaseModel):
     """Schema for JWT token response."""
+
     access_token: str
     token_type: str = "bearer"
 
 
 class TokenData(BaseModel):
     """Schema for decoded token data."""
+
     user_id: Optional[UUID] = None
     email: Optional[str] = None
 
 
 # --- Member Schemas ---
 
+
 class MemberBase(BaseModel):
     """Base schema for church members."""
+
     full_name: str = Field(..., min_length=1, max_length=255)
     email: Optional[EmailStr] = None
     phone: Optional[str] = None
@@ -124,11 +136,13 @@ class MemberBase(BaseModel):
 
 class MemberCreate(MemberBase):
     """Schema for creating a new member."""
+
     pass
 
 
 class MemberUpdate(BaseModel):
     """Schema for updating a member."""
+
     full_name: Optional[str] = Field(None, min_length=1, max_length=255)
     email: Optional[str] = None
     phone: Optional[str] = None
@@ -160,6 +174,7 @@ class MemberUpdate(BaseModel):
 
 class MemberResponse(MemberBase):
     """Schema for member response."""
+
     id: UUID
     tenant_id: UUID
     user_id: Optional[UUID] = None
@@ -173,11 +188,13 @@ class MemberResponse(MemberBase):
 
 # --- Church Registration Schemas ---
 
+
 class ChurchRegistrationRequest(BaseModel):
     """Schema for church + admin registration via wizard."""
+
     # Church info
     church_name: str = Field(..., min_length=2, max_length=255)
-    church_slug: str = Field(..., min_length=2, max_length=100, pattern=r'^[a-z0-9-]+$')
+    church_slug: str = Field(..., min_length=2, max_length=100, pattern=r"^[a-z0-9-]+$")
 
     # Address
     street: str = Field(..., min_length=1)
@@ -197,6 +214,7 @@ class ChurchRegistrationRequest(BaseModel):
 
 class ChurchRegistrationResponse(BaseModel):
     """Response for church registration."""
+
     tenant: TenantResponse
     user: "UserResponse"
     access_token: str
@@ -206,20 +224,10 @@ class ChurchRegistrationResponse(BaseModel):
 # --- Governance Schemas ---
 
 
-
-
 # --- Financial Schemas ---
-
 
 
 # --- Missionary Schemas ---
 
 
-
-
 # --- EBD Schemas ---
-
-
-
-
-

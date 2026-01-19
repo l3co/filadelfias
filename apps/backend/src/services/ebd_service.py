@@ -19,7 +19,7 @@ class EBDService:
             description=data.description,
             min_age=data.min_age,
             max_age=data.max_age,
-            location=data.location
+            location=data.location,
         )
         return await self.repo.create_class(ebd_class)
 
@@ -27,11 +27,7 @@ class EBDService:
         return await self.repo.get_classes(tenant_id)
 
     async def enroll_student(self, ebd_class_id: UUID, data: EBDStudentCreate) -> EBDStudent:
-        enrollment = EBDStudent(
-            ebd_class_id=ebd_class_id,
-            member_id=data.member_id,
-            role=data.role
-        )
+        enrollment = EBDStudent(ebd_class_id=ebd_class_id, member_id=data.member_id, role=data.role)
         return await self.repo.enroll_student(enrollment)
 
     async def list_students(self, ebd_class_id: UUID) -> List[EBDStudent]:
@@ -43,7 +39,7 @@ class EBDService:
             date=data.date,
             topic=data.topic,
             description=data.description,
-            homework_url=data.homework_url
+            homework_url=data.homework_url,
         )
         return await self.repo.create_lesson(lesson)
 

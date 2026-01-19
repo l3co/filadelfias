@@ -1,6 +1,7 @@
 """
 Pytest configuration and fixtures for testing.
 """
+
 import os
 from typing import AsyncGenerator
 
@@ -42,10 +43,7 @@ def database_url(postgres_container):
         port = postgres_container.get_exposed_port(5432)
         return f"postgresql+asyncpg://test:test@{host}:{port}/test"
     else:
-        return os.getenv(
-            "TEST_DATABASE_URL",
-            "postgresql+asyncpg://postgres:postgres@localhost:5432/filadelfias_test"
-        )
+        return os.getenv("TEST_DATABASE_URL", "postgresql+asyncpg://postgres:postgres@localhost:5432/filadelfias_test")
 
 
 @pytest.fixture
@@ -103,6 +101,7 @@ def override_get_db(db_session):
     """
     Override the get_db dependency for testing.
     """
+
     async def _override_get_db():
         yield db_session
 

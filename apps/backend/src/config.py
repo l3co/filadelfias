@@ -2,6 +2,7 @@
 Configuration settings for the application.
 Uses Pydantic Settings for environment variable management.
 """
+
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 

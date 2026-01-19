@@ -33,9 +33,7 @@ class TenantUpdate(BaseModel):
 
 @router.post("/tenants", response_model=TenantResponse, status_code=status.HTTP_201_CREATED)
 async def create_tenant(
-    data: TenantCreate,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    data: TenantCreate, current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)
 ):
     """
     Create a new tenant (Church).
@@ -47,8 +45,7 @@ async def create_tenant(
     existing = await repo.get_by_slug(data.slug)
     if existing:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Organization with this slug already exists"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Organization with this slug already exists"
         )
 
     # Create Tenant
@@ -56,11 +53,7 @@ async def create_tenant(
     await repo.create(tenant)
 
     # Link Creator as Admin
-    membership = UserChurchMembership(
-        user_id=current_user.id,
-        tenant_id=tenant.id,
-        role="ADMIN"
-    )
+    membership = UserChurchMembership(user_id=current_user.id, tenant_id=tenant.id, role="ADMIN")
     db.add(membership)
     await db.commit()
 
@@ -72,7 +65,7 @@ async def update_tenant(
     tenant_id: UUID,
     data: TenantUpdate,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     """
     Update tenant (Church) data.
@@ -83,25 +76,22 @@ async def update_tenant(
     # Get tenant
     tenant = await repo.get(tenant_id)
     if not tenant:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Igreja não encontrada"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Igreja não encontrada")
 
     # Check if user is admin of this tenant
     from sqlalchemy import select
+
     result = await db.execute(
         select(UserChurchMembership).where(
             UserChurchMembership.user_id == current_user.id,
             UserChurchMembership.tenant_id == tenant_id,
-            UserChurchMembership.role == "ADMIN"
+            UserChurchMembership.role == "ADMIN",
         )
     )
     membership = result.scalar_one_or_none()
     if not membership:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Apenas administradores podem editar os dados da igreja"
+            status_code=status.HTTP_403_FORBIDDEN, detail="Apenas administradores podem editar os dados da igreja"
         )
 
     # Update fields

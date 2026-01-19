@@ -1,6 +1,7 @@
 """
 Authentication API endpoints.
 """
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,10 +17,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-async def register(
-    user_data: UserCreate,
-    db: AsyncSession = Depends(get_db)
-):
+async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
     """
     Register a new user (orphan user - not associated with any church).
 
@@ -37,26 +35,16 @@ async def register(
 
     # Check if email already exists
     if await repo.exists_by_email(user_data.email):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered"
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
 
     # Create user
-    user = await repo.create(
-        email=user_data.email,
-        name=user_data.name,
-        password=user_data.password
-    )
+    user = await repo.create(email=user_data.email, name=user_data.name, password=user_data.password)
 
     return user
 
 
 @router.post("/login", response_model=Token)
-async def login(
-    form_data: OAuth2PasswordRequestForm = Depends(),
-    db: AsyncSession = Depends(get_db)
-):
+async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
     """
     Login with email and password.
 
@@ -83,23 +71,15 @@ async def login(
         )
 
     if not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User account is inactive"
-        )
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User account is inactive")
 
     # Create access token
-    access_token = create_access_token(
-        data={"sub": str(user.id), "email": user.email}
-    )
+    access_token = create_access_token(data={"sub": str(user.id), "email": user.email})
 
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-async def get_current_user(
-    token: str = Depends(oauth2_scheme),
-    db: AsyncSession = Depends(get_db)
-):
+async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)):
     """
     Get current authenticated user from JWT token.
 
@@ -137,7 +117,7 @@ async def get_current_user(
 
 
 @router.get("/me", response_model=UserResponse)
-async def get_me(current_user = Depends(get_current_user)):
+async def get_me(current_user=Depends(get_current_user)):
     """
     Get current user profile.
 

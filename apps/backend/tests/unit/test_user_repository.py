@@ -1,6 +1,7 @@
 """
 Unit tests for UserRepository.
 """
+
 import pytest
 
 from src.infra.repositories import UserRepository
@@ -16,11 +17,7 @@ class TestUserRepository:
         """
         repo = UserRepository(db_session)
 
-        user = await repo.create(
-            email="test@example.com",
-            name="Test User",
-            password="password123"
-        )
+        user = await repo.create(email="test@example.com", name="Test User", password="password123")
 
         assert user.id is not None
         assert user.email == "test@example.com"
@@ -36,11 +33,7 @@ class TestUserRepository:
         repo = UserRepository(db_session)
 
         # Create user
-        created_user = await repo.create(
-            email="find@example.com",
-            name="Find Me",
-            password="password123"
-        )
+        created_user = await repo.create(email="find@example.com", name="Find Me", password="password123")
 
         # Find user
         found_user = await repo.get_by_email("find@example.com")
@@ -66,11 +59,7 @@ class TestUserRepository:
         repo = UserRepository(db_session)
 
         # Create user
-        created_user = await repo.create(
-            email="findbyid@example.com",
-            name="Find By ID",
-            password="password123"
-        )
+        created_user = await repo.create(email="findbyid@example.com", name="Find By ID", password="password123")
 
         # Find user by ID
         found_user = await repo.get_by_id(created_user.id)
@@ -85,11 +74,7 @@ class TestUserRepository:
         """
         repo = UserRepository(db_session)
 
-        await repo.create(
-            email="exists@example.com",
-            name="Exists",
-            password="password123"
-        )
+        await repo.create(email="exists@example.com", name="Exists", password="password123")
 
         exists = await repo.exists_by_email("exists@example.com")
 
@@ -114,16 +99,8 @@ class TestUserRepository:
         repo = UserRepository(db_session)
 
         # Create first user
-        await repo.create(
-            email="duplicate@example.com",
-            name="First User",
-            password="password123"
-        )
+        await repo.create(email="duplicate@example.com", name="First User", password="password123")
 
         # Try to create second user with same email
         with pytest.raises(IntegrityError):
-            await repo.create(
-                email="duplicate@example.com",
-                name="Second User",
-                password="password456"
-            )
+            await repo.create(email="duplicate@example.com", name="Second User", password="password456")

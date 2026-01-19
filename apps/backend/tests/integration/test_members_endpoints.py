@@ -18,28 +18,17 @@ async def setup_tenant(db_session):
     Returns (token, tenant, user)
     """
     # Create user
-    user = User(
-        email="pastor@church.com",
-        password_hash=get_password_hash("password123"),
-        name="Pastor User"
-    )
+    user = User(email="pastor@church.com", password_hash=get_password_hash("password123"), name="Pastor User")
     db_session.add(user)
     await db_session.flush()
 
     # Create tenant
-    tenant = Tenant(
-        name="Presbiteriana Teste",
-        slug="ipb-teste"
-    )
+    tenant = Tenant(name="Presbiteriana Teste", slug="ipb-teste")
     db_session.add(tenant)
     await db_session.flush()
 
     # Link user to tenant
-    membership = UserChurchMembership(
-        user_id=user.id,
-        tenant_id=tenant.id,
-        role="PASTOR"
-    )
+    membership = UserChurchMembership(user_id=user.id, tenant_id=tenant.id, role="PASTOR")
     db_session.add(membership)
     await db_session.commit()
 
@@ -49,7 +38,6 @@ async def setup_tenant(db_session):
 
 @pytest.mark.asyncio
 class TestMembersEndpoints:
-
     async def test_create_member_success(self, db_session, override_get_db, setup_tenant):
         """
         Test creating a new member successfully.
@@ -65,9 +53,9 @@ class TestMembersEndpoints:
                     "email": "membro@example.com",
                     "status": "COMUNGANTE",
                     "gender": "M",
-                    "role": "MEMBRO"
+                    "role": "MEMBRO",
                 },
-                headers={"Authorization": f"Bearer {token}"}
+                headers={"Authorization": f"Bearer {token}"},
             )
 
         app.dependency_overrides.clear()
@@ -93,10 +81,7 @@ class TestMembersEndpoints:
         # TDD: First test failure should be "Endpoint 404" or "Model not found".
 
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-            response = await client.get(
-                f"/tenants/{tenant.id}/members",
-                headers={"Authorization": f"Bearer {token}"}
-            )
+            response = await client.get(f"/tenants/{tenant.id}/members", headers={"Authorization": f"Bearer {token}"})
 
         app.dependency_overrides.clear()
 

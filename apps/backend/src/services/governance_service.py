@@ -14,12 +14,7 @@ class GovernanceService:
 
     async def create_council(self, tenant_id: UUID, data: CouncilCreate) -> Council:
         """Create a new council for a tenant."""
-        council = Council(
-            tenant_id=tenant_id,
-            name=data.name,
-            type=data.type,
-            description=data.description
-        )
+        council = Council(tenant_id=tenant_id, name=data.name, type=data.type, description=data.description)
         return await self.repo.create_council(council)
 
     async def list_councils(self, tenant_id: UUID) -> List[Council]:
@@ -29,11 +24,7 @@ class GovernanceService:
     async def create_meeting(self, data: MeetingCreate) -> Meeting:
         """Create a new meeting."""
         meeting = Meeting(
-            council_id=data.council_id,
-            date=data.date,
-            status=data.status,
-            agenda=data.agenda,
-            location=data.location
+            council_id=data.council_id, date=data.date, status=data.status, agenda=data.agenda, location=data.location
         )
         return await self.repo.create_meeting(meeting)
 

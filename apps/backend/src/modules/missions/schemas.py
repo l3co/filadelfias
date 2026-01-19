@@ -15,8 +15,10 @@ class MissionaryBase(BaseModel):
     photo_url: Optional[str] = None
     newsletter_url: Optional[str] = None
 
+
 class MissionaryCreate(MissionaryBase):
     pass
+
 
 class MissionaryResponse(MissionaryBase):
     id: UUID

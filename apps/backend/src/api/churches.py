@@ -1,6 +1,7 @@
 """
 API endpoints for church registration.
 """
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,10 +17,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 @router.post("/churches/register", response_model=ChurchRegistrationResponse, status_code=status.HTTP_201_CREATED)
-async def register_church(
-    data: ChurchRegistrationRequest,
-    db: AsyncSession = Depends(get_db)
-):
+async def register_church(data: ChurchRegistrationRequest, db: AsyncSession = Depends(get_db)):
     """
     Register a new church with admin user.
     This is the main entry point for new churches joining the platform.
@@ -39,16 +37,16 @@ async def register_church(
     if existing:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Uma igreja com este identificador já existe. Escolha outro."
+            detail="Uma igreja com este identificador já existe. Escolha outro.",
         )
 
     # Check if email exists
     from sqlalchemy import select
+
     result = await db.execute(select(User).where(User.email == data.admin_email))
     if result.scalar_one_or_none():
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Este email já está cadastrado na plataforma."
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Este email já está cadastrado na plataforma."
         )
 
     # Create Tenant (Church)
@@ -62,19 +60,14 @@ async def register_church(
         city=data.city,
         state=data.state.upper(),
         postal_code=data.postal_code.replace("-", ""),
-        country="Brasil"
+        country="Brasil",
     )
     db.add(tenant)
     await db.flush()  # Get tenant.id
 
     # Create User (Admin)
     password_hash = pwd_context.hash(data.admin_password)
-    user = User(
-        email=data.admin_email,
-        password_hash=password_hash,
-        name=data.admin_name,
-        is_active=True
-    )
+    user = User(email=data.admin_email, password_hash=password_hash, name=data.admin_name, is_active=True)
     db.add(user)
     await db.flush()  # Get user.id
 
@@ -88,17 +81,12 @@ async def register_church(
         status="COMUNGANTE",
         role="MEMBRO",  # Deprecated field
         office="MEMBRO",  # Starts as member, can be changed later
-        functions=None
+        functions=None,
     )
     db.add(member)
 
     # Create UserChurchMembership (Link user to church as ADMIN)
-    membership = UserChurchMembership(
-        user_id=user.id,
-        tenant_id=tenant.id,
-        role="ADMIN",
-        status="ACTIVE"
-    )
+    membership = UserChurchMembership(user_id=user.id, tenant_id=tenant.id, role="ADMIN", status="ACTIVE")
     db.add(membership)
 
     await db.commit()
@@ -117,18 +105,15 @@ async def register_church(
             avatar_url=user.avatar_url,
             is_active=user.is_active,
             created_at=user.created_at,
-            memberships=[]
+            memberships=[],
         ),
         access_token=access_token,
-        token_type="bearer"
+        token_type="bearer",
     )
 
 
 @router.get("/churches/check-slug/{slug}")
-async def check_slug_availability(
-    slug: str,
-    db: AsyncSession = Depends(get_db)
-):
+async def check_slug_availability(slug: str, db: AsyncSession = Depends(get_db)):
     """
     Check if a church slug is available.
     Used for real-time validation in the registration wizard.
@@ -136,7 +121,4 @@ async def check_slug_availability(
     repo = TenantRepository(db)
     existing = await repo.get_by_slug(slug.lower())
 
-    return {
-        "slug": slug.lower(),
-        "available": existing is None
-    }
+    return {"slug": slug.lower(), "available": existing is None}

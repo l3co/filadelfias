@@ -1,6 +1,7 @@
 """
 User repository for database operations.
 """
+
 from typing import Optional, Sequence
 from uuid import UUID
 
@@ -64,9 +65,7 @@ class UserRepository:
         result = await self.session.execute(
             select(User)
             .where(User.email == email)
-            .options(
-                selectinload(User.memberships).selectinload(UserChurchMembership.tenant)
-            )
+            .options(selectinload(User.memberships).selectinload(UserChurchMembership.tenant))
         )
         return result.scalar_one_or_none()
 
@@ -83,9 +82,7 @@ class UserRepository:
         result = await self.session.execute(
             select(User)
             .where(User.id == user_id)
-            .options(
-                selectinload(User.memberships).selectinload(UserChurchMembership.tenant)
-            )
+            .options(selectinload(User.memberships).selectinload(UserChurchMembership.tenant))
         )
         return result.scalar_one_or_none()
 
@@ -118,16 +115,12 @@ class MemberRepository:
 
     async def get(self, member_id: UUID) -> Optional[Member]:
         """Get member by ID."""
-        result = await self.session.execute(
-            select(Member).where(Member.id == member_id)
-        )
+        result = await self.session.execute(select(Member).where(Member.id == member_id))
         return result.scalar_one_or_none()
 
     async def get_by_tenant(self, tenant_id: UUID) -> Sequence[Member]:
         """List members by tenant."""
-        result = await self.session.execute(
-            select(Member).where(Member.tenant_id == tenant_id)
-        )
+        result = await self.session.execute(select(Member).where(Member.tenant_id == tenant_id))
         return result.scalars().all()
 
 
@@ -153,14 +146,3 @@ class TenantRepository:
         """Get tenant by slug."""
         result = await self.session.execute(select(Tenant).where(Tenant.slug == slug))
         return result.scalar_one_or_none()
-
-
-
-
-
-
-
-
-
-
-

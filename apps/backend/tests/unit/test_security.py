@@ -1,6 +1,7 @@
 """
 Unit tests for security utilities (password hashing and JWT).
 """
+
 from datetime import timedelta
 
 from src.infra.security import (

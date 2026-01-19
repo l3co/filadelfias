@@ -22,7 +22,7 @@ class MissionService:
             longitude=data.longitude,
             bio=data.bio,
             photo_url=data.photo_url,
-            newsletter_url=data.newsletter_url
+            newsletter_url=data.newsletter_url,
         )
         return await self.repo.create(missionary)
 

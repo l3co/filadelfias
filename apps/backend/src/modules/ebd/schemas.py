@@ -12,8 +12,10 @@ class EBDClassBase(BaseModel):
     max_age: Optional[int] = None
     location: Optional[str] = None
 
+
 class EBDClassCreate(EBDClassBase):
     pass
+
 
 class EBDClassResponse(EBDClassBase):
     id: UUID
@@ -22,12 +24,15 @@ class EBDClassResponse(EBDClassBase):
     class Config:
         from_attributes = True
 
+
 class EBDStudentBase(BaseModel):
     member_id: UUID
     role: str = "STUDENT"
 
+
 class EBDStudentCreate(EBDStudentBase):
     pass
+
 
 class EBDStudentResponse(EBDStudentBase):
     id: UUID
@@ -38,14 +43,17 @@ class EBDStudentResponse(EBDStudentBase):
     class Config:
         from_attributes = True
 
+
 class EBDLessonBase(BaseModel):
     date: date
     topic: str
     description: Optional[str] = None
     homework_url: Optional[str] = None
 
+
 class EBDLessonCreate(EBDLessonBase):
     ebd_class_id: UUID
+
 
 class EBDLessonResponse(EBDLessonBase):
     id: UUID

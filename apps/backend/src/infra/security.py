@@ -1,6 +1,7 @@
 """
 Security utilities for password hashing and JWT token generation.
 """
+
 from datetime import datetime, timedelta
 from typing import Optional
 

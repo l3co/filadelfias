@@ -27,9 +27,7 @@ class FinancialRepository:
         return account
 
     async def get_accounts(self, tenant_id: UUID) -> Sequence[FinancialAccount]:
-        result = await self.session.execute(
-            select(FinancialAccount).where(FinancialAccount.tenant_id == tenant_id)
-        )
+        result = await self.session.execute(select(FinancialAccount).where(FinancialAccount.tenant_id == tenant_id))
         return result.scalars().all()
 
     async def create_category(self, category: TransactionCategory) -> TransactionCategory:
@@ -55,10 +53,7 @@ class FinancialRepository:
         result = await self.session.execute(
             select(Transaction)
             .where(Transaction.id == transaction_id)
-            .options(
-                selectinload(Transaction.account),
-                selectinload(Transaction.category)
-            )
+            .options(selectinload(Transaction.account), selectinload(Transaction.category))
         )
         return result.scalar_one_or_none()
 
@@ -68,9 +63,6 @@ class FinancialRepository:
             .where(Transaction.tenant_id == tenant_id)
             .order_by(Transaction.date.desc())
             .limit(limit)
-            .options(
-                selectinload(Transaction.account),
-                selectinload(Transaction.category)
-            )
+            .options(selectinload(Transaction.account), selectinload(Transaction.category))
         )
         return result.scalars().all()

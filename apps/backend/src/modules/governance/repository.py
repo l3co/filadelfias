@@ -22,16 +22,12 @@ class GovernanceRepository:
 
     async def get_councils(self, tenant_id: UUID) -> Sequence[Council]:
         """List councils by tenant."""
-        result = await self.session.execute(
-            select(Council).where(Council.tenant_id == tenant_id)
-        )
+        result = await self.session.execute(select(Council).where(Council.tenant_id == tenant_id))
         return result.scalars().all()
 
     async def get_council_by_id(self, council_id: UUID) -> Optional[Council]:
         """Get council by ID."""
-        result = await self.session.execute(
-            select(Council).where(Council.id == council_id)
-        )
+        result = await self.session.execute(select(Council).where(Council.id == council_id))
         return result.scalar_one_or_none()
 
     async def create_meeting(self, meeting: Meeting) -> Meeting:

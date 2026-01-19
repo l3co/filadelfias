@@ -10,8 +10,10 @@ class FinancialAccountBase(BaseModel):
     type: str = "BANK"
     balance: float = 0.0
 
+
 class FinancialAccountCreate(FinancialAccountBase):
     pass
+
 
 class FinancialAccountResponse(FinancialAccountBase):
     id: UUID
@@ -21,13 +23,16 @@ class FinancialAccountResponse(FinancialAccountBase):
     class Config:
         from_attributes = True
 
+
 class TransactionCategoryBase(BaseModel):
     name: str
-    type: str # INCOME, EXPENSE
+    type: str  # INCOME, EXPENSE
     parent_id: Optional[UUID] = None
+
 
 class TransactionCategoryCreate(TransactionCategoryBase):
     pass
+
 
 class TransactionCategoryResponse(TransactionCategoryBase):
     id: UUID
@@ -36,18 +41,21 @@ class TransactionCategoryResponse(TransactionCategoryBase):
     class Config:
         from_attributes = True
 
+
 class TransactionBase(BaseModel):
     account_id: UUID
     category_id: Optional[UUID] = None
     member_id: Optional[UUID] = None
     amount: float
-    type: str # CREDIT, DEBIT
+    type: str  # CREDIT, DEBIT
     description: str
     date: date
     attachment_url: Optional[str] = None
 
+
 class TransactionCreate(TransactionBase):
     pass
+
 
 class TransactionResponse(TransactionBase):
     id: UUID

@@ -1,6 +1,7 @@
 """
 Email service using Resend.
 """
+
 import os
 
 import resend
@@ -22,11 +23,7 @@ class EmailService:
         return bool(self.api_key)
 
     async def send_welcome_email(
-        self,
-        to_email: str,
-        member_name: str,
-        church_name: str,
-        temporary_password: str
+        self, to_email: str, member_name: str, church_name: str, temporary_password: str
     ) -> bool:
         """
         Send welcome email with temporary password to new member.
@@ -98,24 +95,21 @@ class EmailService:
         """
 
         try:
-            response = resend.Emails.send({
-                "from": self.from_email,
-                "to": [to_email],
-                "subject": f"🎉 Bem-vindo(a) à {church_name} - Filadélfias",
-                "html": html_content,
-            })
+            response = resend.Emails.send(
+                {
+                    "from": self.from_email,
+                    "to": [to_email],
+                    "subject": f"🎉 Bem-vindo(a) à {church_name} - Filadélfias",
+                    "html": html_content,
+                }
+            )
             print(f"[EMAIL] Welcome email sent to {to_email}: {response}")
             return True
         except Exception as e:
             print(f"[EMAIL] Error sending welcome email: {e}")
             return False
 
-    async def send_password_reset_email(
-        self,
-        to_email: str,
-        user_name: str,
-        reset_token: str
-    ) -> bool:
+    async def send_password_reset_email(self, to_email: str, user_name: str, reset_token: str) -> bool:
         """
         Send password reset email.
 
@@ -180,12 +174,14 @@ class EmailService:
         """
 
         try:
-            response = resend.Emails.send({
-                "from": self.from_email,
-                "to": [to_email],
-                "subject": "🔐 Redefinir Senha - Filadélfias",
-                "html": html_content,
-            })
+            response = resend.Emails.send(
+                {
+                    "from": self.from_email,
+                    "to": [to_email],
+                    "subject": "🔐 Redefinir Senha - Filadélfias",
+                    "html": html_content,
+                }
+            )
             print(f"[EMAIL] Password reset email sent to {to_email}: {response}")
             return True
         except Exception as e:

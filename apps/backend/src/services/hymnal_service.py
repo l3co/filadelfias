@@ -11,6 +11,7 @@ class Hymn(BaseModel):
     author: str
     lyrics: List[str]
 
+
 class HymnalService:
     _data: List[Dict] = []
     _loaded: bool = False

@@ -1,6 +1,7 @@
 """
 Integration tests for authentication endpoints.
 """
+
 import pytest
 from httpx import ASGITransport, AsyncClient
 
@@ -18,17 +19,9 @@ class TestAuthEndpoints:
         """
         app.dependency_overrides[get_db] = override_get_db
 
-        async with AsyncClient(
-            transport=ASGITransport(app=app),
-            base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post(
-                "/auth/register",
-                json={
-                    "email": "newuser@example.com",
-                    "name": "New User",
-                    "password": "password123"
-                }
+                "/auth/register", json={"email": "newuser@example.com", "name": "New User", "password": "password123"}
             )
 
         app.dependency_overrides.clear()
@@ -47,28 +40,17 @@ class TestAuthEndpoints:
         """
         app.dependency_overrides[get_db] = override_get_db
 
-        async with AsyncClient(
-            transport=ASGITransport(app=app),
-            base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             # Register first user
             await client.post(
                 "/auth/register",
-                json={
-                    "email": "duplicate@example.com",
-                    "name": "First User",
-                    "password": "password123"
-                }
+                json={"email": "duplicate@example.com", "name": "First User", "password": "password123"},
             )
 
             # Try to register second user with same email
             response = await client.post(
                 "/auth/register",
-                json={
-                    "email": "duplicate@example.com",
-                    "name": "Second User",
-                    "password": "password456"
-                }
+                json={"email": "duplicate@example.com", "name": "Second User", "password": "password456"},
             )
 
         app.dependency_overrides.clear()
@@ -82,27 +64,15 @@ class TestAuthEndpoints:
         """
         app.dependency_overrides[get_db] = override_get_db
 
-        async with AsyncClient(
-            transport=ASGITransport(app=app),
-            base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             # Register user
             await client.post(
-                "/auth/register",
-                json={
-                    "email": "login@example.com",
-                    "name": "Login User",
-                    "password": "password123"
-                }
+                "/auth/register", json={"email": "login@example.com", "name": "Login User", "password": "password123"}
             )
 
             # Login
             response = await client.post(
-                "/auth/login",
-                data={
-                    "username": "login@example.com",
-                    "password": "password123"
-                }
+                "/auth/login", data={"username": "login@example.com", "password": "password123"}
             )
 
         app.dependency_overrides.clear()
@@ -118,27 +88,16 @@ class TestAuthEndpoints:
         """
         app.dependency_overrides[get_db] = override_get_db
 
-        async with AsyncClient(
-            transport=ASGITransport(app=app),
-            base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             # Register user
             await client.post(
                 "/auth/register",
-                json={
-                    "email": "wrongpass@example.com",
-                    "name": "Wrong Pass User",
-                    "password": "correctpassword"
-                }
+                json={"email": "wrongpass@example.com", "name": "Wrong Pass User", "password": "correctpassword"},
             )
 
             # Try to login with wrong password
             response = await client.post(
-                "/auth/login",
-                data={
-                    "username": "wrongpass@example.com",
-                    "password": "wrongpassword"
-                }
+                "/auth/login", data={"username": "wrongpass@example.com", "password": "wrongpassword"}
             )
 
         app.dependency_overrides.clear()
@@ -151,35 +110,20 @@ class TestAuthEndpoints:
         """
         app.dependency_overrides[get_db] = override_get_db
 
-        async with AsyncClient(
-            transport=ASGITransport(app=app),
-            base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             # Register user
             await client.post(
-                "/auth/register",
-                json={
-                    "email": "getme@example.com",
-                    "name": "Get Me User",
-                    "password": "password123"
-                }
+                "/auth/register", json={"email": "getme@example.com", "name": "Get Me User", "password": "password123"}
             )
 
             # Login to get token
             login_response = await client.post(
-                "/auth/login",
-                data={
-                    "username": "getme@example.com",
-                    "password": "password123"
-                }
+                "/auth/login", data={"username": "getme@example.com", "password": "password123"}
             )
             token = login_response.json()["access_token"]
 
             # Get current user
-            response = await client.get(
-                "/auth/me",
-                headers={"Authorization": f"Bearer {token}"}
-            )
+            response = await client.get("/auth/me", headers={"Authorization": f"Bearer {token}"})
 
         app.dependency_overrides.clear()
 
@@ -194,10 +138,7 @@ class TestAuthEndpoints:
         """
         app.dependency_overrides[get_db] = override_get_db
 
-        async with AsyncClient(
-            transport=ASGITransport(app=app),
-            base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.get("/auth/me")
 
         app.dependency_overrides.clear()

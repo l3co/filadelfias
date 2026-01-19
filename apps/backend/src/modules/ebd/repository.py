@@ -18,9 +18,7 @@ class EBDRepository:
         return ebd_class
 
     async def get_classes(self, tenant_id: UUID) -> Sequence[EBDClass]:
-        result = await self.session.execute(
-            select(EBDClass).where(EBDClass.tenant_id == tenant_id)
-        )
+        result = await self.session.execute(select(EBDClass).where(EBDClass.tenant_id == tenant_id))
         return result.scalars().all()
 
     async def enroll_student(self, enrollment: EBDStudent) -> EBDStudent:
@@ -30,9 +28,7 @@ class EBDRepository:
         return enrollment
 
     async def get_students(self, class_id: UUID) -> Sequence[EBDStudent]:
-        result = await self.session.execute(
-            select(EBDStudent).where(EBDStudent.ebd_class_id == class_id)
-        )
+        result = await self.session.execute(select(EBDStudent).where(EBDStudent.ebd_class_id == class_id))
         return result.scalars().all()
 
     async def create_lesson(self, lesson: EBDLesson) -> EBDLesson:
@@ -43,8 +39,6 @@ class EBDRepository:
 
     async def get_lessons(self, class_id: UUID) -> Sequence[EBDLesson]:
         result = await self.session.execute(
-            select(EBDLesson)
-            .where(EBDLesson.ebd_class_id == class_id)
-            .order_by(EBDLesson.date.desc())
+            select(EBDLesson).where(EBDLesson.ebd_class_id == class_id).order_by(EBDLesson.date.desc())
         )
         return result.scalars().all()

@@ -1,6 +1,7 @@
 """
 Integration tests for mission endpoints.
 """
+
 import pytest
 from httpx import ASGITransport, AsyncClient
 
@@ -15,31 +16,16 @@ class TestMissionEndpoints:
     async def get_auth_token(self, client, email="mission_user@test.com"):
         try:
             await client.post(
-                "/auth/register",
-                json={
-                    "email": email,
-                    "name": "Mission User",
-                    "password": "password123"
-                }
+                "/auth/register", json={"email": email, "name": "Mission User", "password": "password123"}
             )
         except Exception:
             pass
-        response = await client.post(
-            "/auth/login",
-            data={
-                "username": email,
-                "password": "password123"
-            }
-        )
+        response = await client.post("/auth/login", data={"username": email, "password": "password123"})
         return response.json()["access_token"]
 
     async def create_tenant(self, client, token, slug="miss-church"):
         headers = {"Authorization": f"Bearer {token}"}
-        response = await client.post(
-            "/tenants",
-            json={"name": "Mission Church", "slug": slug},
-            headers=headers
-        )
+        response = await client.post("/tenants", json={"name": "Mission Church", "slug": slug}, headers=headers)
         return response.json()
 
     async def test_create_and_list_missionaries(self, db_session, override_get_db):
@@ -61,9 +47,9 @@ class TestMissionEndpoints:
                     "country_code": "MZ",
                     "latitude": -18.66,
                     "longitude": 35.53,
-                    "bio": "Trabalhando com plantação de igrejas."
+                    "bio": "Trabalhando com plantação de igrejas.",
                 },
-                headers=headers
+                headers=headers,
             )
             assert resp.status_code == 200
             data = resp.json()
@@ -71,11 +57,7 @@ class TestMissionEndpoints:
             assert data["country_code"] == "MZ"
 
             # List Missionaries
-            resp = await client.get(
-                "/missions/missionaries",
-                params={"tenant_id": tenant_id},
-                headers=headers
-            )
+            resp = await client.get("/missions/missionaries", params={"tenant_id": tenant_id}, headers=headers)
             assert resp.status_code == 200
             missionaries = resp.json()
             assert len(missionaries) == 1

@@ -2,6 +2,7 @@
 Configuration settings for the application.
 Uses Pydantic Settings for environment variable management.
 """
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -14,6 +15,14 @@ class Settings(BaseSettings):
 
     # Database
     database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/filadelfias"
+
+    @field_validator("database_url", mode="before")
+    @classmethod
+    def convert_to_asyncpg(cls, v: str) -> str:
+        """Convert postgresql:// to postgresql+asyncpg:// for async driver."""
+        if v and v.startswith("postgresql://"):
+            return v.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return v
 
     # Security
     secret_key: str = "your-secret-key-change-in-production"

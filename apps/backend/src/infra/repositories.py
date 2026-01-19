@@ -116,6 +116,13 @@ class MemberRepository:
         await self.session.refresh(member)
         return member
 
+    async def get(self, member_id: UUID) -> Optional[Member]:
+        """Get member by ID."""
+        result = await self.session.execute(
+            select(Member).where(Member.id == member_id)
+        )
+        return result.scalar_one_or_none()
+
     async def get_by_tenant(self, tenant_id: UUID) -> Sequence[Member]:
         """List members by tenant."""
         result = await self.session.execute(
@@ -137,12 +144,15 @@ class TenantRepository:
         await self.session.refresh(tenant)
         return tenant
         
+    async def get(self, tenant_id: UUID) -> Optional[Tenant]:
+        """Get tenant by ID."""
+        result = await self.session.execute(select(Tenant).where(Tenant.id == tenant_id))
+        return result.scalar_one_or_none()
+
     async def get_by_slug(self, slug: str) -> Optional[Tenant]:
         """Get tenant by slug."""
         result = await self.session.execute(select(Tenant).where(Tenant.slug == slug))
         return result.scalar_one_or_none()
-
-
 
 
 

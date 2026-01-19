@@ -69,20 +69,23 @@ export function DashboardLayout() {
                     </button>
                 </div>
 
-                {/* Tenant Selector */}
+                {/* Tenant Selector - Links to Settings */}
                 <div className="px-4 py-4 border-b border-gray-100">
-                    <button className="w-full flex items-center justify-between px-3 py-2.5 bg-gradient-to-r from-green-50 to-teal-50 hover:from-green-100 hover:to-teal-100 rounded-xl transition-colors group">
+                    <Link 
+                        to="/app/settings"
+                        className="w-full flex items-center justify-between px-3 py-2.5 bg-gradient-to-r from-green-50 to-teal-50 hover:from-green-100 hover:to-teal-100 rounded-xl transition-colors group"
+                    >
                         <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-600 to-teal-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
                                 {tenantName.charAt(0)}
                             </div>
                             <div className="text-left">
                                 <p className="text-sm font-semibold text-gray-900 truncate max-w-[140px]">{tenantName}</p>
-                                <p className="text-xs text-gray-500">Igreja ativa</p>
+                                <p className="text-xs text-gray-500">Clique para editar</p>
                             </div>
                         </div>
                         <ChevronRight size={16} className="text-gray-400 group-hover:text-gray-600 transition-colors" />
-                    </button>
+                    </Link>
                 </div>
 
                 {/* Navigation */}

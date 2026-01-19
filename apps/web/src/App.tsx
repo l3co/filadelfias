@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './routes/LoginPage';
 import { ChurchRegistrationWizard } from './routes/ChurchRegistrationWizard';
+import { ChurchSettingsPage } from './routes/settings/ChurchSettingsPage';
 import HomePage from './routes/HomePage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { MembersPage } from './routes/members/MembersPage';
@@ -61,6 +62,7 @@ function App() {
           <Route path="missions" element={<MissionsPage />} />
           <Route path="ebd" element={<EBDClassesPage />} />
           <Route path="events" element={<div className="p-8 text-center text-gray-500">Módulo de Eventos (Em breve)</div>} />
+          <Route path="settings" element={<ChurchSettingsPage />} />
         </Route>
 
         {/* Fallback */}

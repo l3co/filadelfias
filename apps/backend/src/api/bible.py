@@ -12,12 +12,12 @@ async def get_versions():
 @router.get("/books", response_model=List[BibleBookSummary])
 async def get_books(version: str = "nvi"):
     """List all books of the Bible for a specific version."""
-    return BibleService.get_books(version)
+    return await BibleService.get_books(version)
 
 @router.get("/{book}/{chapter}", response_model=BibleChapterContent)
 async def get_chapter(book: str, chapter: int, version: str = "nvi"):
     """Get a specific chapter with verses from a specific version."""
-    content = BibleService.get_chapter(book.lower(), chapter, version)
+    content = await BibleService.get_chapter(book.lower(), chapter, version)
     if not content:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, 

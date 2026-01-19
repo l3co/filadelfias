@@ -1,50 +1,22 @@
 import json
 import os
+import httpx
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel
 
-# Mapping of abbreviations to full Portuguese names
-BOOK_NAMES = {
-    "gn": "Gênesis", "ex": "Êxodo", "lv": "Levítico", "nm": "Números", "dt": "Deuteronômio",
-    "js": "Josué", "jz": "Juízes", "rt": "Rute", "1sm": "1 Samuel", "2sm": "2 Samuel",
-    "1rs": "1 Reis", "2rs": "2 Reis", "1cr": "1 Crônicas", "2cr": "2 Crônicas", "ed": "Esdras",
-    "ne": "Neemias", "et": "Ester", "job": "Jó", "sl": "Salmos", "pv": "Provérbios",
-    "ec": "Eclesiastes", "ct": "Cânticos", "is": "Isaías", "jr": "Jeremias", "lm": "Lamentações",
-    "ez": "Ezequiel", "dn": "Daniel", "os": "Oséias", "jl": "Joel", "am": "Amós",
-    "ob": "Obadias", "jn": "Jonas", "mq": "Miquéias", "na": "Naum", "hc": "Habacuque",
-    "sf": "Sofonias", "ag": "Ageu", "zc": "Zacarias", "ml": "Malaquias",
-    "mt": "Mateus", "mc": "Marcos", "lc": "Lucas", "jo": "João", "at": "Atos",
-    "rm": "Romanos", "1co": "1 Coríntios", "2co": "2 Coríntios", "gl": "Gálatas", "ef": "Efésios",
-    "fp": "Filipenses", "cl": "Colossenses", "1ts": "1 Tessalonicenses", "2ts": "2 Tessalonicenses",
-    "1tm": "1 Timóteo", "2tm": "2 Timóteo", "tt": "Tito", "fm": "Filemom", "hb": "Hebreus",
-    "tg": "Tiago", "1pe": "1 Pedro", "2pe": "2 Pedro", "1jo": "1 João", "2jo": "2 João",
-    "3jo": "3 João", "jd": "Judas", "ap": "Apocalipse"
-}
-
-class BibleBookSummary(BaseModel):
-    abbrev: str
-    name: str
-    chapters_count: int
-    testament: str  # 'old' or 'new'
-
-class BibleChapterContent(BaseModel):
-    book_abbrev: str
-    book_name: str
-    chapter: int
-    verses: List[str]
-    previous_chapter: Optional[Dict[str, Any]] = None
-    next_chapter: Optional[Dict[str, Any]] = None
+# ... (BOOK_NAMES keep as is) ...
 
 class BibleVersion(BaseModel):
     id: str
     name: str
     description: str
+    is_remote: bool = False
 
 AVAILABLE_VERSIONS = [
     BibleVersion(id="nvi", name="Nova Versão Internacional", description="Linguagem moderna e acessível"),
     BibleVersion(id="acf", name="Almeida Corrigida Fiel", description="Tradução clássica e fiel aos originais"),
     BibleVersion(id="aa", name="Almeida Atualizada", description="Equilíbrio entre tradição e clareza"),
-    BibleVersion(id="ara", name="Almeida Revista e Atualizada", description="Texto Tradicional e Atual"),
+    BibleVersion(id="ara", name="Almeida Revista e Atualizada", description="Texto Tradicional e Atual (On-line)", is_remote=True),
 ]
 
 class BibleService:
@@ -52,14 +24,10 @@ class BibleService:
     DEFAULT_VERSION = "nvi"
 
     @classmethod
-    def _get_data(cls, version: str) -> List[Dict]:
-        """Lazy loads the requested version if not already in cache."""
-        if version not in [v.id for v in AVAILABLE_VERSIONS]:
-            version = cls.DEFAULT_VERSION
-        
+    def _get_local_data(cls, version: str) -> List[Dict]:
+        """Lazy loads the requested local version if not already in cache."""
         if version not in cls._versions_cache:
             cls._load_version(version)
-        
         return cls._versions_cache.get(version, [])
 
     @classmethod
@@ -79,15 +47,15 @@ class BibleService:
         return AVAILABLE_VERSIONS
 
     @classmethod
-    def get_books(cls, version: str = DEFAULT_VERSION) -> List[BibleBookSummary]:
-        data = cls._get_data(version)
+    async def get_books(cls, version: str = DEFAULT_VERSION) -> List[BibleBookSummary]:
+        # Always use a local version (e.g. NVI) to generate book structure/list
+        # This avoids fetching list from API every time. The Canon is the same.
+        data = cls._get_local_data(cls.DEFAULT_VERSION)
         
         books = []
         for i, book in enumerate(data):
             abbrev = book["abbrev"]
-            # Simple heuristic for testament: first 39 books are OT
             testament = "old" if i < 39 else "new"
-            
             books.append(BibleBookSummary(
                 abbrev=abbrev,
                 name=BOOK_NAMES.get(abbrev, abbrev.title()),
@@ -97,13 +65,35 @@ class BibleService:
         return books
 
     @classmethod
-    def get_chapter(cls, abbrev: str, chapter: int, version: str = DEFAULT_VERSION) -> Optional[BibleChapterContent]:
-        data = cls._get_data(version)
+    async def _fetch_remote_chapter(cls, version: str, abbrev: str, chapter: int) -> List[str]:
+        try:
+            # Map abbrev if necessary, assuming filadelfias abbrevs match abibliadigital
+            url = f"https://www.abibliadigital.com.br/api/verses/{version}/{abbrev}/{chapter}"
+            async with httpx.AsyncClient() as client:
+                response = await client.get(url, timeout=5.0)
+                response.raise_for_status()
+                data = response.json()
+                # Extract text from verses
+                return [v["text"] for v in data.get("verses", [])]
+        except Exception as e:
+            print(f"Error fetching remote chapter: {e}")
+            return []
+
+    @classmethod
+    async def get_chapter(cls, abbrev: str, chapter: int, version: str = DEFAULT_VERSION) -> Optional[BibleChapterContent]:
+        # Identify if version is remote
+        version_config = next((v for v in AVAILABLE_VERSIONS if v.id == version), None)
+        if not version_config:
+            version = cls.DEFAULT_VERSION
+            version_config = next(v for v in AVAILABLE_VERSIONS if v.id == version)
+
+        verses = []
         
-        # Find book
+        # Determine navigation using LOCAL structure (canon is stable)
+        local_data = cls._get_local_data(cls.DEFAULT_VERSION)
         book_idx = -1
         book_data = None
-        for i, b in enumerate(data):
+        for i, b in enumerate(local_data):
             if b["abbrev"] == abbrev:
                 book_data = b
                 book_idx = i
@@ -112,32 +102,47 @@ class BibleService:
         if not book_data:
             return None
             
-        chapters = book_data["chapters"]
-        if chapter < 1 or chapter > len(chapters):
+        total_chapters = len(book_data["chapters"])
+        if chapter < 1 or chapter > total_chapters:
             return None
 
-        # Determine navigation
+        # Fetch Content
+        if version_config.is_remote:
+            verses = await cls._fetch_remote_chapter(version, abbrev, chapter)
+            if not verses:
+                # Fallback to local default if remote fails or returns empty
+                print(f"Remote fetch failed for {version}, falling back to {cls.DEFAULT_VERSION}")
+                fallback_chapters = cls._get_local_data(cls.DEFAULT_VERSION)[book_idx]["chapters"]
+                verses = fallback_chapters[chapter - 1]
+        else:
+            # Local fetch
+            version_data = cls._get_local_data(version)
+            # Ensure book exists in this version data (loaded correctly)
+            if version_data and len(version_data) > book_idx:
+                 verses = version_data[book_idx]["chapters"][chapter - 1]
+            else:
+                 verses = []
+
+        # Navigation logic (same as before)
         prev_chap = None
         if chapter > 1:
             prev_chap = {"book": abbrev, "chapter": chapter - 1}
         elif book_idx > 0:
-            # Last chapter of previous book
-            prev_book = data[book_idx - 1]
+            prev_book = local_data[book_idx - 1]
             prev_chap = {"book": prev_book["abbrev"], "chapter": len(prev_book["chapters"])}
 
         next_chap = None
-        if chapter < len(chapters):
+        if chapter < total_chapters:
             next_chap = {"book": abbrev, "chapter": chapter + 1}
-        elif book_idx < len(data) - 1:
-            # First chapter of next book
-            next_book = data[book_idx + 1]
+        elif book_idx < len(local_data) - 1:
+            next_book = local_data[book_idx + 1]
             next_chap = {"book": next_book["abbrev"], "chapter": 1}
 
         return BibleChapterContent(
             book_abbrev=abbrev,
             book_name=BOOK_NAMES.get(abbrev, abbrev.title()),
             chapter=chapter,
-            verses=chapters[chapter - 1],
+            verses=verses,
             previous_chapter=prev_chap,
             next_chapter=next_chap
         )

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Users, Search, Filter } from 'lucide-react';
 import { useCurrentTenant } from '../../hooks/useAuth';
 import { useMembers } from '../../features/members/hooks/useMembers';
 import { MembersTable } from '../../features/members/components/MembersTable';
@@ -13,24 +13,34 @@ export function MembersPage() {
 
     if (!tenant) {
         return (
-            <div className="p-12 text-center bg-white rounded-lg shadow border border-gray-100">
-                <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 mb-4">
-                    <span className="text-2xl">⚠️</span>
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center">
+                <div className="w-16 h-16 mx-auto rounded-2xl bg-amber-50 flex items-center justify-center mb-4">
+                    <span className="text-3xl">⚠️</span>
                 </div>
-                <h2 className="text-lg font-medium text-gray-900">Nenhuma igreja vinculada</h2>
-                <p className="text-gray-500 mt-2">Sua conta não está vinculada a nenhuma igreja.</p>
+                <h2 className="text-lg font-semibold text-[#002333]">Nenhuma igreja vinculada</h2>
+                <p className="text-gray-500 mt-2 max-w-sm mx-auto">
+                    Sua conta não está vinculada a nenhuma igreja. Complete o onboarding para continuar.
+                </p>
             </div>
         )
     }
 
+    const memberCount = members?.length || 0;
+
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
-            <div className="flex justify-between items-center">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-gray-900">Membros</h1>
-                    <p className="text-muted-foreground text-gray-500 mt-1">
-                        Gerencie a membresia da {tenant.name}.
-                    </p>
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="flex items-center gap-4">
+                    <div className="p-3 rounded-2xl bg-gradient-to-br from-green-50 to-teal-50">
+                        <Users className="h-6 w-6 text-green-600" />
+                    </div>
+                    <div>
+                        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#002333]">Membros</h1>
+                        <p className="text-gray-500 mt-0.5">
+                            {memberCount > 0 ? `${memberCount} membros em ${tenant.name}` : `Gerencie a membresia da ${tenant.name}`}
+                        </p>
+                    </div>
                 </div>
                 <Button onClick={() => setIsDialogOpen(true)} className="gap-2">
                     <Plus className="h-4 w-4" />
@@ -38,8 +48,26 @@ export function MembersPage() {
                 </Button>
             </div>
 
+            {/* Search and Filters */}
+            <div className="flex flex-col sm:flex-row gap-3">
+                <div className="relative flex-1">
+                    <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                        type="text"
+                        placeholder="Buscar por nome, email..."
+                        className="w-full pl-11 pr-4 py-3 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all placeholder:text-gray-400"
+                    />
+                </div>
+                <Button variant="outline" className="gap-2">
+                    <Filter size={16} />
+                    Filtros
+                </Button>
+            </div>
+
+            {/* Table */}
             <MembersTable members={members} isLoading={isLoading} />
 
+            {/* Dialog */}
             <CreateMemberDialog
                 isOpen={isDialogOpen}
                 onClose={() => setIsDialogOpen(false)}

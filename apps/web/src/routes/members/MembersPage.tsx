@@ -1,18 +1,41 @@
 import { useState } from 'react';
 import { Plus, Users, Search, Filter } from 'lucide-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCurrentTenant } from '../../hooks/useAuth';
 import { useMembers } from '../../features/members/hooks/useMembers';
 import { MembersTable } from '../../features/members/components/MembersTable';
 import { CreateMemberDialog } from '../../features/members/components/CreateMemberDialog';
 import { EditMemberDialog } from '../../features/members/components/EditMemberDialog';
+import { InviteSuccessDialog } from '../../features/members/components/InviteSuccessDialog';
 import { Button } from '../../components/ui/button';
+import { api } from '../../lib/api';
 import type { Member } from '../../types';
+
+interface InviteResult {
+    success: boolean;
+    message: string;
+    temporary_password: string | null;
+    email_sent: boolean;
+}
 
 export function MembersPage() {
     const tenant = useCurrentTenant();
+    const queryClient = useQueryClient();
     const { data: members, isLoading } = useMembers(tenant?.id);
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [editingMember, setEditingMember] = useState<Member | null>(null);
+    const [inviteResult, setInviteResult] = useState<{ member: Member; result: InviteResult } | null>(null);
+
+    const inviteMutation = useMutation({
+        mutationFn: async (member: Member) => {
+            const response = await api.post<InviteResult>(`/tenants/${tenant?.id}/members/${member.id}/invite`);
+            return { member, result: response.data };
+        },
+        onSuccess: (data) => {
+            setInviteResult(data);
+            queryClient.invalidateQueries({ queryKey: ['members', tenant?.id] });
+        }
+    });
 
     if (!tenant) {
         return (
@@ -72,6 +95,7 @@ export function MembersPage() {
                 members={members} 
                 isLoading={isLoading} 
                 onEditMember={(member) => setEditingMember(member)}
+                onInviteMember={(member) => inviteMutation.mutate(member)}
             />
 
             {/* Create Dialog */}
@@ -88,6 +112,18 @@ export function MembersPage() {
                 member={editingMember}
                 tenantId={tenant.id}
             />
+
+            {/* Invite Success Dialog */}
+            {inviteResult && (
+                <InviteSuccessDialog
+                    isOpen={!!inviteResult}
+                    onClose={() => setInviteResult(null)}
+                    memberName={inviteResult.member.full_name}
+                    memberEmail={inviteResult.member.email || ''}
+                    temporaryPassword={inviteResult.result.temporary_password || ''}
+                    emailSent={inviteResult.result.email_sent}
+                />
+            )}
         </div>
     );
 }

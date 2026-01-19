@@ -8,15 +8,16 @@ import {
 } from "../../../components/ui/table";
 import { Badge } from "../../../components/ui/badge";
 import type { Member } from "../../../types";
-import { User, Pencil, Mail, Phone } from "lucide-react";
+import { User, Pencil, Mail, Phone, UserPlus } from "lucide-react";
 
 interface MembersTableProps {
     members?: Member[];
     isLoading?: boolean;
     onEditMember?: (member: Member) => void;
+    onInviteMember?: (member: Member) => void;
 }
 
-export function MembersTable({ members, isLoading, onEditMember }: MembersTableProps) {
+export function MembersTable({ members, isLoading, onEditMember, onInviteMember }: MembersTableProps) {
     if (isLoading) {
         return (
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
@@ -136,13 +137,24 @@ export function MembersTable({ members, isLoading, onEditMember }: MembersTableP
                                 </div>
                             </TableCell>
                             <TableCell className="text-right">
-                                <button 
-                                    onClick={() => onEditMember?.(member)}
-                                    className="p-2 rounded-lg text-gray-400 hover:text-green-600 hover:bg-green-50 transition-colors opacity-0 group-hover:opacity-100"
-                                    title="Editar membro"
-                                >
-                                    <Pencil size={16} />
-                                </button>
+                                <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    {member.email && !member.user_id && (
+                                        <button 
+                                            onClick={() => onInviteMember?.(member)}
+                                            className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                                            title="Convidar para a plataforma"
+                                        >
+                                            <UserPlus size={16} />
+                                        </button>
+                                    )}
+                                    <button 
+                                        onClick={() => onEditMember?.(member)}
+                                        className="p-2 rounded-lg text-gray-400 hover:text-green-600 hover:bg-green-50 transition-colors"
+                                        title="Editar membro"
+                                    >
+                                        <Pencil size={16} />
+                                    </button>
+                                </div>
                             </TableCell>
                         </TableRow>
                     ))}

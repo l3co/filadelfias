@@ -8,11 +8,10 @@ export function PublicLayout() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
                         {/* Logo */}
-                        <Link to="/" className="flex items-center gap-2 group">
-                            <div className="bg-green-700 text-white p-1.5 rounded-lg group-hover:bg-green-800 transition-colors">
-                                <span className="font-bold text-xl leading-none">F</span>
-                            </div>
-                            <span className="font-bold text-xl tracking-tight text-gray-900">Filadélfias</span>
+                        <Link to="/" className="group">
+                            <span className="text-2xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-green-700 to-teal-600 group-hover:from-green-800 group-hover:to-teal-700 transition-all">
+                                Filadélfias
+                            </span>
                         </Link>
 
                         {/* Nav Links (Desktop) */}
@@ -53,7 +52,9 @@ export function PublicLayout() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 gap-12">
                     <div>
                         <div className="flex items-center gap-2 mb-4">
-                            <span className="font-bold text-lg text-gray-900">Filadélfias</span>
+                            <span className="text-xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-green-700 to-teal-600">
+                                Filadélfias
+                            </span>
                         </div>
                         <p className="text-gray-500 text-sm italic leading-relaxed">
                             "Esta é uma homenagem a um dos nossos amado Reverendo Eliézer Marra. Em uma das suas pregações a respeito do livro de Apocalipse, uma vez ele disse: tenho uma proposta, que tal mudarmos o nome de nossa Igreja para Filadélfia?"

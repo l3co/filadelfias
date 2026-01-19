@@ -1,7 +1,7 @@
 import { TrendingUp, TrendingDown, MoreHorizontal, Calendar } from "lucide-react";
 import { Card } from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";
-import { Transaction } from "../../../services/financial";
+import type { Transaction } from "../../../services/financial";
 
 interface TransactionListProps {
     transactions?: Transaction[];

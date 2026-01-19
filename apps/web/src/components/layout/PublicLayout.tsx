@@ -56,7 +56,7 @@ export function PublicLayout() {
                             <span className="font-bold text-lg text-gray-900">Filadélfias</span>
                         </div>
                         <p className="text-gray-500 text-sm italic leading-relaxed">
-                            "Esta é uma homenagem a um dos nossos amados reverendos Eliézer Marra. Em uma das suas pregações a respeito do livro de Apocalipse, uma vez ele disse: como seria bom se pudéssemos nós mudar todos os nomes das igrejas que são verdadeiramente cristãs para igrejas da Filadélfia. E por isso veio esse nome."
+                            "Esta é uma homenagem a um dos nossos amado Reverendo Eliézer Marra. Em uma das suas pregações a respeito do livro de Apocalipse, uma vez ele disse: tenho uma proposta, que tal mudarmos o nome de nossa Igreja para Filadélfia?"
                         </p>
                     </div>
 

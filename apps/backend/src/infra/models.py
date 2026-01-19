@@ -71,6 +71,15 @@ class Tenant(Base):
     members: Mapped[list["Member"]] = relationship(
         back_populates="tenant", cascade="all, delete-orphan"
     )
+    councils: Mapped[list["Council"]] = relationship(
+        back_populates="tenant", cascade="all, delete-orphan"
+    )
+    accounts: Mapped[list["FinancialAccount"]] = relationship(
+        back_populates="tenant", cascade="all, delete-orphan"
+    )
+    categories: Mapped[list["TransactionCategory"]] = relationship(
+        back_populates="tenant", cascade="all, delete-orphan"
+    )
 
 
 class UserChurchMembership(Base):
@@ -150,3 +159,199 @@ class Member(Base):
     # Relationships
     tenant: Mapped["Tenant"] = relationship(back_populates="members")
     user: Mapped[Optional["User"]] = relationship(back_populates="member_profile")
+
+
+class Council(Base):
+    """
+    Council model (e.g. Session, Board of Deacons, Assembly).
+    Represents a governing body or committee within the church.
+    """
+    __tablename__ = "councils"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    tenant_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False
+    )
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    type: Mapped[str] = mapped_column(String(50), nullable=False) # SESSION, DEACONS, ASSEMBLY, COMMITTEE
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, nullable=False
+    )
+
+    # Relationships
+    tenant: Mapped["Tenant"] = relationship(back_populates="councils")
+    members: Mapped[list["CouncilMember"]] = relationship(
+        back_populates="council", cascade="all, delete-orphan"
+    )
+    meetings: Mapped[list["Meeting"]] = relationship(
+        back_populates="council", cascade="all, delete-orphan"
+    )
+
+
+class CouncilMember(Base):
+    """
+    Association between Member and Council with a specific role and term.
+    """
+    __tablename__ = "council_members"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    council_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("councils.id", ondelete="CASCADE"), nullable=False
+    )
+    member_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("members.id", ondelete="CASCADE"), nullable=False
+    )
+    role: Mapped[str] = mapped_column(String(50), nullable=False) # e.g. PRESIDENT, SECRETARY, MEMBER
+    start_date: Mapped[date] = mapped_column(Date, nullable=False)
+    end_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    
+    # Relationships
+    council: Mapped["Council"] = relationship(back_populates="members")
+    member: Mapped["Member"] = relationship()
+
+
+class Meeting(Base):
+    """
+    Meeting model (e.g. Session Meeting, General Assembly).
+    """
+    __tablename__ = "meetings"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    council_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("councils.id", ondelete="CASCADE"), nullable=False
+    )
+    date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    status: Mapped[str] = mapped_column(String(50), default="SCHEDULED", nullable=False) # SCHEDULED, IN_PROGRESS, COMPLETED, CANCELED
+    agenda: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    location: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, nullable=False
+    )
+
+    # Relationships
+    council: Mapped["Council"] = relationship(back_populates="meetings")
+    minute: Mapped[Optional["MeetingMinute"]] = relationship(
+        back_populates="meeting", uselist=False, cascade="all, delete-orphan"
+    )
+
+
+class MeetingMinute(Base):
+    """
+    Minutes of a meeting. Contains the official record.
+    """
+    __tablename__ = "meeting_minutes"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    meeting_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("meetings.id", ondelete="CASCADE"), unique=True, nullable=False
+    )
+    content: Mapped[str] = mapped_column(Text, nullable=False) # HTML/Rich Text content
+    status: Mapped[str] = mapped_column(String(50), default="DRAFT", nullable=False) # DRAFT, APPROVED, PUBLISHED
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+    )
+
+    # Relationships
+    meeting: Mapped["Meeting"] = relationship(back_populates="minute")
+
+
+class FinancialAccount(Base):
+    """
+    Financial Account (e.g. Bank Account, Petty Cash).
+    """
+    __tablename__ = "financial_accounts"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    tenant_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False
+    )
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    type: Mapped[str] = mapped_column(String(50), default="BANK", nullable=False) # BANK, CASH
+    balance: Mapped[float] = mapped_column(default=0.0, nullable=False) # Simple float for MVP, Decimal strictly distinct prefered later
+    
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, nullable=False
+    )
+    
+    # Relationships
+    tenant: Mapped["Tenant"] = relationship(back_populates="accounts")
+    transactions: Mapped[list["Transaction"]] = relationship(
+        back_populates="account", cascade="all, delete-orphan"
+    )
+
+
+class TransactionCategory(Base):
+    """
+    Chart of Accounts (Categories for Income/Expense).
+    """
+    __tablename__ = "transaction_categories"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    tenant_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False
+    )
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    type: Mapped[str] = mapped_column(String(20), nullable=False) # INCOME, EXPENSE
+    parent_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("transaction_categories.id"), nullable=True
+    )
+    
+    # Relationships
+    tenant: Mapped["Tenant"] = relationship(back_populates="categories")
+    transactions: Mapped[list["Transaction"]] = relationship(
+        back_populates="category"
+    )
+
+
+class Transaction(Base):
+    """
+    Financial Ledger (Incomes and Expenses).
+    """
+    __tablename__ = "transactions"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    tenant_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False
+    )
+    account_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("financial_accounts.id", ondelete="CASCADE"), nullable=False
+    )
+    category_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("transaction_categories.id", ondelete="SET NULL"), nullable=True
+    )
+    member_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("members.id", ondelete="SET NULL"), nullable=True
+    )
+    
+    amount: Mapped[float] = mapped_column(nullable=False) # Positive
+    type: Mapped[str] = mapped_column(String(20), nullable=False) # CREDIT (Income), DEBIT (Expense)
+    description: Mapped[str] = mapped_column(String(255), nullable=False)
+    date: Mapped[date] = mapped_column(Date, nullable=False)
+    attachment_url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, nullable=False
+    )
+
+    # Relationships
+    tenant: Mapped["Tenant"] = relationship()
+    account: Mapped["FinancialAccount"] = relationship(back_populates="transactions")
+    category: Mapped["TransactionCategory"] = relationship(back_populates="transactions")
+    member: Mapped["Member"] = relationship()
+

@@ -120,3 +120,97 @@ class MemberResponse(MemberBase):
 
     class Config:
         from_attributes = True
+
+
+# --- Governance Schemas ---
+
+class CouncilBase(BaseModel):
+    name: str = Field(..., min_length=1)
+    type: str # SESSION, DEACONS, ASSEMBLY, COMMITTEE
+    description: Optional[str] = None
+
+class CouncilCreate(CouncilBase):
+    pass
+
+class CouncilResponse(CouncilBase):
+    id: UUID
+    tenant_id: UUID
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+        
+class MeetingBase(BaseModel):
+    date: datetime
+    status: str = "SCHEDULED"
+    agenda: Optional[str] = None
+    location: Optional[str] = None
+
+class MeetingCreate(MeetingBase):
+    council_id: UUID
+
+class MeetingResponse(MeetingBase):
+    id: UUID
+    council_id: UUID
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+
+# --- Financial Schemas ---
+
+class FinancialAccountBase(BaseModel):
+    name: str = Field(..., min_length=1)
+    type: str = "BANK"
+    balance: float = 0.0
+
+class FinancialAccountCreate(FinancialAccountBase):
+    pass
+
+class FinancialAccountResponse(FinancialAccountBase):
+    id: UUID
+    tenant_id: UUID
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class TransactionCategoryBase(BaseModel):
+    name: str
+    type: str # INCOME, EXPENSE
+    parent_id: Optional[UUID] = None
+
+class TransactionCategoryCreate(TransactionCategoryBase):
+    pass
+
+class TransactionCategoryResponse(TransactionCategoryBase):
+    id: UUID
+    tenant_id: UUID
+    
+    class Config:
+        from_attributes = True
+
+class TransactionBase(BaseModel):
+    account_id: UUID
+    category_id: Optional[UUID] = None
+    member_id: Optional[UUID] = None
+    amount: float
+    type: str # CREDIT, DEBIT
+    description: str
+    date: date
+    attachment_url: Optional[str] = None
+
+class TransactionCreate(TransactionBase):
+    pass
+
+class TransactionResponse(TransactionBase):
+    id: UUID
+    tenant_id: UUID
+    created_at: datetime
+    category: Optional[TransactionCategoryResponse] = None
+    account: Optional[FinancialAccountResponse] = None
+    
+    class Config:
+        from_attributes = True
+

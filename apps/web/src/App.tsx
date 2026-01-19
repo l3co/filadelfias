@@ -12,6 +12,8 @@ import { BiblePage } from './routes/bible/BiblePage';
 import { BibleReaderPage } from './routes/bible/BibleReaderPage';
 import { HymnalPage } from './routes/hymnal/HymnalPage';
 import { HymnalReaderPage } from './routes/hymnal/HymnalReaderPage';
+import { CouncilsPage } from './routes/governance/CouncilsPage';
+import { TreasuryPage } from './routes/financial/TreasuryPage';
 
 function App() {
   return (
@@ -50,6 +52,8 @@ function App() {
       >
         <Route index element={<HomePage />} />
         <Route path="members" element={<MembersPage />} />
+        <Route path="governance" element={<CouncilsPage />} />
+        <Route path="financial" element={<TreasuryPage />} />
         <Route path="events" element={<div className="p-8 text-center text-gray-500">Módulo de Eventos (Em breve)</div>} />
       </Route>
 

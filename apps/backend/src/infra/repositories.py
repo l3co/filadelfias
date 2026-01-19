@@ -6,7 +6,11 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-from src.infra.models import User, Member, Tenant, UserChurchMembership # Add UserChurchMembership
+from src.infra.models import (
+    User, Member, Tenant, UserChurchMembership, 
+    Council, Meeting, MeetingMinute, CouncilMember,
+    FinancialAccount, Transaction, TransactionCategory
+)
 from src.infra.security import get_password_hash
 
 
@@ -134,3 +138,119 @@ class TenantRepository:
         """Get tenant by slug."""
         result = await self.session.execute(select(Tenant).where(Tenant.slug == slug))
         return result.scalar_one_or_none()
+
+
+class GovernanceRepository:
+    """Repository for Governance operations (Councils, Meetings)."""
+    
+    def __init__(self, session: AsyncSession):
+        self.session = session
+        
+    async def create_council(self, council: Council) -> Council:
+        """Create a new council."""
+        self.session.add(council)
+        await self.session.commit()
+        await self.session.refresh(council)
+        return council
+        
+    async def get_councils(self, tenant_id: UUID) -> Sequence[Council]:
+        """List councils by tenant."""
+        result = await self.session.execute(
+            select(Council).where(Council.tenant_id == tenant_id)
+        )
+        return result.scalars().all()
+        
+    async def get_council_by_id(self, council_id: UUID) -> Optional[Council]:
+        """Get council by ID."""
+        result = await self.session.execute(
+            select(Council).where(Council.id == council_id)
+        )
+        return result.scalar_one_or_none()
+        
+    async def create_meeting(self, meeting: Meeting) -> Meeting:
+        """Create a new meeting."""
+        self.session.add(meeting)
+        await self.session.commit()
+        await self.session.refresh(meeting)
+        return meeting
+        
+    async def get_meetings(self, council_id: UUID) -> Sequence[Meeting]:
+        """List meetings by council."""
+        result = await self.session.execute(
+            select(Meeting).where(Meeting.council_id == council_id).order_by(Meeting.date.desc())
+        )
+        return result.scalars().all()
+
+
+class FinancialRepository:
+    """Repository for Financial operations."""
+    
+    def __init__(self, session: AsyncSession):
+        self.session = session
+
+    async def create_account(self, account: FinancialAccount) -> FinancialAccount:
+        self.session.add(account)
+        await self.session.commit()
+        await self.session.refresh(account)
+        return account
+
+    async def get_accounts(self, tenant_id: UUID) -> Sequence[FinancialAccount]:
+        result = await self.session.execute(
+            select(FinancialAccount).where(FinancialAccount.tenant_id == tenant_id)
+        )
+        return result.scalars().all()
+
+    async def create_category(self, category: TransactionCategory) -> TransactionCategory:
+        self.session.add(category)
+        await self.session.commit()
+        await self.session.refresh(category)
+        return category
+
+    async def get_categories(self, tenant_id: UUID) -> Sequence[TransactionCategory]:
+        result = await self.session.execute(
+            select(TransactionCategory).where(TransactionCategory.tenant_id == tenant_id)
+        )
+        return result.scalars().all()
+
+    async def create_transaction(self, transaction: Transaction) -> Transaction:
+        self.session.add(transaction)
+        
+        # Update account balance simple logic
+        account = await self.session.get(FinancialAccount, transaction.account_id)
+        if account:
+            if transaction.type == "CREDIT":
+                account.balance += transaction.amount
+            else:
+                account.balance -= transaction.amount
+            self.session.add(account)
+
+        await self.session.commit()
+        await self.session.refresh(transaction)
+        
+        # Load relationships
+        return await self.get_transaction(transaction.id)
+
+    async def get_transaction(self, transaction_id: UUID) -> Optional[Transaction]:
+        result = await self.session.execute(
+            select(Transaction)
+            .where(Transaction.id == transaction_id)
+            .options(
+                selectinload(Transaction.account),
+                selectinload(Transaction.category)
+            )
+        )
+        return result.scalar_one_or_none()    
+
+    async def get_transactions(self, tenant_id: UUID, limit: int = 50) -> Sequence[Transaction]:
+        result = await self.session.execute(
+            select(Transaction)
+            .where(Transaction.tenant_id == tenant_id)
+            .order_by(Transaction.date.desc())
+            .limit(limit)
+            .options(
+                selectinload(Transaction.account),
+                selectinload(Transaction.category)
+            )
+        )
+        return result.scalars().all()
+

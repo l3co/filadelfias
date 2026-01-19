@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { Outlet, Link, useLocation, Navigate } from 'react-router-dom';
-import { Menu, Home, Users, Calendar, LogOut } from 'lucide-react';
+import { Menu, Home, Users, Calendar, LogOut, Gavel, Wallet } from 'lucide-react';
 import { useCurrentUser, useLogout } from '../../hooks/useAuth';
 import { cn } from '../../lib/utils';
 
 const navigation = [
     { name: 'Dashboard', href: '/app', icon: Home },
     { name: 'Membros', href: '/app/members', icon: Users },
+    { name: 'Governo', href: '/app/governance', icon: Gavel },
+    { name: 'Tesouraria', href: '/app/financial', icon: Wallet },
     { name: 'Eventos', href: '/app/events', icon: Calendar },
 ];
 

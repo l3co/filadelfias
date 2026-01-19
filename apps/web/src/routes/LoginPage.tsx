@@ -150,11 +150,18 @@ export default function LoginPage() {
                         </form>
                     </div>
 
+                    {/* Info Box */}
+                    <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+                        <p className="text-sm text-blue-700 leading-relaxed">
+                            <strong>É membro de uma igreja?</strong> Use as credenciais fornecidas pelo administrador da sua igreja para acessar.
+                        </p>
+                    </div>
+
                     {/* Footer */}
                     <p className="text-center text-gray-500">
-                        Não tem uma conta?{' '}
+                        É administrador?{' '}
                         <Link to="/register" className="text-green-600 hover:text-green-700 font-semibold">
-                            Cadastre-se gratuitamente
+                            Cadastre sua igreja
                         </Link>
                     </p>
                 </div>

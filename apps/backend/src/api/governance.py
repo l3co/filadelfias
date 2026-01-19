@@ -7,7 +7,7 @@ from src.infra.database import get_db
 from src.api.auth import get_current_user
 from src.infra.models import User
 from src.services.governance_service import GovernanceService
-from src.domain.schemas import CouncilCreate, CouncilResponse, MeetingCreate, MeetingResponse
+from src.modules.governance.schemas import CouncilCreate, CouncilResponse, MeetingCreate, MeetingResponse
 
 router = APIRouter(prefix="/governance", tags=["Governance"])
 

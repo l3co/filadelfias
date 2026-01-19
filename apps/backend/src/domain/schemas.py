@@ -17,6 +17,10 @@ from src.modules.ebd.schemas import (
     EBDStudentBase, EBDStudentCreate, EBDStudentResponse,
     EBDLessonBase, EBDLessonCreate, EBDLessonResponse
 )
+from src.modules.governance.schemas import (
+    CouncilBase, CouncilCreate, CouncilResponse,
+    MeetingBase, MeetingCreate, MeetingResponse
+)
 from .enums import MemberStatus, EcclesiasticalRole, Gender, MaritalStatus
 
 
@@ -136,38 +140,7 @@ class MemberResponse(MemberBase):
 
 # --- Governance Schemas ---
 
-class CouncilBase(BaseModel):
-    name: str = Field(..., min_length=1)
-    type: str # SESSION, DEACONS, ASSEMBLY, COMMITTEE
-    description: Optional[str] = None
 
-class CouncilCreate(CouncilBase):
-    pass
-
-class CouncilResponse(CouncilBase):
-    id: UUID
-    tenant_id: UUID
-    created_at: datetime
-    
-    class Config:
-        from_attributes = True
-        
-class MeetingBase(BaseModel):
-    date: datetime
-    status: str = "SCHEDULED"
-    agenda: Optional[str] = None
-    location: Optional[str] = None
-
-class MeetingCreate(MeetingBase):
-    council_id: UUID
-
-class MeetingResponse(MeetingBase):
-    id: UUID
-    council_id: UUID
-    created_at: datetime
-    
-    class Config:
-        from_attributes = True
 
 
 # --- Financial Schemas ---

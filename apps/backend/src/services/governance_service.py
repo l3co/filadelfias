@@ -1,9 +1,9 @@
 from uuid import UUID
 from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.infra.repositories import GovernanceRepository
-from src.infra.models import Council, Meeting
-from src.domain.schemas import CouncilCreate, MeetingCreate
+from src.modules.governance.repository import GovernanceRepository
+from src.modules.governance.models import Council, Meeting
+from src.modules.governance.schemas import CouncilCreate, MeetingCreate
 
 class GovernanceService:
     def __init__(self, db: AsyncSession):

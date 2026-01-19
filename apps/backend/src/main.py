@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.api.auth import router as auth_router
 from src.api.members import router as members_router
 from src.api.tenants import router as tenants_router
+from src.api.churches import router as churches_router
 from src.api.bible import router as bible_router
 from src.api.hymnal import router as hymnal_router
 from src.api.governance import router as governance_router
@@ -33,6 +34,7 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(members_router)
 app.include_router(tenants_router)
+app.include_router(churches_router)
 app.include_router(bible_router)
 app.include_router(hymnal_router)
 app.include_router(governance_router)

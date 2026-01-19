@@ -48,7 +48,16 @@ export interface Member {
     marital_status?: string;
     marriage_date?: string;
     spouse_name?: string;
-    address?: string;
+    
+    // Structured Address
+    street?: string;
+    number?: string;
+    complement?: string;
+    neighborhood?: string;
+    city?: string;
+    state?: string;
+    postal_code?: string;
+    
     photo_url?: string;
     status: string;
     role: string;  // Deprecated
@@ -74,7 +83,16 @@ export interface MemberCreateData {
     marital_status?: string;
     marriage_date?: string;
     spouse_name?: string;
-    address?: string;
+    
+    // Structured Address
+    street?: string;
+    number?: string;
+    complement?: string;
+    neighborhood?: string;
+    city?: string;
+    state?: string;
+    postal_code?: string;
+    
     status: string;
     role?: string;  // Deprecated
     office: EcclesiasticalOffice;

@@ -11,6 +11,7 @@ import {
     DialogFooter
 } from "../../../components/ui/dialog";
 import { api } from '../../../lib/api';
+import { useViaCEP } from '../../../hooks/useViaCEP';
 import type { Member, EcclesiasticalOffice, EcclesiasticalFunction } from '../../../types';
 import { User, Mail, Phone, Calendar, MapPin, Heart, Loader2 } from 'lucide-react';
 
@@ -23,7 +24,14 @@ interface EditMemberFormData {
     marital_status?: string;
     marriage_date?: string;
     spouse_name?: string;
-    address?: string;
+    // Structured Address
+    postal_code?: string;
+    street?: string;
+    number?: string;
+    complement?: string;
+    neighborhood?: string;
+    city?: string;
+    state?: string;
     status: string;
     office: EcclesiasticalOffice;
     functions?: EcclesiasticalFunction[];
@@ -50,9 +58,11 @@ const FUNCTIONS_OPTIONS: { value: EcclesiasticalFunction; label: string }[] = [
 
 export function EditMemberDialog({ isOpen, onClose, member, tenantId }: Props) {
     const queryClient = useQueryClient();
+    const { fetchAddress, isLoading: isFetchingCEP } = useViaCEP();
     const { register, handleSubmit, reset, setValue, watch, formState: { errors, isDirty } } = useForm<EditMemberFormData>();
 
     const selectedFunctions = watch('functions') || [];
+    const formValues = watch();
 
     useEffect(() => {
         if (member) {
@@ -64,7 +74,13 @@ export function EditMemberDialog({ isOpen, onClose, member, tenantId }: Props) {
             setValue('marital_status', member.marital_status || '');
             setValue('marriage_date', member.marriage_date || '');
             setValue('spouse_name', member.spouse_name || '');
-            setValue('address', member.address || '');
+            setValue('postal_code', member.postal_code || '');
+            setValue('street', member.street || '');
+            setValue('number', member.number || '');
+            setValue('complement', member.complement || '');
+            setValue('neighborhood', member.neighborhood || '');
+            setValue('city', member.city || '');
+            setValue('state', member.state || '');
             setValue('status', member.status);
             setValue('office', member.office || 'MEMBRO');
             setValue('functions', member.functions || []);
@@ -105,6 +121,19 @@ export function EditMemberDialog({ isOpen, onClose, member, tenantId }: Props) {
             setValue('functions', current.filter(f => f !== fn), { shouldDirty: true });
         } else {
             setValue('functions', [...current, fn], { shouldDirty: true });
+        }
+    };
+
+    const handleCEPBlur = async () => {
+        const cep = formValues.postal_code;
+        if (cep && cep.replace(/\D/g, '').length === 8) {
+            const address = await fetchAddress(cep);
+            if (address) {
+                setValue('street', address.street, { shouldDirty: true });
+                setValue('neighborhood', address.neighborhood, { shouldDirty: true });
+                setValue('city', address.city, { shouldDirty: true });
+                setValue('state', address.state, { shouldDirty: true });
+            }
         }
     };
 
@@ -222,16 +251,82 @@ export function EditMemberDialog({ isOpen, onClose, member, tenantId }: Props) {
                                 />
                             </div>
 
-                            <div className="md:col-span-2 space-y-2">
-                                <label className="text-sm font-medium text-gray-700">Endereço</label>
+                        </div>
+                    </div>
+
+                    {/* Endereço */}
+                    <div className="space-y-4">
+                        <h3 className="text-sm font-semibold text-gray-700 border-b pb-2 flex items-center gap-2">
+                            <MapPin size={16} className="text-green-600" />
+                            Endereço
+                        </h3>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-700">CEP</label>
                                 <div className="relative">
-                                    <MapPin size={16} className="absolute left-3 top-3 text-gray-400" />
-                                    <textarea
-                                        {...register('address')}
-                                        className="flex min-h-[80px] w-full rounded-xl border border-gray-200 bg-white px-3 py-2 pl-9 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
-                                        placeholder="Endereço completo"
+                                    <Input
+                                        {...register('postal_code')}
+                                        onBlur={handleCEPBlur}
+                                        placeholder="00000-000"
+                                        maxLength={9}
                                     />
+                                    {isFetchingCEP && (
+                                        <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                            <Loader2 size={16} className="animate-spin text-gray-400" />
+                                        </div>
+                                    )}
                                 </div>
+                            </div>
+                            
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-700">Estado</label>
+                                <Input
+                                    {...register('state')}
+                                    placeholder="SP"
+                                    maxLength={2}
+                                    className="uppercase"
+                                />
+                            </div>
+                            
+                            <div className="md:col-span-2 space-y-2">
+                                <label className="text-sm font-medium text-gray-700">Cidade</label>
+                                <Input
+                                    {...register('city')}
+                                    placeholder="São Paulo"
+                                />
+                            </div>
+                            
+                            <div className="md:col-span-2 space-y-2">
+                                <label className="text-sm font-medium text-gray-700">Logradouro</label>
+                                <Input
+                                    {...register('street')}
+                                    placeholder="Rua, Avenida..."
+                                />
+                            </div>
+                            
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-700">Número</label>
+                                <Input
+                                    {...register('number')}
+                                    placeholder="123"
+                                />
+                            </div>
+                            
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-700">Complemento</label>
+                                <Input
+                                    {...register('complement')}
+                                    placeholder="Apto, Bloco..."
+                                />
+                            </div>
+                            
+                            <div className="md:col-span-2 space-y-2">
+                                <label className="text-sm font-medium text-gray-700">Bairro</label>
+                                <Input
+                                    {...register('neighborhood')}
+                                    placeholder="Centro"
+                                />
                             </div>
                         </div>
                     </div>

@@ -11,6 +11,12 @@ class FinancialRepository:
     
     def __init__(self, session: AsyncSession):
         self.session = session
+        
+    async def get_account(self, account_id: UUID) -> Optional[FinancialAccount]:
+        return await self.session.get(FinancialAccount, account_id)
+        
+    def add(self, obj):
+        self.session.add(obj)
 
     async def create_account(self, account: FinancialAccount) -> FinancialAccount:
         self.session.add(account)
@@ -38,20 +44,8 @@ class FinancialRepository:
 
     async def create_transaction(self, transaction: Transaction) -> Transaction:
         self.session.add(transaction)
-        
-        # Update account balance simple logic
-        # TODO: Move this logic to Domain Service [CODE-01]
-        account = await self.session.get(FinancialAccount, transaction.account_id)
-        if account:
-            if transaction.type == "CREDIT":
-                account.balance += transaction.amount
-            else:
-                account.balance -= transaction.amount
-            self.session.add(account)
-
         await self.session.commit()
         await self.session.refresh(transaction)
-        
         # Load relationships
         return await self.get_transaction(transaction.id)
 

@@ -34,6 +34,16 @@ class FinancialService:
         return await self.repo.get_categories(tenant_id)
         
     async def create_transaction(self, tenant_id: UUID, data: TransactionCreate) -> Transaction:
+        # Domain Logic: Update Account Balance
+        # TODO: Move validation to Domain Entity [DDD]
+        account = await self.repo.get_account(data.account_id)
+        if account:
+            if data.type == "CREDIT":
+                account.balance += data.amount
+            else:
+                account.balance -= data.amount
+            self.repo.add(account) # Add to session to be committed with transaction
+
         transaction = Transaction(
             tenant_id=tenant_id,
             account_id=data.account_id,

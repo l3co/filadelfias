@@ -8,8 +8,14 @@ from uuid import UUID
 
 from src.modules.financial.schemas import (
     FinancialAccountBase, FinancialAccountCreate, FinancialAccountResponse,
-    TransactionCategoryBase, TransactionCategoryCreate, TransactionCategoryResponse,
-    TransactionBase, TransactionCreate, TransactionResponse
+    TransactionCategoryCreate, TransactionCategoryResponse,
+    TransactionCreate, TransactionResponse
+)
+from src.modules.missions.schemas import MissionaryBase, MissionaryCreate, MissionaryResponse
+from src.modules.ebd.schemas import (
+    EBDClassBase, EBDClassCreate, EBDClassResponse,
+    EBDStudentBase, EBDStudentCreate, EBDStudentResponse,
+    EBDLessonBase, EBDLessonCreate, EBDLessonResponse
 )
 from .enums import MemberStatus, EcclesiasticalRole, Gender, MaritalStatus
 
@@ -170,78 +176,12 @@ class MeetingResponse(MeetingBase):
 
 # --- Missionary Schemas ---
 
-class MissionaryBase(BaseModel):
-    name: str = Field(..., min_length=1)
-    field_name: str
-    country_code: str = Field(..., min_length=2, max_length=2)
-    latitude: float
-    longitude: float
-    bio: Optional[str] = None
-    photo_url: Optional[str] = None
-    newsletter_url: Optional[str] = None
 
-class MissionaryCreate(MissionaryBase):
-    pass
-
-class MissionaryResponse(MissionaryBase):
-    id: UUID
-    tenant_id: UUID
-    created_at: datetime
-    
-    class Config:
-        from_attributes = True
 
 
 # --- EBD Schemas ---
 
-class EBDClassBase(BaseModel):
-    name: str = Field(..., min_length=1)
-    description: Optional[str] = None
-    min_age: Optional[int] = None
-    max_age: Optional[int] = None
-    location: Optional[str] = None
 
-class EBDClassCreate(EBDClassBase):
-    pass
-
-class EBDClassResponse(EBDClassBase):
-    id: UUID
-    tenant_id: UUID
-    
-    class Config:
-        from_attributes = True
-
-class EBDStudentBase(BaseModel):
-    member_id: UUID
-    role: str = "STUDENT"
-
-class EBDStudentCreate(EBDStudentBase):
-    pass
-
-class EBDStudentResponse(EBDStudentBase):
-    id: UUID
-    ebd_class_id: UUID
-    enrolled_at: datetime
-    # We might want member details here later
-    
-    class Config:
-        from_attributes = True
-
-class EBDLessonBase(BaseModel):
-    date: date
-    topic: str
-    description: Optional[str] = None
-    homework_url: Optional[str] = None
-
-class EBDLessonCreate(EBDLessonBase):
-    ebd_class_id: UUID
-
-class EBDLessonResponse(EBDLessonBase):
-    id: UUID
-    ebd_class_id: UUID
-    
-    class Config:
-        from_attributes = True
 
 
 

@@ -1,9 +1,9 @@
 from uuid import UUID
 from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.infra.repositories import EBDRepository
-from src.infra.models import EBDClass, EBDStudent, EBDLesson
-from src.domain.schemas import EBDClassCreate, EBDStudentCreate, EBDLessonCreate
+from src.modules.ebd.repository import EBDRepository
+from src.modules.ebd.models import EBDClass, EBDStudent, EBDLesson
+from src.modules.ebd.schemas import EBDClassCreate, EBDStudentCreate, EBDLessonCreate
 
 class EBDService:
     def __init__(self, db: AsyncSession):

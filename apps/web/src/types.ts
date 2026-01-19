@@ -35,6 +35,9 @@ export interface User {
     memberships: UserMembership[];
 }
 
+export type EcclesiasticalOffice = 'MEMBRO' | 'DIACONO' | 'PRESBITERO' | 'PASTOR';
+export type EcclesiasticalFunction = 'TESOUREIRO' | 'SECRETARIO' | 'EVANGELISTA' | 'MISSIONARIO';
+
 export interface Member {
     id: string;
     full_name: string;
@@ -48,7 +51,9 @@ export interface Member {
     address?: string;
     photo_url?: string;
     status: string;
-    role: string;
+    role: string;  // Deprecated
+    office: EcclesiasticalOffice;
+    functions?: EcclesiasticalFunction[];
     baptism_date?: string;
     profession_of_faith_date?: string;
     admission_date?: string;
@@ -71,7 +76,9 @@ export interface MemberCreateData {
     spouse_name?: string;
     address?: string;
     status: string;
-    role: string;
+    role?: string;  // Deprecated
+    office: EcclesiasticalOffice;
+    functions?: EcclesiasticalFunction[];
     baptism_date?: string;
     profession_of_faith_date?: string;
     admission_date?: string;

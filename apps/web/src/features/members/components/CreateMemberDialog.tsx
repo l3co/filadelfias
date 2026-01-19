@@ -62,7 +62,7 @@ export function CreateMemberDialog({ isOpen, onClose, tenantId }: Props) {
                             <label className="text-sm font-medium text-gray-700">Status</label>
                             <select
                                 {...register('status')}
-                                className="flex h-10 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                                className="flex h-10 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
                                 defaultValue="COMUNGANTE"
                             >
                                 <option value="COMUNGANTE">Comungante</option>
@@ -71,10 +71,10 @@ export function CreateMemberDialog({ isOpen, onClose, tenantId }: Props) {
                             </select>
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-700">Cargo</label>
+                            <label className="text-sm font-medium text-gray-700">Ofício</label>
                             <select
-                                {...register('role')}
-                                className="flex h-10 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                                {...register('office')}
+                                className="flex h-10 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
                                 defaultValue="MEMBRO"
                             >
                                 <option value="MEMBRO">Membro</option>
@@ -90,7 +90,7 @@ export function CreateMemberDialog({ isOpen, onClose, tenantId }: Props) {
                             <label className="text-sm font-medium text-gray-700">Sexo</label>
                             <select
                                 {...register('gender')}
-                                className="flex h-10 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                                className="flex h-10 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
                             >
                                 <option value="">Selecione...</option>
                                 <option value="M">Masculino</option>
@@ -101,7 +101,7 @@ export function CreateMemberDialog({ isOpen, onClose, tenantId }: Props) {
                             <label className="text-sm font-medium text-gray-700">Estado Civil</label>
                             <select
                                 {...register('marital_status')}
-                                className="flex h-10 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                                className="flex h-10 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
                             >
                                 <option value="">Selecione...</option>
                                 <option value="SOLTEIRO">Solteiro(a)</option>

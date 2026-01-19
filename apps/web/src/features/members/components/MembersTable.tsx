@@ -8,14 +8,15 @@ import {
 } from "../../../components/ui/table";
 import { Badge } from "../../../components/ui/badge";
 import type { Member } from "../../../types";
-import { User, MoreHorizontal, Mail, Phone } from "lucide-react";
+import { User, Pencil, Mail, Phone } from "lucide-react";
 
 interface MembersTableProps {
     members?: Member[];
     isLoading?: boolean;
+    onEditMember?: (member: Member) => void;
 }
 
-export function MembersTable({ members, isLoading }: MembersTableProps) {
+export function MembersTable({ members, isLoading, onEditMember }: MembersTableProps) {
     if (isLoading) {
         return (
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
@@ -66,17 +67,17 @@ export function MembersTable({ members, isLoading }: MembersTableProps) {
         }
     };
 
-    const getRoleBadge = (role: string) => {
-        const roleLabels: Record<string, string> = {
+    const getOfficeBadge = (office: string) => {
+        const officeLabels: Record<string, string> = {
             'PASTOR': 'Pastor',
             'PRESBITERO': 'Presbítero',
             'DIACONO': 'Diácono',
         };
         
-        if (roleLabels[role]) {
+        if (officeLabels[office]) {
             return (
                 <Badge variant="default" className="ml-2 text-[10px] h-5 bg-gradient-to-r from-green-600 to-teal-600">
-                    {roleLabels[role]}
+                    {officeLabels[office]}
                 </Badge>
             );
         }
@@ -105,7 +106,7 @@ export function MembersTable({ members, isLoading }: MembersTableProps) {
                                     <div>
                                         <div className="flex items-center">
                                             <span className="font-semibold text-[#002333]">{member.full_name}</span>
-                                            {getRoleBadge(member.role)}
+                                            {getOfficeBadge(member.office)}
                                         </div>
                                     </div>
                                 </div>
@@ -135,8 +136,12 @@ export function MembersTable({ members, isLoading }: MembersTableProps) {
                                 </div>
                             </TableCell>
                             <TableCell className="text-right">
-                                <button className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors opacity-0 group-hover:opacity-100">
-                                    <MoreHorizontal size={18} />
+                                <button 
+                                    onClick={() => onEditMember?.(member)}
+                                    className="p-2 rounded-lg text-gray-400 hover:text-green-600 hover:bg-green-50 transition-colors opacity-0 group-hover:opacity-100"
+                                    title="Editar membro"
+                                >
+                                    <Pencil size={16} />
                                 </button>
                             </TableCell>
                         </TableRow>

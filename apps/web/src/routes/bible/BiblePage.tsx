@@ -2,11 +2,15 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { bibleService } from '../../services/bible';
 import { Scroll, Book } from 'lucide-react';
+import { useBibleVersion } from '../../hooks/useBibleVersion';
+import { BibleVersionSelector } from '../../features/bible/components/BibleVersionSelector';
 
 export function BiblePage() {
+    const { version, setVersion } = useBibleVersion();
+
     const { data: books, isLoading } = useQuery({
-        queryKey: ['bible-books'],
-        queryFn: bibleService.getBooks
+        queryKey: ['bible-books', version],
+        queryFn: () => bibleService.getBooks(version)
     });
 
     if (isLoading) {
@@ -22,9 +26,12 @@ export function BiblePage() {
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div className="text-center mb-12">
-                <h1 className="text-4xl font-extrabold text-gray-900 mb-4">Bíblia Sagrada</h1>
-                <p className="text-lg text-gray-500">Selecione um livro para iniciar sua leitura</p>
+            <div className="text-center mb-12 flex flex-col items-center gap-4">
+                <div>
+                    <h1 className="text-4xl font-extrabold text-gray-900 mb-2">Bíblia Sagrada</h1>
+                    <p className="text-lg text-gray-500">Selecione um livro para iniciar sua leitura</p>
+                </div>
+                <BibleVersionSelector currentVersion={version} onVersionChange={setVersion} />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">

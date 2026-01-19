@@ -1,5 +1,11 @@
 import { api } from '../lib/api';
 
+export interface BibleVersion {
+    id: string;
+    name: string;
+    description: string;
+}
+
 export interface BibleBook {
     abbrev: string;
     name: string;
@@ -17,12 +23,16 @@ export interface BibleChapter {
 }
 
 export const bibleService = {
-    getBooks: async (): Promise<BibleBook[]> => {
-        const response = await api.get('/bible/books');
+    getVersions: async (): Promise<BibleVersion[]> => {
+        const response = await api.get('/bible/versions');
         return response.data;
     },
-    getChapter: async (book: string, chapter: number): Promise<BibleChapter> => {
-        const response = await api.get(`/bible/${book}/${chapter}`);
+    getBooks: async (version?: string): Promise<BibleBook[]> => {
+        const response = await api.get('/bible/books', { params: { version } });
+        return response.data;
+    },
+    getChapter: async (book: string, chapter: number, version?: string): Promise<BibleChapter> => {
+        const response = await api.get(`/bible/${book}/${chapter}`, { params: { version } });
         return response.data;
     }
 }

@@ -35,32 +35,54 @@ class BibleChapterContent(BaseModel):
     previous_chapter: Optional[Dict[str, Any]] = None
     next_chapter: Optional[Dict[str, Any]] = None
 
+class BibleVersion(BaseModel):
+    id: str
+    name: str
+    description: str
+
+AVAILABLE_VERSIONS = [
+    BibleVersion(id="nvi", name="Nova Versão Internacional", description="Linguagem moderna e acessível"),
+    BibleVersion(id="acf", name="Almeida Corrigida Fiel", description="Tradução clássica e fiel aos originais"),
+    BibleVersion(id="aa", name="Almeida Atualizada", description="Equilíbrio entre tradição e clareza"),
+]
+
 class BibleService:
-    _data: List[Dict] = []
-    _loaded: bool = False
+    _versions_cache: Dict[str, List[Dict]] = {}
+    DEFAULT_VERSION = "nvi"
 
     @classmethod
-    def load_data(cls):
-        if cls._loaded:
-            return
+    def _get_data(cls, version: str) -> List[Dict]:
+        """Lazy loads the requested version if not already in cache."""
+        if version not in [v.id for v in AVAILABLE_VERSIONS]:
+            version = cls.DEFAULT_VERSION
         
-        path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "bible_acf.json")
+        if version not in cls._versions_cache:
+            cls._load_version(version)
+        
+        return cls._versions_cache.get(version, [])
+
+    @classmethod
+    def _load_version(cls, version: str):
+        filename = f"bible_{version}.json"
+        path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", filename)
         try:
             with open(path, "r", encoding="utf-8-sig") as f:
-                cls._data = json.load(f)
-            cls._loaded = True
-            print(f"Bible data loaded: {len(cls._data)} books")
+                cls._versions_cache[version] = json.load(f)
+            print(f"Bible version '{version}' loaded: {len(cls._versions_cache[version])} books")
         except FileNotFoundError:
-            print(f"Bible data not found at {path}")
-            cls._data = []
+            print(f"Bible version data not found at {path}")
+            cls._versions_cache[version] = []
 
     @classmethod
-    def get_books(cls) -> List[BibleBookSummary]:
-        if not cls._loaded:
-            cls.load_data()
+    def get_available_versions(cls) -> List[BibleVersion]:
+        return AVAILABLE_VERSIONS
+
+    @classmethod
+    def get_books(cls, version: str = DEFAULT_VERSION) -> List[BibleBookSummary]:
+        data = cls._get_data(version)
         
         books = []
-        for i, book in enumerate(cls._data):
+        for i, book in enumerate(data):
             abbrev = book["abbrev"]
             # Simple heuristic for testament: first 39 books are OT
             testament = "old" if i < 39 else "new"
@@ -74,14 +96,13 @@ class BibleService:
         return books
 
     @classmethod
-    def get_chapter(cls, abbrev: str, chapter: int) -> Optional[BibleChapterContent]:
-        if not cls._loaded:
-            cls.load_data()
+    def get_chapter(cls, abbrev: str, chapter: int, version: str = DEFAULT_VERSION) -> Optional[BibleChapterContent]:
+        data = cls._get_data(version)
         
         # Find book
         book_idx = -1
         book_data = None
-        for i, b in enumerate(cls._data):
+        for i, b in enumerate(data):
             if b["abbrev"] == abbrev:
                 book_data = b
                 book_idx = i
@@ -100,15 +121,15 @@ class BibleService:
             prev_chap = {"book": abbrev, "chapter": chapter - 1}
         elif book_idx > 0:
             # Last chapter of previous book
-            prev_book = cls._data[book_idx - 1]
+            prev_book = data[book_idx - 1]
             prev_chap = {"book": prev_book["abbrev"], "chapter": len(prev_book["chapters"])}
 
         next_chap = None
         if chapter < len(chapters):
             next_chap = {"book": abbrev, "chapter": chapter + 1}
-        elif book_idx < len(cls._data) - 1:
+        elif book_idx < len(data) - 1:
             # First chapter of next book
-            next_book = cls._data[book_idx + 1]
+            next_book = data[book_idx + 1]
             next_chap = {"book": next_book["abbrev"], "chapter": 1}
 
         return BibleChapterContent(

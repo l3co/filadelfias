@@ -4,10 +4,13 @@ import { useQuery } from '@tanstack/react-query';
 import { bibleService } from '../../services/bible';
 import { ChevronLeft, ChevronRight, ArrowLeft, Minus, Plus, Volume2, Square } from 'lucide-react';
 import { Button } from '../../components/ui/button';
+import { useBibleVersion } from '../../hooks/useBibleVersion';
+import { BibleVersionSelector } from '../../features/bible/components/BibleVersionSelector';
 
 export function BibleReaderPage() {
     const { book, chapter } = useParams();
     const chapterNum = parseInt(chapter || '1');
+    const { version, setVersion } = useBibleVersion();
 
     // Estado para controle de fonte (persistido)
     const [fontSize, setFontSize] = useState(() => {
@@ -19,8 +22,8 @@ export function BibleReaderPage() {
     const [isSpeaking, setIsSpeaking] = useState(false);
 
     const { data: content, isLoading, isError } = useQuery({
-        queryKey: ['bible', book, chapterNum],
-        queryFn: () => bibleService.getChapter(book!, chapterNum),
+        queryKey: ['bible', book, chapterNum, version],
+        queryFn: () => bibleService.getChapter(book!, chapterNum, version),
         enabled: !!book
     });
 
@@ -88,7 +91,9 @@ export function BibleReaderPage() {
                 </div>
 
                 {/* Toolbar */}
-                <div className="flex items-center justify-center gap-2 bg-gray-50 p-1 rounded-lg border border-gray-200">
+                <div className="flex items-center justify-center gap-2 bg-gray-50 p-1 rounded-lg border border-gray-200 flex-wrap">
+                    <BibleVersionSelector currentVersion={version} onVersionChange={setVersion} />
+                    <div className="w-px h-6 bg-gray-300 mx-1 hidden sm:block"></div>
                     <Button
                         variant="ghost"
                         size="sm"

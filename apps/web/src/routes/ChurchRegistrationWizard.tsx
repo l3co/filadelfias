@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, Link } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
 import { api } from '../lib/api';
 import { useViaCEP } from '../hooks/useViaCEP';
 import { 
@@ -88,7 +89,7 @@ export function ChurchRegistrationWizard() {
             localStorage.setItem('token', data.access_token);
             navigate('/app');
         },
-        onError: (error: any) => {
+        onError: (error: AxiosError<{ detail?: string }>) => {
             setError(error.response?.data?.detail || 'Erro ao cadastrar igreja. Tente novamente.');
         }
     });

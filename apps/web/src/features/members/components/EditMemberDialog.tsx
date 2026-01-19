@@ -78,7 +78,14 @@ export function EditMemberDialog({ isOpen, onClose, member, tenantId }: Props) {
 
     const updateMutation = useMutation({
         mutationFn: async (data: EditMemberFormData) => {
-            const response = await api.patch(`/tenants/${tenantId}/members/${member?.id}`, data);
+            // Clean empty strings to null for date fields
+            const cleanedData = Object.fromEntries(
+                Object.entries(data).map(([key, value]) => [
+                    key,
+                    value === '' ? null : value
+                ])
+            );
+            const response = await api.patch(`/tenants/${tenantId}/members/${member?.id}`, cleanedData);
             return response.data;
         },
         onSuccess: () => {

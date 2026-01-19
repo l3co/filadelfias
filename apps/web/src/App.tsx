@@ -15,6 +15,7 @@ import { HymnalReaderPage } from './routes/hymnal/HymnalReaderPage';
 import { CouncilsPage } from './routes/governance/CouncilsPage';
 import { TreasuryPage } from './routes/financial/TreasuryPage';
 import { MissionsPage } from './routes/missions/MissionsPage';
+import { EBDClassesPage } from './routes/ebd/EBDClassesPage';
 
 function App() {
   return (
@@ -56,6 +57,7 @@ function App() {
         <Route path="governance" element={<CouncilsPage />} />
         <Route path="financial" element={<TreasuryPage />} />
         <Route path="missions" element={<MissionsPage />} />
+        <Route path="ebd" element={<EBDClassesPage />} />
         <Route path="events" element={<div className="p-8 text-center text-gray-500">Módulo de Eventos (Em breve)</div>} />
       </Route>
 

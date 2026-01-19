@@ -12,6 +12,7 @@ from src.api.hymnal import router as hymnal_router
 from src.api.governance import router as governance_router
 from src.api.financial import router as financial_router
 from src.api.mission import router as mission_router
+from src.api.ebd import router as ebd_router
 
 app = FastAPI(
     title="Filadelfias API",
@@ -37,6 +38,7 @@ app.include_router(hymnal_router)
 app.include_router(governance_router)
 app.include_router(financial_router)
 app.include_router(mission_router)
+app.include_router(ebd_router)
 
 
 @app.get("/health", tags=["Health"])

@@ -44,6 +44,7 @@ AVAILABLE_VERSIONS = [
     BibleVersion(id="nvi", name="Nova Versão Internacional", description="Linguagem moderna e acessível"),
     BibleVersion(id="acf", name="Almeida Corrigida Fiel", description="Tradução clássica e fiel aos originais"),
     BibleVersion(id="aa", name="Almeida Atualizada", description="Equilíbrio entre tradição e clareza"),
+    BibleVersion(id="ara", name="Almeida Revista e Atualizada", description="Texto Tradicional e Atual"),
 ]
 
 class BibleService:

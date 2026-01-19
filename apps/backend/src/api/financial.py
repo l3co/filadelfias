@@ -7,7 +7,7 @@ from src.infra.database import get_db
 from src.api.auth import get_current_user
 from src.infra.models import User
 from src.services.financial_service import FinancialService
-from src.domain.schemas import (
+from src.modules.financial.schemas import (
     FinancialAccountCreate, FinancialAccountResponse,
     TransactionCategoryCreate, TransactionCategoryResponse,
     TransactionCreate, TransactionResponse

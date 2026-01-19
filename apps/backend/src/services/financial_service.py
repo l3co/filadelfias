@@ -1,9 +1,9 @@
 from uuid import UUID
 from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.infra.repositories import FinancialRepository
-from src.infra.models import FinancialAccount, TransactionCategory, Transaction
-from src.domain.schemas import FinancialAccountCreate, TransactionCategoryCreate, TransactionCreate
+from src.modules.financial.repository import FinancialRepository
+from src.modules.financial.models import FinancialAccount, TransactionCategory, Transaction
+from src.modules.financial.schemas import FinancialAccountCreate, TransactionCategoryCreate, TransactionCreate
 
 class FinancialService:
     def __init__(self, db: AsyncSession):

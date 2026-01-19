@@ -4,12 +4,15 @@ import { useCurrentTenant } from '../../hooks/useAuth';
 import { useMembers } from '../../features/members/hooks/useMembers';
 import { MembersTable } from '../../features/members/components/MembersTable';
 import { CreateMemberDialog } from '../../features/members/components/CreateMemberDialog';
+import { EditMemberDialog } from '../../features/members/components/EditMemberDialog';
 import { Button } from '../../components/ui/button';
+import type { Member } from '../../types';
 
 export function MembersPage() {
     const tenant = useCurrentTenant();
     const { data: members, isLoading } = useMembers(tenant?.id);
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isCreateOpen, setIsCreateOpen] = useState(false);
+    const [editingMember, setEditingMember] = useState<Member | null>(null);
 
     if (!tenant) {
         return (
@@ -42,7 +45,7 @@ export function MembersPage() {
                         </p>
                     </div>
                 </div>
-                <Button onClick={() => setIsDialogOpen(true)} className="gap-2">
+                <Button onClick={() => setIsCreateOpen(true)} className="gap-2">
                     <Plus className="h-4 w-4" />
                     Novo Membro
                 </Button>
@@ -65,12 +68,24 @@ export function MembersPage() {
             </div>
 
             {/* Table */}
-            <MembersTable members={members} isLoading={isLoading} />
+            <MembersTable 
+                members={members} 
+                isLoading={isLoading} 
+                onEditMember={(member) => setEditingMember(member)}
+            />
 
-            {/* Dialog */}
+            {/* Create Dialog */}
             <CreateMemberDialog
-                isOpen={isDialogOpen}
-                onClose={() => setIsDialogOpen(false)}
+                isOpen={isCreateOpen}
+                onClose={() => setIsCreateOpen(false)}
+                tenantId={tenant.id}
+            />
+
+            {/* Edit Dialog */}
+            <EditMemberDialog
+                isOpen={!!editingMember}
+                onClose={() => setEditingMember(null)}
+                member={editingMember}
                 tenantId={tenant.id}
             />
         </div>

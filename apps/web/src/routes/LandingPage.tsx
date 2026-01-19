@@ -11,20 +11,20 @@ export function LandingPage() {
             <section className="bg-white py-16 sm:py-24">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-12">
-                        <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight sm:text-5xl mb-4">
-                            Ferramentas essenciais para sua fé
+                        <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight sm:text-5xl mb-6">
+                            O que é o Projeto Filadélfia?
                         </h1>
-                        <p className="max-w-2xl mx-auto text-xl text-gray-500">
-                            Tudo o que você precisa para o dia a dia da igreja e devoção pessoal.
+                        <p className="max-w-3xl mx-auto text-xl text-gray-600 leading-relaxed">
+                            O Projeto Filadélfia é uma iniciativa gratuita e de código aberto (open source), desenvolvida com o intuito de apoiar a Igreja de Cristo. Utilizamos a tecnologia como ferramenta de transformação e auxílio no dia a dia de pastores, oficiais e membros. Seja para leitura da Palavra, cânticos ou gestão eclesiástica, nosso foco é servir com excelência e simplicidade, para a Glória de Deus.
                         </p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {/* Bíblia */}
                         <Link to="/bible" className="group">
-                            <Card className="h-full border-2 border-transparent hover:border-indigo-100 transition-all hover:shadow-lg">
+                            <Card className="h-full border-2 border-transparent hover:border-green-100 transition-all hover:shadow-lg">
                                 <CardContent className="flex flex-col items-center p-8 text-center h-full justify-center space-y-6">
-                                    <div className="p-4 bg-indigo-50 text-indigo-600 rounded-full group-hover:scale-110 transition-transform duration-300">
+                                    <div className="p-4 bg-green-50 text-green-700 rounded-full group-hover:scale-110 transition-transform duration-300">
                                         <BookOpen size={48} strokeWidth={1.5} />
                                     </div>
                                     <div className="space-y-2">
@@ -37,9 +37,9 @@ export function LandingPage() {
 
                         {/* Hinário */}
                         <Link to="/hymnal" className="group">
-                            <Card className="h-full border-2 border-transparent hover:border-indigo-100 transition-all hover:shadow-lg">
+                            <Card className="h-full border-2 border-transparent hover:border-green-100 transition-all hover:shadow-lg">
                                 <CardContent className="flex flex-col items-center p-8 text-center h-full justify-center space-y-6">
-                                    <div className="p-4 bg-rose-50 text-rose-600 rounded-full group-hover:scale-110 transition-transform duration-300">
+                                    <div className="p-4 bg-green-50 text-green-700 rounded-full group-hover:scale-110 transition-transform duration-300">
                                         <Music size={48} strokeWidth={1.5} />
                                     </div>
                                     <div className="space-y-2">
@@ -68,25 +68,13 @@ export function LandingPage() {
                 </div>
             </section>
 
-            {/* Sobre Section - Non commercial */}
-            <section className="py-20 bg-indigo-900 text-white">
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
-                    <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-                        Uma plataforma livre para o Reino
-                    </h2>
-                    <p className="text-lg text-indigo-100 leading-relaxed">
-                        A Filadélfias não é um produto comercial. É uma plataforma desenvolvida para servir igrejas locais sem custos de licenciamento, feita para o uso diário de pastores, oficiais e membros. Nosso objetivo é fornecer ferramentas de excelência tecnológica para auxiliar na organização eclesiástica e na expansão do Evangelho.
-                    </p>
-                </div>
-            </section>
-
             {/* Features Section */}
             <section className="py-24 bg-gray-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16">
-                        <h2 className="text-base text-indigo-600 font-semibold tracking-wide uppercase">Funcionalidades</h2>
+                        <h2 className="text-base text-green-700 font-semibold tracking-wide uppercase">Funcionalidades</h2>
                         <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
-                            Gestão Eclesiástica Completa
+                            Conheça algumas funcionalidades que a plataforma possui
                         </p>
                         <p className="mt-4 max-w-2xl text-xl text-gray-500 mx-auto">
                             Tudo integrado em um só lugar.
@@ -99,36 +87,36 @@ export function LandingPage() {
                                 title: 'Financeiro',
                                 desc: 'Gestão de entradas, saídas, dízimos e relatórios de tesouraria transparentes.',
                                 icon: Wallet,
-                                color: 'text-emerald-600',
-                                bg: 'bg-emerald-50'
+                                color: 'text-green-700',
+                                bg: 'bg-green-50'
                             },
                             {
                                 title: 'Membros',
                                 desc: 'Rol de membros completo, com histórico, dados familiares e eclesiásticos.',
                                 icon: Users,
-                                color: 'text-blue-600',
-                                bg: 'bg-blue-50'
+                                color: 'text-green-700',
+                                bg: 'bg-green-50'
                             },
                             {
                                 title: 'Educação Cristã (EBD)',
                                 desc: 'Gestão de classes, professores, alunos e currículo para Escola Bíblica.',
                                 icon: GraduationCap,
-                                color: 'text-orange-600',
-                                bg: 'bg-orange-50'
+                                color: 'text-green-700',
+                                bg: 'bg-green-50'
                             },
                             {
                                 title: 'Governança',
                                 desc: 'Organização de conselhos, atas, assembleias e documentos oficiais.',
                                 icon: Gavel,
-                                color: 'text-purple-600',
-                                bg: 'bg-purple-50'
+                                color: 'text-green-700',
+                                bg: 'bg-green-50'
                             },
                             {
                                 title: 'Missões',
                                 desc: 'Acompanhamento de missionários, campos e projetos evangelísticos.',
                                 icon: Globe,
-                                color: 'text-cyan-600',
-                                bg: 'bg-cyan-50'
+                                color: 'text-green-700',
+                                bg: 'bg-green-50'
                             },
                             {
                                 title: 'Eventos',
@@ -157,20 +145,20 @@ export function LandingPage() {
                 <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center bg-gray-900 rounded-3xl p-12 sm:p-20 shadow-2xl relative overflow-hidden">
                     {/* Decorative background element */}
                     <div className="absolute top-0 left-0 w-full h-full overflow-hidden opacity-10 pointer-events-none">
-                        <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-indigo-500 blur-3xl"></div>
-                        <div className="absolute bottom-0 right-0 w-96 h-96 rounded-full bg-blue-500 blur-3xl"></div>
+                        <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-green-600 blur-3xl"></div>
+                        <div className="absolute bottom-0 right-0 w-96 h-96 rounded-full bg-green-500 blur-3xl"></div>
                     </div>
 
                     <div className="relative z-10 space-y-8">
                         <h2 className="text-3xl font-extrabold text-white sm:text-4xl">
-                            Leve a Filadélfias para sua comunidade
+                            Leve a Filadélfia para sua comunidade
                         </h2>
                         <p className="text-lg text-gray-300 max-w-2xl mx-auto">
                             Cadastre sua igreja hoje mesmo e comece a usar todas as ferramentas de gestão e edificação disponíveis na plataforma.
                         </p>
                         <div className="pt-4">
                             <Link to="/onboarding">
-                                <Button size="lg" className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-6 text-lg rounded-xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all">
+                                <Button size="lg" className="bg-green-700 hover:bg-green-800 text-white px-8 py-6 text-lg rounded-xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all">
                                     Cadastre sua Igreja
                                 </Button>
                             </Link>

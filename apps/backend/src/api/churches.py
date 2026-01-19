@@ -86,7 +86,9 @@ async def register_church(
         email=data.admin_email,
         phone=data.admin_phone,
         status="COMUNGANTE",
-        role="PASTOR"  # Admin is typically a pastor or leader
+        role="MEMBRO",  # Deprecated field
+        office="MEMBRO",  # Starts as member, can be changed later
+        functions=None
     )
     db.add(member)
     

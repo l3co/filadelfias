@@ -7,15 +7,15 @@ export function LandingPage() {
     return (
         <div className="flex flex-col w-full animate-in fade-in duration-700">
 
-            {/* Hero Section - 3 Big Cards */}
+            {/* Hero Section - 3 Big Cards with Inviting Title */}
             <section className="bg-white py-16 sm:py-24">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-12">
                         <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight sm:text-5xl mb-6">
-                            O que é o Projeto Filadélfia?
+                            Vamos ler a Palavra de Deus hoje?
                         </h1>
-                        <p className="max-w-3xl mx-auto text-xl text-gray-600 leading-relaxed">
-                            O Projeto Filadélfia é uma iniciativa gratuita e de código aberto (open source), desenvolvida com o intuito de apoiar a Igreja de Cristo. Utilizamos a tecnologia como ferramenta de transformação e auxílio no dia a dia de pastores, oficiais e membros. Seja para leitura da Palavra, cânticos ou gestão eclesiástica, nosso foco é servir com excelência e simplicidade, para a Glória de Deus.
+                        <p className="max-w-2xl mx-auto text-xl text-gray-500">
+                            Acesse os recursos de edificação de forma rápida e simples.
                         </p>
                     </div>
 
@@ -65,6 +65,18 @@ export function LandingPage() {
                             </Card>
                         </div>
                     </div>
+                </div>
+            </section>
+
+            {/* O Que é o Projeto (Moved down) */}
+            <section className="py-20 bg-green-900 text-white">
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
+                    <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+                        O que é o Projeto Filadélfia?
+                    </h2>
+                    <p className="text-lg text-green-50 leading-relaxed">
+                        O Projeto Filadélfia é uma iniciativa gratuita e de código aberto (open source), desenvolvida com o intuito de apoiar a Igreja de Cristo. Utilizamos a tecnologia como ferramenta de transformação e auxílio no dia a dia de pastores, oficiais e membros. Seja para leitura da Palavra, cânticos ou gestão eclesiástica, nosso foco é servir com excelência e simplicidade, para a Glória de Deus.
+                    </p>
                 </div>
             </section>
 

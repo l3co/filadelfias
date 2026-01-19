@@ -56,9 +56,26 @@ class Tenant(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     slug: Mapped[str] = mapped_column(String(100), unique=True, nullable=False, index=True)
     logo_url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    address: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    
+    # Structured Address
+    street: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    number: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    complement: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    neighborhood: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    city: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    state: Mapped[Optional[str]] = mapped_column(String(2), nullable=True)  # UF
+    postal_code: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)  # CEP
+    country: Mapped[str] = mapped_column(String(50), default="Brasil", nullable=False)
+    
+    # Geolocation
     latitude: Mapped[Optional[float]] = mapped_column(nullable=True)
     longitude: Mapped[Optional[float]] = mapped_column(nullable=True)
+    
+    # Contact
+    phone: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    email: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    
+    # Settings
     is_public: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     config: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
@@ -148,6 +165,8 @@ class Member(Base):
     birth_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     gender: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)
     marital_status: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    marriage_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    spouse_name: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     address: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     photo_url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
@@ -155,6 +174,10 @@ class Member(Base):
     status: Mapped[str] = mapped_column(String(50), default="COMUNGANTE", nullable=False)
     role: Mapped[str] = mapped_column(String(50), default="MEMBRO", nullable=False)
     baptism_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    profession_of_faith_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    admission_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    admission_type: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)  # PROFISSAO_FE, TRANSFERENCIA, JURISDICAO
+    origin_church: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, nullable=False

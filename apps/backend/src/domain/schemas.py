@@ -24,12 +24,26 @@ from src.modules.governance.schemas import (
 from .enums import MemberStatus, EcclesiasticalRole, Gender, MaritalStatus
 
 
-class TenantResponse(BaseModel):
+class TenantBase(BaseModel):
+    """Base schema for tenant."""
+    name: str = Field(..., min_length=2, max_length=255)
+    slug: str = Field(..., min_length=2, max_length=100)
+
+
+class TenantResponse(TenantBase):
     """Schema for tenant response."""
     id: UUID
-    name: str
-    slug: str
     logo_url: Optional[str] = None
+    street: Optional[str] = None
+    number: Optional[str] = None
+    complement: Optional[str] = None
+    neighborhood: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    postal_code: Optional[str] = None
+    country: str = "Brasil"
+    phone: Optional[str] = None
+    email: Optional[str] = None
     
     class Config:
         from_attributes = True
@@ -98,12 +112,18 @@ class MemberBase(BaseModel):
     birth_date: Optional[date] = None
     gender: Optional[Gender] = None
     marital_status: Optional[MaritalStatus] = None
+    marriage_date: Optional[date] = None
+    spouse_name: Optional[str] = None
     address: Optional[str] = None
     
     # Ecclesiastical data
     status: MemberStatus = MemberStatus.Comungante
     role: EcclesiasticalRole = EcclesiasticalRole.Membro
     baptism_date: Optional[date] = None
+    profession_of_faith_date: Optional[date] = None
+    admission_date: Optional[date] = None
+    admission_type: Optional[str] = None
+    origin_church: Optional[str] = None
 
 
 class MemberCreate(MemberBase):
@@ -119,10 +139,16 @@ class MemberUpdate(BaseModel):
     birth_date: Optional[date] = None
     gender: Optional[Gender] = None
     marital_status: Optional[MaritalStatus] = None
+    marriage_date: Optional[date] = None
+    spouse_name: Optional[str] = None
     address: Optional[str] = None
     status: Optional[MemberStatus] = None
     role: Optional[EcclesiasticalRole] = None
     baptism_date: Optional[date] = None
+    profession_of_faith_date: Optional[date] = None
+    admission_date: Optional[date] = None
+    admission_type: Optional[str] = None
+    origin_church: Optional[str] = None
 
 
 class MemberResponse(MemberBase):
@@ -136,6 +162,38 @@ class MemberResponse(MemberBase):
 
     class Config:
         from_attributes = True
+
+
+# --- Church Registration Schemas ---
+
+class ChurchRegistrationRequest(BaseModel):
+    """Schema for church + admin registration via wizard."""
+    # Church info
+    church_name: str = Field(..., min_length=2, max_length=255)
+    church_slug: str = Field(..., min_length=2, max_length=100, pattern=r'^[a-z0-9-]+$')
+    
+    # Address
+    street: str = Field(..., min_length=1)
+    number: str = Field(..., min_length=1)
+    complement: Optional[str] = None
+    neighborhood: str = Field(..., min_length=1)
+    city: str = Field(..., min_length=1)
+    state: str = Field(..., min_length=2, max_length=2)
+    postal_code: str = Field(..., min_length=8, max_length=10)
+    
+    # Admin info
+    admin_name: str = Field(..., min_length=1, max_length=255)
+    admin_email: EmailStr
+    admin_password: str = Field(..., min_length=8, max_length=100)
+    admin_phone: Optional[str] = None
+
+
+class ChurchRegistrationResponse(BaseModel):
+    """Response for church registration."""
+    tenant: TenantResponse
+    user: "UserResponse"
+    access_token: str
+    token_type: str = "bearer"
 
 
 # --- Governance Schemas ---

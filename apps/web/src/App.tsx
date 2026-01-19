@@ -1,5 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './routes/LoginPage';
+import { ForgotPasswordPage } from './routes/auth/ForgotPasswordPage';
+import { ResetPasswordPage } from './routes/auth/ResetPasswordPage';
 import { ChurchRegistrationWizard } from './routes/ChurchRegistrationWizard';
 import { ChurchSettingsPage } from './routes/settings/ChurchSettingsPage';
 import HomePage from './routes/HomePage';
@@ -34,6 +36,8 @@ function App() {
 
         {/* Autenticação (Sem Layout Específico) */}
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/register" element={<ChurchRegistrationWizard />} />
 
         {/* Onboarding Protegido */}

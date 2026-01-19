@@ -1,6 +1,8 @@
-from fastapi import APIRouter, HTTPException, status
 from typing import List
-from src.services.bible_service import BibleService, BibleBookSummary, BibleChapterContent, BibleVersion
+
+from fastapi import APIRouter, HTTPException, status
+
+from src.services.bible_service import BibleBookSummary, BibleChapterContent, BibleService, BibleVersion
 
 router = APIRouter(prefix="/bible", tags=["Bible"])
 
@@ -20,7 +22,7 @@ async def get_chapter(book: str, chapter: int, version: str = "nvi"):
     content = await BibleService.get_chapter(book.lower(), chapter, version)
     if not content:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
+            status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Chapter {chapter} of book '{book}' not found in version '{version}'"
         )
     return content

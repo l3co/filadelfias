@@ -1,7 +1,8 @@
 import json
 import os
+from typing import Any, Dict, List, Optional
+
 import httpx
-from typing import List, Optional, Dict, Any
 from pydantic import BaseModel
 
 # Mapping of abbreviations to full Portuguese names
@@ -79,7 +80,7 @@ class BibleService:
     @classmethod
     async def get_books(cls, version: str = DEFAULT_VERSION) -> List[BibleBookSummary]:
         data = cls._get_local_data(cls.DEFAULT_VERSION)
-        
+
         books = []
         for i, book in enumerate(data):
             abbrev = book["abbrev"]
@@ -113,7 +114,7 @@ class BibleService:
             version_config = next(v for v in AVAILABLE_VERSIONS if v.id == version)
 
         verses = []
-        
+
         local_data = cls._get_local_data(cls.DEFAULT_VERSION)
         book_idx = -1
         book_data = None
@@ -122,10 +123,10 @@ class BibleService:
                 book_data = b
                 book_idx = i
                 break
-        
+
         if not book_data:
             return None
-            
+
         total_chapters = len(book_data["chapters"])
         if chapter < 1 or chapter > total_chapters:
             return None

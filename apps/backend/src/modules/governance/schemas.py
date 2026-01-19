@@ -1,7 +1,9 @@
-from uuid import UUID
 from datetime import datetime
 from typing import Optional
+from uuid import UUID
+
 from pydantic import BaseModel, Field
+
 
 class CouncilBase(BaseModel):
     name: str = Field(..., min_length=1)
@@ -15,10 +17,10 @@ class CouncilResponse(CouncilBase):
     id: UUID
     tenant_id: UUID
     created_at: datetime
-    
+
     class Config:
         from_attributes = True
-        
+
 class MeetingBase(BaseModel):
     date: datetime
     status: str = "SCHEDULED"
@@ -32,6 +34,6 @@ class MeetingResponse(MeetingBase):
     id: UUID
     council_id: UUID
     created_at: datetime
-    
+
     class Config:
         from_attributes = True

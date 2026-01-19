@@ -2,14 +2,14 @@
 API endpoints for church registration.
 """
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
 from passlib.context import CryptContext
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.infra.database import get_db
-from src.infra.models import Tenant, User, UserChurchMembership, Member
-from src.infra.repositories import TenantRepository
-from src.domain.schemas import ChurchRegistrationRequest, ChurchRegistrationResponse, TenantResponse, UserResponse
 from src.api.auth import create_access_token
+from src.domain.schemas import ChurchRegistrationRequest, ChurchRegistrationResponse, TenantResponse, UserResponse
+from src.infra.database import get_db
+from src.infra.models import Member, Tenant, User, UserChurchMembership
+from src.infra.repositories import TenantRepository
 
 router = APIRouter()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -23,17 +23,17 @@ async def register_church(
     """
     Register a new church with admin user.
     This is the main entry point for new churches joining the platform.
-    
+
     Creates:
     - Tenant (church)
     - User (admin)
     - Member (admin as church member)
     - UserChurchMembership (link user to church as ADMIN)
-    
+
     Returns JWT token for immediate login.
     """
     repo = TenantRepository(db)
-    
+
     # Check if slug exists
     existing = await repo.get_by_slug(data.church_slug)
     if existing:
@@ -41,7 +41,7 @@ async def register_church(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Uma igreja com este identificador já existe. Escolha outro."
         )
-    
+
     # Check if email exists
     from sqlalchemy import select
     result = await db.execute(select(User).where(User.email == data.admin_email))
@@ -50,7 +50,7 @@ async def register_church(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Este email já está cadastrado na plataforma."
         )
-    
+
     # Create Tenant (Church)
     tenant = Tenant(
         name=data.church_name,
@@ -66,7 +66,7 @@ async def register_church(
     )
     db.add(tenant)
     await db.flush()  # Get tenant.id
-    
+
     # Create User (Admin)
     password_hash = pwd_context.hash(data.admin_password)
     user = User(
@@ -77,7 +77,7 @@ async def register_church(
     )
     db.add(user)
     await db.flush()  # Get user.id
-    
+
     # Create Member (Admin as church member)
     member = Member(
         tenant_id=tenant.id,
@@ -91,7 +91,7 @@ async def register_church(
         functions=None
     )
     db.add(member)
-    
+
     # Create UserChurchMembership (Link user to church as ADMIN)
     membership = UserChurchMembership(
         user_id=user.id,
@@ -100,14 +100,14 @@ async def register_church(
         status="ACTIVE"
     )
     db.add(membership)
-    
+
     await db.commit()
     await db.refresh(tenant)
     await db.refresh(user)
-    
+
     # Generate JWT token
     access_token = create_access_token(data={"sub": str(user.id), "email": user.email})
-    
+
     return ChurchRegistrationResponse(
         tenant=TenantResponse.model_validate(tenant),
         user=UserResponse(
@@ -135,7 +135,7 @@ async def check_slug_availability(
     """
     repo = TenantRepository(db)
     existing = await repo.get_by_slug(slug.lower())
-    
+
     return {
         "slug": slug.lower(),
         "available": existing is None

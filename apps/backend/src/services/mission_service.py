@@ -1,9 +1,12 @@
-from uuid import UUID
 from typing import List
+from uuid import UUID
+
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.modules.missions.repository import MissionaryRepository
+
 from src.modules.missions.models import Missionary
+from src.modules.missions.repository import MissionaryRepository
 from src.modules.missions.schemas import MissionaryCreate
+
 
 class MissionService:
     def __init__(self, db: AsyncSession):

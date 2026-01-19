@@ -3,17 +3,17 @@ User repository for database operations.
 """
 from typing import Optional, Sequence
 from uuid import UUID
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
+
 from src.infra.models import (
-    User, Member, Tenant, UserChurchMembership, 
-    Missionary,
+    Member,
+    Tenant,
+    User,
+    UserChurchMembership,
 )
-from src.modules.financial.repository import FinancialRepository
-from src.modules.missions.repository import MissionaryRepository
-from src.modules.ebd.repository import EBDRepository
-from src.modules.governance.repository import GovernanceRepository
 from src.infra.security import get_password_hash
 
 
@@ -23,7 +23,7 @@ class UserRepository:
     def __init__(self, session: AsyncSession):
         """
         Initialize repository with database session.
-        
+
         Args:
             session: Async database session
         """
@@ -32,12 +32,12 @@ class UserRepository:
     async def create(self, email: str, name: str, password: str) -> User:
         """
         Create a new user.
-        
+
         Args:
             email: User email
             name: User name
             password: Plain text password (will be hashed)
-            
+
         Returns:
             User: Created user instance
         """
@@ -54,10 +54,10 @@ class UserRepository:
     async def get_by_email(self, email: str) -> Optional[User]:
         """
         Get user by email with eager loaded memberships.
-        
+
         Args:
             email: User email
-            
+
         Returns:
             Optional[User]: User instance or None if not found
         """
@@ -73,10 +73,10 @@ class UserRepository:
     async def get_by_id(self, user_id: UUID) -> Optional[User]:
         """
         Get user by ID.
-        
+
         Args:
             user_id: User UUID
-            
+
         Returns:
             Optional[User]: User instance or None if not found
         """
@@ -92,10 +92,10 @@ class UserRepository:
     async def exists_by_email(self, email: str) -> bool:
         """
         Check if user exists by email.
-        
+
         Args:
             email: User email
-            
+
         Returns:
             bool: True if user exists, False otherwise
         """
@@ -133,17 +133,17 @@ class MemberRepository:
 
 class TenantRepository:
     """Repository for Tenant database operations."""
-    
+
     def __init__(self, session: AsyncSession):
         self.session = session
-        
+
     async def create(self, tenant: Tenant) -> Tenant:
         """Create a new tenant."""
         self.session.add(tenant)
         await self.session.commit()
         await self.session.refresh(tenant)
         return tenant
-        
+
     async def get(self, tenant_id: UUID) -> Optional[Tenant]:
         """Get tenant by ID."""
         result = await self.session.execute(select(Tenant).where(Tenant.id == tenant_id))

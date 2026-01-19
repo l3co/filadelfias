@@ -1,27 +1,13 @@
 """
 Pydantic schemas for authentication and user management.
 """
-from datetime import datetime, date
-from typing import Optional, List
-from pydantic import BaseModel, EmailStr, Field
+from datetime import date, datetime
+from typing import List, Optional
 from uuid import UUID
 
-from src.modules.financial.schemas import (
-    FinancialAccountBase, FinancialAccountCreate, FinancialAccountResponse,
-    TransactionCategoryCreate, TransactionCategoryResponse,
-    TransactionCreate, TransactionResponse
-)
-from src.modules.missions.schemas import MissionaryBase, MissionaryCreate, MissionaryResponse
-from src.modules.ebd.schemas import (
-    EBDClassBase, EBDClassCreate, EBDClassResponse,
-    EBDStudentBase, EBDStudentCreate, EBDStudentResponse,
-    EBDLessonBase, EBDLessonCreate, EBDLessonResponse
-)
-from src.modules.governance.schemas import (
-    CouncilBase, CouncilCreate, CouncilResponse,
-    MeetingBase, MeetingCreate, MeetingResponse
-)
-from .enums import MemberStatus, EcclesiasticalRole, EcclesiasticalOffice, EcclesiasticalFunction, Gender, MaritalStatus
+from pydantic import BaseModel, EmailStr, Field
+
+from .enums import EcclesiasticalFunction, EcclesiasticalOffice, EcclesiasticalRole, Gender, MaritalStatus, MemberStatus
 
 
 class TenantBase(BaseModel):
@@ -44,7 +30,7 @@ class TenantResponse(TenantBase):
     country: str = "Brasil"
     phone: Optional[str] = None
     email: Optional[str] = None
-    
+
     class Config:
         from_attributes = True
 
@@ -56,7 +42,7 @@ class MembershipResponse(BaseModel):
     role: str
     status: str
     joined_at: datetime
-    
+
     class Config:
         from_attributes = True
 
@@ -114,7 +100,7 @@ class MemberBase(BaseModel):
     marital_status: Optional[MaritalStatus] = None
     marriage_date: Optional[date] = None
     spouse_name: Optional[str] = None
-    
+
     # Structured Address
     street: Optional[str] = None
     number: Optional[str] = None
@@ -123,7 +109,7 @@ class MemberBase(BaseModel):
     city: Optional[str] = None
     state: Optional[str] = None
     postal_code: Optional[str] = None
-    
+
     # Ecclesiastical data
     status: MemberStatus = MemberStatus.Comungante
     role: EcclesiasticalRole = EcclesiasticalRole.Membro  # Deprecated
@@ -151,7 +137,7 @@ class MemberUpdate(BaseModel):
     marital_status: Optional[str] = None
     marriage_date: Optional[date] = None
     spouse_name: Optional[str] = None
-    
+
     # Structured Address
     street: Optional[str] = None
     number: Optional[str] = None
@@ -160,7 +146,7 @@ class MemberUpdate(BaseModel):
     city: Optional[str] = None
     state: Optional[str] = None
     postal_code: Optional[str] = None
-    
+
     status: Optional[str] = None
     role: Optional[str] = None  # Deprecated
     office: Optional[str] = None
@@ -192,7 +178,7 @@ class ChurchRegistrationRequest(BaseModel):
     # Church info
     church_name: str = Field(..., min_length=2, max_length=255)
     church_slug: str = Field(..., min_length=2, max_length=100, pattern=r'^[a-z0-9-]+$')
-    
+
     # Address
     street: str = Field(..., min_length=1)
     number: str = Field(..., min_length=1)
@@ -201,7 +187,7 @@ class ChurchRegistrationRequest(BaseModel):
     city: str = Field(..., min_length=1)
     state: str = Field(..., min_length=2, max_length=2)
     postal_code: str = Field(..., min_length=8, max_length=10)
-    
+
     # Admin info
     admin_name: str = Field(..., min_length=1, max_length=255)
     admin_email: EmailStr

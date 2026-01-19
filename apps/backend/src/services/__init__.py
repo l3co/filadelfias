@@ -1,3 +1,3 @@
-from .email_service import email_service, EmailService
+from .email_service import EmailService, email_service
 
 __all__ = ["email_service", "EmailService"]

@@ -1,7 +1,9 @@
 import json
 import os
-from typing import List, Optional, Dict
+from typing import Dict, List, Optional
+
 from pydantic import BaseModel
+
 
 class Hymn(BaseModel):
     number: int
@@ -17,7 +19,7 @@ class HymnalService:
     def load_data(cls):
         if cls._loaded:
             return
-        
+
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "hymnal_nc.json")
         try:
             with open(path, "r", encoding="utf-8") as f:
@@ -32,7 +34,7 @@ class HymnalService:
     def get_hymns(cls) -> List[Hymn]:
         if not cls._loaded:
             cls.load_data()
-        
+
         # Return summaries (maybe could optimize to exclude lyrics for list, but for now it's fine)
         return [Hymn(**h) for h in cls._data]
 
@@ -40,7 +42,7 @@ class HymnalService:
     def get_hymn(cls, number: int) -> Optional[Hymn]:
         if not cls._loaded:
             cls.load_data()
-            
+
         for h in cls._data:
             if h["number"] == number:
                 return Hymn(**h)

@@ -1,20 +1,22 @@
-from typing import Sequence, Optional
+from typing import Optional, Sequence
 from uuid import UUID
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from src.modules.financial.models import FinancialAccount, TransactionCategory, Transaction
+from src.modules.financial.models import FinancialAccount, Transaction, TransactionCategory
+
 
 class FinancialRepository:
     """Repository for Financial operations."""
-    
+
     def __init__(self, session: AsyncSession):
         self.session = session
-        
+
     async def get_account(self, account_id: UUID) -> Optional[FinancialAccount]:
         return await self.session.get(FinancialAccount, account_id)
-        
+
     def add(self, obj):
         self.session.add(obj)
 
@@ -58,7 +60,7 @@ class FinancialRepository:
                 selectinload(Transaction.category)
             )
         )
-        return result.scalar_one_or_none()    
+        return result.scalar_one_or_none()
 
     async def get_transactions(self, tenant_id: UUID, limit: int = 50) -> Sequence[Transaction]:
         result = await self.session.execute(

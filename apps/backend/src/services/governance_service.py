@@ -1,9 +1,12 @@
-from uuid import UUID
 from typing import List
+from uuid import UUID
+
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.modules.governance.repository import GovernanceRepository
+
 from src.modules.governance.models import Council, Meeting
+from src.modules.governance.repository import GovernanceRepository
 from src.modules.governance.schemas import CouncilCreate, MeetingCreate
+
 
 class GovernanceService:
     def __init__(self, db: AsyncSession):
@@ -22,7 +25,7 @@ class GovernanceService:
     async def list_councils(self, tenant_id: UUID) -> List[Council]:
         """List all councils for a tenant."""
         return await self.repo.get_councils(tenant_id)
-        
+
     async def create_meeting(self, data: MeetingCreate) -> Meeting:
         """Create a new meeting."""
         meeting = Meeting(
@@ -33,7 +36,7 @@ class GovernanceService:
             location=data.location
         )
         return await self.repo.create_meeting(meeting)
-        
+
     async def list_meetings(self, council_id: UUID) -> List[Meeting]:
         """List meetings for a council."""
         return await self.repo.get_meetings(council_id)

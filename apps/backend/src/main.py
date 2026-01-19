@@ -5,16 +5,16 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.auth import router as auth_router
-from src.api.members import router as members_router
-from src.api.tenants import router as tenants_router
-from src.api.churches import router as churches_router
-from src.api.invitations import router as invitations_router
 from src.api.bible import router as bible_router
-from src.api.hymnal import router as hymnal_router
-from src.api.governance import router as governance_router
-from src.api.financial import router as financial_router
-from src.api.mission import router as mission_router
+from src.api.churches import router as churches_router
 from src.api.ebd import router as ebd_router
+from src.api.financial import router as financial_router
+from src.api.governance import router as governance_router
+from src.api.hymnal import router as hymnal_router
+from src.api.invitations import router as invitations_router
+from src.api.members import router as members_router
+from src.api.mission import router as mission_router
+from src.api.tenants import router as tenants_router
 
 app = FastAPI(
     title="Filadelfias API",
@@ -49,7 +49,7 @@ app.include_router(ebd_router)
 async def health_check():
     """
     Health check endpoint.
-    
+
     Returns:
         dict: Status of the API
     """
@@ -60,7 +60,7 @@ async def health_check():
 async def root():
     """
     Root endpoint with API information.
-    
+
     Returns:
         dict: Welcome message and documentation link
     """

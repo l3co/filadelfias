@@ -1,11 +1,18 @@
+from __future__ import annotations
+
 import uuid
-from datetime import datetime, date
-from typing import Optional
-from sqlalchemy import String, DateTime, ForeignKey, Text, Date
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from datetime import date, datetime
+from typing import TYPE_CHECKING, Optional
+
+from sqlalchemy import Date, DateTime, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.infra.base import Base
+
+if TYPE_CHECKING:
+    from src.infra.models import Member, Tenant
+
 
 class FinancialAccount(Base):
     """
@@ -22,11 +29,11 @@ class FinancialAccount(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     type: Mapped[str] = mapped_column(String(50), default="BANK", nullable=False) # BANK, CASH
     balance: Mapped[float] = mapped_column(default=0.0, nullable=False) # Simple float for MVP, Decimal strictly distinct prefered later
-    
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, nullable=False
     )
-    
+
     # Relationships
     tenant: Mapped["Tenant"] = relationship(back_populates="accounts")
     transactions: Mapped[list["Transaction"]] = relationship(
@@ -51,7 +58,7 @@ class TransactionCategory(Base):
     parent_id: Mapped[Optional[uuid.UUID]] = mapped_column(
         UUID(as_uuid=True), ForeignKey("transaction_categories.id"), nullable=True
     )
-    
+
     # Relationships
     tenant: Mapped["Tenant"] = relationship(back_populates="categories")
     transactions: Mapped[list["Transaction"]] = relationship(
@@ -80,13 +87,13 @@ class Transaction(Base):
     member_id: Mapped[Optional[uuid.UUID]] = mapped_column(
         UUID(as_uuid=True), ForeignKey("members.id", ondelete="SET NULL"), nullable=True
     )
-    
+
     amount: Mapped[float] = mapped_column(nullable=False) # Positive
     type: Mapped[str] = mapped_column(String(20), nullable=False) # CREDIT (Income), DEBIT (Expense)
     description: Mapped[str] = mapped_column(String(255), nullable=False)
     date: Mapped[date] = mapped_column(Date, nullable=False)
     attachment_url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, nullable=False
     )

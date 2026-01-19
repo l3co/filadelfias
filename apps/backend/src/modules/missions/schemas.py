@@ -1,7 +1,9 @@
-from uuid import UUID
 from datetime import datetime
 from typing import Optional
+from uuid import UUID
+
 from pydantic import BaseModel, Field
+
 
 class MissionaryBase(BaseModel):
     name: str = Field(..., min_length=1)
@@ -20,6 +22,6 @@ class MissionaryResponse(MissionaryBase):
     id: UUID
     tenant_id: UUID
     created_at: datetime
-    
+
     class Config:
         from_attributes = True

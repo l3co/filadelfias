@@ -2,14 +2,16 @@
 Integration tests for EBD endpoints.
 """
 import pytest
-from httpx import AsyncClient, ASGITransport
-from src.main import app
+from httpx import ASGITransport, AsyncClient
+
 from src.infra.database import get_db
+from src.main import app
+
 
 @pytest.mark.asyncio
 class TestEBDEndpoints:
     """Test EBD API endpoints."""
-    
+
     async def get_auth_token(self, client, email="ebd_user@test.com"):
         try:
             await client.post(
@@ -20,7 +22,7 @@ class TestEBDEndpoints:
                     "password": "password123"
                 }
             )
-        except:
+        except Exception:
             pass
         response = await client.post(
             "/auth/login",
@@ -57,13 +59,13 @@ class TestEBDEndpoints:
 
     async def test_ebd_full_flow(self, db_session, override_get_db):
         app.dependency_overrides[get_db] = override_get_db
-        
+
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             token = await self.get_auth_token(client, "ebd_admin@test.com")
             headers = {"Authorization": f"Bearer {token}"}
             tenant = await self.create_tenant(client, token, "ebd-main")
             tenant_id = tenant["id"]
-            
+
             # 1. Create Class
             class_resp = await client.post(
                 "/ebd/classes",
@@ -74,11 +76,11 @@ class TestEBDEndpoints:
             assert class_resp.status_code == 200
             ebd_class = class_resp.json()
             class_id = ebd_class["id"]
-            
+
             # 2. Create Member
             member = await self.create_member(client, token, tenant_id)
             member_id = member["id"]
-            
+
             # 3. Enroll Student
             enroll_resp = await client.post(
                 f"/ebd/classes/{class_id}/students",
@@ -86,7 +88,7 @@ class TestEBDEndpoints:
                 headers=headers
             )
             assert enroll_resp.status_code == 200
-            
+
             # 4. Create Lesson
             lesson_resp = await client.post(
                 f"/ebd/classes/{class_id}/lessons",
@@ -99,7 +101,7 @@ class TestEBDEndpoints:
                 headers=headers
             )
             assert lesson_resp.status_code == 200
-            
+
             # 5. List Classes
             list_resp = await client.get("/ebd/classes", params={"tenant_id": tenant_id}, headers=headers)
             classes = list_resp.json()

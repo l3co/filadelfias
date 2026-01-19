@@ -1,13 +1,14 @@
 """
 Integration tests for members management endpoints.
 """
+
 import pytest
-from httpx import AsyncClient, ASGITransport
-from datetime import date
-from src.main import app
+from httpx import ASGITransport, AsyncClient
+
 from src.infra.database import get_db
-from src.infra.models import Tenant, UserChurchMembership, User
+from src.infra.models import Tenant, User, UserChurchMembership
 from src.infra.security import create_access_token, get_password_hash
+from src.main import app
 
 
 @pytest.fixture
@@ -24,7 +25,7 @@ async def setup_tenant(db_session):
     )
     db_session.add(user)
     await db_session.flush()
-    
+
     # Create tenant
     tenant = Tenant(
         name="Presbiteriana Teste",
@@ -32,7 +33,7 @@ async def setup_tenant(db_session):
     )
     db_session.add(tenant)
     await db_session.flush()
-    
+
     # Link user to tenant
     membership = UserChurchMembership(
         user_id=user.id,
@@ -41,21 +42,21 @@ async def setup_tenant(db_session):
     )
     db_session.add(membership)
     await db_session.commit()
-    
+
     token = create_access_token({"sub": str(user.id)})
     return token, tenant, user
 
 
 @pytest.mark.asyncio
 class TestMembersEndpoints:
-    
+
     async def test_create_member_success(self, db_session, override_get_db, setup_tenant):
         """
         Test creating a new member successfully.
         """
         token, tenant, _ = setup_tenant
         app.dependency_overrides[get_db] = override_get_db
-        
+
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post(
                 f"/tenants/{tenant.id}/members",
@@ -68,9 +69,9 @@ class TestMembersEndpoints:
                 },
                 headers={"Authorization": f"Bearer {token}"}
             )
-            
+
         app.dependency_overrides.clear()
-        
+
         assert response.status_code == 201
         data = response.json()
         assert data["full_name"] == "Novo Membro"
@@ -83,22 +84,22 @@ class TestMembersEndpoints:
         """
         token, tenant, _ = setup_tenant
         app.dependency_overrides[get_db] = override_get_db
-        
+
         # Create a member first (we need to do this via DB or API if API existed)
         # Since API doesn't exist yet, this TEST expects the API to exist.
         # But we can't seed via API if it fails.
         # So we seed via DB if we had the model. But we don't have the model Member yet!
         # So this test will fail twofold: Model undefined, API undefined.
         # TDD: First test failure should be "Endpoint 404" or "Model not found".
-        
+
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.get(
                 f"/tenants/{tenant.id}/members",
                 headers={"Authorization": f"Bearer {token}"}
             )
-        
+
         app.dependency_overrides.clear()
-        
+
         # Should be 200 OK (empty list initially if no seed)
         # But if we want to test list content, we need to seed.
         # Since we haven't created the Member model, we can't seed via DB in this test code without importing it.

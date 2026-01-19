@@ -7,9 +7,9 @@ Create Date: 2026-01-19 16:52:00.000000
 """
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = '3a7b8c9d0e1f'
@@ -21,22 +21,22 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     # Add office column with default value
     op.add_column('members', sa.Column('office', sa.String(50), nullable=False, server_default='MEMBRO'))
-    
+
     # Add functions column as JSON array
     op.add_column('members', sa.Column('functions', sa.JSON(), nullable=True))
-    
+
     # Copy data from role to office for existing records
     op.execute("UPDATE members SET office = role WHERE role IN ('MEMBRO', 'DIACONO', 'PRESBITERO', 'PASTOR')")
-    
+
     # For evangelista and missionario, set office to MEMBRO and add to functions
     op.execute("""
-        UPDATE members 
-        SET office = 'MEMBRO', functions = '["EVANGELISTA"]'::jsonb 
+        UPDATE members
+        SET office = 'MEMBRO', functions = '["EVANGELISTA"]'::jsonb
         WHERE role = 'EVANGELISTA'
     """)
     op.execute("""
-        UPDATE members 
-        SET office = 'MEMBRO', functions = '["MISSIONARIO"]'::jsonb 
+        UPDATE members
+        SET office = 'MEMBRO', functions = '["MISSIONARIO"]'::jsonb
         WHERE role = 'MISSIONARIO'
     """)
 

@@ -7,9 +7,9 @@ Create Date: 2026-01-19 17:10:00.000000
 """
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = '4b5c6d7e8f9a'
@@ -27,7 +27,7 @@ def upgrade() -> None:
     op.add_column('members', sa.Column('city', sa.String(100), nullable=True))
     op.add_column('members', sa.Column('state', sa.String(2), nullable=True))
     op.add_column('members', sa.Column('postal_code', sa.String(10), nullable=True))
-    
+
     # Drop old address column
     op.drop_column('members', 'address')
 
@@ -35,7 +35,7 @@ def upgrade() -> None:
 def downgrade() -> None:
     # Recreate address column
     op.add_column('members', sa.Column('address', sa.Text(), nullable=True))
-    
+
     # Drop structured address columns
     op.drop_column('members', 'postal_code')
     op.drop_column('members', 'state')

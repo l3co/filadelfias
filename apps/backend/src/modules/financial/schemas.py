@@ -1,7 +1,9 @@
-from uuid import UUID
-from datetime import datetime, date
+from datetime import date, datetime
 from typing import Optional
+from uuid import UUID
+
 from pydantic import BaseModel, Field
+
 
 class FinancialAccountBase(BaseModel):
     name: str = Field(..., min_length=1)
@@ -15,7 +17,7 @@ class FinancialAccountResponse(FinancialAccountBase):
     id: UUID
     tenant_id: UUID
     created_at: datetime
-    
+
     class Config:
         from_attributes = True
 
@@ -30,7 +32,7 @@ class TransactionCategoryCreate(TransactionCategoryBase):
 class TransactionCategoryResponse(TransactionCategoryBase):
     id: UUID
     tenant_id: UUID
-    
+
     class Config:
         from_attributes = True
 
@@ -53,6 +55,6 @@ class TransactionResponse(TransactionBase):
     created_at: datetime
     category: Optional[TransactionCategoryResponse] = None
     account: Optional[FinancialAccountResponse] = None
-    
+
     class Config:
         from_attributes = True

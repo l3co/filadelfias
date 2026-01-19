@@ -1,19 +1,20 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
-from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from uuid import UUID
 
-from src.infra.database import get_db
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from src.api.auth import get_current_user
+from src.infra.database import get_db
 from src.infra.models import User
-from src.services.governance_service import GovernanceService
 from src.modules.governance.schemas import CouncilCreate, CouncilResponse, MeetingCreate, MeetingResponse
+from src.services.governance_service import GovernanceService
 
 router = APIRouter(prefix="/governance", tags=["Governance"])
 
 @router.post("/councils", response_model=CouncilResponse)
 async def create_council(
-    data: CouncilCreate, 
+    data: CouncilCreate,
     tenant_id: UUID = Query(..., description="ID of the tenant/church"),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)

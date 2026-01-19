@@ -1,9 +1,12 @@
-from uuid import UUID
 from typing import List
+from uuid import UUID
+
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.modules.financial.models import FinancialAccount, Transaction, TransactionCategory
 from src.modules.financial.repository import FinancialRepository
-from src.modules.financial.models import FinancialAccount, TransactionCategory, Transaction
 from src.modules.financial.schemas import FinancialAccountCreate, TransactionCategoryCreate, TransactionCreate
+
 
 class FinancialService:
     def __init__(self, db: AsyncSession):
@@ -20,7 +23,7 @@ class FinancialService:
 
     async def list_accounts(self, tenant_id: UUID) -> List[FinancialAccount]:
         return await self.repo.get_accounts(tenant_id)
-        
+
     async def create_category(self, tenant_id: UUID, data: TransactionCategoryCreate) -> TransactionCategory:
         category = TransactionCategory(
             tenant_id=tenant_id,
@@ -29,10 +32,10 @@ class FinancialService:
             parent_id=data.parent_id
         )
         return await self.repo.create_category(category)
-        
+
     async def list_categories(self, tenant_id: UUID) -> List[TransactionCategory]:
         return await self.repo.get_categories(tenant_id)
-        
+
     async def create_transaction(self, tenant_id: UUID, data: TransactionCreate) -> Transaction:
         # Domain Logic: Update Account Balance
         # TODO: Move validation to Domain Entity [DDD]
@@ -56,6 +59,6 @@ class FinancialService:
             attachment_url=data.attachment_url
         )
         return await self.repo.create_transaction(transaction)
-        
+
     async def list_transactions(self, tenant_id: UUID) -> List[Transaction]:
         return await self.repo.get_transactions(tenant_id)

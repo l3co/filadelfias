@@ -1,7 +1,9 @@
-from uuid import UUID
-from datetime import datetime, date
+from datetime import date, datetime
 from typing import Optional
+from uuid import UUID
+
 from pydantic import BaseModel, Field
+
 
 class EBDClassBase(BaseModel):
     name: str = Field(..., min_length=1)
@@ -16,7 +18,7 @@ class EBDClassCreate(EBDClassBase):
 class EBDClassResponse(EBDClassBase):
     id: UUID
     tenant_id: UUID
-    
+
     class Config:
         from_attributes = True
 
@@ -32,7 +34,7 @@ class EBDStudentResponse(EBDStudentBase):
     ebd_class_id: UUID
     enrolled_at: datetime
     # We might want member details here later
-    
+
     class Config:
         from_attributes = True
 
@@ -48,6 +50,6 @@ class EBDLessonCreate(EBDLessonBase):
 class EBDLessonResponse(EBDLessonBase):
     id: UUID
     ebd_class_id: UUID
-    
+
     class Config:
         from_attributes = True

@@ -1,6 +1,8 @@
-from fastapi import APIRouter, HTTPException, status
 from typing import List
-from src.services.hymnal_service import HymnalService, Hymn
+
+from fastapi import APIRouter, HTTPException, status
+
+from src.services.hymnal_service import Hymn, HymnalService
 
 router = APIRouter(prefix="/hymnal", tags=["Hymnal"])
 
@@ -15,7 +17,7 @@ async def get_hymn(number: int):
     hymn = HymnalService.get_hymn(number)
     if not hymn:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
+            status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Hino {number} não encontrado"
         )
     return hymn

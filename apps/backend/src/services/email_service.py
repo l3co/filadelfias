@@ -2,25 +2,25 @@
 Email service using Resend.
 """
 import os
+
 import resend
-from typing import Optional
 
 
 class EmailService:
     """Service for sending emails via Resend."""
-    
+
     def __init__(self):
         self.api_key = os.getenv("RESEND_API_KEY")
         self.from_email = os.getenv("EMAIL_FROM", "Filadélfias <noreply@filadelfias.app>")
         self.frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
-        
+
         if self.api_key:
             resend.api_key = self.api_key
-    
+
     def is_configured(self) -> bool:
         """Check if email service is properly configured."""
         return bool(self.api_key)
-    
+
     async def send_welcome_email(
         self,
         to_email: str,
@@ -30,20 +30,20 @@ class EmailService:
     ) -> bool:
         """
         Send welcome email with temporary password to new member.
-        
+
         Args:
             to_email: Recipient email
             member_name: Name of the member
             church_name: Name of the church
             temporary_password: Generated temporary password
-            
+
         Returns:
             True if email was sent successfully
         """
         if not self.is_configured():
             print(f"[EMAIL] Resend not configured. Would send welcome email to {to_email}")
             return False
-        
+
         html_content = f"""
         <!DOCTYPE html>
         <html>
@@ -68,24 +68,24 @@ class EmailService:
                 </div>
                 <div class="content">
                     <p>Olá, <strong>{member_name}</strong>!</p>
-                    
+
                     <p>Você foi adicionado(a) como membro da <strong>{church_name}</strong> na plataforma Filadélfias.</p>
-                    
+
                     <p>Para acessar sua conta, utilize as credenciais abaixo:</p>
-                    
+
                     <div class="password-box">
                         <p style="margin: 0 0 10px 0; color: #6b7280;">Sua senha temporária:</p>
                         <p class="password">{temporary_password}</p>
                     </div>
-                    
+
                     <div class="warning">
                         <strong>⚠️ Importante:</strong> Por segurança, você será solicitado(a) a trocar sua senha no primeiro acesso.
                     </div>
-                    
+
                     <p style="text-align: center;">
                         <a href="{self.frontend_url}/login" class="button">Acessar Plataforma</a>
                     </p>
-                    
+
                     <p>Seu email de acesso: <strong>{to_email}</strong></p>
                 </div>
                 <div class="footer">
@@ -96,7 +96,7 @@ class EmailService:
         </body>
         </html>
         """
-        
+
         try:
             response = resend.Emails.send({
                 "from": self.from_email,
@@ -109,7 +109,7 @@ class EmailService:
         except Exception as e:
             print(f"[EMAIL] Error sending welcome email: {e}")
             return False
-    
+
     async def send_password_reset_email(
         self,
         to_email: str,
@@ -118,21 +118,21 @@ class EmailService:
     ) -> bool:
         """
         Send password reset email.
-        
+
         Args:
             to_email: Recipient email
             user_name: Name of the user
             reset_token: Password reset token
-            
+
         Returns:
             True if email was sent successfully
         """
         if not self.is_configured():
             print(f"[EMAIL] Resend not configured. Would send reset email to {to_email}")
             return False
-        
+
         reset_url = f"{self.frontend_url}/reset-password?token={reset_token}"
-        
+
         html_content = f"""
         <!DOCTYPE html>
         <html>
@@ -155,19 +155,19 @@ class EmailService:
                 </div>
                 <div class="content">
                     <p>Olá, <strong>{user_name}</strong>!</p>
-                    
+
                     <p>Recebemos uma solicitação para redefinir a senha da sua conta no Filadélfias.</p>
-                    
+
                     <p>Clique no botão abaixo para criar uma nova senha:</p>
-                    
+
                     <p style="text-align: center;">
                         <a href="{reset_url}" class="button">Redefinir Minha Senha</a>
                     </p>
-                    
+
                     <div class="warning">
                         <strong>⏰ Atenção:</strong> Este link expira em 1 hora.
                     </div>
-                    
+
                     <p style="color: #6b7280; font-size: 14px;">Se você não solicitou a redefinição de senha, ignore este email. Sua conta permanecerá segura.</p>
                 </div>
                 <div class="footer">
@@ -178,7 +178,7 @@ class EmailService:
         </body>
         </html>
         """
-        
+
         try:
             response = resend.Emails.send({
                 "from": self.from_email,

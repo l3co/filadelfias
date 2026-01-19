@@ -1,9 +1,12 @@
-from uuid import UUID
 from typing import List
+from uuid import UUID
+
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.modules.ebd.models import EBDClass, EBDLesson, EBDStudent
 from src.modules.ebd.repository import EBDRepository
-from src.modules.ebd.models import EBDClass, EBDStudent, EBDLesson
-from src.modules.ebd.schemas import EBDClassCreate, EBDStudentCreate, EBDLessonCreate
+from src.modules.ebd.schemas import EBDClassCreate, EBDLessonCreate, EBDStudentCreate
+
 
 class EBDService:
     def __init__(self, db: AsyncSession):
@@ -22,7 +25,7 @@ class EBDService:
 
     async def list_classes(self, tenant_id: UUID) -> List[EBDClass]:
         return await self.repo.get_classes(tenant_id)
-        
+
     async def enroll_student(self, ebd_class_id: UUID, data: EBDStudentCreate) -> EBDStudent:
         enrollment = EBDStudent(
             ebd_class_id=ebd_class_id,
@@ -30,10 +33,10 @@ class EBDService:
             role=data.role
         )
         return await self.repo.enroll_student(enrollment)
-        
+
     async def list_students(self, ebd_class_id: UUID) -> List[EBDStudent]:
         return await self.repo.get_students(ebd_class_id)
-        
+
     async def create_lesson(self, ebd_class_id: UUID, data: EBDLessonCreate) -> EBDLesson:
         lesson = EBDLesson(
             ebd_class_id=ebd_class_id,
@@ -43,6 +46,6 @@ class EBDService:
             homework_url=data.homework_url
         )
         return await self.repo.create_lesson(lesson)
-        
+
     async def list_lessons(self, ebd_class_id: UUID) -> List[EBDLesson]:
         return await self.repo.get_lessons(ebd_class_id)

@@ -1,11 +1,18 @@
+from __future__ import annotations
+
 import uuid
-from datetime import datetime, date
-from typing import Optional
-from sqlalchemy import String, DateTime, ForeignKey, Text, Date
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from datetime import date, datetime
+from typing import TYPE_CHECKING, Optional
+
+from sqlalchemy import Date, DateTime, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.infra.base import Base
+
+if TYPE_CHECKING:
+    from src.infra.models import Member, Tenant
+
 
 class Council(Base):
     """
@@ -55,7 +62,7 @@ class CouncilMember(Base):
     role: Mapped[str] = mapped_column(String(50), nullable=False) # e.g. PRESIDENT, SECRETARY, MEMBER
     start_date: Mapped[date] = mapped_column(Date, nullable=False)
     end_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
-    
+
     # Relationships
     council: Mapped["Council"] = relationship(back_populates="members")
     member: Mapped["Member"] = relationship()
@@ -77,7 +84,7 @@ class Meeting(Base):
     status: Mapped[str] = mapped_column(String(50), default="SCHEDULED", nullable=False) # SCHEDULED, IN_PROGRESS, COMPLETED, CANCELED
     agenda: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     location: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, nullable=False
     )

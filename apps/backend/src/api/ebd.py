@@ -1,17 +1,21 @@
-from fastapi import APIRouter, Depends, Query, status
-from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from uuid import UUID
 
-from src.infra.database import get_db
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from src.api.auth import get_current_user
+from src.infra.database import get_db
 from src.infra.models import User
-from src.services.ebd_service import EBDService
 from src.modules.ebd.schemas import (
-    EBDClassCreate, EBDClassResponse,
-    EBDStudentCreate, EBDStudentResponse,
-    EBDLessonCreate, EBDLessonResponse
+    EBDClassCreate,
+    EBDClassResponse,
+    EBDLessonCreate,
+    EBDLessonResponse,
+    EBDStudentCreate,
+    EBDStudentResponse,
 )
+from src.services.ebd_service import EBDService
 
 router = APIRouter(prefix="/ebd", tags=["Education (EBD)"])
 
@@ -65,7 +69,7 @@ async def create_lesson(
 ):
     service = EBDService(db)
     # data already has class_id but we ensure it matches path if we want
-    # For now just passing DTO is fine, but maybe redundant. 
+    # For now just passing DTO is fine, but maybe redundant.
     # Service expects class_id as argument anyway.
     return await service.create_lesson(class_id, data)
 

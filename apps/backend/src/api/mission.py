@@ -1,13 +1,14 @@
-from fastapi import APIRouter, Depends, Query
-from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from uuid import UUID
 
-from src.infra.database import get_db
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from src.api.auth import get_current_user
+from src.infra.database import get_db
 from src.infra.models import User
-from src.services.mission_service import MissionService
 from src.modules.missions.schemas import MissionaryCreate, MissionaryResponse
+from src.services.mission_service import MissionService
 
 router = APIRouter(prefix="/missions", tags=["Missions"])
 

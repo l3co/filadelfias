@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './routes/LoginPage';
-import RegisterPage from './routes/RegisterPage';
+import { ChurchRegistrationWizard } from './routes/ChurchRegistrationWizard';
 import HomePage from './routes/HomePage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { MembersPage } from './routes/members/MembersPage';
@@ -33,7 +33,7 @@ function App() {
 
         {/* Autenticação (Sem Layout Específico) */}
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/register" element={<ChurchRegistrationWizard />} />
 
         {/* Onboarding Protegido */}
         <Route

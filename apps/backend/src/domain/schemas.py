@@ -136,18 +136,18 @@ class MemberCreate(MemberBase):
 class MemberUpdate(BaseModel):
     """Schema for updating a member."""
     full_name: Optional[str] = Field(None, min_length=1, max_length=255)
-    email: Optional[EmailStr] = None
+    email: Optional[str] = None
     phone: Optional[str] = None
     birth_date: Optional[date] = None
-    gender: Optional[Gender] = None
-    marital_status: Optional[MaritalStatus] = None
+    gender: Optional[str] = None
+    marital_status: Optional[str] = None
     marriage_date: Optional[date] = None
     spouse_name: Optional[str] = None
     address: Optional[str] = None
-    status: Optional[MemberStatus] = None
-    role: Optional[EcclesiasticalRole] = None  # Deprecated
-    office: Optional[EcclesiasticalOffice] = None
-    functions: Optional[List[EcclesiasticalFunction]] = None
+    status: Optional[str] = None
+    role: Optional[str] = None  # Deprecated
+    office: Optional[str] = None
+    functions: Optional[List[str]] = None
     baptism_date: Optional[date] = None
     profession_of_faith_date: Optional[date] = None
     admission_date: Optional[date] = None

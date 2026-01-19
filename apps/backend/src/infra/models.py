@@ -30,6 +30,12 @@ class User(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     avatar_url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    
+    # Password management
+    must_change_password: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    password_reset_token: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    password_reset_expires: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, nullable=False
     )

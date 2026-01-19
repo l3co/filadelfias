@@ -3,6 +3,18 @@ export interface Tenant {
     name: string;
     slug: string;
     logo_url?: string;
+    street?: string;
+    number?: string;
+    complement?: string;
+    neighborhood?: string;
+    city?: string;
+    state?: string;
+    postal_code?: string;
+    country?: string;
+    phone?: string;
+    email?: string;
+    latitude?: number;
+    longitude?: number;
 }
 
 export interface UserMembership {
@@ -31,11 +43,17 @@ export interface Member {
     birth_date?: string;
     gender?: string;
     marital_status?: string;
+    marriage_date?: string;
+    spouse_name?: string;
     address?: string;
     photo_url?: string;
     status: string;
     role: string;
     baptism_date?: string;
+    profession_of_faith_date?: string;
+    admission_date?: string;
+    admission_type?: string;
+    origin_church?: string;
     tenant_id: string;
     user_id?: string;
     created_at: string;
@@ -49,8 +67,14 @@ export interface MemberCreateData {
     birth_date?: string;
     gender?: string;
     marital_status?: string;
+    marriage_date?: string;
+    spouse_name?: string;
     address?: string;
     status: string;
     role: string;
     baptism_date?: string;
+    profession_of_faith_date?: string;
+    admission_date?: string;
+    admission_type?: string;
+    origin_church?: string;
 }

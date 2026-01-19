@@ -172,7 +172,9 @@ class Member(Base):
     
     # Ecclesiastical Info
     status: Mapped[str] = mapped_column(String(50), default="COMUNGANTE", nullable=False)
-    role: Mapped[str] = mapped_column(String(50), default="MEMBRO", nullable=False)
+    role: Mapped[str] = mapped_column(String(50), default="MEMBRO", nullable=False)  # Deprecated, use office
+    office: Mapped[str] = mapped_column(String(50), default="MEMBRO", nullable=False)  # MEMBRO, DIACONO, PRESBITERO, PASTOR
+    functions: Mapped[Optional[list]] = mapped_column(JSON, nullable=True)  # ["TESOUREIRO", "SECRETARIO"]
     baptism_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     profession_of_faith_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     admission_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)

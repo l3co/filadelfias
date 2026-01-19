@@ -21,7 +21,7 @@ from src.modules.governance.schemas import (
     CouncilBase, CouncilCreate, CouncilResponse,
     MeetingBase, MeetingCreate, MeetingResponse
 )
-from .enums import MemberStatus, EcclesiasticalRole, Gender, MaritalStatus
+from .enums import MemberStatus, EcclesiasticalRole, EcclesiasticalOffice, EcclesiasticalFunction, Gender, MaritalStatus
 
 
 class TenantBase(BaseModel):
@@ -118,7 +118,9 @@ class MemberBase(BaseModel):
     
     # Ecclesiastical data
     status: MemberStatus = MemberStatus.Comungante
-    role: EcclesiasticalRole = EcclesiasticalRole.Membro
+    role: EcclesiasticalRole = EcclesiasticalRole.Membro  # Deprecated
+    office: EcclesiasticalOffice = EcclesiasticalOffice.Membro
+    functions: Optional[List[EcclesiasticalFunction]] = None
     baptism_date: Optional[date] = None
     profession_of_faith_date: Optional[date] = None
     admission_date: Optional[date] = None
@@ -143,7 +145,9 @@ class MemberUpdate(BaseModel):
     spouse_name: Optional[str] = None
     address: Optional[str] = None
     status: Optional[MemberStatus] = None
-    role: Optional[EcclesiasticalRole] = None
+    role: Optional[EcclesiasticalRole] = None  # Deprecated
+    office: Optional[EcclesiasticalOffice] = None
+    functions: Optional[List[EcclesiasticalFunction]] = None
     baptism_date: Optional[date] = None
     profession_of_faith_date: Optional[date] = None
     admission_date: Optional[date] = None

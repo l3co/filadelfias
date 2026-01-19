@@ -114,7 +114,15 @@ class MemberBase(BaseModel):
     marital_status: Optional[MaritalStatus] = None
     marriage_date: Optional[date] = None
     spouse_name: Optional[str] = None
-    address: Optional[str] = None
+    
+    # Structured Address
+    street: Optional[str] = None
+    number: Optional[str] = None
+    complement: Optional[str] = None
+    neighborhood: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    postal_code: Optional[str] = None
     
     # Ecclesiastical data
     status: MemberStatus = MemberStatus.Comungante
@@ -143,7 +151,16 @@ class MemberUpdate(BaseModel):
     marital_status: Optional[str] = None
     marriage_date: Optional[date] = None
     spouse_name: Optional[str] = None
-    address: Optional[str] = None
+    
+    # Structured Address
+    street: Optional[str] = None
+    number: Optional[str] = None
+    complement: Optional[str] = None
+    neighborhood: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    postal_code: Optional[str] = None
+    
     status: Optional[str] = None
     role: Optional[str] = None  # Deprecated
     office: Optional[str] = None

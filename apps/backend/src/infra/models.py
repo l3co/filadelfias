@@ -167,7 +167,16 @@ class Member(Base):
     marital_status: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
     marriage_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     spouse_name: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    address: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    
+    # Structured Address
+    street: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    number: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    complement: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    neighborhood: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    city: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    state: Mapped[Optional[str]] = mapped_column(String(2), nullable=True)  # UF
+    postal_code: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)  # CEP
+    
     photo_url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
     # Ecclesiastical Info

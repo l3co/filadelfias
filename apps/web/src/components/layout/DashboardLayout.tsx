@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { Outlet, Link, useLocation, Navigate } from 'react-router-dom';
-import { Menu, Home, Users, Calendar, LogOut, Gavel, Wallet, Globe, BookOpen } from 'lucide-react';
+import { Menu, Home, Users, Calendar, LogOut, Gavel, Wallet, Globe, BookOpen, Bell, Search, ChevronRight, X } from 'lucide-react';
 import { useCurrentUser, useLogout } from '../../hooks/useAuth';
 import { cn } from '../../lib/utils';
 
 const navigation = [
     { name: 'Dashboard', href: '/app', icon: Home },
     { name: 'Membros', href: '/app/members', icon: Users },
-    { name: 'Governo', href: '/app/governance', icon: Gavel },
+    { name: 'Governança', href: '/app/governance', icon: Gavel },
     { name: 'Tesouraria', href: '/app/financial', icon: Wallet },
     { name: 'Missões', href: '/app/missions', icon: Globe },
     { name: 'EBD', href: '/app/ebd', icon: BookOpen },
@@ -20,8 +20,17 @@ export function DashboardLayout() {
     const { data: user, isLoading } = useCurrentUser();
     const logout = useLogout();
 
+    const tenantName = user?.memberships?.[0]?.tenant?.name || 'Minha Igreja';
+
     if (isLoading) {
-        return <div className="min-h-screen flex items-center justify-center bg-gray-50">Carregando...</div>;
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-white to-[#DEEFE7]/30">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-10 h-10 border-4 border-green-200 border-t-green-600 rounded-full animate-spin" />
+                    <span className="text-gray-500 font-medium">Carregando...</span>
+                </div>
+            </div>
+        );
     }
 
     if (user && (!user.memberships || user.memberships.length === 0)) {
@@ -29,11 +38,11 @@ export function DashboardLayout() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 flex">
+        <div className="min-h-screen bg-[#f8fafc] flex">
             {/* Mobile Sidebar Overlay */}
             {sidebarOpen && (
                 <div
-                    className="fixed inset-0 z-40 bg-gray-900/50 lg:hidden"
+                    className="fixed inset-0 z-40 bg-gray-900/60 backdrop-blur-sm lg:hidden transition-opacity"
                     onClick={() => setSidebarOpen(false)}
                 />
             )}
@@ -41,15 +50,43 @@ export function DashboardLayout() {
             {/* Sidebar */}
             <aside
                 className={cn(
-                    "fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:shadow-none border-r border-gray-200 flex flex-col",
+                    "fixed inset-y-0 left-0 z-50 w-72 bg-white shadow-2xl shadow-gray-200/50 transform transition-transform duration-300 ease-out lg:translate-x-0 lg:static lg:shadow-none border-r border-gray-100 flex flex-col",
                     sidebarOpen ? "translate-x-0" : "-translate-x-full"
                 )}
             >
-                <div className="flex h-16 items-center px-6 border-b border-gray-200">
-                    <h1 className="text-xl font-bold text-indigo-600">Filadelfias</h1>
+                {/* Logo Header */}
+                <div className="flex h-16 items-center justify-between px-6 border-b border-gray-100">
+                    <Link to="/app" className="flex items-center gap-2">
+                        <h1 className="text-xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-green-700 to-teal-600">
+                            Filadélfias
+                        </h1>
+                    </Link>
+                    <button
+                        onClick={() => setSidebarOpen(false)}
+                        className="lg:hidden p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                    >
+                        <X size={20} />
+                    </button>
                 </div>
 
-                <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto">
+                {/* Tenant Selector */}
+                <div className="px-4 py-4 border-b border-gray-100">
+                    <button className="w-full flex items-center justify-between px-3 py-2.5 bg-gradient-to-r from-green-50 to-teal-50 hover:from-green-100 hover:to-teal-100 rounded-xl transition-colors group">
+                        <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-600 to-teal-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                                {tenantName.charAt(0)}
+                            </div>
+                            <div className="text-left">
+                                <p className="text-sm font-semibold text-gray-900 truncate max-w-[140px]">{tenantName}</p>
+                                <p className="text-xs text-gray-500">Igreja ativa</p>
+                            </div>
+                        </div>
+                        <ChevronRight size={16} className="text-gray-400 group-hover:text-gray-600 transition-colors" />
+                    </button>
+                </div>
+
+                {/* Navigation */}
+                <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-1">
                     {navigation.map((item) => {
                         const isActive = location.pathname === item.href;
                         return (
@@ -57,64 +94,106 @@ export function DashboardLayout() {
                                 key={item.name}
                                 to={item.href}
                                 className={cn(
-                                    "group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors",
+                                    "group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200",
                                     isActive
-                                        ? "bg-indigo-50 text-indigo-700"
-                                        : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                                        ? "bg-gradient-to-r from-green-50 to-teal-50 text-green-700 shadow-sm"
+                                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                                 )}
                                 onClick={() => setSidebarOpen(false)}
                             >
-                                <item.icon
-                                    className={cn(
-                                        "mr-3 h-5 w-5 flex-shrink-0 transition-colors",
-                                        isActive
-                                            ? "text-indigo-500"
-                                            : "text-gray-400 group-hover:text-gray-500"
-                                    )}
-                                />
+                                <div className={cn(
+                                    "mr-3 p-1.5 rounded-lg transition-colors",
+                                    isActive
+                                        ? "bg-gradient-to-br from-green-600 to-teal-600 text-white shadow-sm"
+                                        : "bg-gray-100 text-gray-500 group-hover:bg-gray-200 group-hover:text-gray-700"
+                                )}>
+                                    <item.icon className="h-4 w-4" />
+                                </div>
                                 {item.name}
+                                {isActive && (
+                                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-green-500" />
+                                )}
                             </Link>
                         );
                     })}
                 </nav>
 
                 {/* User Profile & Logout */}
-                <div className="border-t border-gray-200 p-4 bg-gray-50">
-                    <div className="flex items-center mb-3 px-2">
-                        <div className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold">
+                <div className="border-t border-gray-100 p-4">
+                    <div className="flex items-center gap-3 px-3 py-3 rounded-xl bg-gray-50 mb-3">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-100 to-teal-100 flex items-center justify-center text-green-700 font-bold shadow-sm">
                             {user?.name?.charAt(0) || 'U'}
                         </div>
-                        <div className="ml-3">
-                            <p className="text-sm font-medium text-gray-700 truncate max-w-[140px]">{user?.name}</p>
-                            <p className="text-xs text-gray-500 truncate max-w-[140px]">{user?.email}</p>
+                        <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-gray-900 truncate">{user?.name}</p>
+                            <p className="text-xs text-gray-500 truncate">{user?.email}</p>
                         </div>
                     </div>
                     <button
                         onClick={() => logout.mutate()}
-                        className="group flex w-full items-center px-2 py-2 text-sm font-medium text-red-600 hover:bg-red-50 hover:text-red-700 rounded-md transition-colors"
+                        className="group flex w-full items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 hover:text-red-700 rounded-xl transition-colors border border-transparent hover:border-red-100"
                     >
-                        <LogOut className="mr-3 h-5 w-5 flex-shrink-0 text-red-500 group-hover:text-red-600" />
-                        Sair
+                        <LogOut className="h-4 w-4" />
+                        Sair da conta
                     </button>
                 </div>
             </aside>
 
             {/* Main Content Area */}
             <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-                {/* Mobile Header */}
-                <header className="sticky top-0 z-10 flex h-16 items-center justify-between bg-white border-b border-gray-200 px-4 lg:hidden shadow-sm">
-                    <button
-                        type="button"
-                        className="-ml-2 p-2 text-gray-500 hover:text-gray-700"
-                        onClick={() => setSidebarOpen(true)}
-                    >
-                        <Menu className="h-6 w-6" />
-                    </button>
-                    <span className="font-semibold text-gray-900">Filadelfias</span>
-                    <div className="w-6" />
+                {/* Header */}
+                <header className="sticky top-0 z-10 flex h-16 items-center justify-between bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 lg:px-8 shadow-sm shadow-gray-100/50">
+                    {/* Left: Menu + Search */}
+                    <div className="flex items-center gap-4">
+                        <button
+                            type="button"
+                            className="lg:hidden p-2 -ml-2 rounded-xl text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                            onClick={() => setSidebarOpen(true)}
+                        >
+                            <Menu className="h-5 w-5" />
+                        </button>
+                        
+                        {/* Search Bar - Desktop */}
+                        <div className="hidden md:flex items-center">
+                            <div className="relative">
+                                <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                <input
+                                    type="text"
+                                    placeholder="Buscar..."
+                                    className="w-64 pl-10 pr-4 py-2 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all placeholder:text-gray-400"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Center: Mobile Logo */}
+                    <div className="lg:hidden">
+                        <span className="font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-green-700 to-teal-600">
+                            Filadélfias
+                        </span>
+                    </div>
+
+                    {/* Right: Actions */}
+                    <div className="flex items-center gap-2">
+                        <button className="relative p-2.5 rounded-xl text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors">
+                            <Bell size={20} />
+                            <span className="absolute top-2 right-2 w-2 h-2 bg-green-500 rounded-full ring-2 ring-white" />
+                        </button>
+                        
+                        {/* Desktop User Avatar */}
+                        <div className="hidden lg:flex items-center gap-3 pl-3 ml-2 border-l border-gray-200">
+                            <div className="text-right">
+                                <p className="text-sm font-medium text-gray-900">{user?.name?.split(' ')[0]}</p>
+                                <p className="text-xs text-gray-500">{tenantName}</p>
+                            </div>
+                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-green-100 to-teal-100 flex items-center justify-center text-green-700 font-bold text-sm shadow-sm">
+                                {user?.name?.charAt(0) || 'U'}
+                            </div>
+                        </div>
+                    </div>
                 </header>
 
-                <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+                <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-gradient-to-b from-gray-50/50 to-white">
                     <Outlet />
                 </main>
             </div>

@@ -42,7 +42,7 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 30
 
     # CORS - stored as string to avoid JSON parsing issues
-    cors_origins_str: str = "http://localhost:3000,http://localhost:5173"
+    cors_origins_str: str = "http://localhost:3000,http://localhost:5173,https://filadelfias-6a116.web.app,https://filadelfias.com,https://www.filadelfias.com"
 
     @property
     def cors_origins(self) -> list[str]:

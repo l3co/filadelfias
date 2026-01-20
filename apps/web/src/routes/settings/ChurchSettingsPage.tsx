@@ -8,8 +8,9 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { 
     Church, MapPin, Phone, Save, Loader2, AlertCircle, CheckCircle2,
-    Building2
+    Building2, Trash2
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface ChurchFormData {
     name: string;
@@ -28,8 +29,11 @@ interface ChurchFormData {
 export function ChurchSettingsPage() {
     const { data: user } = useCurrentUser();
     const queryClient = useQueryClient();
+    const navigate = useNavigate();
     const { fetchAddress, isLoading: isFetchingCEP } = useViaCEP();
     const [successMessage, setSuccessMessage] = useState('');
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [deleteConfirmText, setDeleteConfirmText] = useState('');
     
     const tenant = user?.memberships?.[0]?.tenant;
     const tenantId = tenant?.id;
@@ -90,6 +94,16 @@ export function ChurchSettingsPage() {
             queryClient.invalidateQueries({ queryKey: ['currentUser'] });
             setSuccessMessage('Dados da igreja atualizados com sucesso!');
             setTimeout(() => setSuccessMessage(''), 3000);
+        }
+    });
+
+    const deleteMutation = useMutation({
+        mutationFn: async () => {
+            await api.delete(`/tenants/${tenantId}`);
+        },
+        onSuccess: () => {
+            queryClient.clear();
+            navigate('/');
         }
     });
 
@@ -315,6 +329,88 @@ export function ChurchSettingsPage() {
                     </Button>
                 </div>
             </form>
+
+            {/* Danger Zone */}
+            <div className="mt-12 bg-red-50 rounded-2xl border border-red-200 p-6">
+                <h2 className="text-lg font-semibold text-red-800 mb-2 flex items-center gap-2">
+                    <Trash2 size={20} className="text-red-600" />
+                    Zona de Perigo
+                </h2>
+                <p className="text-red-700 text-sm mb-4">
+                    Ações irreversíveis. Tenha certeza antes de prosseguir.
+                </p>
+
+                {!showDeleteConfirm ? (
+                    <Button
+                        type="button"
+                        variant="destructive"
+                        onClick={() => setShowDeleteConfirm(true)}
+                        className="gap-2"
+                    >
+                        <Trash2 size={18} />
+                        Excluir Igreja
+                    </Button>
+                ) : (
+                    <div className="bg-white rounded-xl p-4 border border-red-300">
+                        <p className="text-red-800 font-medium mb-3">
+                            Esta ação é irreversível e irá excluir:
+                        </p>
+                        <ul className="text-red-700 text-sm mb-4 list-disc list-inside space-y-1">
+                            <li>Todos os dados da igreja</li>
+                            <li>Todos os membros cadastrados</li>
+                            <li>Todos os registros financeiros</li>
+                            <li>Todas as aulas de EBD</li>
+                            <li>Todos os eventos e missões</li>
+                        </ul>
+                        <p className="text-sm text-gray-700 mb-3">
+                            Digite <strong className="text-red-700">{tenant?.slug}</strong> para confirmar:
+                        </p>
+                        <Input
+                            value={deleteConfirmText}
+                            onChange={(e) => setDeleteConfirmText(e.target.value)}
+                            placeholder={tenant?.slug}
+                            className="mb-4"
+                        />
+                        <div className="flex gap-3">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => {
+                                    setShowDeleteConfirm(false);
+                                    setDeleteConfirmText('');
+                                }}
+                            >
+                                Cancelar
+                            </Button>
+                            <Button
+                                type="button"
+                                variant="destructive"
+                                disabled={deleteConfirmText !== tenant?.slug || deleteMutation.isPending}
+                                onClick={() => deleteMutation.mutate()}
+                                className="gap-2"
+                            >
+                                {deleteMutation.isPending ? (
+                                    <>
+                                        <Loader2 size={18} className="animate-spin" />
+                                        Excluindo...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Trash2 size={18} />
+                                        Confirmar Exclusão
+                                    </>
+                                )}
+                            </Button>
+                        </div>
+                        {deleteMutation.isError && (
+                            <div className="mt-3 text-red-600 text-sm flex items-center gap-2">
+                                <AlertCircle size={16} />
+                                Erro ao excluir. Tente novamente.
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
         </div>
     );
 }

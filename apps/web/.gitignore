@@ -23,3 +23,11 @@ dist-ssr
 *.sln
 *.sw?
 coverage/
+
+# E2E Test artifacts
+.features-gen/
+reports/
+test-results/
+playwright-report/
+screenshots/
+blob-report/

@@ -5,7 +5,6 @@ Filadelfias API - Main Application Entry Point
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.config import settings
 from src.api.auth import router as auth_router
 from src.api.bible import router as bible_router
 from src.api.churches import router as churches_router
@@ -17,6 +16,7 @@ from src.api.invitations import router as invitations_router
 from src.api.members import router as members_router
 from src.api.mission import router as mission_router
 from src.api.tenants import router as tenants_router
+from src.config import settings
 
 app = FastAPI(
     title="Filadelfias API",

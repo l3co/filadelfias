@@ -17,7 +17,8 @@ test.describe('Authentication', () => {
     await page.getByLabel(/senha/i).fill('wrongpassword');
     await page.getByRole('button', { name: /entrar/i }).click();
     
-    await expect(page.getByText(/incorretos/i)).toBeVisible();
+    // Aguardar resposta da API com timeout maior
+    await expect(page.getByText(/incorretos/i)).toBeVisible({ timeout: 10000 });
   });
 
   test('should navigate to forgot password page', async ({ page }) => {

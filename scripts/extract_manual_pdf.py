@@ -35,13 +35,21 @@ def extract_text_from_pdf(pdf_path: str) -> list[dict]:
 
 
 def clean_text(text: str) -> str:
-    """Limpa o texto removendo quebras de linha desnecessárias."""
-    # Remove hífens de quebra de linha
+    """Limpa o texto removendo quebras de linha desnecessárias e hifenização."""
+    # Remove hífen seguido de quebra de linha (palavra dividida)
     text = re.sub(r'-\s*\n\s*', '', text)
+    # Remove hífen "soft" (­) usado para quebra de linha
+    text = text.replace('­', '')
+    # Remove hífen seguido de espaços (quebra de linha do PDF)
+    text = re.sub(r'-\s{2,}', '', text)
     # Substitui múltiplas quebras de linha por espaço
     text = re.sub(r'\n+', ' ', text)
     # Remove espaços múltiplos
     text = re.sub(r'\s+', ' ', text)
+    # Remove espaços antes de pontuação
+    text = re.sub(r'\s+([.,;:!?)])', r'\1', text)
+    # Adiciona espaço após pontuação se seguido de letra
+    text = re.sub(r'([.,;:!?])([A-Za-zÀ-ÿ])', r'\1 \2', text)
     return text.strip()
 
 
@@ -119,7 +127,6 @@ def extract_articles_from_pages(pages: list[dict]) -> list[dict]:
 def build_manual_structure(articles: list[dict]) -> dict:
     """Constrói a estrutura do manual com todos os artigos extraídos."""
     
-    # Estrutura simplificada - todos os artigos em uma única parte
     structure = {
         "metadata": {
             "title": "Manual Presbiteriano",
@@ -134,47 +141,77 @@ def build_manual_structure(articles: list[dict]) -> dict:
         "parts": []
     }
     
-    # Agrupa artigos por centenas para criar capítulos
-    # Isso facilita a navegação
-    chapters = {}
+    # Separa artigos por faixas de numeração (diferentes partes do Manual)
+    # Constituição: Art. 1-152
+    # Código de Disciplina: Art. 1-xxx (reinicia numeração)
+    # Princípios de Liturgia: Art. 1-xxx
+    # etc.
+    
+    constituicao_arts = []
+    outros_arts = []
     
     for article in articles:
         try:
             art_num = int(article["number"])
-            # Agrupa por centenas (1-99, 100-199, etc.)
-            chapter_num = (art_num - 1) // 50
-            
-            if chapter_num not in chapters:
-                start = chapter_num * 50 + 1
-                end = (chapter_num + 1) * 50
-                chapters[chapter_num] = {
-                    "id": f"ch{chapter_num}",
-                    "number": str(chapter_num + 1),
-                    "title": f"Artigos {start} a {end}",
-                    "sections": [],
-                    "articles": []
-                }
-            
-            article_copy = article.copy()
-            article_copy["id"] = f"ch{chapter_num}/art{article['number']}"
-            chapters[chapter_num]["articles"].append(article_copy)
+            # Artigos 1-200 são provavelmente da Constituição
+            # Artigos com números muito altos (>1000) são de outras seções
+            if art_num <= 200:
+                constituicao_arts.append(article)
+            else:
+                outros_arts.append(article)
         except ValueError:
-            # Artigo com número não numérico, pula
             continue
     
-    # Ordena capítulos e artigos
-    sorted_chapters = []
-    for ch_num in sorted(chapters.keys()):
-        ch = chapters[ch_num]
-        # Ordena artigos dentro do capítulo
-        ch["articles"].sort(key=lambda a: int(a["number"]) if a["number"].isdigit() else 0)
-        sorted_chapters.append(ch)
+    # Ordena artigos da Constituição
+    constituicao_arts.sort(key=lambda a: int(a["number"]))
+    
+    # Agrupa artigos da Constituição em capítulos de 50
+    chapters = []
+    chapter_num = 0
+    
+    for i in range(0, len(constituicao_arts), 50):
+        batch = constituicao_arts[i:i+50]
+        if batch:
+            first_num = batch[0]["number"]
+            last_num = batch[-1]["number"]
+            
+            chapter = {
+                "id": f"ch{chapter_num}",
+                "number": str(chapter_num + 1),
+                "title": f"Artigos {first_num} a {last_num}",
+                "sections": [],
+                "articles": []
+            }
+            
+            for article in batch:
+                article_copy = article.copy()
+                article_copy["id"] = f"ch{chapter_num}/art{article['number']}"
+                chapter["articles"].append(article_copy)
+            
+            chapters.append(chapter)
+            chapter_num += 1
+    
+    # Adiciona artigos de outras seções como capítulo separado (se houver)
+    if outros_arts:
+        outros_arts.sort(key=lambda a: int(a["number"]))
+        chapter = {
+            "id": f"ch{chapter_num}",
+            "number": str(chapter_num + 1),
+            "title": "Outras Disposições",
+            "sections": [],
+            "articles": []
+        }
+        for article in outros_arts:
+            article_copy = article.copy()
+            article_copy["id"] = f"ch{chapter_num}/art{article['number']}"
+            chapter["articles"].append(article_copy)
+        chapters.append(chapter)
     
     # Cria uma única parte com todos os capítulos
     part = {
         "id": "p0",
-        "title": "Manual Presbiteriano 2019",
-        "chapters": sorted_chapters
+        "title": "Constituição da Igreja Presbiteriana do Brasil",
+        "chapters": chapters
     }
     
     structure["parts"].append(part)

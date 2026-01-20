@@ -1,0 +1,22 @@
+{
+  "name": "Filadélfias - Gestão para Igrejas Presbiterianas",
+  "short_name": "Filadélfias",
+  "description": "Sistema completo de gestão para igrejas presbiterianas. Gerencie membros, finanças, EBD, governança e muito mais.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#15803d",
+  "orientation": "portrait-primary",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities", "education"],
+  "screenshots": [],
+  "prefer_related_applications": false
+}

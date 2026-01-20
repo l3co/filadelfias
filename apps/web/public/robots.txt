@@ -1,0 +1,13 @@
+# Robots.txt for Filadélfias
+# https://filadelfias.com
+
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://filadelfias.com/sitemap.xml
+
+# Disallow admin/private areas
+Disallow: /api/
+Disallow: /dashboard/
+Disallow: /settings/

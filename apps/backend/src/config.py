@@ -30,16 +30,13 @@ class Settings(BaseSettings):
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
 
-    # CORS
-    cors_origins: list[str] = ["http://localhost:3000", "http://localhost:5173"]
+    # CORS - stored as string to avoid JSON parsing issues
+    cors_origins_str: str = "http://localhost:3000,http://localhost:5173"
 
-    @field_validator("cors_origins", mode="before")
-    @classmethod
-    def parse_cors_origins(cls, v: str | list[str]) -> list[str]:
-        """Parse CORS origins from comma-separated string or list."""
-        if isinstance(v, str):
-            return [origin.strip() for origin in v.split(",") if origin.strip()]
-        return v
+    @property
+    def cors_origins(self) -> list[str]:
+        """Parse CORS origins from comma-separated string."""
+        return [origin.strip() for origin in self.cors_origins_str.split(",") if origin.strip()]
 
     model_config = SettingsConfigDict(
         env_file=".env",

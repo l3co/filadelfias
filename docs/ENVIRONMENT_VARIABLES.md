@@ -10,7 +10,7 @@ Este documento lista todas as variáveis de ambiente necessárias para o deploy 
 | `SECRET_KEY` | Chave secreta para JWT (use `openssl rand -hex 32`) | `a1b2c3d4e5f6...` | ✅ |
 | `ALGORITHM` | Algoritmo de criptografia JWT | `HS256` | ✅ |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | Tempo de expiração do token em minutos | `30` | ✅ |
-| `CORS_ORIGINS` | Lista de origens permitidas (JSON array) | `["https://app.filadelfias.app"]` | ✅ |
+| `CORS_ORIGINS_STR` | Lista de origens permitidas (separadas por vírgula) | `https://app.filadelfias.app,https://filadelfias.app` | ✅ |
 | `DEBUG` | Modo debug (sempre `false` em produção) | `false` | ❌ |
 | `RESEND_API_KEY` | API Key do Resend para envio de emails | `re_xxxxxxxxxxxx` | ❌ |
 | `EMAIL_FROM` | Email remetente para emails automáticos | `Filadélfias <noreply@filadelfias.app>` | ❌ |
@@ -56,9 +56,9 @@ envs:
   - key: ACCESS_TOKEN_EXPIRE_MINUTES
     scope: RUN_TIME
     value: "30"
-  - key: CORS_ORIGINS
+  - key: CORS_ORIGINS_STR
     scope: RUN_TIME
-    value: '["https://app.filadelfias.app"]'
+    value: "https://app.filadelfias.app"
   - key: DEBUG
     scope: RUN_TIME
     value: "false"

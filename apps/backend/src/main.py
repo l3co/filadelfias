@@ -5,6 +5,7 @@ Filadelfias API - Main Application Entry Point
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from src.config import settings
 from src.api.auth import router as auth_router
 from src.api.bible import router as bible_router
 from src.api.churches import router as churches_router
@@ -26,7 +27,7 @@ app = FastAPI(
 # CORS Configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],
+    allow_origins=settings.cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

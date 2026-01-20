@@ -24,10 +24,10 @@ export function PublicLayout() {
                                 <Music size={16} />
                                 <span>Hinário</span>
                             </Link>
-                            <span className="text-sm font-medium text-gray-400 cursor-not-allowed flex items-center gap-2" title="Em breve">
+                            <Link to="/manual" className="text-sm font-medium text-gray-600 hover:text-green-700 flex items-center gap-2 transition-colors">
                                 <Book size={16} />
                                 <span>Manual</span>
-                            </span>
+                            </Link>
                             <span className="text-sm font-medium text-gray-400 cursor-not-allowed flex items-center gap-2" title="Em breve">
                                 <MapPin size={16} />
                                 <span>Igrejas Perto</span>
@@ -67,6 +67,7 @@ export function PublicLayout() {
                             <ul className="space-y-2 text-sm text-gray-500">
                                 <li><Link to="/bible" className="hover:text-green-700">Bíblia Online</Link></li>
                                 <li><Link to="/hymnal" className="hover:text-green-700">Hinário</Link></li>
+                                <li><Link to="/manual" className="hover:text-green-700">Manual Presbiteriano</Link></li>
                             </ul>
                         </div>
                         <div>

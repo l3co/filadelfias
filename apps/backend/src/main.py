@@ -13,6 +13,7 @@ from src.api.financial import router as financial_router
 from src.api.governance import router as governance_router
 from src.api.hymnal import router as hymnal_router
 from src.api.invitations import router as invitations_router
+from src.api.manual import router as manual_router
 from src.api.members import router as members_router
 from src.api.mission import router as mission_router
 from src.api.tenants import router as tenants_router
@@ -45,6 +46,7 @@ app.include_router(governance_router)
 app.include_router(financial_router)
 app.include_router(mission_router)
 app.include_router(ebd_router)
+app.include_router(manual_router)
 
 
 @app.get("/health", tags=["Health"])

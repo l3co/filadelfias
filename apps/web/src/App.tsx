@@ -15,6 +15,8 @@ import { BiblePage } from './routes/bible/BiblePage';
 import { BibleReaderPage } from './routes/bible/BibleReaderPage';
 import { HymnalPage } from './routes/hymnal/HymnalPage';
 import { HymnalReaderPage } from './routes/hymnal/HymnalReaderPage';
+import { ManualPage } from './routes/manual/ManualPage';
+import { ManualReaderPage } from './routes/manual/ManualReaderPage';
 import { CouncilsPage } from './routes/governance/CouncilsPage';
 import { TreasuryPage } from './routes/financial/TreasuryPage';
 import { MissionsPage } from './routes/missions/MissionsPage';
@@ -32,6 +34,8 @@ function App() {
           <Route path="/bible/:book/:chapter" element={<BibleReaderPage />} />
           <Route path="/hymnal" element={<HymnalPage />} />
           <Route path="/hymnal/:number" element={<HymnalReaderPage />} />
+          <Route path="/manual" element={<ManualPage />} />
+          <Route path="/manual/*" element={<ManualReaderPage />} />
         </Route>
 
         {/* Autenticação (Sem Layout Específico) */}

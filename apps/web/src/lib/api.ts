@@ -1,10 +1,21 @@
 import axios from 'axios';
 
+// Runtime config type
+interface RuntimeConfig {
+    API_URL?: string;
+}
+
+declare global {
+    interface Window {
+        __CONFIG__?: RuntimeConfig;
+    }
+}
+
 // Runtime config (injected by docker-entrypoint.sh) or build-time env or fallback
 const getApiUrl = (): string => {
     // Check runtime config first (production)
-    if (typeof window !== 'undefined' && (window as any).__CONFIG__?.API_URL) {
-        const runtimeUrl = (window as any).__CONFIG__.API_URL;
+    if (typeof window !== 'undefined' && window.__CONFIG__?.API_URL) {
+        const runtimeUrl = window.__CONFIG__.API_URL;
         // Ignore placeholder value
         if (runtimeUrl !== '__API_URL__') {
             return runtimeUrl;

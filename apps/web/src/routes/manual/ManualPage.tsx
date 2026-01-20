@@ -55,22 +55,22 @@ export function ManualPage() {
     }
 
     return (
-        <div className="max-w-5xl mx-auto px-4 py-8 sm:px-6">
+        <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
             {/* Header */}
-            <div className="text-center mb-8">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-                    <BookOpen className="w-8 h-8 text-green-700" />
+            <div className="text-center mb-6">
+                <div className="inline-flex items-center justify-center w-14 h-14 bg-green-100 rounded-full mb-3">
+                    <BookOpen className="w-7 h-7 text-green-700" />
                 </div>
-                <h1 className="text-3xl font-serif font-bold text-gray-900 mb-2">
+                <h1 className="text-2xl sm:text-3xl font-serif font-bold text-gray-900 mb-1">
                     Manual Presbiteriano
                 </h1>
-                <p className="text-gray-600">
+                <p className="text-gray-600 text-sm">
                     Edição {structure?.metadata.editionYear} • {structure?.total_articles} artigos
                 </p>
             </div>
 
             {/* Search */}
-            <div className="relative max-w-xl mx-auto mb-8">
+            <div className="relative max-w-3xl mx-auto mb-6">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                 <input
                     type="text"
@@ -88,7 +88,7 @@ export function ManualPage() {
 
             {/* Search Results */}
             {searchQuery.length >= 2 && searchResults && (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-8">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
                     <h2 className="text-sm font-medium text-gray-500 mb-3">
                         {searchResults.count} resultado(s) para "{searchQuery}"
                     </h2>

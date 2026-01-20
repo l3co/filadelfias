@@ -10,17 +10,14 @@ Referência rápida de todas as tecnologias utilizadas no projeto.
 |------------|--------|-----|
 | **Python** | 3.11+ | Linguagem principal |
 | **FastAPI** | 0.110+ | Framework web assíncrono |
-| **SQLAlchemy** | 2.0+ | ORM (modo async) |
-| **Alembic** | 1.13+ | Migrações de banco |
-| **PostgreSQL** | 15+ | Banco de dados relacional |
+| **Firestore** | - | Banco de dados NoSQL (Firebase) |
+| **firebase-admin** | 6.0+ | SDK Firebase Admin |
 | **Pydantic** | 2.0+ | Validação e serialização |
 | **Poetry** | 1.8+ | Gerenciamento de dependências |
 | **Pytest** | 8.0+ | Framework de testes |
 | **Uvicorn** | 0.27+ | Servidor ASGI |
-| **asyncpg** | 0.29+ | Driver async para Postgres |
 | **bcrypt** / **argon2** | - | Hash de senhas |
 | **PyJWT** | 2.8+ | Tokens JWT |
-| **aioboto3** | - | SDK AWS/S3 async |
 
 ---
 
@@ -70,13 +67,17 @@ Referência rápida de todas as tecnologias utilizadas no projeto.
 
 ## 🏗️ Infraestrutura
 
+> **Migração (Jan/2026)**: Migramos de DigitalOcean para Firebase/GCP por custo e simplicidade.
+
 | Serviço | Provider | Uso |
 |---------|----------|-----|
-| **App Platform** | DigitalOcean | Deploy de containers |
-| **Managed PostgreSQL** | DigitalOcean | Banco de dados |
-| **Spaces (S3)** | DigitalOcean | Object storage |
+| **Cloud Run** | Google Cloud | Deploy de containers (auto-scaling) |
+| **Firestore** | Firebase | Banco de dados NoSQL |
+| **Cloud Storage** | Firebase | Object storage |
+| **Firebase Hosting** | Firebase | Hospedagem do frontend (CDN) |
 | **GitHub Actions** | GitHub | CI/CD |
 | **Docker** | - | Containerização local |
+| **Firestore Emulator** | Firebase | Desenvolvimento local |
 
 ---
 

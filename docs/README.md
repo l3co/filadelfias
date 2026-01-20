@@ -43,9 +43,17 @@ Bem-vindo à documentação técnica do projeto **Filadelfias**.
 
 ## 🔗 Links Úteis
 
-- **API Docs (Swagger)**: `http://localhost:8000/docs` (local)
+### Produção (Firebase/GCP)
+- **Frontend**: https://filadelfias-6a116.web.app
+- **Backend API**: https://filadelfias-api-332378056596.southamerica-east1.run.app
+- **API Docs (Swagger)**: https://filadelfias-api-332378056596.southamerica-east1.run.app/docs
+
+### Desenvolvimento Local
+- **API Docs (Swagger)**: `http://localhost:8000/docs`
+- **Web App**: `http://localhost:5173`
 - **Storybook (Componentes)**: `http://localhost:6006` (em desenvolvimento)
-- **Repositório**: [GitHub](#)
+
+> **Nota**: Em Janeiro/2026, migramos de DigitalOcean para Firebase/GCP por custo e simplicidade.
 
 ---
 

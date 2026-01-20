@@ -22,7 +22,7 @@ O **Filadelfias** é uma plataforma multi-tenant para gestão eclesiástica, com
          ▼                 ▼                         ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                         API GATEWAY / LOAD BALANCER                          │
-│                        (DigitalOcean App Platform)                           │
+│                           (Google Cloud Run)                                 │
 └─────────────────────────────────────────────────────────────────────────────┘
                                     │
                                     ▼
@@ -36,8 +36,8 @@ O **Filadelfias** é uma plataforma multi-tenant para gestão eclesiástica, com
          │                    │                              │
          ▼                    ▼                              ▼
 ┌─────────────────┐  ┌─────────────────┐          ┌─────────────────┐
-│   PostgreSQL    │  │  Redis (Cache)  │          │  Object Storage │
-│   (DB Managed)  │  │   (Opcional)    │          │  (S3/Spaces)    │
+│    Firestore    │  │  Redis (Cache)  │          │  Cloud Storage  │
+│   (NoSQL DB)    │  │   (Opcional)    │          │  (Firebase)     │
 └─────────────────┘  └─────────────────┘          └─────────────────┘
 ```
 
@@ -84,7 +84,7 @@ graph TD
 
 ### 3. Async First
 - Todos os endpoints são `async def`.
-- Drivers assíncronos: `asyncpg`, `aiohttp`, `aioboto3`.
+- Drivers assíncronos: `google-cloud-firestore`, `aiohttp`.
 
 ---
 
@@ -148,14 +148,19 @@ filadelfias/
 
 ---
 
-## 🌐 Infraestrutura (DigitalOcean)
+## 🌐 Infraestrutura (Firebase / Google Cloud)
+
+> **Nota sobre migração**: Em Janeiro/2026, migramos de DigitalOcean para Firebase/Google Cloud
+> por questões de **custo** e **simplicidade de configuração**. A plataforma tem atendido bem
+> às necessidades do projeto.
 
 | Componente | Serviço | Configuração |
 |------------|---------|--------------|
-| Backend API | App Platform | Container Python |
-| Web | App Platform | Static Site (CDN) |
-| Database | Managed PostgreSQL | 1 vCPU, 1GB RAM (dev) |
-| Storage | Spaces (S3) | Bucket privado |
+| Backend API | Cloud Run | Container Python (auto-scaling) |
+| Web | Firebase Hosting | Static Site (CDN global) |
+| Database | Firestore | NoSQL document database |
+| Storage | Cloud Storage | Bucket Firebase |
+| Auth | Firebase Admin SDK | JWT próprio |
 | CI/CD | GitHub Actions | Build → Test → Deploy |
 
 ---
@@ -166,7 +171,7 @@ filadelfias/
 | API | Uso | Autenticação |
 |-----|-----|--------------|
 | A Bíblia Digital | Versões online da Bíblia | API Key |
-| DigitalOcean Spaces | Upload de arquivos | AWS SDK (S3 compat) |
+| Firebase/GCP | Firestore, Storage | Service Account |
 
 ### Notificações
 - **Push**: Expo Push Notifications (Mobile), Web Push API.

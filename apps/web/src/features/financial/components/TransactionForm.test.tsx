@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { TransactionForm } from './TransactionForm';
 import { vi } from 'vitest';
-import { FinancialAccount, TransactionCategory } from '../../../services/financial';
+import type { FinancialAccount, TransactionCategory } from '../../../services/financial';
 
 const mockAccounts: FinancialAccount[] = [
     { id: '1', name: 'Conta Principal', type: 'BANK', balance: 1000, tenant_id: 't1' },

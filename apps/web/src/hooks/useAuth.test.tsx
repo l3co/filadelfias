@@ -50,7 +50,8 @@ describe('useAuth Hooks', () => {
                 id: '1',
                 email: 'test@example.com',
                 name: 'Test User',
-                username: 'Test User',
+                is_active: true,
+                created_at: '2024-01-01T00:00:00Z',
                 memberships: []
             };
             vi.mocked(authService.register).mockResolvedValue(mockUser);
@@ -82,7 +83,8 @@ describe('useAuth Hooks', () => {
                 id: '1',
                 email: 'test@example.com',
                 name: 'Test User',
-                username: 'Test User',
+                is_active: true,
+                created_at: '2024-01-01T00:00:00Z',
                 memberships: []
             };
             vi.mocked(authService.getCurrentUser).mockResolvedValue(mockUser);

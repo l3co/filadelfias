@@ -33,7 +33,7 @@ async def get_article_by_id(article_id: str):
 @router.get("/search")
 async def search(
     q: str = Query(..., min_length=2, description="Search query"),
-    limit: int = Query(20, ge=1, le=100, description="Maximum results")
+    limit: int = Query(20, ge=1, le=100, description="Maximum results"),
 ):
     """
     Search articles by text content.

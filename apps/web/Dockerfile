@@ -13,18 +13,17 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-# Production stage
-FROM node:20-alpine
+# Production stage with nginx
+FROM nginx:alpine
 
-WORKDIR /app
+# Copy custom nginx config
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY entrypoint.sh ./
+# Copy built assets from builder
+COPY --from=builder /app/dist /usr/share/nginx/html
 
-RUN chmod +x entrypoint.sh
+# Expose port 80
+EXPOSE 80
 
-EXPOSE 5173
-
-ENTRYPOINT ["./entrypoint.sh"]
+# nginx runs as PID 1
+CMD ["nginx", "-g", "daemon off;"]

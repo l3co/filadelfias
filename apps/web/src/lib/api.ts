@@ -1,6 +1,20 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+// Runtime config (injected by docker-entrypoint.sh) or build-time env or fallback
+const getApiUrl = (): string => {
+    // Check runtime config first (production)
+    if (typeof window !== 'undefined' && (window as any).__CONFIG__?.API_URL) {
+        const runtimeUrl = (window as any).__CONFIG__.API_URL;
+        // Ignore placeholder value
+        if (runtimeUrl !== '__API_URL__') {
+            return runtimeUrl;
+        }
+    }
+    // Fall back to build-time env or default
+    return import.meta.env.VITE_API_URL || 'http://localhost:8000';
+};
+
+const API_URL = getApiUrl();
 
 export const api = axios.create({
     baseURL: API_URL,

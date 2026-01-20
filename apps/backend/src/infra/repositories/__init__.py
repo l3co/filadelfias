@@ -2,17 +2,13 @@
 Firestore repositories for each entity.
 """
 
-from src.infra.repositories.user_repository import UserRepository, user_repository
-from src.infra.repositories.tenant_repository import TenantRepository, tenant_repository
-from src.infra.repositories.member_repository import MemberRepository, member_repository
-from src.infra.repositories.membership_repository import MembershipRepository, membership_repository
 from src.infra.repositories.ebd_repository import (
     EBDClassRepository,
-    EBDStudentRepository,
     EBDLessonRepository,
+    EBDStudentRepository,
     ebd_class_repository,
-    ebd_student_repository,
     ebd_lesson_repository,
+    ebd_student_repository,
 )
 from src.infra.repositories.financial_repository import (
     FinancialAccountRepository,
@@ -28,10 +24,14 @@ from src.infra.repositories.governance_repository import (
     council_repository,
     meeting_repository,
 )
+from src.infra.repositories.member_repository import MemberRepository, member_repository
+from src.infra.repositories.membership_repository import MembershipRepository, membership_repository
+from src.infra.repositories.tenant_repository import TenantRepository, tenant_repository
+from src.infra.repositories.user_repository import UserRepository, user_repository
 
 __all__ = [
     "UserRepository",
-    "TenantRepository", 
+    "TenantRepository",
     "MemberRepository",
     "MembershipRepository",
     "EBDClassRepository",

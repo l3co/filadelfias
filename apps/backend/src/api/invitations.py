@@ -10,10 +10,10 @@ from pydantic import BaseModel
 
 from src.api.auth import get_current_user
 from src.infra.repositories import (
-    user_repository,
     member_repository,
-    tenant_repository,
     membership_repository,
+    tenant_repository,
+    user_repository,
 )
 from src.infra.security import get_password_hash, verify_password
 from src.services.email_service import email_service
@@ -134,14 +134,12 @@ async def forgot_password(data: ForgotPasswordRequest):
         # Generate reset token
         reset_token = generate_reset_token()
         expires = datetime.utcnow() + timedelta(hours=1)
-        
+
         await user_repository.set_password_reset_token(user["id"], reset_token, expires)
 
         # Send reset email
         await email_service.send_password_reset_email(
-            to_email=user["email"],
-            user_name=user["name"],
-            reset_token=reset_token
+            to_email=user["email"], user_name=user["name"], reset_token=reset_token
         )
 
     return {"message": "Se o email existir, você receberá instruções para redefinir sua senha."}

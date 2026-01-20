@@ -2,8 +2,8 @@
 Firebase Admin SDK initialization and Firestore client.
 """
 
-import os
 import json
+import os
 from functools import lru_cache
 
 import firebase_admin

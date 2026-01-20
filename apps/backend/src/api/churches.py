@@ -4,14 +4,14 @@ API endpoints for church registration.
 
 from fastapi import APIRouter, HTTPException, status
 
-from src.infra.security import create_access_token
 from src.domain.schemas import ChurchRegistrationRequest, ChurchRegistrationResponse, TenantResponse, UserResponse
 from src.infra.repositories import (
-    tenant_repository,
-    user_repository,
     member_repository,
     membership_repository,
+    tenant_repository,
+    user_repository,
 )
+from src.infra.security import create_access_token
 
 router = APIRouter()
 

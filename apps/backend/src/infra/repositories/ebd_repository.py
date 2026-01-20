@@ -2,10 +2,10 @@
 EBD (Education) repositories for Firestore.
 """
 
-from typing import Optional
 from datetime import date
+from typing import Optional
 
-from src.infra.firestore_repository import TenantScopedRepository, FirestoreRepository
+from src.infra.firestore_repository import FirestoreRepository, TenantScopedRepository
 
 
 class EBDClassRepository(TenantScopedRepository):

@@ -2,9 +2,8 @@
 Financial repositories for Firestore.
 """
 
-from typing import Optional
 from datetime import date
-from decimal import Decimal
+from typing import Optional
 
 from src.infra.firestore_repository import TenantScopedRepository
 

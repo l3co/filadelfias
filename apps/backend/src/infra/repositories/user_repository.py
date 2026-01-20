@@ -2,8 +2,8 @@
 User repository for Firestore.
 """
 
-from typing import Optional
 from datetime import datetime
+from typing import Optional
 
 from src.infra.firestore_repository import FirestoreRepository
 from src.infra.security import get_password_hash
@@ -37,13 +37,7 @@ class UserRepository(FirestoreRepository):
                 return users[0]
         return None
 
-    async def create_user(
-        self,
-        email: str,
-        name: str,
-        password: str,
-        avatar_url: Optional[str] = None
-    ) -> dict:
+    async def create_user(self, email: str, name: str, password: str, avatar_url: Optional[str] = None) -> dict:
         """Create a new user with hashed password."""
         data = {
             "email": email,
@@ -58,33 +52,37 @@ class UserRepository(FirestoreRepository):
         }
         return await self.create(data)
 
-    async def set_password_reset_token(
-        self,
-        user_id: str,
-        token: str,
-        expires: datetime
-    ) -> Optional[dict]:
+    async def set_password_reset_token(self, user_id: str, token: str, expires: datetime) -> Optional[dict]:
         """Set password reset token for user."""
-        return await self.update(user_id, {
-            "password_reset_token": token,
-            "password_reset_expires": expires,
-        })
+        return await self.update(
+            user_id,
+            {
+                "password_reset_token": token,
+                "password_reset_expires": expires,
+            },
+        )
 
     async def clear_password_reset_token(self, user_id: str) -> Optional[dict]:
         """Clear password reset token."""
-        return await self.update(user_id, {
-            "password_reset_token": None,
-            "password_reset_expires": None,
-        })
+        return await self.update(
+            user_id,
+            {
+                "password_reset_token": None,
+                "password_reset_expires": None,
+            },
+        )
 
     async def update_password(self, user_id: str, password_hash: str) -> Optional[dict]:
         """Update user password."""
-        return await self.update(user_id, {
-            "password_hash": password_hash,
-            "must_change_password": False,
-            "password_reset_token": None,
-            "password_reset_expires": None,
-        })
+        return await self.update(
+            user_id,
+            {
+                "password_hash": password_hash,
+                "must_change_password": False,
+                "password_reset_token": None,
+                "password_reset_expires": None,
+            },
+        )
 
 
 # Singleton instance

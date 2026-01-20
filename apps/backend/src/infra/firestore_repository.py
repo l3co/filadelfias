@@ -2,11 +2,11 @@
 Base Firestore repository with common CRUD operations.
 """
 
-from typing import Any, Generic, TypeVar, Optional
-from datetime import datetime
 import uuid
+from datetime import datetime
+from typing import Any, Generic, Optional, TypeVar
 
-from google.cloud.firestore import Client, DocumentReference, CollectionReference
+from google.cloud.firestore import Client, CollectionReference
 
 from src.infra.firebase import get_db
 
@@ -79,13 +79,7 @@ class FirestoreRepository(Generic[T]):
         doc_ref.delete()
         return True
 
-    async def query(
-        self,
-        field: str,
-        operator: str,
-        value: Any,
-        limit: int = 100
-    ) -> list[dict]:
+    async def query(self, field: str, operator: str, value: Any, limit: int = 100) -> list[dict]:
         """Query documents by field."""
         docs = self.collection.where(field, operator, value).limit(limit).stream()
         return [doc.to_dict() for doc in docs]
@@ -147,14 +141,7 @@ class TenantScopedRepository(FirestoreRepository[T]):
         doc_ref.delete()
         return True
 
-    async def query(
-        self,
-        tenant_id: str,
-        field: str,
-        operator: str,
-        value: Any,
-        limit: int = 100
-    ) -> list[dict]:
+    async def query(self, tenant_id: str, field: str, operator: str, value: Any, limit: int = 100) -> list[dict]:
         """Query documents in tenant's subcollection."""
         docs = self.get_collection(tenant_id).where(field, operator, value).limit(limit).stream()
         return [doc.to_dict() for doc in docs]

@@ -2,8 +2,8 @@
 User Church Membership repository for Firestore.
 """
 
-from typing import Optional
 from datetime import datetime
+from typing import Optional
 
 from src.infra.firestore_repository import FirestoreRepository
 

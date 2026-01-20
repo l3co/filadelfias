@@ -3,6 +3,11 @@ from typing import List
 from fastapi import APIRouter, Depends, Query
 
 from src.api.auth import get_current_user
+from src.infra.repositories import (
+    ebd_class_repository,
+    ebd_lesson_repository,
+    ebd_student_repository,
+)
 from src.modules.ebd.schemas import (
     EBDClassCreate,
     EBDClassResponse,
@@ -10,11 +15,6 @@ from src.modules.ebd.schemas import (
     EBDLessonResponse,
     EBDStudentCreate,
     EBDStudentResponse,
-)
-from src.infra.repositories import (
-    ebd_class_repository,
-    ebd_student_repository,
-    ebd_lesson_repository,
 )
 
 router = APIRouter(prefix="/ebd", tags=["Education (EBD)"])

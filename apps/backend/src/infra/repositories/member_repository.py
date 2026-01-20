@@ -2,8 +2,8 @@
 Member repository for Firestore (tenant-scoped).
 """
 
-from typing import Optional
 from datetime import date
+from typing import Optional
 
 from src.infra.firestore_repository import TenantScopedRepository
 

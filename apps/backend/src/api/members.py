@@ -21,8 +21,7 @@ async def create_member(
     # TODO: Implement RBAC to check if user can create members in this tenant
 
     created_member = await member_repository.create_member(
-        tenant_id=tenant_id,
-        **member_data.model_dump(exclude_unset=True)
+        tenant_id=tenant_id, **member_data.model_dump(exclude_unset=True)
     )
     return created_member
 

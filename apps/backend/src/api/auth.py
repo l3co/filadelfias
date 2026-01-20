@@ -34,11 +34,7 @@ async def register(user_data: UserCreate):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
 
     # Create user
-    user = await user_repository.create_user(
-        email=user_data.email,
-        name=user_data.name,
-        password=user_data.password
-    )
+    user = await user_repository.create_user(email=user_data.email, name=user_data.name, password=user_data.password)
 
     return user
 
@@ -129,17 +125,14 @@ async def get_me(current_user=Depends(get_current_user)):
 async def delete_my_account(current_user: dict = Depends(get_current_user)):
     """
     Delete current user account and all associated data.
-    
+
     WARNING: This action is irreversible and will:
     - Remove user from all churches (memberships)
     - Unlink user from member profiles
     - Delete the user account
-    
+
     Note: This does NOT delete the church data, only the user's personal data.
     """
     deleted = await delete_user_data(current_user["id"])
-    
-    return {
-        "message": "Sua conta foi excluída com sucesso",
-        "deleted": deleted
-    }
+
+    return {"message": "Sua conta foi excluída com sucesso", "deleted": deleted}

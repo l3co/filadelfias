@@ -87,7 +87,7 @@ class TenantRepository(FirestoreRepository):
             data["latitude"] = latitude
         if longitude is not None:
             data["longitude"] = longitude
-        
+
         if data:
             return await self.update(tenant_id, data)
         return await self.get(tenant_id)

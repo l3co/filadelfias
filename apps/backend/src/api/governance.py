@@ -3,8 +3,8 @@ from typing import List
 from fastapi import APIRouter, Depends, Query
 
 from src.api.auth import get_current_user
-from src.modules.governance.schemas import CouncilCreate, CouncilResponse, MeetingCreate, MeetingResponse
 from src.infra.repositories import council_repository, meeting_repository
+from src.modules.governance.schemas import CouncilCreate, CouncilResponse, MeetingCreate, MeetingResponse
 
 router = APIRouter(prefix="/governance", tags=["Governance"])
 

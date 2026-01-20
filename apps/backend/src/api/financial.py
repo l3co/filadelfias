@@ -3,6 +3,11 @@ from typing import List
 from fastapi import APIRouter, Depends, Query
 
 from src.api.auth import get_current_user
+from src.infra.repositories import (
+    financial_account_repository,
+    transaction_category_repository,
+    transaction_repository,
+)
 from src.modules.financial.schemas import (
     FinancialAccountCreate,
     FinancialAccountResponse,
@@ -10,11 +15,6 @@ from src.modules.financial.schemas import (
     TransactionCategoryResponse,
     TransactionCreate,
     TransactionResponse,
-)
-from src.infra.repositories import (
-    financial_account_repository,
-    transaction_category_repository,
-    transaction_repository,
 )
 
 router = APIRouter(prefix="/financial", tags=["Financial - Treasury"])

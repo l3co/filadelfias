@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 
 from src.api.auth import get_current_user
 from src.domain.schemas import TenantResponse
-from src.infra.repositories import tenant_repository, membership_repository
+from src.infra.repositories import membership_repository, tenant_repository
 from src.services.deletion_service import delete_tenant_data
 
 router = APIRouter()
@@ -47,11 +47,7 @@ async def create_tenant(
     tenant = await tenant_repository.create_tenant(name=data.name, slug=data.slug)
 
     # Link Creator as Admin
-    await membership_repository.create_membership(
-        user_id=current_user["id"],
-        tenant_id=tenant["id"],
-        role="ADMIN"
-    )
+    await membership_repository.create_membership(user_id=current_user["id"], tenant_id=tenant["id"], role="ADMIN")
 
     return tenant
 
@@ -72,10 +68,7 @@ async def update_tenant(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Igreja não encontrada")
 
     # Check if user is admin of this tenant
-    membership = await membership_repository.get_by_user_and_tenant(
-        user_id=current_user["id"],
-        tenant_id=tenant_id
-    )
+    membership = await membership_repository.get_by_user_and_tenant(user_id=current_user["id"], tenant_id=tenant_id)
     if not membership or membership.get("role") != "ADMIN":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Apenas administradores podem editar os dados da igreja"
@@ -96,7 +89,7 @@ async def delete_tenant(
     """
     Delete a tenant (Church) and ALL associated data.
     Only ADMIN can delete.
-    
+
     WARNING: This action is irreversible and will delete:
     - All members
     - All EBD classes, students, and lessons
@@ -110,20 +103,13 @@ async def delete_tenant(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Igreja não encontrada")
 
     # Check if user is admin of this tenant
-    membership = await membership_repository.get_by_user_and_tenant(
-        user_id=current_user["id"],
-        tenant_id=tenant_id
-    )
+    membership = await membership_repository.get_by_user_and_tenant(user_id=current_user["id"], tenant_id=tenant_id)
     if not membership or membership.get("role") != "ADMIN":
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, 
-            detail="Apenas administradores podem excluir a igreja"
+            status_code=status.HTTP_403_FORBIDDEN, detail="Apenas administradores podem excluir a igreja"
         )
 
     # Delete all tenant data
     deleted = await delete_tenant_data(tenant_id)
 
-    return {
-        "message": f"Igreja '{tenant['name']}' e todos os dados associados foram excluídos",
-        "deleted": deleted
-    }
+    return {"message": f"Igreja '{tenant['name']}' e todos os dados associados foram excluídos", "deleted": deleted}

@@ -95,41 +95,58 @@ export function ManualReaderPage() {
             {/* Article Content */}
             <div className="bg-white p-6 sm:p-10 rounded-xl shadow-sm border border-gray-100 min-h-[400px]">
                 <div
-                    className="prose prose-lg prose-green max-w-none text-gray-800 leading-relaxed transition-all duration-200"
+                    className="max-w-none text-gray-800 leading-relaxed transition-all duration-200"
                     style={{ fontSize: `${fontSize}px`, lineHeight: '1.8' }}
                 >
-                    {/* Main text */}
-                    <p className="text-justify">{article.text}</p>
-
-                    {/* Structured content (if available) */}
-                    {article.structure && article.structure.length > 0 && (
-                        <div className="mt-6 space-y-3">
+                    {/* Structured content - renderiza parágrafos separadamente */}
+                    {article.structure && article.structure.length > 0 ? (
+                        <div className="space-y-4">
                             {article.structure.map((item, idx) => (
-                                <div key={idx} className={item.type === 'paragraph' ? '' : 'pl-6'}>
+                                <div 
+                                    key={item.id || idx} 
+                                    id={item.id}
+                                    className={`
+                                        ${item.type === 'caput' ? 'text-justify' : ''}
+                                        ${item.type === 'section' ? 'pl-4 sm:pl-6 border-l-2 border-green-200' : ''}
+                                        ${item.type === 'paragraph' ? 'pl-4' : ''}
+                                    `}
+                                >
                                     {item.marker && (
-                                        <span className="font-bold text-green-700 mr-2">{item.marker}</span>
+                                        <span className="inline-block font-bold text-green-700 mr-2 mb-1">
+                                            {item.marker}
+                                        </span>
                                     )}
-                                    <span>{item.text}</span>
+                                    <span className="text-justify">{item.text}</span>
+                                    
+                                    {/* Indicador de notas no parágrafo */}
+                                    {item.notes && item.notes.length > 0 && (
+                                        <span className="ml-1 text-xs text-gray-400">
+                                            [{item.notes.length} nota{item.notes.length > 1 ? 's' : ''}]
+                                        </span>
+                                    )}
                                 </div>
                             ))}
                         </div>
+                    ) : (
+                        <p className="text-justify">{article.text}</p>
                     )}
                 </div>
 
-                {/* Notes */}
+                {/* Notes - exibe referências de notas */}
                 {article.notes && article.notes.length > 0 && (
                     <div className="mt-8 pt-6 border-t border-gray-200">
                         <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
-                            Notas de Rodapé
+                            Referências ({article.notes.length})
                         </h3>
-                        <div className="space-y-3">
+                        <div className="flex flex-wrap gap-2">
                             {article.notes.map((note) => (
-                                <div key={note.id} className="flex gap-3 text-sm text-gray-600">
-                                    <span className="shrink-0 w-6 h-6 bg-gray-100 text-gray-700 rounded flex items-center justify-center text-xs font-bold">
-                                        {note.marker}
-                                    </span>
-                                    <p className="flex-1">{note.text}</p>
-                                </div>
+                                <span 
+                                    key={note.id} 
+                                    className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 text-gray-600 rounded text-xs font-medium"
+                                    title={`Nota ${note.number}`}
+                                >
+                                    {note.number}
+                                </span>
                             ))}
                         </div>
                     </div>

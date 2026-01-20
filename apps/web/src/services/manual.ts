@@ -40,15 +40,18 @@ export interface ManualStructure {
 
 export interface ArticleNote {
     id: string;
-    marker: string;
-    text: string;
+    number: string;
+    marker?: string;
+    text?: string;
     page?: number;
 }
 
 export interface ArticleStructure {
+    id: string;
     type: string;
     marker?: string;
     text: string;
+    notes?: ArticleNote[];
 }
 
 export interface ArticleNavigation {

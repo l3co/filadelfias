@@ -665,9 +665,9 @@ service cloud.firestore {
 
 ## 📝 Checklist Pré-Migração
 
-- [ ] Criar conta Google Cloud / Firebase
+- [x] Criar conta Google Cloud / Firebase ✅
+- [x] Criar projeto no Firebase Console ✅ (Nome: **Filadelfias**)
 - [ ] Configurar billing (mesmo para free tier)
-- [ ] Criar projeto no Firebase Console
 - [ ] Gerar Service Account Key para CI/CD
 - [ ] Configurar secrets no GitHub
 - [ ] Fazer backup do código atual (tag no git)

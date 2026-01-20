@@ -20,9 +20,19 @@ class Settings(BaseSettings):
     @field_validator("database_url", mode="before")
     @classmethod
     def convert_to_asyncpg(cls, v: str) -> str:
-        """Convert postgresql:// to postgresql+asyncpg:// for async driver."""
-        if v and v.startswith("postgresql://"):
-            return v.replace("postgresql://", "postgresql+asyncpg://", 1)
+        """Convert postgresql:// to postgresql+asyncpg:// and fix SSL params for asyncpg."""
+        if not v:
+            return v
+        # Convert driver
+        if v.startswith("postgresql://"):
+            v = v.replace("postgresql://", "postgresql+asyncpg://", 1)
+        # asyncpg doesn't support sslmode param, remove it (SSL is handled separately)
+        if "sslmode=" in v:
+            # Remove sslmode parameter from URL
+            import re
+            v = re.sub(r"[?&]sslmode=[^&]*", "", v)
+            # Clean up URL if we left a dangling ? or &
+            v = v.replace("?&", "?").rstrip("?")
         return v
 
     # Security

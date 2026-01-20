@@ -1,4 +1,5 @@
 import asyncio
+import ssl
 
 # Import models
 import sys
@@ -7,7 +8,7 @@ from pathlib import Path
 
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
-from sqlalchemy.ext.asyncio import async_engine_from_config
+from sqlalchemy.ext.asyncio import create_async_engine
 
 from alembic import context
 
@@ -15,6 +16,16 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 from src.config import settings
 from src.infra.models import Base
+
+
+def _get_connect_args() -> dict:
+    """Get connection args for asyncpg, including SSL for production databases."""
+    if "digitalocean" in settings.database_url or "ondigitalocean" in settings.database_url:
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
+        return {"ssl": ssl_context}
+    return {}
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -69,10 +80,10 @@ async def run_async_migrations() -> None:
     and associate a connection with the context.
 
     """
-    connectable = async_engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
+    connectable = create_async_engine(
+        settings.database_url,
         poolclass=pool.NullPool,
+        connect_args=_get_connect_args(),
     )
 
     async with connectable.connect() as connection:

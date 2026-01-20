@@ -794,9 +794,41 @@ jobs:
 
 ## Próximos Passos
 
-1. [ ] Configurar Cucumber + Playwright no projeto
-2. [ ] Implementar steps comuns (login, navegação)
-3. [ ] Implementar smoke tests (Fase 1)
-4. [ ] Integrar com CI (rodar em PRs)
-5. [ ] Implementar fluxos principais (Fase 2)
+1. [x] Configurar Cucumber + Playwright no projeto
+2. [x] Implementar steps comuns (login, navegação)
+3. [x] Implementar smoke tests (Fase 1) - **8 smoke tests passando**
+4. [x] Integrar com CI (rodar em PRs)
+5. [ ] Implementar fluxos principais (Fase 2) - requer backend com seed de dados
 6. [ ] Adicionar relatórios visuais
+
+### Status Atual dos Testes (Atualizado 2026-01-20)
+
+**Smoke Tests (19 total):**
+- ✅ 8 smoke tests passando (sem necessidade de backend)
+- ⏸️ 11 testes de integração marcados com `@needs-backend`
+
+**Testes por Módulo:**
+- Auth: Login, Forgot Password (smoke) + Reset Password (needs-backend)
+- Registration: Wizard de cadastro (smoke)
+- Public: Bible, Hymnal, Manual (smoke)
+- Dashboard, Members, Financial, etc. (needs-backend)
+
+## Comandos Disponíveis
+
+```bash
+# Rodar todos os testes E2E
+npm run test:e2e
+
+# Rodar apenas smoke tests
+npm run test:e2e:smoke
+
+# Rodar testes críticos
+npm run test:e2e:critical
+
+# Rodar com UI visual
+npm run test:e2e:ui
+
+# Ver relatório
+npm run test:e2e:report
+```
+

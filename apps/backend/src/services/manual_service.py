@@ -37,96 +37,48 @@ def _load_manual_data() -> dict[str, Any]:
         return json.load(f)
 
 
-def _has_content(chapter: dict[str, Any]) -> bool:
-    """Check if a chapter has any articles with content."""
-    items = chapter.get("items", [])
-    if not items:
-        return False
-    
-    for item in items:
-        if item.get("type") == "article" and item.get("text"):
-            return True
-        if item.get("type") == "section":
-            for sub_item in item.get("items", []):
-                if sub_item.get("type") == "article" and sub_item.get("text"):
-                    return True
-    return False
-
-
 def _process_structure(data: dict[str, Any]) -> dict[str, Any]:
-    """Process the manual structure, fixing IDs and cleaning titles."""
+    """Process the manual structure - now supports new JSON format."""
     metadata = data.get("metadata", {})
     parts = data.get("parts", [])
     
     processed_parts = []
     all_articles = []
     
-    for part_idx, part in enumerate(parts):
+    for part in parts:
         processed_chapters = []
         
-        for chapter_idx, chapter in enumerate(part.get("items", [])):
-            # Skip chapters without content
-            if not _has_content(chapter):
-                continue
-                
-            chapter_id = _generate_unique_id(part_idx, chapter_idx)
-            
-            processed_sections = []
+        # New format: chapters directly in part
+        for chapter in part.get("chapters", []):
             chapter_articles = []
             
-            for section_idx, section in enumerate(chapter.get("items", [])):
-                if section.get("type") == "section":
-                    section_id = _generate_unique_id(part_idx, chapter_idx, section_idx)
-                    
-                    section_articles = []
-                    for article_idx, article in enumerate(section.get("items", [])):
-                        if article.get("type") == "article" and article.get("text"):
-                            article_id = _generate_unique_id(part_idx, chapter_idx, section_idx, article_idx)
-                            article_data = {
-                                "id": article_id,
-                                "number": article.get("number", ""),
-                                "text": article.get("text", ""),
-                                "structure": article.get("structure", []),
-                                "notes": article.get("notes", []),
-                            }
-                            section_articles.append(article_data)
-                            all_articles.append(article_data)
-                    
-                    # Only add section if it has articles
-                    if section_articles:
-                        processed_sections.append({
-                            "id": section_id,
-                            "number": section.get("number", ""),
-                            "title": _clean_title(section.get("title", "")),
-                            "articles": section_articles,
-                        })
-                elif section.get("type") == "article" and section.get("text"):
-                    # Articles directly in chapter (no section)
-                    article_id = _generate_unique_id(part_idx, chapter_idx, None, section_idx)
+            # New format: articles directly in chapter
+            for article in chapter.get("articles", []):
+                if article.get("text"):
                     article_data = {
-                        "id": article_id,
-                        "number": section.get("number", ""),
-                        "text": section.get("text", ""),
-                        "structure": section.get("structure", []),
-                        "notes": section.get("notes", []),
+                        "id": article.get("id", ""),
+                        "number": article.get("number", ""),
+                        "text": article.get("text", ""),
+                        "structure": article.get("structure", []),
+                        "notes": article.get("notes", []),
                     }
                     chapter_articles.append(article_data)
                     all_articles.append(article_data)
             
-            # Only add chapter if it has content
-            if processed_sections or chapter_articles:
+            # Only add chapter if it has articles
+            if chapter_articles:
                 processed_chapters.append({
-                    "id": chapter_id,
+                    "id": chapter.get("id", ""),
                     "number": chapter.get("number", ""),
                     "title": _clean_title(chapter.get("title", "")),
-                    "sections": processed_sections,
+                    "sections": chapter.get("sections", []),
                     "articles": chapter_articles,
                 })
         
-        # Only add part if it has chapters with content
+        # Only add part if it has chapters
         if processed_chapters:
             processed_parts.append({
-                "id": f"p{part_idx}",
+                "id": part.get("id", ""),
                 "title": part.get("title", ""),
                 "chapters": processed_chapters,
             })

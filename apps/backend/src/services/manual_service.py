@@ -37,6 +37,22 @@ def _load_manual_data() -> dict[str, Any]:
         return json.load(f)
 
 
+def _has_content(chapter: dict[str, Any]) -> bool:
+    """Check if a chapter has any articles with content."""
+    items = chapter.get("items", [])
+    if not items:
+        return False
+    
+    for item in items:
+        if item.get("type") == "article" and item.get("text"):
+            return True
+        if item.get("type") == "section":
+            for sub_item in item.get("items", []):
+                if sub_item.get("type") == "article" and sub_item.get("text"):
+                    return True
+    return False
+
+
 def _process_structure(data: dict[str, Any]) -> dict[str, Any]:
     """Process the manual structure, fixing IDs and cleaning titles."""
     metadata = data.get("metadata", {})
@@ -49,6 +65,10 @@ def _process_structure(data: dict[str, Any]) -> dict[str, Any]:
         processed_chapters = []
         
         for chapter_idx, chapter in enumerate(part.get("items", [])):
+            # Skip chapters without content
+            if not _has_content(chapter):
+                continue
+                
             chapter_id = _generate_unique_id(part_idx, chapter_idx)
             
             processed_sections = []
@@ -60,7 +80,7 @@ def _process_structure(data: dict[str, Any]) -> dict[str, Any]:
                     
                     section_articles = []
                     for article_idx, article in enumerate(section.get("items", [])):
-                        if article.get("type") == "article":
+                        if article.get("type") == "article" and article.get("text"):
                             article_id = _generate_unique_id(part_idx, chapter_idx, section_idx, article_idx)
                             article_data = {
                                 "id": article_id,
@@ -72,13 +92,15 @@ def _process_structure(data: dict[str, Any]) -> dict[str, Any]:
                             section_articles.append(article_data)
                             all_articles.append(article_data)
                     
-                    processed_sections.append({
-                        "id": section_id,
-                        "number": section.get("number", ""),
-                        "title": _clean_title(section.get("title", "")),
-                        "articles": section_articles,
-                    })
-                elif section.get("type") == "article":
+                    # Only add section if it has articles
+                    if section_articles:
+                        processed_sections.append({
+                            "id": section_id,
+                            "number": section.get("number", ""),
+                            "title": _clean_title(section.get("title", "")),
+                            "articles": section_articles,
+                        })
+                elif section.get("type") == "article" and section.get("text"):
                     # Articles directly in chapter (no section)
                     article_id = _generate_unique_id(part_idx, chapter_idx, None, section_idx)
                     article_data = {
@@ -91,19 +113,23 @@ def _process_structure(data: dict[str, Any]) -> dict[str, Any]:
                     chapter_articles.append(article_data)
                     all_articles.append(article_data)
             
-            processed_chapters.append({
-                "id": chapter_id,
-                "number": chapter.get("number", ""),
-                "title": _clean_title(chapter.get("title", "")),
-                "sections": processed_sections,
-                "articles": chapter_articles,
-            })
+            # Only add chapter if it has content
+            if processed_sections or chapter_articles:
+                processed_chapters.append({
+                    "id": chapter_id,
+                    "number": chapter.get("number", ""),
+                    "title": _clean_title(chapter.get("title", "")),
+                    "sections": processed_sections,
+                    "articles": chapter_articles,
+                })
         
-        processed_parts.append({
-            "id": f"p{part_idx}",
-            "title": part.get("title", ""),
-            "chapters": processed_chapters,
-        })
+        # Only add part if it has chapters with content
+        if processed_chapters:
+            processed_parts.append({
+                "id": f"p{part_idx}",
+                "title": part.get("title", ""),
+                "chapters": processed_chapters,
+            })
     
     return {
         "metadata": metadata,

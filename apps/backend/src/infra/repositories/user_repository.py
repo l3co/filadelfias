@@ -6,6 +6,7 @@ from typing import Optional
 from datetime import datetime
 
 from src.infra.firestore_repository import FirestoreRepository
+from src.infra.security import get_password_hash
 
 
 class UserRepository(FirestoreRepository):
@@ -17,6 +18,15 @@ class UserRepository(FirestoreRepository):
     async def get_by_email(self, email: str) -> Optional[dict]:
         """Get user by email."""
         return await self.get_by_field("email", email)
+
+    async def get_by_id(self, user_id: str) -> Optional[dict]:
+        """Get user by ID."""
+        return await self.get(user_id)
+
+    async def exists_by_email(self, email: str) -> bool:
+        """Check if user exists by email."""
+        user = await self.get_by_email(email)
+        return user is not None
 
     async def get_by_reset_token(self, token: str) -> Optional[dict]:
         """Get user by password reset token."""
@@ -30,20 +40,21 @@ class UserRepository(FirestoreRepository):
     async def create_user(
         self,
         email: str,
-        password_hash: str,
         name: str,
+        password: str,
         avatar_url: Optional[str] = None
     ) -> dict:
-        """Create a new user."""
+        """Create a new user with hashed password."""
         data = {
             "email": email,
-            "password_hash": password_hash,
+            "password_hash": get_password_hash(password),
             "name": name,
             "avatar_url": avatar_url,
             "is_active": True,
             "must_change_password": False,
             "password_reset_token": None,
             "password_reset_expires": None,
+            "memberships": [],
         }
         return await self.create(data)
 

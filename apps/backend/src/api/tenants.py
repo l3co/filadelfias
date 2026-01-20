@@ -1,14 +1,9 @@
-from uuid import UUID
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.auth import get_current_user
 from src.domain.schemas import TenantResponse
-from src.infra.database import get_db
-from src.infra.models import Tenant, User, UserChurchMembership
-from src.infra.repositories import TenantRepository
+from src.infra.repositories import tenant_repository, membership_repository
 
 router = APIRouter()
 
@@ -33,73 +28,60 @@ class TenantUpdate(BaseModel):
 
 @router.post("/tenants", response_model=TenantResponse, status_code=status.HTTP_201_CREATED)
 async def create_tenant(
-    data: TenantCreate, current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)
+    data: TenantCreate,
+    current_user: dict = Depends(get_current_user),
 ):
     """
     Create a new tenant (Church).
     The creator will be assigned as ADMIN.
     """
-    repo = TenantRepository(db)
-
     # Check if slug exists
-    existing = await repo.get_by_slug(data.slug)
+    existing = await tenant_repository.get_by_slug(data.slug)
     if existing:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Organization with this slug already exists"
         )
 
     # Create Tenant
-    tenant = Tenant(name=data.name, slug=data.slug)
-    await repo.create(tenant)
+    tenant = await tenant_repository.create_tenant(name=data.name, slug=data.slug)
 
     # Link Creator as Admin
-    membership = UserChurchMembership(user_id=current_user.id, tenant_id=tenant.id, role="ADMIN")
-    db.add(membership)
-    await db.commit()
+    await membership_repository.create_membership(
+        user_id=current_user["id"],
+        tenant_id=tenant["id"],
+        role="ADMIN"
+    )
 
     return tenant
 
 
 @router.patch("/tenants/{tenant_id}", response_model=TenantResponse)
 async def update_tenant(
-    tenant_id: UUID,
+    tenant_id: str,
     data: TenantUpdate,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
 ):
     """
     Update tenant (Church) data.
     Only ADMIN can update.
     """
-    repo = TenantRepository(db)
-
     # Get tenant
-    tenant = await repo.get(tenant_id)
+    tenant = await tenant_repository.get(tenant_id)
     if not tenant:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Igreja não encontrada")
 
     # Check if user is admin of this tenant
-    from sqlalchemy import select
-
-    result = await db.execute(
-        select(UserChurchMembership).where(
-            UserChurchMembership.user_id == current_user.id,
-            UserChurchMembership.tenant_id == tenant_id,
-            UserChurchMembership.role == "ADMIN",
-        )
+    membership = await membership_repository.get_by_user_and_tenant(
+        user_id=current_user["id"],
+        tenant_id=tenant_id
     )
-    membership = result.scalar_one_or_none()
-    if not membership:
+    if not membership or membership.get("role") != "ADMIN":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Apenas administradores podem editar os dados da igreja"
         )
 
     # Update fields
     update_data = data.model_dump(exclude_unset=True)
-    for field, value in update_data.items():
-        setattr(tenant, field, value)
+    updated_tenant = await tenant_repository.update(tenant_id, update_data)
 
-    await db.commit()
-    await db.refresh(tenant)
-
-    return tenant
+    return updated_tenant

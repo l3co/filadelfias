@@ -1,64 +1,58 @@
 from typing import List
-from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.auth import get_current_user
 from src.domain.schemas import MemberCreate, MemberResponse, MemberUpdate
-from src.infra.database import get_db
-from src.infra.models import Member, User
-from src.infra.repositories import MemberRepository
+from src.infra.repositories import member_repository
 
 router = APIRouter()
 
 
 @router.post("/tenants/{tenant_id}/members", response_model=MemberResponse, status_code=status.HTTP_201_CREATED)
 async def create_member(
-    tenant_id: UUID,
+    tenant_id: str,
     member_data: MemberCreate,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
 ):
     """
     Create a new member in a tenant.
     """
     # TODO: Implement RBAC to check if user can create members in this tenant
 
-    repo = MemberRepository(db)
-
-    # Create DB model
-    member = Member(tenant_id=tenant_id, **member_data.model_dump(exclude_unset=True))
-
-    created_member = await repo.create(member)
+    created_member = await member_repository.create_member(
+        tenant_id=tenant_id,
+        **member_data.model_dump(exclude_unset=True)
+    )
     return created_member
 
 
 @router.get("/tenants/{tenant_id}/members", response_model=List[MemberResponse])
 async def list_members(
-    tenant_id: UUID, current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)
+    tenant_id: str,
+    current_user: dict = Depends(get_current_user),
 ):
     """
     List all members of a tenant.
     """
     # TODO: Implement RBAC check
 
-    repo = MemberRepository(db)
-    members = await repo.get_by_tenant(tenant_id)
+    members = await member_repository.get_all(tenant_id)
     return members
 
 
 @router.get("/tenants/{tenant_id}/members/{member_id}", response_model=MemberResponse)
 async def get_member(
-    tenant_id: UUID, member_id: UUID, current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)
+    tenant_id: str,
+    member_id: str,
+    current_user: dict = Depends(get_current_user),
 ):
     """
     Get a specific member by ID.
     """
-    repo = MemberRepository(db)
-    member = await repo.get(member_id)
+    member = await member_repository.get(tenant_id, member_id)
 
-    if not member or member.tenant_id != tenant_id:
+    if not member:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Membro não encontrado")
 
     return member
@@ -66,27 +60,21 @@ async def get_member(
 
 @router.patch("/tenants/{tenant_id}/members/{member_id}", response_model=MemberResponse)
 async def update_member(
-    tenant_id: UUID,
-    member_id: UUID,
+    tenant_id: str,
+    member_id: str,
     member_data: MemberUpdate,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
 ):
     """
     Update a member's data.
     """
-    repo = MemberRepository(db)
-    member = await repo.get(member_id)
+    member = await member_repository.get(tenant_id, member_id)
 
-    if not member or member.tenant_id != tenant_id:
+    if not member:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Membro não encontrado")
 
     # Update fields
     update_data = member_data.model_dump(exclude_unset=True)
-    for field, value in update_data.items():
-        setattr(member, field, value)
+    updated_member = await member_repository.update(tenant_id, member_id, update_data)
 
-    await db.commit()
-    await db.refresh(member)
-
-    return member
+    return updated_member

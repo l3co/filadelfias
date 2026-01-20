@@ -2,22 +2,22 @@
 API endpoints for church registration.
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from passlib.context import CryptContext
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, HTTPException, status
 
-from src.api.auth import create_access_token
+from src.infra.security import create_access_token
 from src.domain.schemas import ChurchRegistrationRequest, ChurchRegistrationResponse, TenantResponse, UserResponse
-from src.infra.database import get_db
-from src.infra.models import Member, Tenant, User, UserChurchMembership
-from src.infra.repositories import TenantRepository
+from src.infra.repositories import (
+    tenant_repository,
+    user_repository,
+    member_repository,
+    membership_repository,
+)
 
 router = APIRouter()
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 @router.post("/churches/register", response_model=ChurchRegistrationResponse, status_code=status.HTTP_201_CREATED)
-async def register_church(data: ChurchRegistrationRequest, db: AsyncSession = Depends(get_db)):
+async def register_church(data: ChurchRegistrationRequest):
     """
     Register a new church with admin user.
     This is the main entry point for new churches joining the platform.
@@ -30,10 +30,8 @@ async def register_church(data: ChurchRegistrationRequest, db: AsyncSession = De
 
     Returns JWT token for immediate login.
     """
-    repo = TenantRepository(db)
-
     # Check if slug exists
-    existing = await repo.get_by_slug(data.church_slug)
+    existing = await tenant_repository.get_by_slug(data.church_slug)
     if existing:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -41,16 +39,13 @@ async def register_church(data: ChurchRegistrationRequest, db: AsyncSession = De
         )
 
     # Check if email exists
-    from sqlalchemy import select
-
-    result = await db.execute(select(User).where(User.email == data.admin_email))
-    if result.scalar_one_or_none():
+    if await user_repository.exists_by_email(data.admin_email):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Este email já está cadastrado na plataforma."
         )
 
     # Create Tenant (Church)
-    tenant = Tenant(
+    tenant = await tenant_repository.create_tenant(
         name=data.church_name,
         slug=data.church_slug,
         street=data.street,
@@ -58,53 +53,64 @@ async def register_church(data: ChurchRegistrationRequest, db: AsyncSession = De
         complement=data.complement,
         neighborhood=data.neighborhood,
         city=data.city,
-        state=data.state.upper(),
-        postal_code=data.postal_code.replace("-", ""),
-        country="Brasil",
+        state=data.state.upper() if data.state else None,
+        postal_code=data.postal_code.replace("-", "") if data.postal_code else None,
     )
-    db.add(tenant)
-    await db.flush()  # Get tenant.id
 
     # Create User (Admin)
-    password_hash = pwd_context.hash(data.admin_password)
-    user = User(email=data.admin_email, password_hash=password_hash, name=data.admin_name, is_active=True)
-    db.add(user)
-    await db.flush()  # Get user.id
+    user = await user_repository.create_user(
+        email=data.admin_email,
+        password=data.admin_password,
+        name=data.admin_name,
+    )
 
     # Create Member (Admin as church member)
-    member = Member(
-        tenant_id=tenant.id,
-        user_id=user.id,
+    await member_repository.create_member(
+        tenant_id=tenant["id"],
         full_name=data.admin_name,
         email=data.admin_email,
         phone=data.admin_phone,
         status="COMUNGANTE",
-        role="MEMBRO",  # Deprecated field
-        office="MEMBRO",  # Starts as member, can be changed later
-        functions=None,
+        office="MEMBRO",
+        user_id=user["id"],
     )
-    db.add(member)
 
     # Create UserChurchMembership (Link user to church as ADMIN)
-    membership = UserChurchMembership(user_id=user.id, tenant_id=tenant.id, role="ADMIN", status="ACTIVE")
-    db.add(membership)
-
-    await db.commit()
-    await db.refresh(tenant)
-    await db.refresh(user)
+    await membership_repository.create_membership(
+        user_id=user["id"],
+        tenant_id=tenant["id"],
+        role="ADMIN",
+        status="ACTIVE",
+    )
 
     # Generate JWT token
-    access_token = create_access_token(data={"sub": str(user.id), "email": user.email})
+    access_token = create_access_token(data={"sub": user["id"], "email": user["email"]})
 
     return ChurchRegistrationResponse(
-        tenant=TenantResponse.model_validate(tenant),
+        tenant=TenantResponse(
+            id=tenant["id"],
+            name=tenant["name"],
+            slug=tenant["slug"],
+            logo_url=tenant.get("logo_url"),
+            street=tenant.get("street"),
+            number=tenant.get("number"),
+            complement=tenant.get("complement"),
+            neighborhood=tenant.get("neighborhood"),
+            city=tenant.get("city"),
+            state=tenant.get("state"),
+            postal_code=tenant.get("postal_code"),
+            country=tenant.get("country", "Brasil"),
+            phone=tenant.get("phone"),
+            email=tenant.get("email"),
+            created_at=tenant["created_at"],
+        ),
         user=UserResponse(
-            id=user.id,
-            email=user.email,
-            name=user.name,
-            avatar_url=user.avatar_url,
-            is_active=user.is_active,
-            created_at=user.created_at,
+            id=user["id"],
+            email=user["email"],
+            name=user["name"],
+            avatar_url=user.get("avatar_url"),
+            is_active=user.get("is_active", True),
+            created_at=user["created_at"],
             memberships=[],
         ),
         access_token=access_token,
@@ -113,12 +119,11 @@ async def register_church(data: ChurchRegistrationRequest, db: AsyncSession = De
 
 
 @router.get("/churches/check-slug/{slug}")
-async def check_slug_availability(slug: str, db: AsyncSession = Depends(get_db)):
+async def check_slug_availability(slug: str):
     """
     Check if a church slug is available.
     Used for real-time validation in the registration wizard.
     """
-    repo = TenantRepository(db)
-    existing = await repo.get_by_slug(slug.lower())
+    existing = await tenant_repository.get_by_slug(slug.lower())
 
     return {"slug": slug.lower(), "available": existing is None}

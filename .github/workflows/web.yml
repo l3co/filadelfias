@@ -114,7 +114,7 @@ jobs:
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
-          version: 1.8.0
+          version: 2.1.1
           virtualenvs-create: true
           virtualenvs-in-project: true
 
@@ -134,7 +134,7 @@ jobs:
           DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/filadelfias
           SECRET_KEY: test-secret-key-for-e2e
           DEBUG: "false"
-          CORS_ORIGINS: '["http://localhost:5173"]'
+          CORS_ORIGINS_STR: http://localhost:5173
         run: |
           poetry run uvicorn src.main:app --host 0.0.0.0 --port 8000 &
           sleep 5
@@ -149,6 +149,12 @@ jobs:
         env:
           VITE_API_URL: http://localhost:8000
         run: npm run build
+
+      - name: Start frontend server
+        run: |
+          npm run preview -- --port 5173 &
+          sleep 5
+          curl -f http://localhost:5173 || exit 1
 
       - name: Run E2E tests
         env:

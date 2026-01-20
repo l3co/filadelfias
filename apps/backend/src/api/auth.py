@@ -8,6 +8,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from src.domain.schemas import Token, UserCreate, UserResponse
 from src.infra.repositories import user_repository
 from src.infra.security import create_access_token, decode_access_token, verify_password
+from src.services.deletion_service import delete_user_data
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -122,3 +123,23 @@ async def get_me(current_user=Depends(get_current_user)):
         UserResponse: Current user data
     """
     return current_user
+
+
+@router.delete("/me")
+async def delete_my_account(current_user: dict = Depends(get_current_user)):
+    """
+    Delete current user account and all associated data.
+    
+    WARNING: This action is irreversible and will:
+    - Remove user from all churches (memberships)
+    - Unlink user from member profiles
+    - Delete the user account
+    
+    Note: This does NOT delete the church data, only the user's personal data.
+    """
+    deleted = await delete_user_data(current_user["id"])
+    
+    return {
+        "message": "Sua conta foi excluída com sucesso",
+        "deleted": deleted
+    }

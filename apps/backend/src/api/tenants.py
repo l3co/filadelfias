@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 from src.api.auth import get_current_user
 from src.domain.schemas import TenantResponse
 from src.infra.repositories import tenant_repository, membership_repository
+from src.services.deletion_service import delete_tenant_data
 
 router = APIRouter()
 
@@ -85,3 +86,44 @@ async def update_tenant(
     updated_tenant = await tenant_repository.update(tenant_id, update_data)
 
     return updated_tenant
+
+
+@router.delete("/tenants/{tenant_id}")
+async def delete_tenant(
+    tenant_id: str,
+    current_user: dict = Depends(get_current_user),
+):
+    """
+    Delete a tenant (Church) and ALL associated data.
+    Only ADMIN can delete.
+    
+    WARNING: This action is irreversible and will delete:
+    - All members
+    - All EBD classes, students, and lessons
+    - All financial accounts, categories, and transactions
+    - All councils and meetings
+    - All user memberships linked to this church
+    """
+    # Get tenant
+    tenant = await tenant_repository.get(tenant_id)
+    if not tenant:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Igreja não encontrada")
+
+    # Check if user is admin of this tenant
+    membership = await membership_repository.get_by_user_and_tenant(
+        user_id=current_user["id"],
+        tenant_id=tenant_id
+    )
+    if not membership or membership.get("role") != "ADMIN":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="Apenas administradores podem excluir a igreja"
+        )
+
+    # Delete all tenant data
+    deleted = await delete_tenant_data(tenant_id)
+
+    return {
+        "message": f"Igreja '{tenant['name']}' e todos os dados associados foram excluídos",
+        "deleted": deleted
+    }

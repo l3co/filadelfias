@@ -17,10 +17,10 @@ import os
 # Configure environment for testing
 os.environ.setdefault("ENVIRONMENT", "development")
 
-from src.infra.repositories.user_repository import user_repository
-from src.infra.repositories.tenant_repository import tenant_repository
-from src.infra.repositories.membership_repository import membership_repository
 from src.infra.repositories.member_repository import member_repository
+from src.infra.repositories.membership_repository import membership_repository
+from src.infra.repositories.tenant_repository import tenant_repository
+from src.infra.repositories.user_repository import user_repository
 
 
 # Test data constants - must match apps/web/e2e/support/fixtures.ts
@@ -164,7 +164,7 @@ async def main():
 
     try:
         await clean_test_data()
-        data = await seed_test_data()
+        await seed_test_data()
 
         print("\n" + "=" * 60)
         print("✅ Seed completed successfully!")

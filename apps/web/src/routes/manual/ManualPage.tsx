@@ -55,7 +55,7 @@ export function ManualPage() {
     }
 
     return (
-        <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
             {/* Header */}
             <div className="text-center mb-5">
                 <div className="inline-flex items-center justify-center w-12 h-12 bg-green-100 rounded-full mb-2">

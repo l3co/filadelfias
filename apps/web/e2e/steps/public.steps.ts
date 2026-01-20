@@ -66,7 +66,7 @@ When('seleciono a versão {string}', async ({ page }, version: string) => {
     await page.getByRole('option', { name: new RegExp(version, 'i') }).click();
 });
 
-Then('devo ver o texto de Gênesis {int}', async ({ page }, chapter: number) => {
+Then('devo ver o texto de Gênesis {int}', async ({ page }) => {
     // Verify that Bible text is loaded
     const textContent = page.locator('.verse, [data-verse], p').first();
     await expect(textContent).toBeVisible();

@@ -1,15 +1,9 @@
 {
-  "input": "/mnt/data/manual_2019_paragrafos.json",
-  "output": "/mnt/data/manual_2019_ui_ready.json",
-  "generatedAtUtc": "2026-01-20T16:16:35Z",
-  "stats": {
-    "articles": 156,
-    "notes": 260
-  },
-  "duplicateAnchorIds": [],
-  "duplicateAnchorIdsCount": 0,
-  "articlesWithoutStructureCount": 0,
-  "articlesWithoutStructureSample": [],
-  "emptyArticlesCount": 0,
-  "emptyArticlesSample": []
+  "articles_without_paragraphs": [],
+  "orphan_notes": [],
+  "empty_texts": [],
+  "total_articles": 156,
+  "total_paragraphs": 391,
+  "total_notes": 389,
+  "valid": true
 }

@@ -1,22 +1,17 @@
 services:
   firebase:
-    image: andreysenov/firebase-tools:latest
+    image: mtlynch/firestore-emulator
     container_name: filadelfias_firebase
-    working_dir: /app
-    command: firebase emulators:start --only firestore,auth --project filadelfias-dev
     ports:
       - "8080:8080"   # Firestore
-      - "9099:9099"   # Auth
-      - "4000:4000"   # Emulator UI
-    volumes:
-      - ./firebase.json:/app/firebase.json
-      - firebase_data:/app/.firebase
+    environment:
+      - FIRESTORE_PROJECT_ID=filadelfias-dev
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080"]
-      interval: 10s
+      test: ["CMD-SHELL", "curl -f http://localhost:8080 || exit 1"]
+      interval: 5s
       timeout: 5s
       retries: 10
-      start_period: 30s
+      start_period: 10s
 
   api:
     build:
@@ -31,7 +26,6 @@ services:
       - ./apps/backend/src:/app/src
     environment:
       FIRESTORE_EMULATOR_HOST: firebase:8080
-      FIREBASE_AUTH_EMULATOR_HOST: firebase:9099
       SECRET_KEY: dev-secret-key-change-in-production
       DEBUG: "true"
       CORS_ORIGINS_STR: http://localhost:5173,http://localhost:3000

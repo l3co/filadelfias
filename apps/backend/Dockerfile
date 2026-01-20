@@ -15,8 +15,11 @@ RUN poetry config virtualenvs.create false \
 # Copy application code
 COPY . .
 
+# Make entrypoint executable
+RUN chmod +x entrypoint.sh
+
 # Expose port
 EXPOSE 8000
 
-# Run application
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Run application with migrations
+ENTRYPOINT ["./entrypoint.sh"]

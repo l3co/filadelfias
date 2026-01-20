@@ -27,6 +27,7 @@ def _get_connect_args() -> dict:
         return {"ssl": ssl_context}
     return {}
 
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config

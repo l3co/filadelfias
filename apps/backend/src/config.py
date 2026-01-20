@@ -30,6 +30,7 @@ class Settings(BaseSettings):
         if "sslmode=" in v:
             # Remove sslmode parameter from URL
             import re
+
             v = re.sub(r"[?&]sslmode=[^&]*", "", v)
             # Clean up URL if we left a dangling ? or &
             v = v.replace("?&", "?").rstrip("?")

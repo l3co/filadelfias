@@ -5,8 +5,6 @@ Note: These tests require Firestore credentials and are marked with @pytest.mark
 They are skipped in CI. Run locally with: pytest -m firestore
 """
 
-import pytest
-
 from src.infra.repositories import UserRepository
 
 

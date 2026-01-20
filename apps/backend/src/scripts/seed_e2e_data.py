@@ -22,7 +22,6 @@ from src.infra.repositories.membership_repository import membership_repository
 from src.infra.repositories.tenant_repository import tenant_repository
 from src.infra.repositories.user_repository import user_repository
 
-
 # Test data constants - must match apps/web/e2e/support/fixtures.ts
 TEST_ADMIN = {
     "email": "admin@igreja.com",
@@ -178,6 +177,7 @@ async def main():
     except Exception as e:
         print(f"\n❌ Error seeding data: {e}")
         import traceback
+
         traceback.print_exc()
         raise
 

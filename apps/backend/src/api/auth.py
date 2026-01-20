@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from src.domain.schemas import Token, UserCreate, UserResponse
-from src.infra.repositories import user_repository
+from src.infra.repositories import membership_repository, tenant_repository, user_repository
 from src.infra.security import create_access_token, decode_access_token, verify_password
 from src.services.deletion_service import delete_user_data
 
@@ -110,14 +110,33 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 @router.get("/me", response_model=UserResponse)
 async def get_me(current_user=Depends(get_current_user)):
     """
-    Get current user profile.
+    Get current user profile with memberships.
 
     Args:
         current_user: Current authenticated user
 
     Returns:
-        UserResponse: Current user data
+        UserResponse: Current user data with memberships
     """
+    # Fetch user memberships
+    memberships = await membership_repository.get_user_memberships(current_user["id"])
+
+    # Enrich memberships with tenant data
+    enriched_memberships = []
+    for m in memberships:
+        tenant = await tenant_repository.get(m["tenant_id"])
+        if tenant:
+            enriched_memberships.append(
+                {
+                    "id": m["id"],
+                    "tenant": tenant,
+                    "role": m.get("role", "ATTENDEE"),
+                    "status": m.get("status", "ACTIVE"),
+                    "joined_at": m.get("joined_at"),
+                }
+            )
+
+    current_user["memberships"] = enriched_memberships
     return current_user
 
 

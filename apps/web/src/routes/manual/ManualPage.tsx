@@ -55,13 +55,13 @@ export function ManualPage() {
     }
 
     return (
-        <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
             {/* Header */}
-            <div className="text-center mb-6">
-                <div className="inline-flex items-center justify-center w-14 h-14 bg-green-100 rounded-full mb-3">
-                    <BookOpen className="w-7 h-7 text-green-700" />
+            <div className="text-center mb-5">
+                <div className="inline-flex items-center justify-center w-12 h-12 bg-green-100 rounded-full mb-2">
+                    <BookOpen className="w-6 h-6 text-green-700" />
                 </div>
-                <h1 className="text-2xl sm:text-3xl font-serif font-bold text-gray-900 mb-1">
+                <h1 className="text-xl sm:text-2xl font-serif font-bold text-gray-900 mb-1">
                     Manual Presbiteriano
                 </h1>
                 <p className="text-gray-600 text-sm">
@@ -70,14 +70,14 @@ export function ManualPage() {
             </div>
 
             {/* Search */}
-            <div className="relative max-w-3xl mx-auto mb-6">
+            <div className="relative w-full mb-5">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                 <input
                     type="text"
                     placeholder="Buscar no manual..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full pl-12 pr-4 py-3 text-base border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 />
                 {isSearching && (
                     <div className="absolute right-4 top-1/2 -translate-y-1/2">
@@ -88,7 +88,7 @@ export function ManualPage() {
 
             {/* Search Results */}
             {searchQuery.length >= 2 && searchResults && (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-5">
                     <h2 className="text-sm font-medium text-gray-500 mb-3">
                         {searchResults.count} resultado(s) para "{searchQuery}"
                     </h2>
@@ -128,12 +128,12 @@ export function ManualPage() {
                                 className="w-full flex items-center gap-3 p-4 text-left hover:bg-gray-50 transition-colors"
                             >
                                 <ChevronRight
-                                    size={20}
+                                    size={22}
                                     className={`text-gray-400 transition-transform ${expandedParts.has(part.id) ? 'rotate-90' : ''}`}
                                 />
-                                <BookOpen size={20} className="text-green-600" />
-                                <span className="font-medium text-gray-900">{part.title}</span>
-                                <span className="ml-auto text-xs text-gray-400">
+                                <BookOpen size={22} className="text-green-600" />
+                                <span className="font-semibold text-gray-900 text-lg">{part.title}</span>
+                                <span className="ml-auto text-sm text-gray-400">
                                     {part.chapters.length} capítulos
                                 </span>
                             </button>
@@ -147,13 +147,13 @@ export function ManualPage() {
                                                 className="w-full flex items-center gap-3 pl-12 pr-4 py-3 text-left hover:bg-gray-100 transition-colors"
                                             >
                                                 <ChevronRight
-                                                    size={16}
+                                                    size={18}
                                                     className={`text-gray-400 transition-transform ${expandedChapters.has(chapter.id) ? 'rotate-90' : ''}`}
                                                 />
-                                                <span className="text-green-700 font-medium text-sm">
+                                                <span className="text-green-700 font-semibold text-base">
                                                     Cap. {chapter.number}
                                                 </span>
-                                                <span className="text-gray-700 text-sm truncate">
+                                                <span className="text-gray-700 text-base truncate">
                                                     {chapter.title}
                                                 </span>
                                             </button>
@@ -182,13 +182,13 @@ export function ManualPage() {
 
                                                     {/* Direct articles (no section) */}
                                                     {chapter.articles.length > 0 && (
-                                                        <div className="pl-20 pr-4 py-2">
+                                                        <div className="pl-16 pr-4 py-3">
                                                             <div className="flex flex-wrap gap-2">
                                                                 {chapter.articles.map((article) => (
                                                                     <Link
                                                                         key={article.id}
                                                                         to={`/manual/${article.id}`}
-                                                                        className="w-8 h-8 flex items-center justify-center text-xs font-medium bg-gray-100 text-gray-700 rounded hover:bg-green-100 hover:text-green-700 transition-colors"
+                                                                        className="w-10 h-10 flex items-center justify-center text-sm font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-green-100 hover:text-green-700 transition-colors"
                                                                     >
                                                                         {article.number}
                                                                     </Link>

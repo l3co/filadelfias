@@ -12,6 +12,7 @@ declare global {
 }
 
 // Runtime config (injected by docker-entrypoint.sh) or build-time env or fallback
+// Production API: Cloud Run (southamerica-east1)
 const getApiUrl = (): string => {
     // Check runtime config first (production)
     if (typeof window !== 'undefined' && window.__CONFIG__?.API_URL) {

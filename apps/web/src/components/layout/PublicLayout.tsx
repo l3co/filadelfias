@@ -1,7 +1,10 @@
+import { useState } from 'react';
 import { Link, Outlet } from 'react-router-dom';
-import { BookOpen, Music, MapPin, Book } from 'lucide-react';
+import { BookOpen, Music, MapPin, Book, Menu, X } from 'lucide-react';
 
 export function PublicLayout() {
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
     return (
         <div className="min-h-screen flex flex-col bg-white font-sans text-gray-900">
             <header className="border-b border-gray-100 sticky top-0 bg-white/90 backdrop-blur-md z-50">
@@ -35,13 +38,59 @@ export function PublicLayout() {
                         </nav>
 
                         {/* Actions */}
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2">
                             <Link to="/login" className="px-4 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors border border-gray-200 hover:text-green-700 hover:border-green-200">
                                 Entrar
                             </Link>
+                            
+                            {/* Mobile menu button */}
+                            <button
+                                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                                className="md:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+                                aria-label="Menu"
+                            >
+                                {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                            </button>
                         </div>
                     </div>
                 </div>
+
+                {/* Mobile Menu */}
+                {mobileMenuOpen && (
+                    <div className="md:hidden border-t border-gray-100 bg-white">
+                        <nav className="max-w-7xl mx-auto px-4 py-4 space-y-2">
+                            <Link 
+                                to="/bible" 
+                                onClick={() => setMobileMenuOpen(false)}
+                                className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors"
+                            >
+                                <BookOpen size={20} />
+                                <span className="font-medium">Bíblia</span>
+                            </Link>
+                            <Link 
+                                to="/hymnal" 
+                                onClick={() => setMobileMenuOpen(false)}
+                                className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors"
+                            >
+                                <Music size={20} />
+                                <span className="font-medium">Hinário</span>
+                            </Link>
+                            <Link 
+                                to="/manual" 
+                                onClick={() => setMobileMenuOpen(false)}
+                                className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors"
+                            >
+                                <Book size={20} />
+                                <span className="font-medium">Manual</span>
+                            </Link>
+                            <div className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 cursor-not-allowed">
+                                <MapPin size={20} />
+                                <span className="font-medium">Igrejas Perto</span>
+                                <span className="text-xs bg-gray-100 px-2 py-0.5 rounded">Em breve</span>
+                            </div>
+                        </nav>
+                    </div>
+                )}
             </header>
 
             <main className="flex-grow flex flex-col">

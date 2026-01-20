@@ -1,0 +1,80 @@
+"""
+User repository for Firestore.
+"""
+
+from typing import Optional
+from datetime import datetime
+
+from src.infra.firestore_repository import FirestoreRepository
+
+
+class UserRepository(FirestoreRepository):
+    """Repository for users collection."""
+
+    def __init__(self):
+        super().__init__("users")
+
+    async def get_by_email(self, email: str) -> Optional[dict]:
+        """Get user by email."""
+        return await self.get_by_field("email", email)
+
+    async def get_by_reset_token(self, token: str) -> Optional[dict]:
+        """Get user by password reset token."""
+        users = await self.query("password_reset_token", "==", token, limit=1)
+        if users and users[0].get("password_reset_expires"):
+            expires = users[0]["password_reset_expires"]
+            if isinstance(expires, datetime) and expires > datetime.utcnow():
+                return users[0]
+        return None
+
+    async def create_user(
+        self,
+        email: str,
+        password_hash: str,
+        name: str,
+        avatar_url: Optional[str] = None
+    ) -> dict:
+        """Create a new user."""
+        data = {
+            "email": email,
+            "password_hash": password_hash,
+            "name": name,
+            "avatar_url": avatar_url,
+            "is_active": True,
+            "must_change_password": False,
+            "password_reset_token": None,
+            "password_reset_expires": None,
+        }
+        return await self.create(data)
+
+    async def set_password_reset_token(
+        self,
+        user_id: str,
+        token: str,
+        expires: datetime
+    ) -> Optional[dict]:
+        """Set password reset token for user."""
+        return await self.update(user_id, {
+            "password_reset_token": token,
+            "password_reset_expires": expires,
+        })
+
+    async def clear_password_reset_token(self, user_id: str) -> Optional[dict]:
+        """Clear password reset token."""
+        return await self.update(user_id, {
+            "password_reset_token": None,
+            "password_reset_expires": None,
+        })
+
+    async def update_password(self, user_id: str, password_hash: str) -> Optional[dict]:
+        """Update user password."""
+        return await self.update(user_id, {
+            "password_hash": password_hash,
+            "must_change_password": False,
+            "password_reset_token": None,
+            "password_reset_expires": None,
+        })
+
+
+# Singleton instance
+user_repository = UserRepository()

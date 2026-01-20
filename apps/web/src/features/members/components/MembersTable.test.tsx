@@ -14,6 +14,7 @@ const mockMembers: Member[] = [
         birth_date: '1990-01-01',
         phone: '123456789',
         tenant_id: 't1',
+        office: 'MEMBRO',
         created_at: '2023-01-01',
         updated_at: '2023-01-01'
     },
@@ -28,6 +29,7 @@ const mockMembers: Member[] = [
         birth_date: '1995-01-01',
         phone: '987654321',
         tenant_id: 't1',
+        office: 'DIACONO',
         created_at: '2023-01-01',
         updated_at: '2023-01-01'
     }
@@ -36,12 +38,14 @@ const mockMembers: Member[] = [
 describe('MembersTable Component', () => {
     it('should render loading state', () => {
         render(<MembersTable isLoading={true} />);
-        expect(screen.getByText('Carregando membros...')).toBeInTheDocument();
+        // Loading state uses skeleton animation
+        const skeletons = document.querySelectorAll('.animate-pulse');
+        expect(skeletons.length).toBeGreaterThan(0);
     });
 
     it('should render empty state when no members', () => {
         render(<MembersTable members={[]} />);
-        expect(screen.getByText('Nenhum membro')).toBeInTheDocument();
+        expect(screen.getByText('Nenhum membro cadastrado')).toBeInTheDocument();
     });
 
     it('should render member list correctly', () => {
@@ -51,12 +55,12 @@ describe('MembersTable Component', () => {
         expect(screen.getByText('Maria Santos')).toBeInTheDocument();
         expect(screen.getByText('joao@email.com')).toBeInTheDocument();
 
-        // Verificar Badges de Status
-        expect(screen.getByText('COMUNGANTE')).toBeInTheDocument();
-        expect(screen.getByText('NAO COMUNGANTE')).toBeInTheDocument(); // replace foi usado
+        // Verificar Badges de Status (renderizados com getStatusLabel)
+        expect(screen.getByText('Comungante')).toBeInTheDocument();
+        expect(screen.getByText('Não Comungante')).toBeInTheDocument();
 
         // Verificar Badge de Cargo (apenas para cargos especiais)
         expect(screen.queryByText('MEMBRO')).not.toBeInTheDocument(); // Membro normal não tem badge extra
-        expect(screen.getByText('DIACONO')).toBeInTheDocument();
+        expect(screen.getByText('Diácono')).toBeInTheDocument();
     });
 });

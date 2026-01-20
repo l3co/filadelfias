@@ -1,7 +1,7 @@
 {
-  "name": "Filadélfias - Gestão para Igrejas Presbiterianas",
+  "name": "Filadélfias - Comunhão e organização para sua igreja",
   "short_name": "Filadélfias",
-  "description": "Sistema completo de gestão para igrejas presbiterianas. Gerencie membros, finanças, EBD, governança e muito mais.",
+  "description": "Ferramentas para fortalecer a comunhão e organização da sua igreja presbiteriana. Bíblia, Hinário e recursos para a vida em comunidade.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

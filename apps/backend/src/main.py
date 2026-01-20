@@ -18,12 +18,16 @@ from src.api.members import router as members_router
 from src.api.mission import router as mission_router
 from src.api.tenants import router as tenants_router
 from src.config import settings
+from src.middleware import LoggingMiddleware
 
 app = FastAPI(
     title="Filadelfias API",
     description="Multi-tenant church management platform",
     version="0.1.0",
 )
+
+# Logging Middleware (must be added first to wrap all requests)
+app.add_middleware(LoggingMiddleware)
 
 # CORS Configuration
 app.add_middleware(

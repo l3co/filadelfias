@@ -12,6 +12,7 @@ from src.infra.repositories import (
     user_repository,
 )
 from src.infra.security import create_access_token
+from src.services.logging_service import log_info, log_warning
 
 router = APIRouter()
 
@@ -30,9 +31,17 @@ async def register_church(data: ChurchRegistrationRequest):
 
     Returns JWT token for immediate login.
     """
+    log_info(
+        "Church registration started",
+        church_name=data.church_name,
+        church_slug=data.church_slug,
+        admin_email=data.admin_email,
+    )
+
     # Check if slug exists
     existing = await tenant_repository.get_by_slug(data.church_slug)
     if existing:
+        log_warning("Church registration failed - slug exists", church_slug=data.church_slug)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Uma igreja com este identificador já existe. Escolha outro.",
@@ -40,6 +49,7 @@ async def register_church(data: ChurchRegistrationRequest):
 
     # Check if email exists
     if await user_repository.exists_by_email(data.admin_email):
+        log_warning("Church registration failed - email exists", admin_email=data.admin_email)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Este email já está cadastrado na plataforma."
         )
@@ -85,6 +95,14 @@ async def register_church(data: ChurchRegistrationRequest):
 
     # Generate JWT token
     access_token = create_access_token(data={"sub": user["id"], "email": user["email"]})
+
+    log_info(
+        "Church registration completed",
+        tenant_id=tenant["id"],
+        tenant_name=tenant["name"],
+        user_id=user["id"],
+        user_email=user["email"],
+    )
 
     return ChurchRegistrationResponse(
         tenant=TenantResponse(

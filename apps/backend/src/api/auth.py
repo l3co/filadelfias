@@ -9,6 +9,7 @@ from src.domain.schemas import Token, UserCreate, UserResponse
 from src.infra.repositories import membership_repository, tenant_repository, user_repository
 from src.infra.security import create_access_token, decode_access_token, verify_password
 from src.services.deletion_service import delete_user_data
+from src.services.logging_service import log_info, log_warning, set_request_context
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -31,11 +32,13 @@ async def register(user_data: UserCreate):
     """
     # Check if email already exists
     if await user_repository.exists_by_email(user_data.email):
+        log_warning("Registration failed - email exists", email=user_data.email)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
 
     # Create user
     user = await user_repository.create_user(email=user_data.email, name=user_data.name, password=user_data.password)
 
+    log_info("User registered", user_id=user["id"], email=user["email"])
     return user
 
 
@@ -56,7 +59,16 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     # Get user by email
     user = await user_repository.get_by_email(form_data.username)
 
-    if not user or not verify_password(form_data.password, user.get("password_hash", "")):
+    if not user:
+        log_warning("Login failed - user not found", email=form_data.username)
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    if not verify_password(form_data.password, user.get("password_hash", "")):
+        log_warning("Login failed - wrong password", email=form_data.username, user_id=user["id"])
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
@@ -64,10 +76,15 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
         )
 
     if not user.get("is_active", False):
+        log_warning("Login failed - inactive user", email=form_data.username, user_id=user["id"])
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User account is inactive")
 
     # Create access token
     access_token = create_access_token(data={"sub": user["id"], "email": user["email"]})
+
+    # Set user context for subsequent logs
+    set_request_context(user_id=user["id"])
+    log_info("User logged in", user_id=user["id"], email=user["email"])
 
     return {"access_token": access_token, "token_type": "bearer"}
 
@@ -118,8 +135,11 @@ async def get_me(current_user=Depends(get_current_user)):
     Returns:
         UserResponse: Current user data with memberships
     """
+    set_request_context(user_id=current_user["id"])
+
     # Fetch user memberships
     memberships = await membership_repository.get_user_memberships(current_user["id"])
+    log_info("Fetching user memberships", user_id=current_user["id"], memberships_count=len(memberships))
 
     # Enrich memberships with tenant data
     enriched_memberships = []

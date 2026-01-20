@@ -798,8 +798,9 @@ jobs:
 2. [x] Implementar steps comuns (login, navegação)
 3. [x] Implementar smoke tests (Fase 1) - **8 smoke tests passando**
 4. [x] Integrar com CI (rodar em PRs)
-5. [ ] Implementar fluxos principais (Fase 2) - requer backend com seed de dados
-6. [ ] Adicionar relatórios visuais
+5. [x] Implementar script de seed de dados (Backend)
+6. [ ] Implementar fluxos principais (Fase 2) - requer backend rodando
+7. [ ] Adicionar relatórios visuais
 
 ### Status Atual dos Testes (Atualizado 2026-01-20)
 

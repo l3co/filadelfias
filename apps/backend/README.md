@@ -60,6 +60,9 @@ poetry run alembic revision --autogenerate -m "description"
 
 # Aplicar migrações
 poetry run alembic upgrade head
+
+# Popular dados de teste (E2E)
+poetry run seed-e2e
 ```
 
 ## API Documentation

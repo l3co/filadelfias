@@ -10,12 +10,12 @@ export const testUsers = {
     admin: {
         email: 'admin@igreja.com',
         password: 'MinhaS3nh@Segura',
-        name: 'Admin User',
+        name: 'Administrador Teste',
     },
     member: {
         email: 'membro@igreja.com',
-        password: 'S3nh@M3mbr0',
-        name: 'Member User',
+        password: 'S3nh@Membro',
+        name: 'Maria Silva',
     },
     invalid: {
         email: 'usuario@inexistente.com',

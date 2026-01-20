@@ -6,6 +6,9 @@ authors = ["Leco <leco@filadelfias.app>"]
 readme = "README.md"
 package-mode = false
 
+[tool.poetry.scripts]
+seed-e2e = "src.scripts.seed_e2e_data:main"
+
 [tool.poetry.dependencies]
 python = "^3.11"
 fastapi = "^0.128.0"

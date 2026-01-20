@@ -119,24 +119,27 @@ export function LandingPage() {
                         </Link>
 
                         {/* Manual */}
-                        <div className="group">
-                            <Card className="h-full border-0 bg-gray-50/80 backdrop-blur-sm shadow-md transition-all duration-300 overflow-hidden">
+                        <Link to="/manual" className="group">
+                            <Card className="h-full border-0 bg-white/80 backdrop-blur-sm shadow-lg shadow-gray-200/50 hover:shadow-2xl hover:shadow-green-200/30 transition-all duration-500 hover:-translate-y-1 overflow-hidden">
+                                <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-teal-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                                 <CardContent className="relative flex flex-col items-center p-10 text-center h-full justify-center space-y-6">
                                     <div className="relative">
-                                        <div className="relative p-5 bg-gray-100 text-gray-400 rounded-2xl shadow-sm">
+                                        <div className="absolute inset-0 bg-green-400/20 rounded-full blur-xl group-hover:blur-2xl transition-all duration-500" />
+                                        <div className="relative p-5 bg-gradient-to-br from-green-50 to-green-100 text-green-700 rounded-2xl group-hover:scale-110 transition-transform duration-500 shadow-sm">
                                             <Book size={40} strokeWidth={1.5} />
                                         </div>
                                     </div>
                                     <div className="space-y-3">
-                                        <div className="flex items-center justify-center gap-2">
-                                            <h2 className="text-2xl font-bold text-gray-400">Manual</h2>
-                                            <span className="px-2 py-0.5 bg-gray-200 text-gray-500 text-xs font-medium rounded-full">Em breve</span>
-                                        </div>
-                                        <p className="text-gray-400 leading-relaxed">Manual Presbiteriano e documentos oficiais.</p>
+                                        <h2 className="text-2xl font-bold text-[#002333]">Manual</h2>
+                                        <p className="text-gray-500 leading-relaxed">Manual Presbiteriano e documentos oficiais.</p>
+                                    </div>
+                                    <div className="flex items-center gap-1 text-green-700 font-medium text-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <span>Acessar</span>
+                                        <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
                                     </div>
                                 </CardContent>
                             </Card>
-                        </div>
+                        </Link>
                     </div>
                 </div>
             </section>

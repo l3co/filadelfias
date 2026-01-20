@@ -17,21 +17,21 @@ export function BibleVersionSelector({ currentVersion, onVersionChange }: Props)
     if (!versions) return null;
 
     return (
-        <div className="relative inline-block">
+        <div className="relative inline-block shrink-0">
             <select
                 value={currentVersion}
                 onChange={(e) => onVersionChange(e.target.value)}
-                className="appearance-none bg-white border border-gray-200 text-gray-700 py-2 pl-4 pr-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent font-medium text-sm cursor-pointer shadow-sm hover:border-green-300 transition-colors"
+                className="appearance-none bg-gray-50 border border-gray-200 text-gray-700 py-1.5 pl-3 pr-8 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent font-medium text-xs cursor-pointer hover:border-green-300 transition-colors"
                 aria-label="Selecionar versão"
             >
                 {versions.map((v) => (
                     <option key={v.id} value={v.id}>
-                        {v.id.toUpperCase()} - {v.name}
+                        {v.id.toUpperCase()}
                     </option>
                 ))}
             </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                <ChevronDown size={16} />
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                <ChevronDown size={14} />
             </div>
         </div>
     );

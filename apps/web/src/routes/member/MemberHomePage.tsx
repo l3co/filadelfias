@@ -51,10 +51,10 @@ export function MemberHomePage() {
         
         <HomeCard
           icon={Users}
-          title="Diretório de Membros"
+          title="Membros"
           description="Conheça os irmãos da nossa igreja"
           href="/membro/diretorio"
-          color="green"
+          color="emerald"
         />
         
         <HomeCard

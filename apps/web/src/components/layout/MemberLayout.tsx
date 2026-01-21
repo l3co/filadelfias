@@ -20,7 +20,7 @@ const navItems = [
   { href: '/membro/biblia', label: 'Bíblia', icon: BookOpen },
   { href: '/membro/manual', label: 'Manual', icon: BookMarked },
   { href: '/membro/devocionais', label: 'Devocionais', icon: Heart },
-  { href: '/membro/diretorio', label: 'Diretório', icon: Users },
+  { href: '/membro/diretorio', label: 'Membros', icon: Users },
   { href: '/membro/eventos', label: 'Eventos', icon: Calendar },
   { href: '/membro/missoes', label: 'Missões', icon: Globe },
   { href: '/membro/ebd', label: 'EBD', icon: GraduationCap },

@@ -56,7 +56,7 @@ export function MemberDirectoryPage() {
       <div className="max-w-5xl mx-auto">
         <PageHeaderWithIcon
           icon={Users}
-          title="Diretório de Membros"
+          title="Membros"
           description="Carregando..."
         />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mt-6">
@@ -80,7 +80,7 @@ export function MemberDirectoryPage() {
     <div className="max-w-5xl mx-auto">
       <PageHeaderWithIcon
         icon={Users}
-        title="Diretório de Membros"
+        title="Membros"
         description="Conheça os irmãos da nossa comunidade"
       />
 
@@ -105,10 +105,10 @@ export function MemberDirectoryPage() {
               key={filter.value}
               onClick={() => setOfficeFilter(filter.value)}
               className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap",
+                "flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap border-2",
                 officeFilter === filter.value
-                  ? `${filter.color} ring-2 ring-offset-1 ring-current/20`
-                  : "bg-slate-50 text-slate-600 hover:bg-slate-100"
+                  ? `${filter.color} border-current/30`
+                  : "bg-slate-50 text-slate-600 hover:bg-slate-100 border-transparent"
               )}
             >
               {filter.label}

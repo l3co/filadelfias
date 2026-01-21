@@ -190,7 +190,7 @@ async def create_admin_user(tenant_id: str):
         birth_date=datetime(1990, 5, 15).date(),
         gender="M",
         status="COMUNGANTE",
-        office="PRESBÍTERO",
+        office="PRESBITERO",
         user_id=user["id"],
     )
     print(f"  ✓ Created member profile")
@@ -244,8 +244,8 @@ async def create_members(tenant_id: str, count: int = 55):
                 print(f"  ⚠️  Could not create user for {full_name}: {e}")
         
         # Create member
-        # Map random function to office
-        office = "PRESBÍTERO" if "Presbítero" in functions else "DIÁCONO" if "Diácono" in functions else "MEMBRO"
+        # Map random function to office (without accents to match enum)
+        office = "PRESBITERO" if "Presbítero" in functions else "DIACONO" if "Diácono" in functions else "MEMBRO"
         
         member = await member_repository.create_member(
             tenant_id=tenant_id,
@@ -254,7 +254,7 @@ async def create_members(tenant_id: str, count: int = 55):
             phone=generate_phone(),
             birth_date=birth_date,
             gender=gender,
-            status="COMUNGANTE" if random.random() > 0.1 else "NÃO COMUNGANTE",
+            status="COMUNGANTE" if random.random() > 0.1 else "NAO_COMUNGANTE",
             office=office,
             user_id=user_id,
         )

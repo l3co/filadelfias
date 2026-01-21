@@ -29,7 +29,7 @@ const FUNCTIONS_OPTIONS: { value: EcclesiasticalFunction; label: string }[] = [
 export function CreateMemberDialog({ isOpen, onClose, tenantId }: Props) {
     const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<MemberCreateData>({
         defaultValues: {
-            status: 'COMUNGANTE',
+            status: 'ACTIVE',
             office: 'MEMBRO',
         }
     });

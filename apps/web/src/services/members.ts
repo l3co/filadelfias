@@ -1,5 +1,5 @@
 import { api } from '../lib/api';
-import type { Member, MemberCreateData } from '../types';
+import type { Member, MemberCreateData } from '../types/members.types';
 
 export const membersService = {
     /**
@@ -15,6 +15,14 @@ export const membersService = {
      */
     createMember: async (tenantId: string, data: MemberCreateData): Promise<Member> => {
         const response = await api.post<Member>(`/tenants/${tenantId}/members`, data);
+        return response.data;
+    },
+
+    /**
+     * Update a member
+     */
+    updateMember: async (tenantId: string, memberId: string, data: Partial<MemberCreateData>): Promise<Member> => {
+        const response = await api.patch<Member>(`/tenants/${tenantId}/members/${memberId}`, data);
         return response.data;
     },
 };

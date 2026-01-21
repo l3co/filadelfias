@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { membersService } from '../../../services/members';
-import type { MemberCreateData } from '../../../types';
+import type { MemberCreateData } from '../../../types/members.types';
 import { toast } from 'sonner';
 
 export const MEMBERS_QUERY_KEY = 'members';
@@ -25,6 +25,22 @@ export function useCreateMember(tenantId: string | undefined) {
         },
         onError: () => {
             toast.error('Erro ao criar membro. Verifique os dados.');
+        }
+    });
+}
+
+export function useUpdateMember(tenantId: string | undefined) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ memberId, data }: { memberId: string; data: Partial<MemberCreateData> }) => 
+            membersService.updateMember(tenantId!, memberId, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [MEMBERS_QUERY_KEY, tenantId] });
+            toast.success('Membro atualizado com sucesso!');
+        },
+        onError: () => {
+            toast.error('Erro ao atualizar membro. Verifique os dados.');
         }
     });
 }

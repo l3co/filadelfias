@@ -36,7 +36,12 @@ export interface User {
 }
 
 export type EcclesiasticalOffice = 'MEMBRO' | 'DIACONO' | 'PRESBITERO' | 'PASTOR';
-export type EcclesiasticalFunction = 'TESOUREIRO' | 'SECRETARIO' | 'EVANGELISTA' | 'MISSIONARIO';
+export type EcclesiasticalFunction = 'TESOUREIRO' | 'SECRETARIO' | 'EVANGELISTA' | 'MISSIONARIO' | 'PROFESSOR_EBD';
+
+export type Gender = 'MALE' | 'FEMALE';
+export type MaritalStatus = 'SINGLE' | 'MARRIED' | 'DIVORCED' | 'WIDOWED';
+export type MemberStatus = 'ACTIVE' | 'INACTIVE' | 'TRANSFERRED' | 'DECEASED' | 'EXCLUDED';
+export type AdmissionType = 'BAPTISM' | 'PROFESSION' | 'TRANSFER' | 'JURISDICTION';
 
 export interface Member {
     id: string;
@@ -44,8 +49,8 @@ export interface Member {
     email?: string;
     phone?: string;
     birth_date?: string;
-    gender?: string;
-    marital_status?: string;
+    gender?: Gender;
+    marital_status?: MaritalStatus;
     marriage_date?: string;
     spouse_name?: string;
     
@@ -59,14 +64,14 @@ export interface Member {
     postal_code?: string;
     
     photo_url?: string;
-    status: string;
+    status: MemberStatus;
     role: string;  // Deprecated
     office: EcclesiasticalOffice;
     functions?: EcclesiasticalFunction[];
     baptism_date?: string;
     profession_of_faith_date?: string;
     admission_date?: string;
-    admission_type?: string;
+    admission_type?: AdmissionType;
     origin_church?: string;
     tenant_id: string;
     user_id?: string;
@@ -79,8 +84,8 @@ export interface MemberCreateData {
     email?: string;
     phone?: string;
     birth_date?: string;
-    gender?: string;
-    marital_status?: string;
+    gender?: Gender;
+    marital_status?: MaritalStatus;
     marriage_date?: string;
     spouse_name?: string;
     
@@ -93,13 +98,13 @@ export interface MemberCreateData {
     state?: string;
     postal_code?: string;
     
-    status: string;
+    status: MemberStatus;
     role?: string;  // Deprecated
     office: EcclesiasticalOffice;
     functions?: EcclesiasticalFunction[];
     baptism_date?: string;
     profession_of_faith_date?: string;
     admission_date?: string;
-    admission_type?: string;
+    admission_type?: AdmissionType;
     origin_church?: string;
 }

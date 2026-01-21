@@ -201,6 +201,12 @@ export const FUNCTION_PERMISSIONS: Record<EcclesiasticalFunction, Permission[]> 
     'missions:create',
     'missions:edit',
   ],
+
+  PROFESSOR_EBD: [
+    'ebd:view',
+    'ebd:create',
+    'ebd:edit',
+  ],
 };
 
 // ============================================================================
@@ -357,6 +363,7 @@ export const FUNCTION_LABELS: Record<EcclesiasticalFunction, string> = {
   SECRETARIO: 'Secretário',
   EVANGELISTA: 'Evangelista',
   MISSIONARIO: 'Missionário',
+  PROFESSOR_EBD: 'Professor de EBD',
 };
 
 /**

@@ -1,0 +1,84 @@
+/**
+ * Member Constants
+ */
+
+import type { 
+  EcclesiasticalOffice, 
+  EcclesiasticalFunction, 
+} from '../types/members.types';
+
+type MemberStatus = 'ACTIVE' | 'INACTIVE' | 'TRANSFERRED' | 'DECEASED' | 'EXCLUDED';
+type Gender = 'MALE' | 'FEMALE';
+type MaritalStatus = 'SINGLE' | 'MARRIED' | 'DIVORCED' | 'WIDOWED';
+type AdmissionType = 'BAPTISM' | 'PROFESSION' | 'TRANSFER' | 'JURISDICTION';
+
+export interface SelectOption<T = string> {
+  value: T;
+  label: string;
+}
+
+export const OFFICE_OPTIONS: SelectOption<EcclesiasticalOffice>[] = [
+  { value: 'MEMBRO', label: 'Membro' },
+  { value: 'DIACONO', label: 'Diácono' },
+  { value: 'PRESBITERO', label: 'Presbítero' },
+  { value: 'PASTOR', label: 'Pastor' },
+];
+
+export const FUNCTION_OPTIONS: SelectOption<EcclesiasticalFunction>[] = [
+  { value: 'TESOUREIRO', label: 'Tesoureiro' },
+  { value: 'SECRETARIO', label: 'Secretário' },
+  { value: 'EVANGELISTA', label: 'Evangelista' },
+  { value: 'MISSIONARIO', label: 'Missionário' },
+  { value: 'PROFESSOR_EBD', label: 'Professor de EBD' },
+];
+
+export const STATUS_OPTIONS: SelectOption<MemberStatus>[] = [
+  { value: 'ACTIVE', label: 'Ativo' },
+  { value: 'INACTIVE', label: 'Inativo' },
+  { value: 'TRANSFERRED', label: 'Transferido' },
+  { value: 'DECEASED', label: 'Falecido' },
+  { value: 'EXCLUDED', label: 'Excluído' },
+];
+
+export const GENDER_OPTIONS: SelectOption<Gender>[] = [
+  { value: 'MALE', label: 'Masculino' },
+  { value: 'FEMALE', label: 'Feminino' },
+];
+
+export const MARITAL_STATUS_OPTIONS: SelectOption<MaritalStatus>[] = [
+  { value: 'SINGLE', label: 'Solteiro(a)' },
+  { value: 'MARRIED', label: 'Casado(a)' },
+  { value: 'DIVORCED', label: 'Divorciado(a)' },
+  { value: 'WIDOWED', label: 'Viúvo(a)' },
+];
+
+export const ADMISSION_TYPE_OPTIONS: SelectOption<AdmissionType>[] = [
+  { value: 'BAPTISM', label: 'Batismo' },
+  { value: 'PROFESSION', label: 'Profissão de Fé' },
+  { value: 'TRANSFER', label: 'Transferência' },
+  { value: 'JURISDICTION', label: 'Jurisdição' },
+];
+
+// Labels for display
+export const OFFICE_LABELS: Record<EcclesiasticalOffice, string> = {
+  MEMBRO: 'Membro',
+  DIACONO: 'Diácono',
+  PRESBITERO: 'Presbítero',
+  PASTOR: 'Pastor',
+};
+
+export const FUNCTION_LABELS: Record<EcclesiasticalFunction, string> = {
+  TESOUREIRO: 'Tesoureiro',
+  SECRETARIO: 'Secretário',
+  EVANGELISTA: 'Evangelista',
+  MISSIONARIO: 'Missionário',
+  PROFESSOR_EBD: 'Professor de EBD',
+};
+
+export const STATUS_LABELS: Record<MemberStatus, string> = {
+  ACTIVE: 'Ativo',
+  INACTIVE: 'Inativo',
+  TRANSFERRED: 'Transferido',
+  DECEASED: 'Falecido',
+  EXCLUDED: 'Excluído',
+};

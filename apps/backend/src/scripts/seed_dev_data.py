@@ -38,6 +38,7 @@ from src.infra.repositories.tenant_repository import tenant_repository  # noqa: 
 from src.infra.repositories.user_repository import user_repository  # noqa: E402
 from src.modules.ebd.repository import ebd_class_repository, ebd_student_repository, ebd_lesson_repository  # noqa: E402
 from src.modules.financial.repository import financial_account_repository, transaction_repository  # noqa: E402
+from src.modules.governance.repository import council_repository, meeting_repository  # noqa: E402
 
 # Church data
 CHURCH_DATA = {
@@ -368,6 +369,61 @@ async def create_financial_data(tenant_id: str):
     print(f"  ✓ Created {transactions_created} financial transactions")
 
 
+async def create_governance_data(tenant_id: str, members: list):
+    """Create councils and meetings."""
+    print("\n⚖️  Creating governance data...")
+    
+    # Create councils
+    council_types = [
+        {"name": "Conselho", "type": "conselho", "description": "Conselho da Igreja"},
+        {"name": "Diretoria", "type": "diretoria", "description": "Diretoria Executiva"},
+    ]
+    
+    councils = []
+    for council_data in council_types:
+        # Select council members (5-10)
+        num_members = random.randint(5, 10)
+        council_members = random.sample(members, min(num_members, len(members)))
+        
+        council = await council_repository.create_council(
+            tenant_id=tenant_id,
+            name=council_data["name"],
+            council_type=council_data["type"],
+            description=council_data["description"],
+            members=[m["full_name"] for m in council_members],
+        )
+        councils.append(council)
+    
+    print(f"  ✓ Created {len(councils)} councils")
+    
+    # Create meetings for each council (last 6 months)
+    meetings_created = 0
+    for council in councils:
+        for month_ago in range(6):
+            meeting_date = datetime.now() - timedelta(days=month_ago * 30 + random.randint(0, 15))
+            
+            # Select attendees (subset of council members)
+            council_member_names = council.get("members", [])
+            if council_member_names:
+                num_attendees = random.randint(3, len(council_member_names))
+                attendees = random.sample(council_member_names, min(num_attendees, len(council_member_names)))
+            else:
+                attendees = []
+            
+            await meeting_repository.create_meeting(
+                council_id=council["id"],
+                title=f"Reunião {council['name']} - {meeting_date.strftime('%B/%Y')}",
+                scheduled_date=meeting_date.date(),
+                location="Salão da Igreja",
+                agenda=f"1. Abertura em oração\n2. Leitura da ata anterior\n3. Assuntos gerais\n4. Decisões\n5. Encerramento",
+                attendees=attendees,
+                decisions=f"Aprovado: {random.choice(['Orçamento para missões', 'Reforma do templo', 'Compra de equipamentos', 'Evento evangelístico', 'Curso de capacitação'])}",
+            )
+            meetings_created += 1
+    
+    print(f"  ✓ Created {meetings_created} meetings")
+
+
 async def create_governance_meetings(tenant_id: str, members: list):
     """Create governance meetings."""
     print("\n⚖️  Creating governance meetings...")
@@ -455,10 +511,10 @@ async def main():
         # Create financial data
         await create_financial_data(tenant_id)
         
-        # TODO: Uncomment when governance and missionaries modules are fully implemented
-        # Create governance meetings
-        # await create_governance_meetings(tenant_id, all_members)
+        # Create governance data (councils and meetings)
+        await create_governance_data(tenant_id, all_members)
         
+        # TODO: Uncomment when missionaries module is fully implemented
         # Create missionaries
         # await create_missionaries(tenant_id, all_members)
         

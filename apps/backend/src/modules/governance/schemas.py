@@ -15,9 +15,20 @@ class CouncilCreate(CouncilBase):
     pass
 
 
+class CouncilUpdate(BaseModel):
+    name: Optional[str] = None
+    type: Optional[str] = None
+    description: Optional[str] = None
+
+
+class CouncilMemberAdd(BaseModel):
+    member_id: str
+
+
 class CouncilResponse(CouncilBase):
     id: UUID
     tenant_id: UUID
+    member_ids: list[str] = []
     created_at: datetime
 
     class Config:

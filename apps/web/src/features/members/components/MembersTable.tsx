@@ -56,6 +56,14 @@ const officeLabels: Record<string, string> = {
     'DIACONO': 'Diácono',
 };
 
+const functionLabels: Record<string, string> = {
+    'TESOUREIRO': 'Tesoureiro',
+    'SECRETARIO': 'Secretário',
+    'EVANGELISTA': 'Evangelista',
+    'MISSIONARIO': 'Missionário',
+    'PROFESSOR_EBD': 'Prof. EBD',
+};
+
 const MemberRow = memo(function MemberRow({ 
     member, 
     onEdit, 
@@ -73,14 +81,23 @@ const MemberRow = memo(function MemberRow({
                         {member.full_name.charAt(0)}
                     </div>
                     <div>
-                        <div className="flex items-center">
+                        <div className="flex items-center flex-wrap gap-1">
                             <span className="font-semibold text-[#002333]">{member.full_name}</span>
                             {officeLabels[member.office] && (
-                                <Badge variant="default" className="ml-2 text-[10px] h-5 bg-gradient-to-r from-green-600 to-teal-600">
+                                <Badge variant="default" className="text-[10px] h-5 bg-gradient-to-r from-green-600 to-teal-600">
                                     {officeLabels[member.office]}
                                 </Badge>
                             )}
                         </div>
+                        {member.functions && member.functions.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-1">
+                                {member.functions.map(fn => (
+                                    <Badge key={fn} variant="outline" className="text-[10px] h-5 text-indigo-600 border-indigo-200">
+                                        {functionLabels[fn] || fn}
+                                    </Badge>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
             </TableCell>

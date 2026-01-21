@@ -6,6 +6,7 @@ export interface Council {
     name: string;
     type: string;
     description?: string;
+    member_ids?: string[];
 }
 
 export interface Meeting {
@@ -63,6 +64,21 @@ export const governanceService = {
 
     updateCouncil: async (tenantId: string, councilId: string, council: Partial<CreateCouncilDTO>) => {
         const { data } = await api.patch<Council>(`/governance/councils/${councilId}`, council, {
+            params: { tenant_id: tenantId }
+        });
+        return data;
+    },
+
+    addMember: async (tenantId: string, councilId: string, memberId: string) => {
+        const { data } = await api.post<Council>(`/governance/councils/${councilId}/members`, 
+            { member_id: memberId },
+            { params: { tenant_id: tenantId } }
+        );
+        return data;
+    },
+
+    removeMember: async (tenantId: string, councilId: string, memberId: string) => {
+        const { data } = await api.delete<Council>(`/governance/councils/${councilId}/members/${memberId}`, {
             params: { tenant_id: tenantId }
         });
         return data;

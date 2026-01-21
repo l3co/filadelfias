@@ -26,6 +26,7 @@ class CouncilRepository(TenantScopedRepository):
             "name": name,
             "council_type": council_type,
             "description": description,
+            "member_ids": [],
             "is_active": True,
         }
         return await self.create(tenant_id, data)
@@ -33,6 +34,32 @@ class CouncilRepository(TenantScopedRepository):
     async def get_by_type(self, tenant_id: str, council_type: str) -> list[dict]:
         """Get councils by type."""
         return await self.query(tenant_id, "council_type", "==", council_type)
+
+    async def add_member(self, tenant_id: str, council_id: str, member_id: str) -> Optional[dict]:
+        """Add a member to a council."""
+        council = await self.get(council_id, tenant_id)
+        if not council:
+            return None
+        
+        member_ids = council.get("member_ids", [])
+        if member_id not in member_ids:
+            member_ids.append(member_id)
+            await self.update(council_id, {"member_ids": member_ids}, tenant_id)
+        
+        return await self.get(council_id, tenant_id)
+
+    async def remove_member(self, tenant_id: str, council_id: str, member_id: str) -> Optional[dict]:
+        """Remove a member from a council."""
+        council = await self.get(council_id, tenant_id)
+        if not council:
+            return None
+        
+        member_ids = council.get("member_ids", [])
+        if member_id in member_ids:
+            member_ids.remove(member_id)
+            await self.update(council_id, {"member_ids": member_ids}, tenant_id)
+        
+        return await self.get(council_id, tenant_id)
 
 
 class MeetingRepository(FirestoreRepository):

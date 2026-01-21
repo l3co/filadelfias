@@ -60,3 +60,35 @@ export function useUpdateCouncil(tenantId: string | undefined) {
     });
 }
 
+export function useAddCouncilMember(tenantId: string | undefined) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ councilId, memberId }: { councilId: string; memberId: string }) => 
+            governanceService.addMember(tenantId!, councilId, memberId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [COUNCILS_KEY, tenantId] });
+            toast.success('Membro adicionado ao órgão!');
+        },
+        onError: () => {
+            toast.error('Erro ao adicionar membro.');
+        }
+    });
+}
+
+export function useRemoveCouncilMember(tenantId: string | undefined) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ councilId, memberId }: { councilId: string; memberId: string }) => 
+            governanceService.removeMember(tenantId!, councilId, memberId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [COUNCILS_KEY, tenantId] });
+            toast.success('Membro removido do órgão!');
+        },
+        onError: () => {
+            toast.error('Erro ao remover membro.');
+        }
+    });
+}
+

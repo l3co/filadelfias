@@ -1,5 +1,6 @@
 import { useState, memo } from 'react';
-import { Users, Landmark, Gavel, Calendar, MoreVertical, Pencil, Trash2 } from 'lucide-react';
+import { Users, Landmark, Gavel, Calendar, MoreVertical, Pencil, Trash2, UserPlus } from 'lucide-react';
+import { ManageMembersDialog } from './ManageMembersDialog';
 import { Card, CardContent, CardTitle } from "../../../components/ui/card";
 import { Badge } from "../../../components/ui/badge";
 import { Button } from "../../../components/ui/button";
@@ -42,6 +43,7 @@ export const CouncilList = memo(function CouncilList({ councils, isLoading, onDe
     const [showMembers, setShowMembers] = useState(false);
     const [showMeetings, setShowMeetings] = useState(false);
     const [councilToDelete, setCouncilToDelete] = useState<Council | null>(null);
+    const [managingMembers, setManagingMembers] = useState<Council | null>(null);
 
     if (isLoading) {
         return (
@@ -127,6 +129,10 @@ export const CouncilList = memo(function CouncilList({ councils, isLoading, onDe
                                                             <DropdownMenuItem onClick={() => onEdit?.(council)}>
                                                                 <Pencil size={14} className="mr-2" />
                                                                 Editar
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem onClick={() => setManagingMembers(council)}>
+                                                                <UserPlus size={14} className="mr-2" />
+                                                                Gerenciar Membros
                                                             </DropdownMenuItem>
                                                             <DropdownMenuItem
                                                                 onClick={() => setCouncilToDelete(council)}
@@ -233,6 +239,13 @@ export const CouncilList = memo(function CouncilList({ councils, isLoading, onDe
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+
+            {/* Manage Members Dialog */}
+            <ManageMembersDialog
+                isOpen={!!managingMembers}
+                onClose={() => setManagingMembers(null)}
+                council={managingMembers}
+            />
         </>
     );
 });

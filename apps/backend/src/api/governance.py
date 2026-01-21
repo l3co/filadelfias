@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter, Depends, Query
 
 from src.modules.governance.repository import council_repository, meeting_repository
-from src.modules.governance.schemas import CouncilCreate, CouncilResponse, MeetingCreate, MeetingResponse
+from src.modules.governance.schemas import CouncilCreate, CouncilUpdate, CouncilMemberAdd, CouncilResponse, MeetingCreate, MeetingResponse
 from src.middleware.permissions import (
     require_view_governance,
     require_create_governance,
@@ -75,6 +75,24 @@ async def list_meetings(
     return await meeting_repository.get_by_council(council_id)
 
 
+@router.patch("/councils/{council_id}", response_model=CouncilResponse)
+async def update_council(
+    council_id: str,
+    data: CouncilUpdate,
+    tenant_id: str = Query(..., description="ID of the tenant/church"),
+    auth_context: dict = Depends(require_manage_governance),
+):
+    """
+    Update a council.
+    Requires: Pastor or Presbítero with manage permission (governance:manage).
+    """
+    update_data = data.model_dump(exclude_unset=True)
+    if "type" in update_data:
+        update_data["council_type"] = update_data.pop("type")
+    await council_repository.update(council_id, update_data, tenant_id)
+    return await council_repository.get(council_id, tenant_id)
+
+
 @router.delete("/councils/{council_id}")
 async def delete_council(
     council_id: str,
@@ -87,4 +105,40 @@ async def delete_council(
     """
     await council_repository.delete(tenant_id, council_id)
     return {"message": "Council deleted successfully"}
+
+
+@router.post("/councils/{council_id}/members", response_model=CouncilResponse)
+async def add_council_member(
+    council_id: str,
+    data: CouncilMemberAdd,
+    tenant_id: str = Query(..., description="ID of the tenant/church"),
+    auth_context: dict = Depends(require_manage_governance),
+):
+    """
+    Add a member to a council.
+    Requires: Pastor or Presbítero with manage permission (governance:manage).
+    """
+    result = await council_repository.add_member(tenant_id, council_id, data.member_id)
+    if not result:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Council not found")
+    return result
+
+
+@router.delete("/councils/{council_id}/members/{member_id}", response_model=CouncilResponse)
+async def remove_council_member(
+    council_id: str,
+    member_id: str,
+    tenant_id: str = Query(..., description="ID of the tenant/church"),
+    auth_context: dict = Depends(require_manage_governance),
+):
+    """
+    Remove a member from a council.
+    Requires: Pastor or Presbítero with manage permission (governance:manage).
+    """
+    result = await council_repository.remove_member(tenant_id, council_id, member_id)
+    if not result:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Council not found")
+    return result
 

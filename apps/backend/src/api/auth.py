@@ -160,6 +160,43 @@ async def get_me(current_user=Depends(get_current_user)):
     return current_user
 
 
+@router.put("/me/password")
+async def change_password(
+    current_password: str,
+    new_password: str,
+    current_user: dict = Depends(get_current_user),
+):
+    """
+    Change current user's password.
+
+    Args:
+        current_password: Current password for verification
+        new_password: New password to set
+
+    Returns:
+        Success message
+
+    Raises:
+        HTTPException: If current password is incorrect
+    """
+    from src.infra.security import hash_password
+
+    # Verify current password
+    if not verify_password(current_password, current_user.get("password_hash", "")):
+        log_warning("Password change failed - wrong current password", user_id=current_user["id"])
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Senha atual incorreta",
+        )
+
+    # Update password
+    new_hash = hash_password(new_password)
+    await user_repository.update_password(current_user["id"], new_hash)
+
+    log_info("Password changed successfully", user_id=current_user["id"])
+    return {"message": "Senha alterada com sucesso"}
+
+
 @router.delete("/me")
 async def delete_my_account(current_user: dict = Depends(get_current_user)):
     """

@@ -52,6 +52,19 @@ export const authService = {
     },
 
     /**
+     * Change user password
+     */
+    changePassword: async (currentPassword: string, newPassword: string): Promise<{ message: string }> => {
+        const response = await api.put<{ message: string }>('/auth/me/password', null, {
+            params: {
+                current_password: currentPassword,
+                new_password: newPassword,
+            },
+        });
+        return response.data;
+    },
+
+    /**
      * Logout (clear local token)
      */
     logout: () => {

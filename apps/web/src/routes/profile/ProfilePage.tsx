@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { User, Mail, Phone, Calendar, Shield, Church, Save, Camera } from 'lucide-react';
+import { User, Mail, Phone, Calendar, Shield, Church, Save, Camera, Eye, EyeOff, Lock, X } from 'lucide-react';
 import { useCurrentUser, useCurrentTenant } from '../../hooks/useAuth';
 import { PageHeaderWithIcon } from '../../components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
@@ -7,6 +7,8 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Badge } from '../../components/ui/badge';
+import { authService } from '../../services/auth';
+import { toast } from 'sonner';
 
 export function ProfilePage() {
   const { data: user } = useCurrentUser();
@@ -17,6 +19,20 @@ export function ProfilePage() {
     email: user?.email || '',
     phone: '',
   });
+
+  // Password change modal state
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+  const [showPasswords, setShowPasswords] = useState({
+    current: false,
+    new: false,
+    confirm: false,
+  });
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   const membership = user?.memberships?.[0];
   const roleLabels: Record<string, { label: string; color: string }> = {
@@ -36,6 +52,30 @@ export function ProfilePage() {
   const handleSave = () => {
     // TODO: Implementar atualização do perfil
     setIsEditing(false);
+  };
+
+  const handleChangePassword = async () => {
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast.error('As senhas não coincidem');
+      return;
+    }
+
+    if (passwordForm.newPassword.length < 6) {
+      toast.error('A nova senha deve ter pelo menos 6 caracteres');
+      return;
+    }
+
+    setIsChangingPassword(true);
+    try {
+      await authService.changePassword(passwordForm.currentPassword, passwordForm.newPassword);
+      toast.success('Senha alterada com sucesso!');
+      setShowPasswordModal(false);
+      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || 'Erro ao alterar senha');
+    } finally {
+      setIsChangingPassword(false);
+    }
   };
 
   const formatDate = (dateStr?: string) => {
@@ -221,7 +261,7 @@ export function ProfilePage() {
               <p className="font-medium text-slate-900">Alterar senha</p>
               <p className="text-sm text-slate-500">Atualize sua senha de acesso</p>
             </div>
-            <Button variant="outline">Alterar</Button>
+            <Button variant="outline" onClick={() => setShowPasswordModal(true)}>Alterar</Button>
           </div>
           
           <div className="flex items-center justify-between p-4 rounded-xl bg-red-50 border border-red-100">
@@ -235,6 +275,111 @@ export function ProfilePage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Password Change Modal */}
+      {showPasswordModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div 
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            onClick={() => setShowPasswordModal(false)}
+          />
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-emerald-100">
+                  <Lock className="h-5 w-5 text-emerald-600" />
+                </div>
+                <h2 className="text-xl font-bold text-slate-900">Alterar Senha</h2>
+              </div>
+              <button
+                onClick={() => setShowPasswordModal(false)}
+                className="p-2 rounded-lg hover:bg-slate-100 transition-colors"
+              >
+                <X className="h-5 w-5 text-slate-500" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="currentPassword">Senha atual</Label>
+                <div className="relative">
+                  <Input
+                    id="currentPassword"
+                    type={showPasswords.current ? 'text' : 'password'}
+                    value={passwordForm.currentPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                    placeholder="Digite sua senha atual"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPasswords({ ...showPasswords, current: !showPasswords.current })}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    {showPasswords.current ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="newPassword">Nova senha</Label>
+                <div className="relative">
+                  <Input
+                    id="newPassword"
+                    type={showPasswords.new ? 'text' : 'password'}
+                    value={passwordForm.newPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                    placeholder="Digite a nova senha"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPasswords({ ...showPasswords, new: !showPasswords.new })}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    {showPasswords.new ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirmar nova senha</Label>
+                <div className="relative">
+                  <Input
+                    id="confirmPassword"
+                    type={showPasswords.confirm ? 'text' : 'password'}
+                    value={passwordForm.confirmPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                    placeholder="Confirme a nova senha"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPasswords({ ...showPasswords, confirm: !showPasswords.confirm })}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    {showPasswords.confirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => setShowPasswordModal(false)}
+              >
+                Cancelar
+              </Button>
+              <Button
+                className="flex-1"
+                onClick={handleChangePassword}
+                disabled={isChangingPassword}
+              >
+                {isChangingPassword ? 'Alterando...' : 'Alterar Senha'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

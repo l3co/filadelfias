@@ -128,6 +128,12 @@ jobs:
           DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/filadelfias
         run: poetry run alembic upgrade head
 
+      - name: Run seed data
+        working-directory: apps/backend
+        env:
+          DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/filadelfias
+        run: poetry run python src/scripts/seed_e2e_data.py
+
       - name: Start backend server
         working-directory: apps/backend
         env:
@@ -159,10 +165,10 @@ jobs:
       - name: Generate BDD tests
         run: npx bddgen
 
-      - name: Run E2E smoke tests
+      - name: Run E2E tests
         env:
           VITE_API_URL: http://localhost:8000
-        run: npx playwright test --grep @smoke
+        run: npx playwright test
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4

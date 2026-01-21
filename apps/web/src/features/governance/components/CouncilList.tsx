@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { Users, Landmark, Gavel, Calendar, MoreVertical, Pencil, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardTitle } from "../../../components/ui/card";
 import { Badge } from "../../../components/ui/badge";
@@ -26,6 +26,8 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "../../../components/ui/alert-dialog";
+import { CardSkeleton } from "../../../components/LoadingState";
+import { EmptyState } from "../../../components/EmptyState";
 import type { Council } from '../../../services/governance';
 
 interface CouncilListProps {
@@ -35,25 +37,27 @@ interface CouncilListProps {
     onEdit?: (council: Council) => void;
 }
 
-export function CouncilList({ councils, isLoading, onDelete, onEdit }: CouncilListProps) {
+export const CouncilList = memo(function CouncilList({ councils, isLoading, onDelete, onEdit }: CouncilListProps) {
     const [selectedCouncil, setSelectedCouncil] = useState<Council | null>(null);
     const [showMembers, setShowMembers] = useState(false);
     const [showMeetings, setShowMeetings] = useState(false);
     const [councilToDelete, setCouncilToDelete] = useState<Council | null>(null);
 
     if (isLoading) {
-        return <div className="text-center p-8 text-gray-500">Carregando governança...</div>;
+        return (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[1, 2, 3].map((i) => <CardSkeleton key={i} />)}
+            </div>
+        );
     }
 
     if (!councils || councils.length === 0) {
         return (
-            <div className="text-center py-16 bg-white rounded-2xl border-2 border-dashed border-gray-200">
-                <div className="bg-indigo-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Landmark className="h-8 w-8 text-indigo-600" />
-                </div>
-                <h3 className="mt-2 text-lg font-medium text-gray-900">Nenhum órgão governamental</h3>
-                <p className="mt-1 text-sm text-gray-500 max-w-sm mx-auto">Comece estruturando a liderança da igreja criando o Conselho ou a Junta Diaconal.</p>
-            </div>
+            <EmptyState
+                icon={Landmark}
+                title="Nenhum órgão governamental"
+                description="Comece estruturando a liderança da igreja criando o Conselho ou a Junta Diaconal."
+            />
         );
     }
 
@@ -231,4 +235,4 @@ export function CouncilList({ councils, isLoading, onDelete, onEdit }: CouncilLi
             </AlertDialog>
         </>
     );
-}
+});

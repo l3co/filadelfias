@@ -375,8 +375,8 @@ async def create_governance_data(tenant_id: str, members: list):
     
     # Create councils
     council_types = [
-        {"name": "Conselho", "type": "conselho", "description": "Conselho da Igreja"},
-        {"name": "Diretoria", "type": "diretoria", "description": "Diretoria Executiva"},
+        {"name": "Conselho", "type": "SESSION", "description": "Conselho da Igreja"},
+        {"name": "Junta Diaconal", "type": "DEACONS", "description": "Junta de Diáconos"},
     ]
     
     councils = []

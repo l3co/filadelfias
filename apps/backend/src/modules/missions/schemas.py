@@ -9,8 +9,10 @@ class MissionaryBase(BaseModel):
     name: str = Field(..., min_length=1)
     field_name: str
     country_code: str = Field(..., min_length=2, max_length=2)
-    latitude: float
-    longitude: float
+    state: Optional[str] = None
+    city: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
     bio: Optional[str] = None
     photo_url: Optional[str] = None
     newsletter_url: Optional[str] = None

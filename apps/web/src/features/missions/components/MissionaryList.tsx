@@ -98,7 +98,7 @@ export function MissionaryList({ missionaries, isLoading, onEdit, onDelete }: Mi
 
                             <div className="flex items-center text-gray-500 text-sm mb-4 gap-1">
                                 <MapPin size={16} />
-                                {m.field_name}
+                                {m.city && m.state ? `${m.city}, ${m.state}` : m.field_name}
                             </div>
 
                             <p className="text-gray-600 text-sm mb-6 line-clamp-3 min-h-[60px]">

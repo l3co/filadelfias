@@ -37,5 +37,11 @@ export const missionService = {
             params: { tenant_id: tenantId }
         });
         return data;
+    },
+
+    deleteMissionary: async (tenantId: string, missionaryId: string) => {
+        await api.delete(`/missions/missionaries/${missionaryId}`, {
+            params: { tenant_id: tenantId }
+        });
     }
 };

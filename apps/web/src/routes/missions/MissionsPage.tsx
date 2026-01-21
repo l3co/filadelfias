@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Plus, Globe } from 'lucide-react';
 import { useCurrentTenant } from '../../hooks/useAuth';
-import { useMissions } from '../../features/missions/hooks/useMissions';
+import { useMissions, useDeleteMissionary } from '../../features/missions/hooks/useMissions';
 import { MissionaryList } from '../../features/missions/components/MissionaryList';
 import { CreateMissionaryDialog } from '../../features/missions/components/CreateMissionaryDialog';
 import { Button } from '../../components/ui/button';
@@ -11,7 +11,12 @@ import { EmptyState } from '../../components/EmptyState';
 export function MissionsPage() {
     const tenant = useCurrentTenant();
     const { data: missionaries, isLoading } = useMissions(tenant?.id);
+    const deleteMissionary = useDeleteMissionary(tenant?.id);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+    const handleDelete = (missionaryId: string) => {
+        deleteMissionary.mutate(missionaryId);
+    };
 
     if (!tenant) {
         return (
@@ -37,7 +42,11 @@ export function MissionsPage() {
                 }
             />
 
-            <MissionaryList missionaries={missionaries} isLoading={isLoading} />
+            <MissionaryList 
+                missionaries={missionaries} 
+                isLoading={isLoading} 
+                onDelete={handleDelete}
+            />
 
             <CreateMissionaryDialog
                 isOpen={isDialogOpen}

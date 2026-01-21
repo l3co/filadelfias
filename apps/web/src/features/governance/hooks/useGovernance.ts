@@ -44,3 +44,19 @@ export function useDeleteCouncil(tenantId: string | undefined) {
     });
 }
 
+export function useUpdateCouncil(tenantId: string | undefined) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ councilId, data }: { councilId: string; data: Partial<CreateCouncilDTO> }) => 
+            governanceService.updateCouncil(tenantId!, councilId, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [COUNCILS_KEY, tenantId] });
+            toast.success('Órgão atualizado com sucesso!');
+        },
+        onError: () => {
+            toast.error('Erro ao atualizar órgão.');
+        }
+    });
+}
+

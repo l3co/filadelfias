@@ -59,5 +59,12 @@ export const governanceService = {
         await api.delete(`/governance/councils/${councilId}`, {
             params: { tenant_id: tenantId }
         });
+    },
+
+    updateCouncil: async (tenantId: string, councilId: string, council: Partial<CreateCouncilDTO>) => {
+        const { data } = await api.patch<Council>(`/governance/councils/${councilId}`, council, {
+            params: { tenant_id: tenantId }
+        });
+        return data;
     }
 };

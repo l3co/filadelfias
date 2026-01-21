@@ -37,8 +37,8 @@ export function ChurchSettingsPage() {
     
     const tenant = user?.memberships?.[0]?.tenant;
     const tenantId = tenant?.id;
-    const userRole = user?.memberships?.[0]?.role;
-    const isAdmin = userRole === 'ADMIN';
+    const userRole = user?.memberships?.[0]?.role?.toUpperCase();
+    const isAdmin = userRole === 'ADMIN' || userRole === 'MODERATOR';
 
     const { register, handleSubmit, setValue, watch, formState: { errors, isDirty } } = useForm<ChurchFormData>({
         defaultValues: {

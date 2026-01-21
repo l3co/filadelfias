@@ -37,7 +37,7 @@ from src.infra.repositories.membership_repository import membership_repository  
 from src.infra.repositories.tenant_repository import tenant_repository  # noqa: E402
 from src.infra.repositories.user_repository import user_repository  # noqa: E402
 from src.modules.ebd.repository import ebd_class_repository, ebd_student_repository, ebd_lesson_repository  # noqa: E402
-from src.modules.financial.repository import financial_account_repository, transaction_repository  # noqa: E402
+from src.modules.financial.repository import financial_account_repository, transaction_repository, transaction_category_repository  # noqa: E402
 from src.modules.governance.repository import council_repository, meeting_repository  # noqa: E402
 
 # Church data
@@ -335,6 +335,39 @@ async def create_financial_data(tenant_id: str):
         accounts.append(account)
     
     print(f"  ✓ Created {len(accounts)} financial accounts")
+    
+    # Create categories
+    categories = []
+    category_types = [
+        # Income categories
+        {"name": "Dízimos", "type": "INCOME"},
+        {"name": "Ofertas", "type": "INCOME"},
+        {"name": "Doações", "type": "INCOME"},
+        {"name": "Eventos", "type": "INCOME"},
+        {"name": "Outras Receitas", "type": "INCOME"},
+        # Expense categories
+        {"name": "Aluguel", "type": "EXPENSE"},
+        {"name": "Energia Elétrica", "type": "EXPENSE"},
+        {"name": "Água", "type": "EXPENSE"},
+        {"name": "Telefone/Internet", "type": "EXPENSE"},
+        {"name": "Material de Limpeza", "type": "EXPENSE"},
+        {"name": "Material de Escritório", "type": "EXPENSE"},
+        {"name": "Manutenção", "type": "EXPENSE"},
+        {"name": "Missões", "type": "EXPENSE"},
+        {"name": "Assistência Social", "type": "EXPENSE"},
+        {"name": "Salários", "type": "EXPENSE"},
+        {"name": "Outras Despesas", "type": "EXPENSE"},
+    ]
+    
+    for cat_data in category_types:
+        category = await transaction_category_repository.create_category(
+            tenant_id=tenant_id,
+            name=cat_data["name"],
+            type=cat_data["type"],
+        )
+        categories.append(category)
+    
+    print(f"  ✓ Created {len(categories)} transaction categories")
     
     # Create transactions (last 3 months)
     transaction_types = [

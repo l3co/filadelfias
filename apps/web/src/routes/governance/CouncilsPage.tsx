@@ -5,10 +5,12 @@ import { useGovernance, useDeleteCouncil } from '../../features/governance/hooks
 import { usePermissions } from '../../hooks/usePermissions';
 import { CouncilList } from '../../features/governance/components/CouncilList';
 import { CreateCouncilDialog } from '../../features/governance/components/CreateCouncilDialog';
+import { EditCouncilDialog } from '../../features/governance/components/EditCouncilDialog';
 import { Button } from '../../components/ui/button';
 import { PermissionGate, AccessDenied } from '../../components/PermissionGate';
 import { PageHeaderWithIcon } from '../../components/PageHeader';
 import { EmptyState } from '../../components/EmptyState';
+import type { Council } from '../../services/governance';
 
 export function CouncilsPage() {
     const tenant = useCurrentTenant();
@@ -16,9 +18,14 @@ export function CouncilsPage() {
     const deleteCouncil = useDeleteCouncil(tenant?.id);
     const { canViewGovernance } = usePermissions();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [editingCouncil, setEditingCouncil] = useState<Council | null>(null);
 
     const handleDelete = (councilId: string) => {
         deleteCouncil.mutate(councilId);
+    };
+
+    const handleEdit = (council: Council) => {
+        setEditingCouncil(council);
     };
 
     if (!tenant) {
@@ -55,12 +62,20 @@ export function CouncilsPage() {
                 councils={councils}
                 isLoading={isLoading}
                 onDelete={handleDelete}
+                onEdit={handleEdit}
             />
 
             <CreateCouncilDialog
                 isOpen={isDialogOpen}
                 onClose={() => setIsDialogOpen(false)}
                 tenantId={tenant.id}
+            />
+
+            <EditCouncilDialog
+                isOpen={!!editingCouncil}
+                onClose={() => setEditingCouncil(null)}
+                tenantId={tenant.id}
+                council={editingCouncil}
             />
         </div>
     );

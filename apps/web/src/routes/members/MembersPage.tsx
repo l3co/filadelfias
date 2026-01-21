@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Plus, Users, Search, Filter } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Plus, Users, Search, X } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCurrentTenant } from '../../hooks/useAuth';
 import { useMembers } from '../../features/members/hooks/useMembers';
@@ -7,6 +7,7 @@ import { MembersTable } from '../../features/members/components/MembersTable';
 import { MemberDialog } from '../../features/members/components/MemberDialog';
 import { InviteSuccessDialog } from '../../features/members/components/InviteSuccessDialog';
 import { Button } from '../../components/ui/button';
+import { Badge } from '../../components/ui/badge';
 import { api } from '../../lib/api';
 import type { Member } from '../../types';
 
@@ -17,6 +18,13 @@ interface InviteResult {
     email_sent: boolean;
 }
 
+const officeLabels: Record<string, string> = {
+    PASTOR: 'Pastor',
+    PRESBITERO: 'Presbítero',
+    DIACONO: 'Diácono',
+    MEMBRO: 'Membro',
+};
+
 export function MembersPage() {
     const tenant = useCurrentTenant();
     const queryClient = useQueryClient();
@@ -24,6 +32,32 @@ export function MembersPage() {
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [editingMember, setEditingMember] = useState<Member | null>(null);
     const [inviteResult, setInviteResult] = useState<{ member: Member; result: InviteResult } | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [officeFilter, setOfficeFilter] = useState<string | null>(null);
+
+    const filteredMembers = useMemo(() => {
+        if (!members) return [];
+        
+        return members.filter(member => {
+            const matchesSearch = searchQuery === '' || 
+                member.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                member.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                member.phone?.includes(searchQuery);
+            
+            const matchesOffice = !officeFilter || member.office === officeFilter;
+            
+            return matchesSearch && matchesOffice;
+        });
+    }, [members, searchQuery, officeFilter]);
+
+    const officeCounts = useMemo(() => {
+        if (!members) return {};
+        return members.reduce((acc, m) => {
+            const office = m.office || 'MEMBRO';
+            acc[office] = (acc[office] || 0) + 1;
+            return acc;
+        }, {} as Record<string, number>);
+    }, [members]);
 
     const inviteMutation = useMutation({
         mutationFn: async (member: Member) => {
@@ -74,24 +108,63 @@ export function MembersPage() {
             </div>
 
             {/* Search and Filters */}
-            <div className="flex flex-col sm:flex-row gap-3">
-                <div className="relative flex-1">
-                    <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
-                        type="text"
-                        placeholder="Buscar por nome, email..."
-                        className="w-full pl-11 pr-4 py-3 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all placeholder:text-gray-400"
-                    />
+            <div className="flex flex-col gap-4">
+                <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="relative flex-1">
+                        <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="Buscar por nome, email, telefone..."
+                            className="w-full pl-11 pr-10 py-3 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all placeholder:text-gray-400"
+                        />
+                        {searchQuery && (
+                            <button
+                                onClick={() => setSearchQuery('')}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                            >
+                                <X size={16} />
+                            </button>
+                        )}
+                    </div>
                 </div>
-                <Button variant="outline" className="gap-2">
-                    <Filter size={16} />
-                    Filtros
-                </Button>
+
+                {/* Office Filters */}
+                <div className="flex flex-wrap gap-2">
+                    <button
+                        onClick={() => setOfficeFilter(null)}
+                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                            !officeFilter 
+                                ? 'bg-green-600 text-white' 
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                    >
+                        Todos
+                        <Badge variant="secondary" className="ml-2 bg-white/20">{members?.length || 0}</Badge>
+                    </button>
+                    {Object.entries(officeLabels).map(([key, label]) => (
+                        <button
+                            key={key}
+                            onClick={() => setOfficeFilter(officeFilter === key ? null : key)}
+                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                                officeFilter === key 
+                                    ? 'bg-green-600 text-white' 
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                        >
+                            {label}
+                            {officeCounts[key] && (
+                                <Badge variant="secondary" className="ml-2">{officeCounts[key]}</Badge>
+                            )}
+                        </button>
+                    ))}
+                </div>
             </div>
 
             {/* Table */}
             <MembersTable 
-                members={members} 
+                members={filteredMembers} 
                 isLoading={isLoading} 
                 onEditMember={(member) => setEditingMember(member)}
                 onInviteMember={(member) => inviteMutation.mutate(member)}

@@ -72,7 +72,7 @@ export function DashboardLayout() {
             {/* Sidebar */}
             <aside
                 className={cn(
-                    "fixed inset-y-0 left-0 z-50 w-72 bg-white shadow-2xl shadow-gray-200/50 transform transition-transform duration-300 ease-out lg:translate-x-0 lg:static lg:shadow-none border-r border-gray-100 flex flex-col",
+                    "fixed inset-y-0 left-0 z-50 w-72 h-screen bg-white shadow-2xl shadow-gray-200/50 transform transition-transform duration-300 ease-out lg:translate-x-0 lg:static lg:shadow-none border-r border-gray-100 flex flex-col",
                     sidebarOpen ? "translate-x-0" : "-translate-x-full"
                 )}
             >

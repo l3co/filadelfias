@@ -28,3 +28,18 @@ export function useCreateMissionary(tenantId: string | undefined) {
         }
     });
 }
+
+export function useDeleteMissionary(tenantId: string | undefined) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (missionaryId: string) => missionService.deleteMissionary(tenantId!, missionaryId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [MISSIONS_KEY, tenantId] });
+            toast.success('Missionário excluído com sucesso!');
+        },
+        onError: () => {
+            toast.error('Erro ao excluir missionário.');
+        }
+    });
+}

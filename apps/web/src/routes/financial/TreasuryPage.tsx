@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useCurrentTenant } from '../../hooks/useAuth';
 import { useFinancialData } from '../../features/financial/hooks/useFinancial';
+import { usePermissions } from '../../hooks/usePermissions';
 import { BalanceSummary } from '../../features/financial/components/BalanceSummary';
 import { TransactionList } from '../../features/financial/components/TransactionList';
 import { TransactionForm } from '../../features/financial/components/TransactionForm';
 import { Button } from '../../components/ui/button';
+import { PermissionGate, AccessDenied } from '../../components/PermissionGate';
 import { PlusCircle, MinusCircle, Wallet, FileText, CreditCard, ChevronRight } from 'lucide-react';
 
 export function TreasuryPage() {
@@ -17,6 +19,7 @@ export function TreasuryPage() {
         createTransaction,
         isLoading
     } = useFinancialData(tenant?.id);
+    const { canViewFinancial } = usePermissions();
 
     const [modalState, setModalState] = useState<{ isOpen: boolean; type: 'CREDIT' | 'DEBIT' }>({
         isOpen: false,
@@ -40,6 +43,11 @@ export function TreasuryPage() {
         );
     }
 
+    // Verifica permissão de acesso à tesouraria
+    if (!canViewFinancial) {
+        return <AccessDenied resource="financial" />;
+    }
+
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
             {/* Header Section */}
@@ -53,20 +61,23 @@ export function TreasuryPage() {
                         <p className="text-gray-500 mt-0.5">Gestão financeira inteligente e transparente</p>
                     </div>
                 </div>
-                <div className="flex gap-3">
-                    <Button onClick={() => openModal('CREDIT')} className="gap-2">
-                        <PlusCircle className="h-4 w-4" />
-                        Nova Receita
-                    </Button>
-                    <Button
-                        variant="destructive"
-                        onClick={() => openModal('DEBIT')}
-                        className="gap-2"
-                    >
-                        <MinusCircle className="h-4 w-4" />
-                        Nova Despesa
-                    </Button>
-                </div>
+                {/* Apenas quem pode criar transações vê os botões */}
+                <PermissionGate resource="financial" action="create">
+                    <div className="flex gap-3">
+                        <Button onClick={() => openModal('CREDIT')} className="gap-2">
+                            <PlusCircle className="h-4 w-4" />
+                            Nova Receita
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={() => openModal('DEBIT')}
+                            className="gap-2"
+                        >
+                            <MinusCircle className="h-4 w-4" />
+                            Nova Despesa
+                        </Button>
+                    </div>
+                </PermissionGate>
             </div>
 
             {/* Dashboard Cards */}

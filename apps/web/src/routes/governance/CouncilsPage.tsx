@@ -1,15 +1,23 @@
 import { useState } from 'react';
 import { Plus, Gavel } from 'lucide-react';
 import { useCurrentTenant } from '../../hooks/useAuth';
-import { useGovernance } from '../../features/governance/hooks/useGovernance';
+import { useGovernance, useDeleteCouncil } from '../../features/governance/hooks/useGovernance';
+import { usePermissions } from '../../hooks/usePermissions';
 import { CouncilList } from '../../features/governance/components/CouncilList';
 import { CreateCouncilDialog } from '../../features/governance/components/CreateCouncilDialog';
 import { Button } from '../../components/ui/button';
+import { PermissionGate, AccessDenied } from '../../components/PermissionGate';
 
 export function CouncilsPage() {
     const tenant = useCurrentTenant();
     const { data: councils, isLoading } = useGovernance(tenant?.id);
+    const deleteCouncil = useDeleteCouncil(tenant?.id);
+    const { canViewGovernance } = usePermissions();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+    const handleDelete = (councilId: string) => {
+        deleteCouncil.mutate(councilId);
+    };
 
     if (!tenant) {
         return (
@@ -21,6 +29,11 @@ export function CouncilsPage() {
                 <p className="text-gray-500 mt-2">Você precisa estar vinculado a uma igreja.</p>
             </div>
         );
+    }
+
+    // Verifica permissão de acesso à governança
+    if (!canViewGovernance) {
+        return <AccessDenied resource="governance" />;
     }
 
     return (
@@ -37,12 +50,19 @@ export function CouncilsPage() {
                         </p>
                     </div>
                 </div>
-                <Button onClick={() => setIsDialogOpen(true)} className="gap-2">
-                    <Plus size={16} /> Novo Órgão
-                </Button>
+                {/* Apenas quem pode gerenciar governança pode criar novos órgãos */}
+                <PermissionGate resource="governance" action="create">
+                    <Button onClick={() => setIsDialogOpen(true)} className="gap-2">
+                        <Plus size={16} /> Novo Órgão
+                    </Button>
+                </PermissionGate>
             </div>
 
-            <CouncilList councils={councils} isLoading={isLoading} />
+            <CouncilList
+                councils={councils}
+                isLoading={isLoading}
+                onDelete={handleDelete}
+            />
 
             <CreateCouncilDialog
                 isOpen={isDialogOpen}
@@ -52,3 +72,4 @@ export function CouncilsPage() {
         </div>
     );
 }
+

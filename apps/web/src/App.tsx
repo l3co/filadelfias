@@ -31,6 +31,7 @@ const TreasuryPage = lazy(() => import('./routes/financial/TreasuryPage').then(m
 const MissionsPage = lazy(() => import('./routes/missions/MissionsPage').then(m => ({ default: m.MissionsPage })));
 const EBDClassesPage = lazy(() => import('./routes/ebd/EBDClassesPage').then(m => ({ default: m.EBDClassesPage })));
 const EBDClassDetailPage = lazy(() => import('./routes/ebd/EBDClassDetailPage').then(m => ({ default: m.EBDClassDetailPage })));
+const EventsPage = lazy(() => import('./routes/events/EventsPage').then(m => ({ default: m.EventsPage })));
 const ChurchSettingsPage = lazy(() => import('./routes/settings/ChurchSettingsPage').then(m => ({ default: m.ChurchSettingsPage })));
 
 // Lazy loaded pages - Member Portal
@@ -93,7 +94,7 @@ function App() {
           <Route path="missions" element={<MissionsPage />} />
           <Route path="ebd" element={<EBDClassesPage />} />
           <Route path="ebd/:classId" element={<EBDClassDetailPage />} />
-          <Route path="events" element={<div className="p-8 text-center text-gray-500">Módulo de Eventos (Em breve)</div>} />
+          <Route path="events" element={<EventsPage />} />
           <Route path="settings" element={<ChurchSettingsPage />} />
           <Route path="profile" element={<ProfilePage />} />
         </Route>

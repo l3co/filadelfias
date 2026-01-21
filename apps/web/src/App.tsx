@@ -1,32 +1,48 @@
+import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import LoginPage from './routes/LoginPage';
-import { ForgotPasswordPage } from './routes/auth/ForgotPasswordPage';
-import { ResetPasswordPage } from './routes/auth/ResetPasswordPage';
-import { ChurchRegistrationWizard } from './routes/ChurchRegistrationWizard';
-import { ChurchSettingsPage } from './routes/settings/ChurchSettingsPage';
-import HomePage from './routes/HomePage';
 import ProtectedRoute from './components/ProtectedRoute';
-import { MembersPage } from './routes/members/MembersPage';
 import { DashboardLayout } from './components/layout/DashboardLayout';
-import { OnboardingPage } from './routes/OnboardingPage';
+import { MemberLayout } from './components/layout/MemberLayout';
 import { PublicLayout } from './components/layout/PublicLayout';
-import { LandingPage } from './routes/LandingPage';
-import { BiblePage } from './routes/bible/BiblePage';
-import { BibleReaderPage } from './routes/bible/BibleReaderPage';
-import { HymnalPage } from './routes/hymnal/HymnalPage';
-import { HymnalReaderPage } from './routes/hymnal/HymnalReaderPage';
-import { ManualPage } from './routes/manual/ManualPage';
-import { ManualReaderPage } from './routes/manual/ManualReaderPage';
-import { CouncilsPage } from './routes/governance/CouncilsPage';
-import { TreasuryPage } from './routes/financial/TreasuryPage';
-import { MissionsPage } from './routes/missions/MissionsPage';
-import { EBDClassesPage } from './routes/ebd/EBDClassesPage';
 import { Toaster } from './components/ui/sonner';
+import { LoadingOverlay } from './components/ui/spinner';
+
+// Lazy loaded pages - Auth
+const LoginPage = lazy(() => import('./routes/LoginPage'));
+const ForgotPasswordPage = lazy(() => import('./routes/auth/ForgotPasswordPage').then(m => ({ default: m.ForgotPasswordPage })));
+const ResetPasswordPage = lazy(() => import('./routes/auth/ResetPasswordPage').then(m => ({ default: m.ResetPasswordPage })));
+const ChurchRegistrationWizard = lazy(() => import('./routes/ChurchRegistrationWizard').then(m => ({ default: m.ChurchRegistrationWizard })));
+const OnboardingPage = lazy(() => import('./routes/OnboardingPage').then(m => ({ default: m.OnboardingPage })));
+
+// Lazy loaded pages - Public
+const LandingPage = lazy(() => import('./routes/LandingPage').then(m => ({ default: m.LandingPage })));
+const BiblePage = lazy(() => import('./routes/bible/BiblePage').then(m => ({ default: m.BiblePage })));
+const BibleReaderPage = lazy(() => import('./routes/bible/BibleReaderPage').then(m => ({ default: m.BibleReaderPage })));
+const HymnalPage = lazy(() => import('./routes/hymnal/HymnalPage').then(m => ({ default: m.HymnalPage })));
+const HymnalReaderPage = lazy(() => import('./routes/hymnal/HymnalReaderPage').then(m => ({ default: m.HymnalReaderPage })));
+const ManualPage = lazy(() => import('./routes/manual/ManualPage').then(m => ({ default: m.ManualPage })));
+const ManualReaderPage = lazy(() => import('./routes/manual/ManualReaderPage').then(m => ({ default: m.ManualReaderPage })));
+
+// Lazy loaded pages - Admin Dashboard
+const HomePage = lazy(() => import('./routes/HomePage'));
+const MembersPage = lazy(() => import('./routes/members/MembersPage').then(m => ({ default: m.MembersPage })));
+const CouncilsPage = lazy(() => import('./routes/governance/CouncilsPage').then(m => ({ default: m.CouncilsPage })));
+const TreasuryPage = lazy(() => import('./routes/financial/TreasuryPage').then(m => ({ default: m.TreasuryPage })));
+const MissionsPage = lazy(() => import('./routes/missions/MissionsPage').then(m => ({ default: m.MissionsPage })));
+const EBDClassesPage = lazy(() => import('./routes/ebd/EBDClassesPage').then(m => ({ default: m.EBDClassesPage })));
+const ChurchSettingsPage = lazy(() => import('./routes/settings/ChurchSettingsPage').then(m => ({ default: m.ChurchSettingsPage })));
+
+// Lazy loaded pages - Member Portal
+const MemberHomePage = lazy(() => import('./routes/member/MemberHomePage').then(m => ({ default: m.MemberHomePage })));
+const MemberDirectoryPage = lazy(() => import('./routes/member/MemberDirectoryPage').then(m => ({ default: m.MemberDirectoryPage })));
+const MemberEventsPage = lazy(() => import('./routes/member/MemberEventsPage').then(m => ({ default: m.MemberEventsPage })));
+const MemberMissionsPage = lazy(() => import('./routes/member/MemberMissionsPage').then(m => ({ default: m.MemberMissionsPage })));
 
 function App() {
   return (
     <>
-      <Routes>
+      <Suspense fallback={<LoadingOverlay message="Carregando..." />}>
+        <Routes>
         {/* Rotas Públicas com Layout Público */}
         <Route element={<PublicLayout />}>
           <Route path="/" element={<LandingPage />} />
@@ -73,9 +89,30 @@ function App() {
           <Route path="settings" element={<ChurchSettingsPage />} />
         </Route>
 
+        {/* Portal do Membro (Nova UX) */}
+        <Route
+          path="/membro"
+          element={
+            <ProtectedRoute>
+              <MemberLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<MemberHomePage />} />
+          <Route path="diretorio" element={<MemberDirectoryPage />} />
+          <Route path="eventos" element={<MemberEventsPage />} />
+          <Route path="missoes" element={<MemberMissionsPage />} />
+          <Route path="biblia" element={<BiblePage />} />
+          <Route path="manual" element={<ManualPage />} />
+          <Route path="ebd" element={<div className="text-center py-12">Minha Turma (Em breve)</div>} />
+          <Route path="oracao" element={<div className="text-center py-12">Pedidos de Oração (Em breve)</div>} />
+          <Route path="devocionais" element={<div className="text-center py-12">Devocionais (Em breve)</div>} />
+        </Route>
+
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+        </Routes>
+      </Suspense>
       <Toaster />
     </>
   );

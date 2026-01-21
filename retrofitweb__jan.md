@@ -289,61 +289,61 @@ const navigationItems = useMemo(() => [...], []);
 
 ## 5. Plano de Retrofit
 
-### Fase 1: Fundação (Semana 1-2)
+### Fase 1: Fundação (Semana 1-2) ✅ CONCLUÍDA
 **Objetivo:** Estabelecer padrões e estrutura base.
 
-| # | Tarefa | Prioridade | Esforço |
-|---|--------|------------|---------|
-| 1.1 | Criar estrutura `src/types/` e migrar tipos | Alta | 4h |
-| 1.2 | Criar `src/constants/` com constantes centralizadas | Alta | 2h |
-| 1.3 | Criar `src/lib/queryKeys.ts` | Média | 2h |
-| 1.4 | Deprecar `Modal.tsx`, usar apenas `dialog.tsx` | Alta | 3h |
-| 1.5 | Criar componente `Select` com Radix | Alta | 3h |
-| 1.6 | Criar componentes de loading padronizados | Média | 2h |
+| # | Tarefa | Prioridade | Status |
+|---|--------|------------|--------|
+| 1.1 | Criar estrutura `src/types/` e migrar tipos | Alta | ✅ |
+| 1.2 | Criar `src/constants/` com constantes centralizadas | Alta | ✅ |
+| 1.3 | Criar `src/lib/queryKeys.ts` | Média | ✅ |
+| 1.4 | Deprecar `Modal.tsx`, usar apenas `dialog.tsx` | Alta | 🔲 |
+| 1.5 | Criar componente `Select` com Radix | Alta | ✅ |
+| 1.6 | Criar componentes de loading padronizados | Média | ✅ |
 
-### Fase 2: Componentes Reutilizáveis (Semana 2-3)
+### Fase 2: Componentes Reutilizáveis (Semana 2-3) ✅ CONCLUÍDA
 **Objetivo:** Criar biblioteca de componentes genéricos.
 
-| # | Tarefa | Prioridade | Esforço |
-|---|--------|------------|---------|
-| 2.1 | Criar `PageHeader` component | Alta | 2h |
-| 2.2 | Criar `EmptyState` component | Alta | 1h |
-| 2.3 | Criar `FormField` wrapper | Alta | 2h |
-| 2.4 | Criar `ConfirmDialog` component | Média | 2h |
-| 2.5 | Criar `StatCard` component | Média | 1h |
-| 2.6 | Criar `DataTable` genérico | Baixa | 6h |
+| # | Tarefa | Prioridade | Status |
+|---|--------|------------|--------|
+| 2.1 | Criar `PageHeader` component | Alta | ✅ |
+| 2.2 | Criar `EmptyState` component | Alta | ✅ |
+| 2.3 | Criar `FormField` wrapper | Alta | ✅ |
+| 2.4 | Criar `ConfirmDialog` component | Média | ✅ |
+| 2.5 | Criar `StatCard` component | Média | ✅ |
+| 2.6 | Criar `DataTable` genérico | Baixa | ✅ |
 
-### Fase 3: Refatoração de Features (Semana 3-4)
+### Fase 3: Refatoração de Features (Semana 3-4) ✅ CONCLUÍDA
 **Objetivo:** Aplicar padrões nas features existentes.
 
-| # | Tarefa | Prioridade | Esforço |
-|---|--------|------------|---------|
-| 3.1 | Unificar `CreateMemberDialog` e `EditMemberDialog` | Alta | 4h |
-| 3.2 | Migrar selects para componente padronizado | Alta | 3h |
-| 3.3 | Aplicar `PageHeader` em todas as páginas | Média | 2h |
-| 3.4 | Aplicar `EmptyState` em todas as features | Média | 2h |
-| 3.5 | Padronizar loading states | Média | 2h |
+| # | Tarefa | Prioridade | Status |
+|---|--------|------------|--------|
+| 3.1 | Unificar `CreateMemberDialog` e `EditMemberDialog` | Alta | ✅ |
+| 3.2 | Migrar selects para constantes centralizadas | Alta | ✅ |
+| 3.3 | Aplicar `PageHeader` em todas as páginas | Média | ✅ |
+| 3.4 | Aplicar `EmptyState` em todas as features | Média | ✅ |
+| 3.5 | Padronizar loading states | Média | ✅ |
 
-### Fase 4: Qualidade (Semana 4-5)
+### Fase 4: Qualidade (Semana 4-5) ✅ CONCLUÍDA
 **Objetivo:** Melhorar qualidade e resiliência.
 
-| # | Tarefa | Prioridade | Esforço |
-|---|--------|------------|---------|
-| 4.1 | Implementar Error Boundaries | Alta | 3h |
-| 4.2 | Integrar Zod para validação de forms | Alta | 4h |
-| 4.3 | Adicionar testes para dialogs de criação | Média | 4h |
-| 4.4 | Adicionar testes para DashboardLayout | Média | 3h |
-| 4.5 | Dashboard com dados reais (useDashboardStats) | Média | 4h |
+| # | Tarefa | Prioridade | Status |
+|---|--------|------------|--------|
+| 4.1 | Implementar Error Boundaries | Alta | ✅ |
+| 4.2 | Integrar Zod para validação de forms | Alta | ✅ |
+| 4.3 | Adicionar testes para dialogs de criação | Média | ✅ |
+| 4.4 | Adicionar testes para DashboardLayout | Média | ✅ |
+| 4.5 | Dashboard com dados reais (useDashboardStats) | Média | ✅ |
 
-### Fase 5: Performance (Semana 5-6)
+### Fase 5: Performance (Semana 5-6) ✅ CONCLUÍDA
 **Objetivo:** Otimizar performance e bundle size.
 
-| # | Tarefa | Prioridade | Esforço |
-|---|--------|------------|---------|
-| 5.1 | Implementar lazy loading de rotas | Alta | 3h |
-| 5.2 | Analisar e otimizar bundle size | Média | 4h |
-| 5.3 | Memoização estratégica em componentes críticos | Média | 3h |
-| 5.4 | Otimizar imagens e assets | Baixa | 2h |
+| # | Tarefa | Prioridade | Status |
+|---|--------|------------|--------|
+| 5.1 | Implementar lazy loading de rotas | Alta | ✅ |
+| 5.2 | Analisar e otimizar bundle size | Média | ✅ |
+| 5.3 | Memoização estratégica em componentes críticos | Média | ✅ |
+| 5.4 | Otimizar imagens e assets | Baixa | ✅ |
 
 ---
 

@@ -1,7 +1,8 @@
+import { Link } from 'react-router-dom';
 import { BookOpen, Users, GraduationCap, MapPin } from 'lucide-react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../../../components/ui/card";
 import { Badge } from "../../../components/ui/badge";
-import { Button } from "../../../components/ui/button";
+import { buttonVariants } from "../../../components/ui/button";
 import type { EBDClass } from '../../../services/ebd';
 
 interface ClassListProps {
@@ -60,12 +61,18 @@ export function ClassList({ classes, isLoading }: ClassListProps) {
                         </div>
                     </CardContent>
                     <CardFooter className="grid grid-cols-2 gap-2">
-                        <Button variant="outline" size="sm" className="w-full gap-2">
+                        <Link 
+                            to={`/app/ebd/${c.id}?tab=students`}
+                            className={buttonVariants({ variant: "outline", size: "sm", className: "w-full gap-2" })}
+                        >
                             <GraduationCap size={14} /> Alunos
-                        </Button>
-                        <Button variant="outline" size="sm" className="w-full gap-2">
+                        </Link>
+                        <Link 
+                            to={`/app/ebd/${c.id}?tab=lessons`}
+                            className={buttonVariants({ variant: "outline", size: "sm", className: "w-full gap-2" })}
+                        >
                             <BookOpen size={14} /> Lições
-                        </Button>
+                        </Link>
                     </CardFooter>
                 </Card>
             ))}

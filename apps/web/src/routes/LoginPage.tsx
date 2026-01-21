@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useLogin } from '../hooks/useAuth';
+import { getPostLoginRoute } from '../lib/userRouting';
 import { Mail, Lock, ArrowRight, AlertCircle } from 'lucide-react';
 
 export default function LoginPage() {
@@ -12,12 +13,16 @@ export default function LoginPage() {
         password: '',
     });
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         login(formData, {
-            onSuccess: () => {
-                navigate('/app');
+            onSuccess: async () => {
+                // Buscar dados do usuário para determinar rota
+                const { authService } = await import('../services/auth');
+                const user = await authService.getCurrentUser();
+                const route = getPostLoginRoute(user);
+                navigate(route);
             },
         });
     };

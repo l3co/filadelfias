@@ -37,6 +37,12 @@ const MemberHomePage = lazy(() => import('./routes/member/MemberHomePage').then(
 const MemberDirectoryPage = lazy(() => import('./routes/member/MemberDirectoryPage').then(m => ({ default: m.MemberDirectoryPage })));
 const MemberEventsPage = lazy(() => import('./routes/member/MemberEventsPage').then(m => ({ default: m.MemberEventsPage })));
 const MemberMissionsPage = lazy(() => import('./routes/member/MemberMissionsPage').then(m => ({ default: m.MemberMissionsPage })));
+const MemberDevotionalsPage = lazy(() => import('./routes/member/MemberDevotionalsPage').then(m => ({ default: m.MemberDevotionalsPage })));
+const MemberPrayerPage = lazy(() => import('./routes/member/MemberPrayerPage').then(m => ({ default: m.MemberPrayerPage })));
+const MemberEBDPage = lazy(() => import('./routes/member/MemberEBDPage').then(m => ({ default: m.MemberEBDPage })));
+
+// Lazy loaded pages - Shared
+const ProfilePage = lazy(() => import('./routes/profile/ProfilePage').then(m => ({ default: m.ProfilePage })));
 
 function App() {
   return (
@@ -87,6 +93,7 @@ function App() {
           <Route path="ebd" element={<EBDClassesPage />} />
           <Route path="events" element={<div className="p-8 text-center text-gray-500">Módulo de Eventos (Em breve)</div>} />
           <Route path="settings" element={<ChurchSettingsPage />} />
+          <Route path="profile" element={<ProfilePage />} />
         </Route>
 
         {/* Portal do Membro (Nova UX) */}
@@ -104,9 +111,10 @@ function App() {
           <Route path="missoes" element={<MemberMissionsPage />} />
           <Route path="biblia" element={<BiblePage />} />
           <Route path="manual" element={<ManualPage />} />
-          <Route path="ebd" element={<div className="text-center py-12">Minha Turma (Em breve)</div>} />
-          <Route path="oracao" element={<div className="text-center py-12">Pedidos de Oração (Em breve)</div>} />
-          <Route path="devocionais" element={<div className="text-center py-12">Devocionais (Em breve)</div>} />
+          <Route path="ebd" element={<MemberEBDPage />} />
+          <Route path="oracao" element={<MemberPrayerPage />} />
+          <Route path="devocionais" element={<MemberDevotionalsPage />} />
+          <Route path="perfil" element={<ProfilePage />} />
         </Route>
 
         {/* Fallback */}

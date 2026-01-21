@@ -145,7 +145,10 @@ export function DashboardLayout() {
 
                 {/* User Profile & Logout - Always visible at bottom */}
                 <div className="flex-shrink-0 border-t border-gray-100 p-4 bg-white">
-                    <div className="flex items-center gap-3 px-3 py-3 rounded-xl bg-gray-50 mb-3">
+                    <Link
+                        to="/app/profile"
+                        className="flex items-center gap-3 px-3 py-3 rounded-xl bg-gray-50 mb-3 hover:bg-gray-100 transition-colors"
+                    >
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-100 to-teal-100 flex items-center justify-center text-green-700 font-bold shadow-sm">
                             {user?.name?.charAt(0) || 'U'}
                         </div>
@@ -153,7 +156,7 @@ export function DashboardLayout() {
                             <p className="text-sm font-semibold text-gray-900 truncate">{user?.name}</p>
                             <PermissionBadge />
                         </div>
-                    </div>
+                    </Link>
                     <button
                         onClick={() => logout.mutate()}
                         className="group flex w-full items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 hover:text-red-700 rounded-xl transition-colors border border-transparent hover:border-red-100"

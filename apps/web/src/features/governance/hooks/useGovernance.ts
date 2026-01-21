@@ -28,3 +28,19 @@ export function useCreateCouncil(tenantId: string | undefined) {
         }
     });
 }
+
+export function useDeleteCouncil(tenantId: string | undefined) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (councilId: string) => governanceService.deleteCouncil(tenantId!, councilId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [COUNCILS_KEY, tenantId] });
+            toast.success('Órgão excluído com sucesso!');
+        },
+        onError: () => {
+            toast.error('Erro ao excluir órgão.');
+        }
+    });
+}
+

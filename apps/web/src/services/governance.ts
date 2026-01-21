@@ -53,5 +53,11 @@ export const governanceService = {
     createMeeting: async (meeting: CreateMeetingDTO) => {
         const { data } = await api.post<Meeting>('/governance/meetings', meeting);
         return data;
+    },
+
+    deleteCouncil: async (tenantId: string, councilId: string) => {
+        await api.delete(`/governance/councils/${councilId}`, {
+            params: { tenant_id: tenantId }
+        });
     }
 };

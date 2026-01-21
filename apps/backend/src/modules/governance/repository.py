@@ -33,6 +33,10 @@ class CouncilRepository:
     async def get_all(self, tenant_id: str) -> List[dict]:
         return [doc.to_dict() for doc in self._get_collection(str(tenant_id)).stream()]
 
+    async def delete(self, tenant_id: str, council_id: str) -> None:
+        """Delete a council by ID."""
+        self._get_collection(tenant_id).document(council_id).delete()
+
 
 class MeetingRepository:
     @property

@@ -15,6 +15,11 @@ export interface Tenant {
     email?: string;
     latitude?: number;
     longitude?: number;
+    website?: string;
+    facebook_url?: string;
+    instagram_url?: string;
+    youtube_url?: string;
+    whatsapp?: string;
 }
 
 export interface UserMembership {

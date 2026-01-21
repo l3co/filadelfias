@@ -17,6 +17,7 @@ from src.api.manual import router as manual_router
 from src.api.members import router as members_router
 from src.api.mission import router as mission_router
 from src.api.events import router as events_router
+from src.api.prayer import router as prayer_router
 from src.api.tenants import router as tenants_router
 from src.config import settings
 from src.middleware import LoggingMiddleware
@@ -52,6 +53,7 @@ app.include_router(financial_router)
 app.include_router(mission_router)
 app.include_router(ebd_router)
 app.include_router(events_router)
+app.include_router(prayer_router)
 app.include_router(manual_router)
 
 

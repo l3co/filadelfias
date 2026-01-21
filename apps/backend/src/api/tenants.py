@@ -25,6 +25,11 @@ class TenantUpdate(BaseModel):
     postal_code: str | None = None
     phone: str | None = None
     email: str | None = None
+    website: str | None = None
+    facebook_url: str | None = None
+    instagram_url: str | None = None
+    youtube_url: str | None = None
+    whatsapp: str | None = None
 
 
 @router.post("/tenants", response_model=TenantResponse, status_code=status.HTTP_201_CREATED)

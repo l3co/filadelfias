@@ -11,6 +11,7 @@ import {
 import { useCurrentUser, useCurrentTenant } from '../../hooks/useAuth';
 import { WelcomeBanner } from '../../components/WelcomeBanner';
 import { HomeCard, HomeCardGrid } from '../../components/HomeCard';
+import { SocialMediaCard } from '../../components/SocialMediaCard';
 
 export function MemberHomePage() {
   const { data: user } = useCurrentUser();
@@ -89,6 +90,11 @@ export function MemberHomePage() {
           color="pink"
         />
       </HomeCardGrid>
+
+      {/* Social Media Links */}
+      <div className="mt-8">
+        <SocialMediaCard tenant={tenant} />
+      </div>
     </div>
   );
 }

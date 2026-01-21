@@ -3,47 +3,8 @@ import { MessageCircle, Plus, Heart, Clock, User, Send } from 'lucide-react';
 import { PageHeaderWithIcon } from '../../components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
-import { useCurrentUser } from '../../hooks/useAuth';
-
-interface PrayerRequest {
-  id: string;
-  author: string;
-  content: string;
-  category: 'health' | 'family' | 'work' | 'spiritual' | 'other';
-  createdAt: string;
-  prayerCount: number;
-  isAnonymous: boolean;
-}
-
-const mockPrayerRequests: PrayerRequest[] = [
-  {
-    id: '1',
-    author: 'Maria Silva',
-    content: 'Peço orações pela recuperação do meu pai que está hospitalizado.',
-    category: 'health',
-    createdAt: new Date().toISOString(),
-    prayerCount: 15,
-    isAnonymous: false,
-  },
-  {
-    id: '2',
-    author: 'Anônimo',
-    content: 'Preciso de sabedoria para tomar uma decisão importante no trabalho.',
-    category: 'work',
-    createdAt: new Date(Date.now() - 86400000).toISOString(),
-    prayerCount: 8,
-    isAnonymous: true,
-  },
-  {
-    id: '3',
-    author: 'João Pedro',
-    content: 'Orem pela minha família, estamos passando por um momento difícil de reconciliação.',
-    category: 'family',
-    createdAt: new Date(Date.now() - 172800000).toISOString(),
-    prayerCount: 23,
-    isAnonymous: false,
-  },
-];
+import { useCurrentTenant } from '../../hooks/useAuth';
+import { usePrayerRequests, useCreatePrayerRequest, usePrayFor } from '../../features/prayer/hooks/usePrayer';
 
 const categoryLabels: Record<string, { label: string; color: string }> = {
   health: { label: 'Saúde', color: 'bg-red-100 text-red-700' },
@@ -54,21 +15,39 @@ const categoryLabels: Record<string, { label: string; color: string }> = {
 };
 
 export function MemberPrayerPage() {
-  useCurrentUser();
+  const tenant = useCurrentTenant();
+  const { data: prayerRequests, isLoading } = usePrayerRequests(tenant?.id);
+  const createRequest = useCreatePrayerRequest(tenant?.id);
+  const prayFor = usePrayFor(tenant?.id);
+  
   const [showForm, setShowForm] = useState(false);
   const [newRequest, setNewRequest] = useState('');
+  const [category, setCategory] = useState('other');
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [prayedFor, setPrayedFor] = useState<Set<string>>(new Set());
 
   const handlePray = (id: string) => {
-    setPrayedFor(prev => new Set(prev).add(id));
+    prayFor.mutate(id, {
+      onSuccess: () => {
+        setPrayedFor(prev => new Set(prev).add(id));
+      }
+    });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implementar envio do pedido
-    setNewRequest('');
-    setShowForm(false);
+    createRequest.mutate({
+      content: newRequest,
+      category,
+      is_anonymous: isAnonymous
+    }, {
+      onSuccess: () => {
+        setNewRequest('');
+        setCategory('other');
+        setIsAnonymous(false);
+        setShowForm(false);
+      }
+    });
   };
 
   const formatDate = (dateStr: string) => {
@@ -115,17 +94,33 @@ export function MemberPrayerPage() {
                   required
                 />
               </div>
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="anonymous"
-                  checked={isAnonymous}
-                  onChange={(e) => setIsAnonymous(e.target.checked)}
-                  className="rounded border-gray-300 text-green-600 focus:ring-green-500"
-                />
-                <label htmlFor="anonymous" className="text-sm text-gray-600">
-                  Publicar anonimamente
-                </label>
+              <div className="flex flex-wrap gap-4">
+                <div className="flex-1 min-w-[150px]">
+                  <label className="text-sm text-gray-600 mb-1 block">Categoria</label>
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="w-full p-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500"
+                  >
+                    <option value="health">Saúde</option>
+                    <option value="family">Família</option>
+                    <option value="work">Trabalho</option>
+                    <option value="spiritual">Espiritual</option>
+                    <option value="other">Outros</option>
+                  </select>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="anonymous"
+                    checked={isAnonymous}
+                    onChange={(e) => setIsAnonymous(e.target.checked)}
+                    className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                  />
+                  <label htmlFor="anonymous" className="text-sm text-gray-600">
+                    Publicar anonimamente
+                  </label>
+                </div>
               </div>
               <div className="flex gap-3">
                 <Button type="submit" className="gap-2">
@@ -150,51 +145,59 @@ export function MemberPrayerPage() {
 
       {/* Prayer Requests List */}
       <div className="space-y-4">
-        {mockPrayerRequests.map((request) => (
-          <Card key={request.id} className="hover:shadow-md transition-shadow">
-            <CardContent className="p-5">
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
-                    <User size={16} className="text-gray-500" />
+        {isLoading ? (
+          <div className="text-center py-8 text-gray-500">Carregando pedidos...</div>
+        ) : !prayerRequests?.length ? (
+          <div className="text-center py-8 text-gray-500">
+            Nenhum pedido de oração ainda. Seja o primeiro a compartilhar!
+          </div>
+        ) : (
+          prayerRequests.map((request) => (
+            <Card key={request.id} className="hover:shadow-md transition-shadow">
+              <CardContent className="p-5">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                      <User size={16} className="text-gray-500" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">
+                        {request.author_name}
+                      </p>
+                      <p className="text-xs text-gray-500 flex items-center gap-1">
+                        <Clock size={12} />
+                        {formatDate(request.created_at)}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium text-gray-900">
-                      {request.isAnonymous ? 'Anônimo' : request.author}
-                    </p>
-                    <p className="text-xs text-gray-500 flex items-center gap-1">
-                      <Clock size={12} />
-                      {formatDate(request.createdAt)}
-                    </p>
-                  </div>
+                  <span className={`text-xs px-2 py-1 rounded-full ${categoryLabels[request.category]?.color || categoryLabels.other.color}`}>
+                    {categoryLabels[request.category]?.label || 'Outros'}
+                  </span>
                 </div>
-                <span className={`text-xs px-2 py-1 rounded-full ${categoryLabels[request.category].color}`}>
-                  {categoryLabels[request.category].label}
-                </span>
-              </div>
 
-              <p className="text-gray-700 mb-4 leading-relaxed">
-                {request.content}
-              </p>
+                <p className="text-gray-700 mb-4 leading-relaxed">
+                  {request.content}
+                </p>
 
-              <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                <span className="text-sm text-gray-500">
-                  {request.prayerCount + (prayedFor.has(request.id) ? 1 : 0)} pessoas oraram
-                </span>
-                <Button
-                  variant={prayedFor.has(request.id) ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => handlePray(request.id)}
-                  disabled={prayedFor.has(request.id)}
-                  className="gap-2"
-                >
-                  <Heart size={16} className={prayedFor.has(request.id) ? "fill-current" : ""} />
-                  {prayedFor.has(request.id) ? 'Orei!' : 'Orar'}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+                <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                  <span className="text-sm text-gray-500">
+                    {request.prayer_count} pessoas oraram
+                  </span>
+                  <Button
+                    variant={prayedFor.has(request.id) ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => handlePray(request.id)}
+                    disabled={prayedFor.has(request.id) || prayFor.isPending}
+                    className="gap-2"
+                  >
+                    <Heart size={16} className={prayedFor.has(request.id) ? "fill-current" : ""} />
+                    {prayedFor.has(request.id) ? 'Orei!' : 'Orar'}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
     </div>
   );

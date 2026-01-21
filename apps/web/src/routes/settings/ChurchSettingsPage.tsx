@@ -8,7 +8,7 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { 
     Church, MapPin, Phone, Save, Loader2, AlertCircle, CheckCircle2,
-    Building2, Trash2
+    Building2, Trash2, Globe, Instagram, Youtube, MessageCircle
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -24,6 +24,11 @@ interface ChurchFormData {
     postal_code: string;
     phone: string;
     email: string;
+    website: string;
+    facebook_url: string;
+    instagram_url: string;
+    youtube_url: string;
+    whatsapp: string;
 }
 
 export function ChurchSettingsPage() {
@@ -53,6 +58,11 @@ export function ChurchSettingsPage() {
             postal_code: '',
             phone: '',
             email: '',
+            website: '',
+            facebook_url: '',
+            instagram_url: '',
+            youtube_url: '',
+            whatsapp: '',
         }
     });
 
@@ -71,6 +81,11 @@ export function ChurchSettingsPage() {
             setValue('postal_code', tenant.postal_code || '');
             setValue('phone', tenant.phone || '');
             setValue('email', tenant.email || '');
+            setValue('website', tenant.website || '');
+            setValue('facebook_url', tenant.facebook_url || '');
+            setValue('instagram_url', tenant.instagram_url || '');
+            setValue('youtube_url', tenant.youtube_url || '');
+            setValue('whatsapp', tenant.whatsapp || '');
         }
     }, [tenant, setValue]);
 
@@ -87,6 +102,11 @@ export function ChurchSettingsPage() {
                 postal_code: data.postal_code.replace(/\D/g, ''),
                 phone: data.phone || null,
                 email: data.email || null,
+                website: data.website || null,
+                facebook_url: data.facebook_url || null,
+                instagram_url: data.instagram_url || null,
+                youtube_url: data.youtube_url || null,
+                whatsapp: data.whatsapp || null,
             });
             return response.data;
         },
@@ -303,6 +323,72 @@ export function ChurchSettingsPage() {
                                 {...register('email')}
                                 type="email"
                                 placeholder="contato@igreja.com"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Mídias Sociais */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <h2 className="text-lg font-semibold text-[#002333] mb-4 flex items-center gap-2">
+                        <Globe size={20} className="text-green-600" />
+                        Mídias Sociais
+                    </h2>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Website</label>
+                            <Input
+                                {...register('website')}
+                                type="url"
+                                placeholder="https://www.igreja.com.br"
+                            />
+                        </div>
+                        
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <span className="flex items-center gap-2">
+                                    <MessageCircle size={16} /> WhatsApp
+                                </span>
+                            </label>
+                            <Input
+                                {...register('whatsapp')}
+                                placeholder="(11) 99999-9999"
+                            />
+                        </div>
+                        
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <span className="flex items-center gap-2">
+                                    <Instagram size={16} /> Instagram
+                                </span>
+                            </label>
+                            <Input
+                                {...register('instagram_url')}
+                                type="url"
+                                placeholder="https://instagram.com/suaigreja"
+                            />
+                        </div>
+                        
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <span className="flex items-center gap-2">
+                                    <Youtube size={16} /> YouTube
+                                </span>
+                            </label>
+                            <Input
+                                {...register('youtube_url')}
+                                type="url"
+                                placeholder="https://youtube.com/@suaigreja"
+                            />
+                        </div>
+                        
+                        <div className="md:col-span-2">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Facebook</label>
+                            <Input
+                                {...register('facebook_url')}
+                                type="url"
+                                placeholder="https://facebook.com/suaigreja"
                             />
                         </div>
                     </div>

@@ -2,7 +2,6 @@ from typing import List
 
 from fastapi import APIRouter, Depends, Query
 
-from src.api.auth import get_current_user
 from src.modules.ebd.repository import (
     ebd_class_repository,
     ebd_lesson_repository,
@@ -16,8 +15,15 @@ from src.modules.ebd.schemas import (
     EBDStudentCreate,
     EBDStudentResponse,
 )
+from src.middleware.permissions import (
+    require_view_ebd,
+    require_manage_ebd,
+    PermissionChecker,
+)
 
 router = APIRouter(prefix="/ebd", tags=["Education (EBD)"])
+
+require_create_ebd = PermissionChecker("ebd", "create")
 
 
 # Classes
@@ -25,8 +31,12 @@ router = APIRouter(prefix="/ebd", tags=["Education (EBD)"])
 async def create_class(
     data: EBDClassCreate,
     tenant_id: str = Query(..., description="ID of the tenant"),
-    current_user: dict = Depends(get_current_user),
+    auth_context: dict = Depends(require_manage_ebd),
 ):
+    """
+    Create a new EBD class.
+    Requires: Pastor, Presbítero (ebd:manage permission).
+    """
     return await ebd_class_repository.create_class(
         tenant_id=tenant_id,
         name=data.name,
@@ -40,8 +50,12 @@ async def create_class(
 @router.get("/classes", response_model=List[EBDClassResponse])
 async def list_classes(
     tenant_id: str = Query(..., description="ID of the tenant"),
-    current_user: dict = Depends(get_current_user),
+    auth_context: dict = Depends(require_view_ebd),
 ):
+    """
+    List all EBD classes.
+    Requires: ebd:view permission (all members have this).
+    """
     return await ebd_class_repository.get_all(tenant_id)
 
 
@@ -50,21 +64,29 @@ async def list_classes(
 async def enroll_student(
     class_id: str,
     data: EBDStudentCreate,
-    current_user: dict = Depends(get_current_user),
+    tenant_id: str = Query(..., description="ID of the tenant"),
+    auth_context: dict = Depends(require_create_ebd),
 ):
-    # Note: data.member_id from schema
+    """
+    Enroll a student in a class.
+    Requires: Pastor, Presbítero, Diácono (ebd:create permission).
+    """
     return await ebd_student_repository.enroll_student(
         class_id=class_id,
         member_id=str(data.member_id),
-        # schema has no enrollment_date, defaulting in repo
     )
 
 
 @router.get("/classes/{class_id}/students", response_model=List[EBDStudentResponse])
 async def list_students(
     class_id: str,
-    current_user: dict = Depends(get_current_user),
+    tenant_id: str = Query(..., description="ID of the tenant"),
+    auth_context: dict = Depends(require_view_ebd),
 ):
+    """
+    List students in a class.
+    Requires: ebd:view permission.
+    """
     return await ebd_student_repository.get_by_class(class_id)
 
 
@@ -73,12 +95,17 @@ async def list_students(
 async def create_lesson(
     class_id: str,
     data: EBDLessonCreate,
-    current_user: dict = Depends(get_current_user),
+    tenant_id: str = Query(..., description="ID of the tenant"),
+    auth_context: dict = Depends(require_create_ebd),
 ):
+    """
+    Create a new lesson.
+    Requires: Pastor, Presbítero, Diácono (ebd:create permission).
+    """
     return await ebd_lesson_repository.create_lesson(
         class_id=class_id,
-        title=data.topic,  # Schema uses 'topic'
-        lesson_date=data.date,  # Schema uses 'date'
+        title=data.topic,
+        lesson_date=data.date,
         description=data.description,
         homework_url=data.homework_url,
     )
@@ -87,6 +114,11 @@ async def create_lesson(
 @router.get("/classes/{class_id}/lessons", response_model=List[EBDLessonResponse])
 async def list_lessons(
     class_id: str,
-    current_user: dict = Depends(get_current_user),
+    tenant_id: str = Query(..., description="ID of the tenant"),
+    auth_context: dict = Depends(require_view_ebd),
 ):
+    """
+    List lessons for a class.
+    Requires: ebd:view permission.
+    """
     return await ebd_lesson_repository.get_by_class(class_id)

@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from src.api.auth import get_current_user
 from src.domain.schemas import MemberCreate, MemberResponse, MemberUpdate
 from src.infra.repositories import member_repository
+from src.middleware.permissions import verify_permission
 
 router = APIRouter()
 
@@ -17,9 +18,10 @@ async def create_member(
 ):
     """
     Create a new member in a tenant.
+    Requires: Pastor, Presbítero, Diácono or Secretário (members:create permission).
     """
-    # TODO: Implement RBAC to check if user can create members in this tenant
-
+    await verify_permission(tenant_id, current_user, "members", "create")
+    
     created_member = await member_repository.create_member(
         tenant_id=tenant_id, **member_data.model_dump(exclude_unset=True)
     )
@@ -33,9 +35,10 @@ async def list_members(
 ):
     """
     List all members of a tenant.
+    Requires: members:view permission (all members have this).
     """
-    # TODO: Implement RBAC check
-
+    await verify_permission(tenant_id, current_user, "members", "view")
+    
     members = await member_repository.get_all(tenant_id)
     return members
 
@@ -48,7 +51,10 @@ async def get_member(
 ):
     """
     Get a specific member by ID.
+    Requires: members:view permission.
     """
+    await verify_permission(tenant_id, current_user, "members", "view")
+    
     member = await member_repository.get(tenant_id, member_id)
 
     if not member:
@@ -66,13 +72,15 @@ async def update_member(
 ):
     """
     Update a member's data.
+    Requires: Pastor, Presbítero or Secretário (members:edit permission).
     """
+    await verify_permission(tenant_id, current_user, "members", "edit")
+    
     member = await member_repository.get(tenant_id, member_id)
 
     if not member:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Membro não encontrado")
 
-    # Update fields
     update_data = member_data.model_dump(exclude_unset=True)
     updated_member = await member_repository.update(tenant_id, member_id, update_data)
 

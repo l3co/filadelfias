@@ -3,19 +3,28 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query
 
-from src.api.auth import get_current_user
 from src.modules.missions.schemas import MissionaryCreate, MissionaryResponse
 from src.services.mission_service import MissionService
+from src.middleware.permissions import (
+    require_view_missions,
+    PermissionChecker,
+)
 
 router = APIRouter(prefix="/missions", tags=["Missions"])
+
+require_create_missions = PermissionChecker("missions", "create")
 
 
 @router.post("/missionaries", response_model=MissionaryResponse)
 async def create_missionary(
     data: MissionaryCreate,
     tenant_id: UUID = Query(..., description="ID of the tenant"),
-    current_user: dict = Depends(get_current_user),
+    auth_context: dict = Depends(require_create_missions),
 ):
+    """
+    Create a new missionary.
+    Requires: Pastor, Presbítero, Evangelista or Missionário (missions:create permission).
+    """
     service = MissionService()
     return await service.create_missionary(tenant_id, data)
 
@@ -23,7 +32,11 @@ async def create_missionary(
 @router.get("/missionaries", response_model=List[MissionaryResponse])
 async def list_missionaries(
     tenant_id: UUID = Query(..., description="ID of the tenant"),
-    current_user: dict = Depends(get_current_user),
+    auth_context: dict = Depends(require_view_missions),
 ):
+    """
+    List all missionaries.
+    Requires: missions:view permission (all members have this).
+    """
     service = MissionService()
     return await service.list_missionaries(tenant_id)

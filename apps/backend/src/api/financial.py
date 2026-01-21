@@ -2,7 +2,6 @@ from typing import List
 
 from fastapi import APIRouter, Depends, Query
 
-from src.api.auth import get_current_user
 from src.modules.financial.repository import (
     financial_account_repository,
     transaction_category_repository,
@@ -16,6 +15,11 @@ from src.modules.financial.schemas import (
     TransactionCreate,
     TransactionResponse,
 )
+from src.middleware.permissions import (
+    require_view_financial,
+    require_create_financial,
+    require_manage_financial,
+)
 
 router = APIRouter(prefix="/financial", tags=["Financial - Treasury"])
 
@@ -24,25 +28,29 @@ router = APIRouter(prefix="/financial", tags=["Financial - Treasury"])
 async def create_account(
     data: FinancialAccountCreate,
     tenant_id: str = Query(..., description="ID of the tenant"),
-    current_user: dict = Depends(get_current_user),
+    auth_context: dict = Depends(require_manage_financial),
 ):
-    # Schema uses 'type' and 'balance'
+    """
+    Create a new financial account.
+    Requires: Tesoureiro or leadership (financial:manage permission).
+    """
     return await financial_account_repository.create_account(
         tenant_id=tenant_id,
         name=data.name,
         type=data.type,
         balance=float(data.balance) if data.balance else 0.0,
-        # description not in schema base, checking schema...
-        # Schema FinancialAccountBase: name, type, balance. No description.
-        # So providing description will depend on Repo kwargs, ok.
     )
 
 
 @router.get("/accounts", response_model=List[FinancialAccountResponse])
 async def list_accounts(
     tenant_id: str = Query(..., description="ID of the tenant"),
-    current_user: dict = Depends(get_current_user),
+    auth_context: dict = Depends(require_view_financial),
 ):
+    """
+    List all financial accounts.
+    Requires: Pastor, Presbítero, Diácono or Tesoureiro (financial:view permission).
+    """
     return await financial_account_repository.get_all(tenant_id)
 
 
@@ -50,9 +58,12 @@ async def list_accounts(
 async def create_category(
     data: TransactionCategoryCreate,
     tenant_id: str = Query(..., description="ID of the tenant"),
-    current_user: dict = Depends(get_current_user),
+    auth_context: dict = Depends(require_manage_financial),
 ):
-    # Schema TransactionCategoryBase: name, type, parent_id.
+    """
+    Create a new transaction category.
+    Requires: Tesoureiro or leadership (financial:manage permission).
+    """
     return await transaction_category_repository.create_category(
         tenant_id=tenant_id,
         name=data.name,
@@ -64,8 +75,12 @@ async def create_category(
 @router.get("/categories", response_model=List[TransactionCategoryResponse])
 async def list_categories(
     tenant_id: str = Query(..., description="ID of the tenant"),
-    current_user: dict = Depends(get_current_user),
+    auth_context: dict = Depends(require_view_financial),
 ):
+    """
+    List all transaction categories.
+    Requires: financial:view permission.
+    """
     return await transaction_category_repository.get_all(tenant_id)
 
 
@@ -73,18 +88,20 @@ async def list_categories(
 async def create_transaction(
     data: TransactionCreate,
     tenant_id: str = Query(..., description="ID of the tenant"),
-    current_user: dict = Depends(get_current_user),
+    auth_context: dict = Depends(require_create_financial),
 ):
-    # Schema TransactionBase: account_id, amount, type, description, date...
+    """
+    Create a new transaction (income or expense).
+    Requires: Pastor, Presbítero or Tesoureiro (financial:create permission).
+    """
     return await transaction_repository.create_transaction(
         tenant_id=tenant_id,
         account_id=str(data.account_id),
         category_id=str(data.category_id) if data.category_id else None,
         amount=float(data.amount),
-        transaction_type=data.type,  # Schema uses 'type'
-        transaction_date=data.date,  # Schema uses 'date'
+        transaction_type=data.type,
+        transaction_date=data.date,
         description=data.description,
-        # reference not in schema base.
         member_id=str(data.member_id) if data.member_id else None,
         attachment_url=data.attachment_url,
     )
@@ -93,6 +110,10 @@ async def create_transaction(
 @router.get("/transactions", response_model=List[TransactionResponse])
 async def list_transactions(
     tenant_id: str = Query(..., description="ID of the tenant"),
-    current_user: dict = Depends(get_current_user),
+    auth_context: dict = Depends(require_view_financial),
 ):
+    """
+    List all transactions.
+    Requires: financial:view permission.
+    """
     return await transaction_repository.get_all(tenant_id)

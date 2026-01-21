@@ -1,13 +1,8 @@
 import { useCurrentUser } from '../hooks/useAuth';
+import { useFormattedStats } from '../hooks/useDashboardStats';
 import { Link } from 'react-router-dom';
 import { Users, Wallet, GraduationCap, Gavel, Globe, Calendar, TrendingUp, ArrowRight, Sparkles } from 'lucide-react';
-
-const stats = [
-    { name: 'Membros Ativos', value: '127', change: '+3', changeType: 'positive', icon: Users },
-    { name: 'Saldo Atual', value: 'R$ 12.450', change: '+8%', changeType: 'positive', icon: Wallet },
-    { name: 'Alunos EBD', value: '45', change: '+2', changeType: 'positive', icon: GraduationCap },
-    { name: 'Próximo Evento', value: '3 dias', change: 'Culto', changeType: 'neutral', icon: Calendar },
-];
+import { Skeleton } from '../components/ui/skeleton';
 
 const quickActions = [
     { name: 'Membros', href: '/app/members', icon: Users, color: 'from-green-500 to-green-600' },
@@ -20,6 +15,7 @@ const quickActions = [
 
 export default function HomePage() {
     const { data: user } = useCurrentUser();
+    const dashboardStats = useFormattedStats();
     const firstName = user?.name?.split(' ')[0] || 'Usuário';
     const tenantName = user?.memberships?.[0]?.tenant?.name || 'Minha Igreja';
 
@@ -29,6 +25,37 @@ export default function HomePage() {
         if (hour < 18) return 'Boa tarde';
         return 'Boa noite';
     };
+
+    const stats = [
+        { 
+            name: 'Membros Ativos', 
+            value: dashboardStats.members.active.toString(), 
+            change: `+${dashboardStats.members.newThisMonth}`, 
+            changeType: dashboardStats.members.newThisMonth > 0 ? 'positive' : 'neutral', 
+            icon: Users 
+        },
+        { 
+            name: 'Saldo Atual', 
+            value: dashboardStats.formatted.balance, 
+            change: dashboardStats.formatted.incomeThisMonth, 
+            changeType: 'positive', 
+            icon: Wallet 
+        },
+        { 
+            name: 'Total de Membros', 
+            value: dashboardStats.members.total.toString(), 
+            change: `${dashboardStats.members.inactive} inativos`, 
+            changeType: 'neutral', 
+            icon: GraduationCap 
+        },
+        { 
+            name: 'Receita do Mês', 
+            value: dashboardStats.formatted.incomeThisMonth, 
+            change: dashboardStats.formatted.expenseThisMonth + ' despesas', 
+            changeType: 'positive', 
+            icon: Calendar 
+        },
+    ];
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
@@ -44,33 +71,45 @@ export default function HomePage() {
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-                {stats.map((stat) => (
-                    <div
-                        key={stat.name}
-                        className="group bg-white rounded-2xl p-6 shadow-sm shadow-gray-100 border border-gray-100 hover:shadow-lg hover:shadow-gray-200/50 hover:border-gray-200 transition-all duration-300"
-                    >
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <p className="text-sm font-medium text-gray-500">{stat.name}</p>
-                                <p className="mt-2 text-3xl font-bold text-[#002333]">{stat.value}</p>
+                {dashboardStats.isLoading ? (
+                    <>
+                        {[1, 2, 3, 4].map((i) => (
+                            <div key={i} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                                <Skeleton className="h-4 w-24 mb-3" />
+                                <Skeleton className="h-8 w-32 mb-4" />
+                                <Skeleton className="h-3 w-20" />
                             </div>
-                            <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-50 to-teal-50 text-green-600 group-hover:scale-110 transition-transform duration-300">
-                                <stat.icon className="h-5 w-5" />
+                        ))}
+                    </>
+                ) : (
+                    stats.map((stat) => (
+                        <div
+                            key={stat.name}
+                            className="group bg-white rounded-2xl p-6 shadow-sm shadow-gray-100 border border-gray-100 hover:shadow-lg hover:shadow-gray-200/50 hover:border-gray-200 transition-all duration-300"
+                        >
+                            <div className="flex items-start justify-between">
+                                <div>
+                                    <p className="text-sm font-medium text-gray-500">{stat.name}</p>
+                                    <p className="mt-2 text-3xl font-bold text-[#002333]">{stat.value}</p>
+                                </div>
+                                <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-50 to-teal-50 text-green-600 group-hover:scale-110 transition-transform duration-300">
+                                    <stat.icon className="h-5 w-5" />
+                                </div>
+                            </div>
+                            <div className="mt-4 flex items-center gap-1.5">
+                                {stat.changeType === 'positive' && (
+                                    <TrendingUp className="h-4 w-4 text-green-500" />
+                                )}
+                                <span className={`text-sm font-medium ${
+                                    stat.changeType === 'positive' ? 'text-green-600' : 'text-gray-500'
+                                }`}>
+                                    {stat.change}
+                                </span>
+                                <span className="text-sm text-gray-400">este mês</span>
                             </div>
                         </div>
-                        <div className="mt-4 flex items-center gap-1.5">
-                            {stat.changeType === 'positive' && (
-                                <TrendingUp className="h-4 w-4 text-green-500" />
-                            )}
-                            <span className={`text-sm font-medium ${
-                                stat.changeType === 'positive' ? 'text-green-600' : 'text-gray-500'
-                            }`}>
-                                {stat.change}
-                            </span>
-                            <span className="text-sm text-gray-400">este mês</span>
-                        </div>
-                    </div>
-                ))}
+                    ))
+                )}
             </div>
 
             {/* Welcome Card */}

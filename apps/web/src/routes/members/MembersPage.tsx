@@ -4,8 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCurrentTenant } from '../../hooks/useAuth';
 import { useMembers } from '../../features/members/hooks/useMembers';
 import { MembersTable } from '../../features/members/components/MembersTable';
-import { CreateMemberDialog } from '../../features/members/components/CreateMemberDialog';
-import { EditMemberDialog } from '../../features/members/components/EditMemberDialog';
+import { MemberDialog } from '../../features/members/components/MemberDialog';
 import { InviteSuccessDialog } from '../../features/members/components/InviteSuccessDialog';
 import { Button } from '../../components/ui/button';
 import { api } from '../../lib/api';
@@ -98,19 +97,15 @@ export function MembersPage() {
                 onInviteMember={(member) => inviteMutation.mutate(member)}
             />
 
-            {/* Create Dialog */}
-            <CreateMemberDialog
-                isOpen={isCreateOpen}
-                onClose={() => setIsCreateOpen(false)}
+            {/* Create/Edit Dialog (Unified) */}
+            <MemberDialog
+                isOpen={isCreateOpen || !!editingMember}
+                onClose={() => {
+                    setIsCreateOpen(false);
+                    setEditingMember(null);
+                }}
                 tenantId={tenant.id}
-            />
-
-            {/* Edit Dialog */}
-            <EditMemberDialog
-                isOpen={!!editingMember}
-                onClose={() => setEditingMember(null)}
                 member={editingMember}
-                tenantId={tenant.id}
             />
 
             {/* Invite Success Dialog */}

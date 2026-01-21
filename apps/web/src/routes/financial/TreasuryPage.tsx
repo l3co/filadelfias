@@ -8,6 +8,8 @@ import { TransactionForm } from '../../features/financial/components/Transaction
 import { Button } from '../../components/ui/button';
 import { PermissionGate, AccessDenied } from '../../components/PermissionGate';
 import { PlusCircle, MinusCircle, Wallet, FileText, CreditCard, ChevronRight } from 'lucide-react';
+import { PageHeaderWithIcon } from '../../components/PageHeader';
+import { EmptyState } from '../../components/EmptyState';
 
 export function TreasuryPage() {
     const tenant = useCurrentTenant();
@@ -31,54 +33,44 @@ export function TreasuryPage() {
 
     if (!tenant?.id) {
         return (
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center">
-                <div className="w-16 h-16 mx-auto rounded-2xl bg-amber-50 flex items-center justify-center mb-4">
-                    <Wallet className="h-8 w-8 text-amber-600" />
-                </div>
-                <h2 className="text-lg font-semibold text-[#002333]">Selecione uma organização</h2>
-                <p className="text-gray-500 mt-2 max-w-sm mx-auto">
-                    Você precisa estar vinculado a uma igreja para acessar o financeiro.
-                </p>
-            </div>
+            <EmptyState
+                icon={Wallet}
+                title="Selecione uma organização"
+                description="Você precisa estar vinculado a uma igreja para acessar o financeiro."
+            />
         );
     }
 
-    // Verifica permissão de acesso à tesouraria
     if (!canViewFinancial) {
         return <AccessDenied resource="financial" />;
     }
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
-            {/* Header Section */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-2xl bg-gradient-to-br from-green-50 to-teal-50">
-                        <Wallet className="h-6 w-6 text-green-600" />
-                    </div>
-                    <div>
-                        <h1 className="text-2xl sm:text-3xl font-extrabold text-[#002333] tracking-tight">Tesouraria</h1>
-                        <p className="text-gray-500 mt-0.5">Gestão financeira inteligente e transparente</p>
-                    </div>
-                </div>
-                {/* Apenas quem pode criar transações vê os botões */}
-                <PermissionGate resource="financial" action="create">
-                    <div className="flex gap-3">
-                        <Button onClick={() => openModal('CREDIT')} className="gap-2">
-                            <PlusCircle className="h-4 w-4" />
-                            Nova Receita
-                        </Button>
-                        <Button
-                            variant="destructive"
-                            onClick={() => openModal('DEBIT')}
-                            className="gap-2"
-                        >
-                            <MinusCircle className="h-4 w-4" />
-                            Nova Despesa
-                        </Button>
-                    </div>
-                </PermissionGate>
-            </div>
+            <PageHeaderWithIcon
+                icon={Wallet}
+                iconColor="green"
+                title="Tesouraria"
+                description="Gestão financeira inteligente e transparente"
+                actions={
+                    <PermissionGate resource="financial" action="create">
+                        <div className="flex gap-3">
+                            <Button onClick={() => openModal('CREDIT')} className="gap-2">
+                                <PlusCircle className="h-4 w-4" />
+                                Nova Receita
+                            </Button>
+                            <Button
+                                variant="destructive"
+                                onClick={() => openModal('DEBIT')}
+                                className="gap-2"
+                            >
+                                <MinusCircle className="h-4 w-4" />
+                                Nova Despesa
+                            </Button>
+                        </div>
+                    </PermissionGate>
+                }
+            />
 
             {/* Dashboard Cards */}
             <BalanceSummary totalBalance={totalBalance} isLoading={isLoading} />

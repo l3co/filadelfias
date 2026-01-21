@@ -17,10 +17,16 @@ import os
 # Configure environment for testing
 os.environ.setdefault("ENVIRONMENT", "development")
 
-from src.infra.repositories.member_repository import member_repository
-from src.infra.repositories.membership_repository import membership_repository
-from src.infra.repositories.tenant_repository import tenant_repository
-from src.infra.repositories.user_repository import user_repository
+print("DEBUG: Script Start")
+print(f"DEBUG: FIRESTORE_EMULATOR_HOST={os.getenv('FIRESTORE_EMULATOR_HOST')}")
+print(f"DEBUG: PROJECT_ID={os.getenv('PROJECT_ID')}")
+print(f"DEBUG: GCLOUD_PROJECT={os.getenv('GCLOUD_PROJECT')}")
+
+# Defer imports to avoid early initialization
+from src.infra.repositories.member_repository import member_repository  # noqa: E402
+from src.infra.repositories.membership_repository import membership_repository  # noqa: E402
+from src.infra.repositories.tenant_repository import tenant_repository  # noqa: E402
+from src.infra.repositories.user_repository import user_repository  # noqa: E402
 
 # Test data constants - must match apps/web/e2e/support/fixtures.ts
 TEST_ADMIN = {
@@ -147,6 +153,60 @@ async def seed_test_data():
         user_id=member_user["id"],
     )
     print(f"  ✓ Member profile created (ID: {member_profile['id']})")
+
+    # 7. Create sample Missionary
+    from src.modules.missions.repository import missionary_repository
+    from src.modules.missions.schemas import MissionaryCreate
+
+    print("  Creating sample missionary...")
+    mission_data = MissionaryCreate(
+        name="Missionário Paulo",
+        field_name="África do Sul",
+        country_code="ZA",
+        latitude=-30.5595,
+        longitude=22.9375,
+        bio="Missionário teste",
+    )
+    missionary = await missionary_repository.create(tenant["id"], mission_data)
+    print(f"  ✓ Missionary created: {missionary['name']}")
+
+    # 8. Create sample EBD Class
+    from src.modules.ebd.repository import ebd_class_repository
+
+    print("  Creating sample EBD class...")
+    ebd_class = await ebd_class_repository.create_class(
+        tenant_id=tenant["id"],
+        name="Classe Jovens",
+        description="Estudo Bíblico para jovens",
+        location="Sala 1",
+        min_age=18,
+        max_age=30,
+    )
+    print(f"  ✓ EBD Class created: {ebd_class['name']}")
+
+    # 9. Create sample Financial Account
+    from src.modules.financial.repository import financial_account_repository
+
+    print("  Creating sample financial account...")
+    account = await financial_account_repository.create_account(
+        tenant_id=tenant["id"],
+        name="Conta Corrente",
+        type="BANK",
+        balance=1000.0,
+    )
+    print(f"  ✓ Financial Account created: {account['name']}")
+
+    # 10. Create sample Governance Council
+    from src.modules.governance.repository import council_repository
+
+    print("  Creating sample council...")
+    council = await council_repository.create_council(
+        tenant_id=tenant["id"],
+        name="Conselho da Igreja",
+        type="SESSION",  # Enum value
+        description="Reunião de Presbíteros",
+    )
+    print(f"  ✓ Council created: {council['name']}")
 
     return {
         "tenant": tenant,

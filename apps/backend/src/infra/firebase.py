@@ -35,10 +35,18 @@ def get_firebase_app() -> firebase_admin.App:
 
     # Check if using emulator
     if is_emulator():
+        from google.auth.credentials import AnonymousCredentials as GoogleAnonymousCredentials
+
+        # Define a mock credential class that passes firebase-admin validation
+        class MockCreds(credentials.Base):
+            def get_credential(self):
+                return GoogleAnonymousCredentials()
+
         emulator_host = os.getenv("FIRESTORE_EMULATOR_HOST")
         logger.info(f"🔧 Using Firebase Emulator at {emulator_host}")
-        # Initialize with a dummy project for emulator
-        return firebase_admin.initialize_app(options={"projectId": "filadelfias-dev"})
+
+        # Initialize with dummy project and Mock credential to bypass auth check
+        return firebase_admin.initialize_app(credential=MockCreds(), options={"projectId": "filadelfias-dev"})
 
     # Check for service account JSON in environment variable
     service_account_json = os.getenv("FIREBASE_SERVICE_ACCOUNT")

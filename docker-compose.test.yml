@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  # 1. Firestore Emulator
+  firestore:
+    image: mtlynch/firestore-emulator
+    environment:
+      - FIRESTORE_PROJECT_ID=filadelfias-test
+      - PORT=8080
+    ports:
+      - "8082:8080"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/" ]
+      interval: 10s
+      timeout: 20s
+      retries: 5
+      start_period: 30s
+
+  # 2. Backend API (runs seed on startup)
+  backend:
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile
+    command: >
+      sh -c "poetry run python src/scripts/seed_e2e_data.py &&
+             poetry run uvicorn src.main:app --host 0.0.0.0 --port 8000"
+    environment:
+      - FIRESTORE_EMULATOR_HOST=firestore:8080
+      - PROJECT_ID=filadelfias-test
+      - GOOGLE_CLOUD_PROJECT=filadelfias-test
+      - GCLOUD_PROJECT=filadelfias-test
+      - ENVIRONMENT=test
+      - SECRET_KEY=test-secret-key-for-e2e
+      - DEBUG=true
+      - CORS_ORIGINS_STR=http://localhost:5173
+      # Fix pythonpath for seed script
+      - PYTHONPATH=/app
+    depends_on:
+      firestore:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+
+  # 3. Frontend Web App
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile.e2e
+    environment:
+      - VITE_API_URL=http://backend:8000
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "5173:5173"
+
+  # 4. E2E Tests Runner
+  e2e:
+    image: mcr.microsoft.com/playwright:v1.57.0-jammy
+    working_dir: /app
+    volumes:
+      - ./apps/web:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://backend:8000
+      - CI=true
+    command: sh -c "npm ci && npx bddgen && npx playwright test"
+    depends_on:
+      - web
+    ipc: host

@@ -3,11 +3,9 @@ Pytest configuration and fixtures for testing with Firestore Emulator via Testco
 """
 
 import os
-import time
 from typing import AsyncGenerator, Generator
 
 import pytest
-import requests
 from httpx import AsyncClient
 from testcontainers.core.container import DockerContainer
 from testcontainers.core.waiting_utils import wait_for_logs
@@ -27,30 +25,30 @@ def firestore_emulator() -> Generator[str, None, None]:
     # or a lighter image specifically for Firestore.
     # 'mtlynch/firestore-emulator' is a popular lightweight option.
     print("🐳 Starting Firestore Emulator container...")
-    
+
     with DockerContainer("mtlynch/firestore-emulator:latest") as container:
         container.with_exposed_ports(FIRESTORE_PORT)
         container.with_env("FIRESTORE_PROJECT_ID", PROJECT_ID)
         container.with_env("PORT", str(FIRESTORE_PORT))
-        
+
         container.start()
-        
+
         # Wait for emulator to be ready
         wait_for_logs(container, "Dev App Server is now running")
-        
+
         host = container.get_container_host_ip()
         port = container.get_exposed_port(FIRESTORE_PORT)
         emulator_host = f"{host}:{port}"
-        
+
         print(f"✅ Firestore Emulator running at {emulator_host}")
-        
+
         # Set environment variables for the application to pick up
         # IMPORTANT: These must be set before importing app/firebase modules
         os.environ["FIRESTORE_EMULATOR_HOST"] = emulator_host
-        os.environ["FIREBASE_AUTH_EMULATOR_HOST"] = "mock-auth-host:9099" # Placeholder
+        os.environ["FIREBASE_AUTH_EMULATOR_HOST"] = "mock-auth-host:9099"  # Placeholder
         os.environ["ENVIRONMENT"] = "test"
         os.environ["PROJECT_ID"] = PROJECT_ID
-        
+
         yield emulator_host
 
 
@@ -58,6 +56,7 @@ def firestore_emulator() -> Generator[str, None, None]:
 def event_loop():
     """Create an instance of the default event loop for each test session."""
     import asyncio
+
     loop = asyncio.new_event_loop()
     yield loop
     loop.close()
@@ -72,7 +71,7 @@ async def clean_firestore(firestore_emulator):
     # The emulator exposes an endpoint to clear data
     # DELETE http://{host}:{port}/emulator/v1/projects/{project_id}/databases/(default)/documents
     url = f"http://{firestore_emulator}/emulator/v1/projects/{PROJECT_ID}/databases/(default)/documents"
-    
+
     async with AsyncClient() as client:
         try:
             resp = await client.delete(url)
@@ -89,7 +88,7 @@ async def client(firestore_emulator) -> AsyncGenerator[AsyncClient, None]:
     """
     # Import app inside fixture to ensure env vars are set mainly for FIRESTORE_EMULATOR_HOST
     from src.main import app
-    
+
     async with AsyncClient(app=app, base_url="http://test") as ac:
         yield ac
 
@@ -98,9 +97,9 @@ async def client(firestore_emulator) -> AsyncGenerator[AsyncClient, None]:
 def auth_headers():
     """
     Returns valid authorization headers for a test user.
-    Simulates a decode_access_token success without needing real Auth Emulator login 
+    Simulates a decode_access_token success without needing real Auth Emulator login
     (unless we are testing the auth flow specifically).
-    
+
     For integration tests that hit the API, you might need to mock 'decode_access_token'
     or actually create a user in the Auth Emulator.
     """

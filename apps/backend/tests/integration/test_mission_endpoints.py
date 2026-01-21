@@ -30,7 +30,7 @@ class TestMissionEndpoints:
     async def test_create_missionary(self):
         """Test creating a new missionary."""
 
-        async with AsyncClient(transport=ASGITaport(app=app), base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             token = await self.get_auth_token(client, "mission@church.com")
             headers = {"Authorization": f"Bearer {token}"}
             tenant = await self.create_tenant(client, token, "mission-church")

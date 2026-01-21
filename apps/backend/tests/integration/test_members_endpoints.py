@@ -4,9 +4,8 @@ Integration tests for members management endpoints.
 
 import pytest
 from httpx import ASGITransport, AsyncClient
-
-from src.infra.database import get_db
 from src.infra.models import Tenant, User, UserChurchMembership
+
 from src.infra.security import create_access_token, get_password_hash
 from src.main import app
 

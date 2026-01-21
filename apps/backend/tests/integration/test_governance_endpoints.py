@@ -62,8 +62,6 @@ class TestGovernanceEndpoints:
         """
         Test creating and listing meetings.
         """
-        app.dependency_overrides[get_db] = override_get_db
-
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             token = await self.get_auth_token(client, "meeting_test@test.com")
             headers = {"Authorization": f"Bearer {token}"}

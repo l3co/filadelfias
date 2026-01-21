@@ -393,17 +393,26 @@ type EcclesiasticalFunction =
 | `/membro/missoes` | Missionários | ✅ |
 | `/membro/biblia` | Bíblia (reusa BiblePage) | ✅ |
 | `/membro/manual` | Manual (reusa ManualPage) | ✅ |
-| `/membro/ebd` | Minha turma | 🔲 Placeholder |
-| `/membro/oracao` | Pedidos de oração | 🔲 Placeholder |
-| `/membro/devocionais` | Devocionais | 🔲 Placeholder |
+| `/membro/ebd` | Minha turma | ✅ |
+| `/membro/oracao` | Pedidos de oração | ✅ |
+| `/membro/devocionais` | Devocionais | ✅ |
 
 ### 11.3 Pendências
 
-| Item | Prioridade |
-|------|------------|
-| Implementar lógica de redirecionamento pós-login | Alta |
-| Página de Devocionais | Média |
-| Página de Pedidos de Oração | Média |
-| Página "Minha Turma" (EBD para alunos) | Média |
-| Portal do Professor (TeacherLayout) | Baixa |
-| Função PROFESSOR_EBD no enum | Baixa |
+| Item | Prioridade | Status |
+|------|------------|--------|
+| Implementar lógica de redirecionamento pós-login | Alta | ✅ |
+| Página de Devocionais | Média | ✅ |
+| Página de Pedidos de Oração | Média | ✅ |
+| Página "Minha Turma" (EBD para alunos) | Média | ✅ |
+| Função PROFESSOR_EBD no enum | Baixa | ✅ |
+| Portal do Professor (TeacherLayout) | Baixa | 🔲 |
+
+### 11.4 Arquivos Adicionados (Janeiro 2026)
+
+| Arquivo | Descrição |
+|---------|-----------|
+| `src/lib/userRouting.ts` | Lógica de redirecionamento baseada em perfil |
+| `src/routes/member/MemberDevotionalsPage.tsx` | Devocionais diários |
+| `src/routes/member/MemberPrayerPage.tsx` | Pedidos de oração |
+| `src/routes/member/MemberEBDPage.tsx` | Minha turma EBD |

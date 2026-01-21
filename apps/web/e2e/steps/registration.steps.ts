@@ -37,10 +37,26 @@ Then('devo ver erro {string} no campo identificador', async ({ page }, errorMess
 // ============================================================================
 
 When('preencho o CEP {string}', async ({ page }, cep: string) => {
+    // Mock ViaCEP response to ensure reliability
+    if (cep) {
+        const cleanCep = cep.replace(/\D/g, '');
+        const mockAddress = {
+            logradouro: cleanCep === '01310100' ? 'Avenida Paulista' : 'Praça da Sé',
+            bairro: cleanCep === '01310100' ? 'Bela Vista' : 'Sé',
+            localidade: 'São Paulo',
+            uf: 'SP',
+            cep: cep
+        };
+
+        await page.route(`**/*viacep.com.br/ws/${cleanCep}/json/`, async route => {
+            await route.fulfill({ status: 200, body: JSON.stringify(mockAddress) });
+        });
+    }
+
     const input = page.locator('input[name="postal_code"]');
     await input.fill(cep);
     await input.blur(); // Trigger CEP lookup
-    await page.waitForTimeout(1000); // Wait for CEP API
+    await page.waitForTimeout(1500); // Wait for CEP API and React State update
 });
 
 When('preencho o número {string}', async ({ page }, number: string) => {

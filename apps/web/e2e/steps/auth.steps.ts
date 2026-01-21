@@ -50,6 +50,11 @@ Given('que estou logado como membro', async ({ page }) => {
 // ============================================================================
 
 Given('que acessei o link de redefinição válido', async ({ page }) => {
+    // Mock the API response to ensure success scenario works without real token
+    await page.route('**/api/auth/reset-password', async route => {
+        await route.fulfill({ status: 200, body: JSON.stringify({ message: 'Password reset successful' }) });
+    });
+
     // Navigate to reset password page with a mock token
     await page.goto('/reset-password?token=valid-test-token');
 });
@@ -59,11 +64,12 @@ Given('que o link de redefinição expirou', async ({ page }) => {
 });
 
 When('preencho a nova senha {string}', async ({ page }, password: string) => {
-    await page.locator('#password').first().fill(password);
+    // Use name attribute or label as the input might not have id="password"
+    await page.locator('input[name="new_password"]').fill(password);
 });
 
 When('confirmo a senha {string}', async ({ page }, password: string) => {
-    await page.locator('#confirmPassword').fill(password);
+    await page.locator('input[name="confirm_password"]').fill(password);
 });
 
 Then('devo ver erro de validação de senha fraca', async ({ page }) => {

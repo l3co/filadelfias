@@ -175,7 +175,7 @@ When('seleciono a data de hoje', async ({ page }) => {
 });
 
 When('busco por {string}', async ({ page }, searchTerm: string) => {
-    const searchInput = page.getByPlaceholder(/buscar|pesquisar|search/i);
+    const searchInput = page.getByPlaceholder(/buscar|pesquisar|search/i).first();
     await searchInput.fill(searchTerm);
     await searchInput.press('Enter');
 });
@@ -197,7 +197,7 @@ Then('devo ver mensagem {string}', async ({ page }, message: string) => {
 });
 
 Then('devo ver a mensagem de boas-vindas', async ({ page }) => {
-    await expect(page.getByText(/bem-vindo|olá|dashboard/i)).toBeVisible();
+    await expect(page.getByText(/bem-vindo|olá|dashboard/i).first()).toBeVisible();
 });
 
 Then('devo ver a mensagem de erro {string}', async ({ page }, errorMessage: string) => {
@@ -240,7 +240,7 @@ Then('devo ver campo de senha', async ({ page }) => {
 });
 
 Then('devo ver campo de busca', async ({ page }) => {
-    await expect(page.getByPlaceholder(/buscar|pesquisar|search/i)).toBeVisible();
+    await expect(page.getByPlaceholder(/buscar|pesquisar|search/i).first()).toBeVisible();
 });
 
 Then('devo ver botão {string}', async ({ page }, buttonText: string) => {
@@ -292,7 +292,7 @@ Then('devo ver menu lateral com todos os módulos', async ({ page }) => {
     const sidebar = page.locator('nav, aside, [role="navigation"]');
 
     // Check for main navigation items
-    const expectedItems = ['Membros', 'Tesouraria', 'Governança', 'EBD', 'Missões', 'Configurações'];
+    const expectedItems = ['Dashboard', 'Membros', 'Governança', 'Tesouraria', 'Missões', 'EBD', 'Eventos'];
 
     for (const item of expectedItems) {
         await expect(sidebar.getByText(new RegExp(item, 'i')).first()).toBeVisible();

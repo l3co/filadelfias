@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter, Depends, Query
 
 from src.api.auth import get_current_user
-from src.infra.repositories import (
+from src.modules.ebd.repository import (
     ebd_class_repository,
     ebd_lesson_repository,
     ebd_student_repository,
@@ -31,8 +31,9 @@ async def create_class(
         tenant_id=tenant_id,
         name=data.name,
         description=data.description,
-        teacher_id=str(data.teacher_id) if data.teacher_id else None,
-        age_group=data.age_group,
+        min_age=data.min_age,
+        max_age=data.max_age,
+        location=data.location,
     )
 
 
@@ -51,10 +52,11 @@ async def enroll_student(
     data: EBDStudentCreate,
     current_user: dict = Depends(get_current_user),
 ):
+    # Note: data.member_id from schema
     return await ebd_student_repository.enroll_student(
         class_id=class_id,
         member_id=str(data.member_id),
-        enrollment_date=data.enrollment_date,
+        # schema has no enrollment_date, defaulting in repo
     )
 
 
@@ -75,10 +77,10 @@ async def create_lesson(
 ):
     return await ebd_lesson_repository.create_lesson(
         class_id=class_id,
-        title=data.title,
-        lesson_date=data.lesson_date,
+        title=data.topic,  # Schema uses 'topic'
+        lesson_date=data.date,  # Schema uses 'date'
         description=data.description,
-        bible_text=data.bible_text,
+        homework_url=data.homework_url,
     )
 
 

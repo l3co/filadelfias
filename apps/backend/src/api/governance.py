@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter, Depends, Query
 
 from src.api.auth import get_current_user
-from src.infra.repositories import council_repository, meeting_repository
+from src.modules.governance.repository import council_repository, meeting_repository
 from src.modules.governance.schemas import CouncilCreate, CouncilResponse, MeetingCreate, MeetingResponse
 
 router = APIRouter(prefix="/governance", tags=["Governance"])
@@ -19,10 +19,11 @@ async def create_council(
     Create a new council (Session, Board, Assembly).
     Requires appropriate permissions (TODO).
     """
+    # Schema uses 'type'
     return await council_repository.create_council(
         tenant_id=tenant_id,
         name=data.name,
-        council_type=data.council_type,
+        council_type=data.type,
         description=data.description,
     )
 
@@ -46,12 +47,13 @@ async def create_meeting(
     """
     Schedule a new meeting.
     """
+    # Schema: date, status, agenda, location
     return await meeting_repository.create_meeting(
         council_id=str(data.council_id),
-        title=data.title,
-        scheduled_date=data.scheduled_date,
+        title=data.agenda,  # Map agenda to title/agenda
+        scheduled_date=data.date,  # Map date
         location=data.location,
-        description=data.description,
+        status=data.status,
     )
 
 

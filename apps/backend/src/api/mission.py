@@ -2,11 +2,8 @@ from typing import List
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.auth import get_current_user
-from src.infra.database import get_db
-from src.infra.models import User
 from src.modules.missions.schemas import MissionaryCreate, MissionaryResponse
 from src.services.mission_service import MissionService
 
@@ -17,18 +14,16 @@ router = APIRouter(prefix="/missions", tags=["Missions"])
 async def create_missionary(
     data: MissionaryCreate,
     tenant_id: UUID = Query(..., description="ID of the tenant"),
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
 ):
-    service = MissionService(db)
+    service = MissionService()
     return await service.create_missionary(tenant_id, data)
 
 
 @router.get("/missionaries", response_model=List[MissionaryResponse])
 async def list_missionaries(
     tenant_id: UUID = Query(..., description="ID of the tenant"),
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
 ):
-    service = MissionService(db)
+    service = MissionService()
     return await service.list_missionaries(tenant_id)

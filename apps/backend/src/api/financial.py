@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter, Depends, Query
 
 from src.api.auth import get_current_user
-from src.infra.repositories import (
+from src.modules.financial.repository import (
     financial_account_repository,
     transaction_category_repository,
     transaction_repository,
@@ -26,12 +26,15 @@ async def create_account(
     tenant_id: str = Query(..., description="ID of the tenant"),
     current_user: dict = Depends(get_current_user),
 ):
+    # Schema uses 'type' and 'balance'
     return await financial_account_repository.create_account(
         tenant_id=tenant_id,
         name=data.name,
-        account_type=data.account_type,
-        initial_balance=float(data.initial_balance) if data.initial_balance else 0.0,
-        description=data.description,
+        type=data.type,
+        balance=float(data.balance) if data.balance else 0.0,
+        # description not in schema base, checking schema...
+        # Schema FinancialAccountBase: name, type, balance. No description.
+        # So providing description will depend on Repo kwargs, ok.
     )
 
 
@@ -49,11 +52,12 @@ async def create_category(
     tenant_id: str = Query(..., description="ID of the tenant"),
     current_user: dict = Depends(get_current_user),
 ):
+    # Schema TransactionCategoryBase: name, type, parent_id.
     return await transaction_category_repository.create_category(
         tenant_id=tenant_id,
         name=data.name,
-        category_type=data.category_type,
-        description=data.description,
+        type=data.type,
+        parent_id=str(data.parent_id) if data.parent_id else None,
     )
 
 
@@ -71,15 +75,18 @@ async def create_transaction(
     tenant_id: str = Query(..., description="ID of the tenant"),
     current_user: dict = Depends(get_current_user),
 ):
+    # Schema TransactionBase: account_id, amount, type, description, date...
     return await transaction_repository.create_transaction(
         tenant_id=tenant_id,
         account_id=str(data.account_id),
-        category_id=str(data.category_id),
+        category_id=str(data.category_id) if data.category_id else None,
         amount=float(data.amount),
-        transaction_type=data.transaction_type,
-        transaction_date=data.transaction_date,
+        transaction_type=data.type,  # Schema uses 'type'
+        transaction_date=data.date,  # Schema uses 'date'
         description=data.description,
-        reference=data.reference,
+        # reference not in schema base.
+        member_id=str(data.member_id) if data.member_id else None,
+        attachment_url=data.attachment_url,
     )
 
 

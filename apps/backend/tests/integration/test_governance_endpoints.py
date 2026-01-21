@@ -5,7 +5,6 @@ Integration tests for governance endpoints.
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from src.infra.database import get_db
 from src.main import app
 
 
@@ -27,11 +26,10 @@ class TestGovernanceEndpoints:
         response = await client.post("/tenants", json={"name": "Governance Church", "slug": slug}, headers=headers)
         return response.json()
 
-    async def test_create_and_list_councils(self, db_session, override_get_db):
+    async def test_create_and_list_councils(self):
         """
         Test creating and listing councils.
         """
-        app.dependency_overrides[get_db] = override_get_db
 
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             token = await self.get_auth_token(client, "council_test@test.com")

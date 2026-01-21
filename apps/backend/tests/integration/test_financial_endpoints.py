@@ -5,7 +5,6 @@ Integration tests for financial endpoints.
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from src.infra.database import get_db
 from src.main import app
 
 
@@ -33,11 +32,8 @@ class TestFinancialEndpoints:
         response = await client.post("/tenants", json={"name": "Financial Church", "slug": slug}, headers=headers)
         return response.json()
 
-    async def test_financial_flow(self, db_session, override_get_db):
-        """
-        Test Account -> Category -> Transaction flow.
-        """
-        app.dependency_overrides[get_db] = override_get_db
+    async def test_create_account(self):
+        """Test creating a new financial account."""
 
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             token = await self.get_auth_token(client, "ceo@bank.com")

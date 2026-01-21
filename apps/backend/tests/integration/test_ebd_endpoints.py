@@ -5,7 +5,6 @@ Integration tests for EBD endpoints.
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from src.infra.database import get_db
 from src.main import app
 
 
@@ -41,9 +40,7 @@ class TestEBDEndpoints:
         )
         return response.json()
 
-    async def test_ebd_full_flow(self, db_session, override_get_db):
-        app.dependency_overrides[get_db] = override_get_db
-
+    async def test_ebd_full_flow(self):
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             token = await self.get_auth_token(client, "ebd_admin@test.com")
             headers = {"Authorization": f"Bearer {token}"}

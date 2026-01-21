@@ -5,7 +5,6 @@ Integration tests for mission endpoints.
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from src.infra.database import get_db
 from src.main import app
 
 
@@ -28,10 +27,10 @@ class TestMissionEndpoints:
         response = await client.post("/tenants", json={"name": "Mission Church", "slug": slug}, headers=headers)
         return response.json()
 
-    async def test_create_and_list_missionaries(self, db_session, override_get_db):
-        app.dependency_overrides[get_db] = override_get_db
+    async def test_create_missionary(self):
+        """Test creating a new missionary."""
 
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITaport(app=app), base_url="http://test") as client:
             token = await self.get_auth_token(client, "mission@church.com")
             headers = {"Authorization": f"Bearer {token}"}
             tenant = await self.create_tenant(client, token, "mission-church")

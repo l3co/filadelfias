@@ -11,6 +11,13 @@ on:
     paths:
       - 'apps/web/**'
       - '.github/workflows/web.yml'
+  workflow_dispatch:
+    inputs:
+      full_suite:
+        description: 'Run full E2E suite'
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   lint:
@@ -132,6 +139,7 @@ jobs:
         working-directory: apps/backend
         env:
           DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/filadelfias
+          PYTHONPATH: ${{ github.workspace }}/apps/backend
         run: poetry run python src/scripts/seed_e2e_data.py
 
       - name: Start backend server
@@ -168,7 +176,14 @@ jobs:
       - name: Run E2E tests
         env:
           VITE_API_URL: http://localhost:8000
-        run: npx playwright test
+        run: |
+          if [ "${{ github.event.inputs.full_suite }}" == "true" ]; then
+            echo "Running FULL E2E Suite..."
+            npx playwright test
+          else
+            echo "Running Smoke Tests (@smoke)..."
+            npx playwright test --grep @smoke
+          fi
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4

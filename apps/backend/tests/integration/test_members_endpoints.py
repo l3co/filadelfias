@@ -38,12 +38,9 @@ async def setup_tenant(db_session):
 
 @pytest.mark.asyncio
 class TestMembersEndpoints:
-    async def test_create_member_success(self, db_session, override_get_db, setup_tenant):
-        """
-        Test creating a new member successfully.
-        """
+    async def test_create_member(self, setup_tenant):
+        """Test creating a new member."""
         token, tenant, _ = setup_tenant
-        app.dependency_overrides[get_db] = override_get_db
 
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post(
@@ -58,20 +55,17 @@ class TestMembersEndpoints:
                 headers={"Authorization": f"Bearer {token}"},
             )
 
-        app.dependency_overrides.clear()
-
         assert response.status_code == 201
         data = response.json()
         assert data["full_name"] == "Novo Membro"
         assert data["tenant_id"] == str(tenant.id)
         assert "id" in data
 
-    async def test_list_members(self, db_session, override_get_db, setup_tenant):
+    async def test_list_members(self, setup_tenant):
         """
         Test listing members of a tenant.
         """
         token, tenant, _ = setup_tenant
-        app.dependency_overrides[get_db] = override_get_db
 
         # Create a member first (we need to do this via DB or API if API existed)
         # Since API doesn't exist yet, this TEST expects the API to exist.

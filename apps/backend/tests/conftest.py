@@ -1,108 +1,108 @@
 """
-Pytest configuration and fixtures for testing.
+Pytest configuration and fixtures for testing with Firestore Emulator via Testcontainers.
 """
 
 import os
-from typing import AsyncGenerator
+import time
+from typing import AsyncGenerator, Generator
 
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from sqlalchemy.pool import NullPool
+import requests
+from httpx import AsyncClient
+from testcontainers.core.container import DockerContainer
+from testcontainers.core.waiting_utils import wait_for_logs
 
-from src.infra.models import Base
-
-# Check if we should use testcontainers (CI environment)
-USE_TESTCONTAINERS = os.getenv("USE_TESTCONTAINERS", "false").lower() == "true"
-
-# Conditionally import testcontainers
-if USE_TESTCONTAINERS:
-    from testcontainers.postgres import PostgresContainer
+# Define constants for emulator
+FIRESTORE_PORT = 8080
+PROJECT_ID = "filadelfias-test"
 
 
 @pytest.fixture(scope="session")
-def postgres_container():
+def firestore_emulator() -> Generator[str, None, None]:
     """
-    Start a PostgreSQL container for tests.
-    Only used when USE_TESTCONTAINERS is true.
+    Start Firestore Emulator using Testcontainers.
+    Returns the host:port string.
     """
-    if USE_TESTCONTAINERS:
-        with PostgresContainer("postgres:15-alpine") as postgres:
-            yield postgres
-    else:
-        yield None
+    # Use the official Google Cloud SDK image which includes emulators
+    # or a lighter image specifically for Firestore.
+    # 'mtlynch/firestore-emulator' is a popular lightweight option.
+    print("🐳 Starting Firestore Emulator container...")
+    
+    with DockerContainer("mtlynch/firestore-emulator:latest") as container:
+        container.with_exposed_ports(FIRESTORE_PORT)
+        container.with_env("FIRESTORE_PROJECT_ID", PROJECT_ID)
+        container.with_env("PORT", str(FIRESTORE_PORT))
+        
+        container.start()
+        
+        # Wait for emulator to be ready
+        wait_for_logs(container, "Dev App Server is now running")
+        
+        host = container.get_container_host_ip()
+        port = container.get_exposed_port(FIRESTORE_PORT)
+        emulator_host = f"{host}:{port}"
+        
+        print(f"✅ Firestore Emulator running at {emulator_host}")
+        
+        # Set environment variables for the application to pick up
+        # IMPORTANT: These must be set before importing app/firebase modules
+        os.environ["FIRESTORE_EMULATOR_HOST"] = emulator_host
+        os.environ["FIREBASE_AUTH_EMULATOR_HOST"] = "mock-auth-host:9099" # Placeholder
+        os.environ["ENVIRONMENT"] = "test"
+        os.environ["PROJECT_ID"] = PROJECT_ID
+        
+        yield emulator_host
+
+
+@pytest.fixture(scope="session")
+def event_loop():
+    """Create an instance of the default event loop for each test session."""
+    import asyncio
+    loop = asyncio.new_event_loop()
+    yield loop
+    loop.close()
+
+
+@pytest.fixture(scope="function")
+async def clean_firestore(firestore_emulator):
+    """
+    Clean Firestore emulator between tests.
+    Uses the emulator's REST API to delete all data.
+    """
+    # The emulator exposes an endpoint to clear data
+    # DELETE http://{host}:{port}/emulator/v1/projects/{project_id}/databases/(default)/documents
+    url = f"http://{firestore_emulator}/emulator/v1/projects/{PROJECT_ID}/databases/(default)/documents"
+    
+    async with AsyncClient() as client:
+        try:
+            resp = await client.delete(url)
+            if resp.status_code != 200:
+                print(f"⚠️ Failed to clear Firestore: {resp.status_code}")
+        except Exception as e:
+            print(f"⚠️ Error clearing Firestore: {e}")
 
 
 @pytest.fixture
-def database_url(postgres_container):
+async def client(firestore_emulator) -> AsyncGenerator[AsyncClient, None]:
     """
-    Get the database URL for tests.
-    Uses testcontainers in CI or local test database otherwise.
+    Async HTTP client for integration tests.
     """
-    if USE_TESTCONTAINERS and postgres_container:
-        host = postgres_container.get_container_host_ip()
-        port = postgres_container.get_exposed_port(5432)
-        return f"postgresql+asyncpg://test:test@{host}:{port}/test"
-    else:
-        return os.getenv("TEST_DATABASE_URL", "postgresql+asyncpg://postgres:postgres@localhost:5432/filadelfias_test")
+    # Import app inside fixture to ensure env vars are set mainly for FIRESTORE_EMULATOR_HOST
+    from src.main import app
+    
+    async with AsyncClient(app=app, base_url="http://test") as ac:
+        yield ac
 
 
 @pytest.fixture
-async def engine(database_url):
+def auth_headers():
     """
-    Create a test database engine.
-    Function scoped to ensure it runs in the same event loop as the test.
+    Returns valid authorization headers for a test user.
+    Simulates a decode_access_token success without needing real Auth Emulator login 
+    (unless we are testing the auth flow specifically).
+    
+    For integration tests that hit the API, you might need to mock 'decode_access_token'
+    or actually create a user in the Auth Emulator.
     """
-    engine = create_async_engine(
-        database_url,
-        echo=False,
-        poolclass=NullPool,
-    )
-
-    # Create all tables
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
-        await conn.run_sync(Base.metadata.create_all)
-
-    yield engine
-
-    # Drop all tables
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
-
-    await engine.dispose()
-
-
-@pytest.fixture
-async def db_session(engine) -> AsyncGenerator[AsyncSession, None]:
-    """
-    Create a fresh database session for each test.
-    This session runs in a transaction that rolls back after user.
-    """
-    connection = await engine.connect()
-    transaction = await connection.begin()
-
-    session_maker = async_sessionmaker(
-        bind=connection,
-        class_=AsyncSession,
-        expire_on_commit=False,
-    )
-
-    session = session_maker()
-
-    yield session
-
-    await session.close()
-    await transaction.rollback()
-    await connection.close()
-
-
-@pytest.fixture
-def override_get_db(db_session):
-    """
-    Override the get_db dependency for testing.
-    """
-
-    async def _override_get_db():
-        yield db_session
-
-    return _override_get_db
+    # Placeholder for a predefined token if we mock the verifier
+    return {"Authorization": "Bearer test-token"}

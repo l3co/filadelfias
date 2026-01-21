@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   # 1. Firestore Emulator
-  firestore:
+  firestore-test:
     image: mtlynch/firestore-emulator
     environment:
       - FIRESTORE_PROJECT_ID=filadelfias-test
@@ -17,7 +17,7 @@ services:
       start_period: 30s
 
   # 2. Backend API (runs seed on startup)
-  backend:
+  backend-test:
     build:
       context: ./apps/backend
       dockerfile: Dockerfile
@@ -25,7 +25,7 @@ services:
       sh -c "poetry run python src/scripts/seed_e2e_data.py &&
              poetry run uvicorn src.main:app --host 0.0.0.0 --port 8000"
     environment:
-      - FIRESTORE_EMULATOR_HOST=firestore:8080
+      - FIRESTORE_EMULATOR_HOST=firestore-test:8080
       - PROJECT_ID=filadelfias-test
       - GOOGLE_CLOUD_PROJECT=filadelfias-test
       - GCLOUD_PROJECT=filadelfias-test
@@ -36,7 +36,7 @@ services:
       # Fix pythonpath for seed script
       - PYTHONPATH=/app
     depends_on:
-      firestore:
+      firestore-test:
         condition: service_healthy
     ports:
       - "8000:8000"
@@ -47,14 +47,14 @@ services:
       retries: 5
 
   # 3. Frontend Web App
-  web:
+  web-test:
     build:
       context: ./apps/web
       dockerfile: Dockerfile.e2e
     environment:
-      - VITE_API_URL=http://backend:8000
+      - VITE_API_URL=http://backend-test:8000
     depends_on:
-      backend:
+      backend-test:
         condition: service_healthy
     ports:
       - "5173:5173"
@@ -67,9 +67,9 @@ services:
       - ./apps/web:/app
       - /app/node_modules
     environment:
-      - VITE_API_URL=http://backend:8000
+      - VITE_API_URL=http://backend-test:8000
       - CI=true
     command: sh -c "npm ci && npx bddgen && npx playwright test"
     depends_on:
-      - web
+      - web-test
     ipc: host

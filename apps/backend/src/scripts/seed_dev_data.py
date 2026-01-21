@@ -182,21 +182,15 @@ async def create_admin_user(tenant_id: str):
     print(f"  ✓ Created admin membership")
     
     # Create member profile
-    member = await member_repository.create(
+    member = await member_repository.create_member(
         tenant_id=tenant_id,
-        name=user["name"],
+        full_name=user["name"],
         email=user["email"],
         phone=generate_phone(),
         birth_date=datetime(1990, 5, 15).date(),
         gender="M",
-        marital_status="Casado",
-        address="Rua das Flores, 123",
-        city="São Paulo",
-        state="SP",
-        postal_code="01310-100",
-        baptism_date=datetime(2010, 3, 20).date(),
-        membership_date=datetime(2010, 4, 1).date(),
-        functions=["Presbítero", "Líder de Jovens"],
+        status="COMUNGANTE",
+        office="PRESBÍTERO",
         user_id=user["id"],
     )
     print(f"  ✓ Created member profile")
@@ -250,21 +244,18 @@ async def create_members(tenant_id: str, count: int = 55):
                 print(f"  ⚠️  Could not create user for {full_name}: {e}")
         
         # Create member
-        member = await member_repository.create(
+        # Map random function to office
+        office = "PRESBÍTERO" if "Presbítero" in functions else "DIÁCONO" if "Diácono" in functions else "MEMBRO"
+        
+        member = await member_repository.create_member(
             tenant_id=tenant_id,
-            name=full_name,
+            full_name=full_name,
             email=email,
             phone=generate_phone(),
             birth_date=birth_date,
             gender=gender,
-            marital_status=marital_status,
-            address=f"Rua {random.choice(['das Flores', 'dos Anjos', 'da Paz', 'da Esperança'])}, {random.randint(1, 999)}",
-            city="São Paulo",
-            state="SP",
-            postal_code=f"01{random.randint(100, 999)}-{random.randint(100, 999)}",
-            baptism_date=(birth_date + timedelta(days=random.randint(3650, 10950))) if random.random() > 0.1 else None,
-            membership_date=(datetime.now().date() - timedelta(days=random.randint(30, 3650))),
-            functions=functions,
+            status="COMUNGANTE" if random.random() > 0.1 else "NÃO COMUNGANTE",
+            office=office,
             user_id=user_id,
         )
         members.append(member)
@@ -287,7 +278,7 @@ async def create_ebd_classes(tenant_id: str, members: list):
             tenant_id=tenant_id,
             name=class_data["name"],
             description=f"Classe de EBD para {class_data['age_group']}",
-            teacher=random.choice(members)["name"],
+            teacher=random.choice(members)["full_name"],
             schedule="Domingo, 9:00",
         )
         classes.append(ebd_class)
@@ -299,9 +290,9 @@ async def create_ebd_classes(tenant_id: str, members: list):
         for member in selected_members:
             await ebd_student_repository.create_student(
                 class_id=ebd_class["id"],
-                name=member["name"],
+                name=member["full_name"],
                 birth_date=member.get("birth_date"),
-                parent_name=random.choice(members)["name"] if random.random() > 0.5 else None,
+                parent_name=random.choice(members)["full_name"] if random.random() > 0.5 else None,
                 phone=member.get("phone"),
             )
         

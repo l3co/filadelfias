@@ -13,18 +13,15 @@ export function getUserExperience(user: User | null | undefined): UserExperience
   }
 
   const membership = user.memberships[0];
+  const role = membership.role?.toUpperCase();
   
   // Admin do sistema sempre vai para /app
-  if (membership.role === 'ADMIN') {
+  if (role === 'ADMIN') {
     return 'admin';
   }
 
-  // Buscar member associado para verificar office e functions
-  // Por enquanto, verificamos apenas o role do membership
-  // TODO: Buscar dados do member quando disponível
-  
   // Se tem role de moderador, vai para admin
-  if (membership.role === 'MODERATOR') {
+  if (role === 'MODERATOR') {
     return 'admin';
   }
 

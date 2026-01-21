@@ -88,19 +88,13 @@ jobs:
         working-directory: apps/web
 
     services:
-      postgres:
-        image: postgres:15-alpine
+      firestore:
+        image: mtlynch/firestore-emulator
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: filadelfias
+          FIRESTORE_PROJECT_ID: filadelfias-ci
+          PORT: 8080
         ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          - 8080:8080
 
     steps:
       - name: Checkout code
@@ -129,23 +123,21 @@ jobs:
         working-directory: apps/backend
         run: poetry install --no-interaction --no-root
 
-      - name: Run database migrations
-        working-directory: apps/backend
-        env:
-          DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/filadelfias
-        run: poetry run alembic upgrade head
-
       - name: Run seed data
         working-directory: apps/backend
         env:
-          DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/filadelfias
+          FIRESTORE_EMULATOR_HOST: localhost:8080
+          PROJECT_ID: filadelfias-ci
+          ENVIRONMENT: test
           PYTHONPATH: ${{ github.workspace }}/apps/backend
         run: poetry run python src/scripts/seed_e2e_data.py
 
       - name: Start backend server
         working-directory: apps/backend
         env:
-          DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/filadelfias
+          FIRESTORE_EMULATOR_HOST: localhost:8080
+          PROJECT_ID: filadelfias-ci
+          ENVIRONMENT: test
           SECRET_KEY: test-secret-key-for-e2e
           DEBUG: "false"
           CORS_ORIGINS_STR: http://localhost:5173

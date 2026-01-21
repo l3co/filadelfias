@@ -1,6 +1,6 @@
 # Nova Experiência dos Usuários - Planejamento
 **Data:** Janeiro 2026  
-**Status:** Planejamento
+**Status:** Em Implementação ✅
 
 ---
 
@@ -361,3 +361,49 @@ type EcclesiasticalFunction =
 | Professor | Professores de EBD | `/portal-professor` | Focado na turma |
 
 **Objetivo principal:** Proporcionar uma experiência adequada para cada tipo de usuário, simplificando a navegação para membros comuns e professores, enquanto mantém a complexidade necessária para a administração.
+
+---
+
+## 11. Implementação (Progresso)
+
+### 11.1 Arquivos Criados
+
+| Arquivo | Descrição | Status |
+|---------|-----------|--------|
+| `src/components/layout/MemberLayout.tsx` | Layout do portal do membro | ✅ |
+| `src/components/HomeCard.tsx` | Card clicável para navegação | ✅ |
+| `src/components/WelcomeBanner.tsx` | Banner de boas-vindas | ✅ |
+| `src/components/PageHeader.tsx` | Header padrão de páginas | ✅ |
+| `src/components/EmptyState.tsx` | Estado vazio reutilizável | ✅ |
+| `src/components/StatCard.tsx` | Card de estatísticas | ✅ |
+| `src/components/ui/skeleton.tsx` | Loading skeleton | ✅ |
+| `src/components/ui/spinner.tsx` | Loading spinner | ✅ |
+| `src/routes/member/MemberHomePage.tsx` | Página inicial do membro | ✅ |
+| `src/routes/member/MemberDirectoryPage.tsx` | Diretório de membros | ✅ |
+| `src/routes/member/MemberEventsPage.tsx` | Eventos | ✅ |
+| `src/routes/member/MemberMissionsPage.tsx` | Missões | ✅ |
+
+### 11.2 Rotas Implementadas
+
+| Rota | Página | Status |
+|------|--------|--------|
+| `/membro` | Página inicial com cards | ✅ |
+| `/membro/diretorio` | Diretório de membros | ✅ |
+| `/membro/eventos` | Eventos próximos | ✅ |
+| `/membro/missoes` | Missionários | ✅ |
+| `/membro/biblia` | Bíblia (reusa BiblePage) | ✅ |
+| `/membro/manual` | Manual (reusa ManualPage) | ✅ |
+| `/membro/ebd` | Minha turma | 🔲 Placeholder |
+| `/membro/oracao` | Pedidos de oração | 🔲 Placeholder |
+| `/membro/devocionais` | Devocionais | 🔲 Placeholder |
+
+### 11.3 Pendências
+
+| Item | Prioridade |
+|------|------------|
+| Implementar lógica de redirecionamento pós-login | Alta |
+| Página de Devocionais | Média |
+| Página de Pedidos de Oração | Média |
+| Página "Minha Turma" (EBD para alunos) | Média |
+| Portal do Professor (TeacherLayout) | Baixa |
+| Função PROFESSOR_EBD no enum | Baixa |

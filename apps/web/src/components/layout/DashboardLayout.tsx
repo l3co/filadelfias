@@ -1,17 +1,28 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Outlet, Link, useLocation, Navigate } from 'react-router-dom';
-import { Menu, Home, Users, Calendar, LogOut, Gavel, Wallet, Globe, BookOpen, Bell, Search, ChevronRight, X } from 'lucide-react';
+import { Menu, Home, Users, Calendar, LogOut, Gavel, Wallet, Globe, BookOpen, Bell, Search, ChevronRight, X, Settings } from 'lucide-react';
 import { useCurrentUser, useLogout } from '../../hooks/useAuth';
+import { usePermissions } from '../../hooks/usePermissions';
+import { PermissionBadge } from '../PermissionGate';
 import { cn } from '../../lib/utils';
+import type { Resource } from '../../lib/permissions';
 
-const navigation = [
+interface NavItem {
+    name: string;
+    href: string;
+    icon: React.ComponentType<{ className?: string }>;
+    resource?: Resource;
+}
+
+const allNavigation: NavItem[] = [
     { name: 'Dashboard', href: '/app', icon: Home },
-    { name: 'Membros', href: '/app/members', icon: Users },
-    { name: 'Governança', href: '/app/governance', icon: Gavel },
-    { name: 'Tesouraria', href: '/app/financial', icon: Wallet },
-    { name: 'Missões', href: '/app/missions', icon: Globe },
-    { name: 'EBD', href: '/app/ebd', icon: BookOpen },
-    { name: 'Eventos', href: '/app/events', icon: Calendar },
+    { name: 'Membros', href: '/app/members', icon: Users, resource: 'members' },
+    { name: 'Governança', href: '/app/governance', icon: Gavel, resource: 'governance' },
+    { name: 'Tesouraria', href: '/app/financial', icon: Wallet, resource: 'financial' },
+    { name: 'Missões', href: '/app/missions', icon: Globe, resource: 'missions' },
+    { name: 'EBD', href: '/app/ebd', icon: BookOpen, resource: 'ebd' },
+    { name: 'Eventos', href: '/app/events', icon: Calendar, resource: 'events' },
+    { name: 'Configurações', href: '/app/settings', icon: Settings, resource: 'settings' },
 ];
 
 export function DashboardLayout() {
@@ -19,8 +30,19 @@ export function DashboardLayout() {
     const location = useLocation();
     const { data: user, isLoading } = useCurrentUser();
     const logout = useLogout();
+    const { can } = usePermissions();
 
     const tenantName = user?.memberships?.[0]?.tenant?.name || 'Minha Igreja';
+
+    // Filtra navegação baseada nas permissões do usuário
+    const navigation = useMemo(() => {
+        return allNavigation.filter(item => {
+            // Dashboard é sempre visível
+            if (!item.resource) return true;
+            // Verifica se tem permissão de visualização
+            return can(item.resource, 'view');
+        });
+    }, [can]);
 
     if (isLoading) {
         return (
@@ -71,7 +93,7 @@ export function DashboardLayout() {
 
                 {/* Tenant Selector - Links to Settings */}
                 <div className="px-4 py-4 border-b border-gray-100">
-                    <Link 
+                    <Link
                         to="/app/settings"
                         className="w-full flex items-center justify-between px-3 py-2.5 bg-gradient-to-r from-green-50 to-teal-50 hover:from-green-100 hover:to-teal-100 rounded-xl transition-colors group"
                     >
@@ -121,15 +143,15 @@ export function DashboardLayout() {
                     })}
                 </nav>
 
-                {/* User Profile & Logout */}
-                <div className="border-t border-gray-100 p-4">
+                {/* User Profile & Logout - Always visible at bottom */}
+                <div className="flex-shrink-0 border-t border-gray-100 p-4 bg-white">
                     <div className="flex items-center gap-3 px-3 py-3 rounded-xl bg-gray-50 mb-3">
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-100 to-teal-100 flex items-center justify-center text-green-700 font-bold shadow-sm">
                             {user?.name?.charAt(0) || 'U'}
                         </div>
                         <div className="flex-1 min-w-0">
                             <p className="text-sm font-semibold text-gray-900 truncate">{user?.name}</p>
-                            <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                            <PermissionBadge />
                         </div>
                     </div>
                     <button
@@ -155,7 +177,7 @@ export function DashboardLayout() {
                         >
                             <Menu className="h-5 w-5" />
                         </button>
-                        
+
                         {/* Search Bar - Desktop */}
                         <div className="hidden md:flex items-center">
                             <div className="relative">
@@ -182,7 +204,7 @@ export function DashboardLayout() {
                             <Bell size={20} />
                             <span className="absolute top-2 right-2 w-2 h-2 bg-green-500 rounded-full ring-2 ring-white" />
                         </button>
-                        
+
                         {/* Desktop User Avatar */}
                         <div className="hidden lg:flex items-center gap-3 pl-3 ml-2 border-l border-gray-200">
                             <div className="text-right">

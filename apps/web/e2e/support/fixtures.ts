@@ -17,6 +17,38 @@ export const testUsers = {
         password: 'S3nh@Membro',
         name: 'Maria Silva',
     },
+    pastor: {
+        email: 'pastor@igreja.com',
+        password: 'S3nh@Pastor',
+        name: 'Rev. João Silva',
+        office: 'PASTOR',
+    },
+    presbitero: {
+        email: 'presbitero@igreja.com',
+        password: 'S3nh@Presb',
+        name: 'Presb. Carlos Santos',
+        office: 'PRESBITERO',
+    },
+    diacono: {
+        email: 'diacono@igreja.com',
+        password: 'S3nh@Diac',
+        name: 'Diác. Pedro Lima',
+        office: 'DIACONO',
+    },
+    tesoureiro: {
+        email: 'tesoureiro@igreja.com',
+        password: 'S3nh@Tes',
+        name: 'Ana Tesoureira',
+        office: 'MEMBRO',
+        functions: ['TESOUREIRO'],
+    },
+    secretario: {
+        email: 'secretario@igreja.com',
+        password: 'S3nh@Sec',
+        name: 'José Secretário',
+        office: 'MEMBRO',
+        functions: ['SECRETARIO'],
+    },
     invalid: {
         email: 'usuario@inexistente.com',
         password: 'senhaerrada',
@@ -101,3 +133,61 @@ export const testFinancial = {
         description: 'Conta de luz - Janeiro',
     },
 } as const;
+
+/**
+ * Devotional test data.
+ */
+export const testDevotionals = {
+    today: {
+        title: 'O Amor de Deus',
+        verseReference: 'João 3:16',
+        verseText: 'Porque Deus amou o mundo de tal maneira que deu o seu Filho unigênito...',
+        meditation: 'Reflexão sobre o amor incondicional de Deus pela humanidade.',
+    },
+    new: {
+        title: 'A Graça Salvadora',
+        verseReference: 'Efésios 2:8',
+        verseText: 'Porque pela graça sois salvos, mediante a fé...',
+        meditation: 'Meditação sobre a graça divina e a salvação pela fé.',
+    },
+} as const;
+
+/**
+ * Prayer request test data.
+ */
+export const testPrayerRequests = {
+    public: {
+        content: 'Oração pela minha família',
+        category: 'Família',
+        isAnonymous: false,
+    },
+    anonymous: {
+        content: 'Pedido confidencial de oração',
+        category: 'Espiritual',
+        isAnonymous: true,
+    },
+    healing: {
+        content: 'Oração pela cura de um irmão',
+        category: 'Saúde',
+        isAnonymous: false,
+    },
+} as const;
+
+/**
+ * Event test data.
+ */
+export const testEvents = {
+    upcoming: {
+        title: 'Culto de Celebração',
+        date: '2026-02-15',
+        time: '19:00',
+        location: 'Templo Principal',
+    },
+    conference: {
+        title: 'Conferência Missionária',
+        date: '2026-03-20',
+        time: '09:00',
+        location: 'Auditório Central',
+    },
+} as const;
+

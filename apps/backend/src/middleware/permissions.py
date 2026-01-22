@@ -214,3 +214,36 @@ require_view_missions = PermissionChecker("missions", "view")
 require_manage_missions = PermissionChecker("missions", "manage")
 require_view_settings = PermissionChecker("settings", "view")
 require_manage_settings = PermissionChecker("settings", "manage")
+
+
+class RequireAuthenticated:
+    """
+    Dependency que apenas exige que o usuário esteja autenticado.
+    Não verifica permissões específicas.
+    
+    Uso:
+        @router.get("/events")
+        async def list_events(
+            auth_context: dict = Depends(require_authenticated),
+        ):
+            ...
+    """
+    
+    async def __call__(
+        self,
+        tenant_id: str = Query(..., description="ID of the tenant/church"),
+        current_user: dict = Depends(get_current_user),
+    ) -> dict:
+        user_id = current_user["id"]
+        
+        membership = await membership_repository.get_by_user_and_tenant(user_id, tenant_id)
+        member = await member_repository.get_by_user_id(tenant_id, user_id)
+        
+        return {
+            "user": current_user,
+            "member": member,
+            "membership": membership,
+        }
+
+
+require_authenticated = RequireAuthenticated()

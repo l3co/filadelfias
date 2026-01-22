@@ -32,6 +32,7 @@ const MissionsPage = lazy(() => import('./routes/missions/MissionsPage').then(m 
 const EBDClassesPage = lazy(() => import('./routes/ebd/EBDClassesPage').then(m => ({ default: m.EBDClassesPage })));
 const EBDClassDetailPage = lazy(() => import('./routes/ebd/EBDClassDetailPage').then(m => ({ default: m.EBDClassDetailPage })));
 const EventsPage = lazy(() => import('./routes/events/EventsPage').then(m => ({ default: m.EventsPage })));
+const DevotionalsPage = lazy(() => import('./routes/devotionals/DevotionalsPage').then(m => ({ default: m.DevotionalsPage })));
 const ChurchSettingsPage = lazy(() => import('./routes/settings/ChurchSettingsPage').then(m => ({ default: m.ChurchSettingsPage })));
 
 // Lazy loaded pages - Member Portal
@@ -95,6 +96,7 @@ function App() {
           <Route path="ebd" element={<EBDClassesPage />} />
           <Route path="ebd/:classId" element={<EBDClassDetailPage />} />
           <Route path="events" element={<EventsPage />} />
+          <Route path="devotionals" element={<DevotionalsPage />} />
           <Route path="settings" element={<ChurchSettingsPage />} />
           <Route path="profile" element={<ProfilePage />} />
         </Route>

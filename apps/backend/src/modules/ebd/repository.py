@@ -56,6 +56,37 @@ class EBDStudentRepository:
             return []
         return [doc.to_dict() for doc in classes[0].reference.collection("students").stream()]
 
+    async def enroll_student(self, class_id: str, member_id: str, role: str = "STUDENT") -> dict:
+        classes = self.db.collection_group("ebd_classes").where("id", "==", str(class_id)).limit(1).get()
+        if not classes:
+            raise ValueError("Class not found")
+
+        class_doc = classes[0]
+        doc_id = str(uuid.uuid4())
+
+        data = {
+            "id": doc_id,
+            "ebd_class_id": str(class_id),
+            "member_id": str(member_id),
+            "role": role,
+            "enrolled_at": datetime.utcnow(),
+        }
+
+        class_doc.reference.collection("students").document(doc_id).set(data)
+        return data
+
+    async def remove_student(self, class_id: str, student_id: str) -> bool:
+        classes = self.db.collection_group("ebd_classes").where("id", "==", str(class_id)).limit(1).get()
+        if not classes:
+            return False
+
+        class_doc = classes[0]
+        student_ref = class_doc.reference.collection("students").document(student_id)
+        if student_ref.get().exists:
+            student_ref.delete()
+            return True
+        return False
+
 
 class EBDLessonRepository:
     @property

@@ -23,6 +23,7 @@ export interface EBDLesson {
     ebd_class_id: string;
     date: string;
     topic: string;
+    bible_reference?: string;
     description?: string;
     homework_url?: string;
 }
@@ -44,6 +45,7 @@ export interface CreateLessonDTO {
     ebd_class_id?: string;
     date: string;
     topic: string;
+    bible_reference?: string;
     description?: string;
     homework_url?: string;
 }
@@ -82,5 +84,9 @@ export const ebdService = {
     listLessons: async (classId: string) => {
         const { data } = await api.get<EBDLesson[]>(`/ebd/classes/${classId}/lessons`);
         return data;
+    },
+
+    removeStudent: async (classId: string, studentId: string) => {
+        await api.delete(`/ebd/classes/${classId}/students/${studentId}`);
     }
 };

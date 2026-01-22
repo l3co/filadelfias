@@ -67,10 +67,19 @@ export function CreateLessonDialog({ isOpen, onClose, classId }: Props) {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Descrição (opcional)</label>
+                        <label className="text-sm font-medium text-gray-700">Referência Bíblica (opcional)</label>
                         <Input
+                            {...register('bible_reference')}
+                            placeholder="Ex: Mateus 13:1-23"
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-700">Descrição (opcional)</label>
+                        <textarea
                             {...register('description')}
                             placeholder="Descrição ou resumo da lição"
+                            className="flex min-h-[80px] w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 resize-none"
                         />
                     </div>
 

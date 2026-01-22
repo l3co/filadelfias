@@ -90,6 +90,21 @@ async def list_students(
     return await ebd_student_repository.get_by_class(class_id)
 
 
+@router.delete("/classes/{class_id}/students/{student_id}")
+async def remove_student(
+    class_id: str,
+    student_id: str,
+    tenant_id: str = Query(..., description="ID of the tenant"),
+    auth_context: dict = Depends(require_manage_ebd),
+):
+    """
+    Remove a student from a class.
+    Requires: ebd:manage permission.
+    """
+    await ebd_student_repository.remove_student(class_id, student_id)
+    return {"message": "Student removed successfully"}
+
+
 # Lessons
 @router.post("/classes/{class_id}/lessons", response_model=EBDLessonResponse)
 async def create_lesson(

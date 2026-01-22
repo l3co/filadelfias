@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, GraduationCap, BookOpen, Plus, Users, Calendar, MapPin } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { ArrowLeft, GraduationCap, BookOpen, Plus, Users, Calendar, MapPin, Trash2, ExternalLink } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { useCurrentTenant } from '../../hooks/useAuth';
 import { useMembers } from '../../features/members/hooks/useMembers';
 import { ebdService } from '../../services/ebd';
@@ -41,6 +42,19 @@ export function EBDClassDetailPage() {
     });
 
     const { data: members } = useMembers(tenant?.id);
+
+    const queryClient = useQueryClient();
+
+    const removeStudentMutation = useMutation({
+        mutationFn: (studentId: string) => ebdService.removeStudent(classId!, studentId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['ebd-students', classId] });
+            toast.success('Aluno removido da turma!');
+        },
+        onError: () => {
+            toast.error('Erro ao remover aluno.');
+        }
+    });
 
     const getMemberName = (memberId: string) => {
         const member = members?.find(m => m.id === memberId);
@@ -131,7 +145,7 @@ export function EBDClassDetailPage() {
                             {students.map(student => {
                                 const roleInfo = getRoleBadge(student.role);
                                 return (
-                                    <Card key={student.id} className="hover:shadow-sm transition-shadow">
+                                    <Card key={student.id} className="hover:shadow-sm transition-shadow group">
                                         <CardContent className="p-4 flex items-center justify-between">
                                             <div>
                                                 <p className="font-medium text-gray-900">{getMemberName(student.member_id)}</p>
@@ -139,7 +153,16 @@ export function EBDClassDetailPage() {
                                                     Matriculado em {new Date(student.enrolled_at).toLocaleDateString('pt-BR')}
                                                 </p>
                                             </div>
-                                            <Badge variant={roleInfo.variant}>{roleInfo.label}</Badge>
+                                            <div className="flex items-center gap-2">
+                                                <Badge variant={roleInfo.variant}>{roleInfo.label}</Badge>
+                                                <button
+                                                    onClick={() => removeStudentMutation.mutate(student.id)}
+                                                    className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100"
+                                                    title="Remover aluno"
+                                                >
+                                                    <Trash2 size={14} />
+                                                </button>
+                                            </div>
                                         </CardContent>
                                     </Card>
                                 );
@@ -174,18 +197,36 @@ export function EBDClassDetailPage() {
                                 <Card key={lesson.id} className="hover:shadow-sm transition-shadow">
                                     <CardHeader className="pb-2">
                                         <div className="flex items-center justify-between">
-                                            <CardTitle className="text-base">{lesson.topic}</CardTitle>
+                                            <div>
+                                                <CardTitle className="text-base">{lesson.topic}</CardTitle>
+                                                {lesson.bible_reference && (
+                                                    <p className="text-sm text-indigo-600 font-medium mt-1">
+                                                        {lesson.bible_reference}
+                                                    </p>
+                                                )}
+                                            </div>
                                             <Badge variant="outline" className="flex items-center gap-1">
                                                 <Calendar size={12} />
                                                 {new Date(lesson.date).toLocaleDateString('pt-BR')}
                                             </Badge>
                                         </div>
                                     </CardHeader>
-                                    {lesson.description && (
-                                        <CardContent className="pt-0">
-                                            <p className="text-sm text-gray-600">{lesson.description}</p>
-                                        </CardContent>
-                                    )}
+                                    <CardContent className="pt-0">
+                                        {lesson.description && (
+                                            <p className="text-sm text-gray-600 mb-2">{lesson.description}</p>
+                                        )}
+                                        {lesson.homework_url && (
+                                            <a
+                                                href={lesson.homework_url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
+                                            >
+                                                <ExternalLink size={14} />
+                                                Material da Lição
+                                            </a>
+                                        )}
+                                    </CardContent>
                                 </Card>
                             ))}
                         </div>

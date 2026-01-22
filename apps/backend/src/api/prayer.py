@@ -17,11 +17,11 @@ async def create_prayer_request(
     auth_context: dict = Depends(require_authenticated),
 ):
     """Create a new prayer request."""
-    user = auth_context.get("user", {})
-    member = auth_context.get("member", {})
+    user = auth_context.get("user") or {}
+    member = auth_context.get("member") or {}
     
-    member_id = member.get("id", user.get("id", "unknown"))
-    author_name = member.get("full_name", user.get("name", "Membro"))
+    member_id = member.get("id") or user.get("id") or "unknown"
+    author_name = member.get("full_name") or user.get("name") or "Membro"
     
     return await prayer_request_repository.create(tenant_id, member_id, author_name, data)
 
@@ -42,8 +42,8 @@ async def pray_for_request(
     auth_context: dict = Depends(require_authenticated),
 ):
     """Increment prayer count for a request."""
-    user = auth_context.get("user", {})
-    user_id = user.get("id", "unknown")
+    user = auth_context.get("user") or {}
+    user_id = user.get("id") or "unknown"
     
     result = await prayer_request_repository.increment_prayer_count(tenant_id, request_id, user_id)
     if not result:

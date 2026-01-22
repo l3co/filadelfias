@@ -3,87 +3,95 @@ Integration tests for EBD endpoints.
 """
 
 import pytest
-from httpx import ASGITransport, AsyncClient
+import uuid
+from httpx import AsyncClient
 
-from src.main import app
+pytestmark = pytest.mark.integration
+
+
+async def get_auth_token(client: AsyncClient):
+    """Helper to register and login a user."""
+    email = f"user_{uuid.uuid4().hex[:8]}@test.com"
+    await client.post("/auth/register", json={"email": email, "name": "Test User", "password": "password123"})
+    response = await client.post("/auth/login", data={"username": email, "password": "password123"})
+    return response.json()["access_token"]
+
+
+async def create_tenant(client: AsyncClient, token: str):
+    """Helper to create a tenant."""
+    slug = f"church-{uuid.uuid4().hex[:8]}"
+    headers = {"Authorization": f"Bearer {token}"}
+    response = await client.post("/tenants", json={"name": "Test Church", "slug": slug}, headers=headers)
+    return response.json()
+
+
+async def create_member(client: AsyncClient, token: str, tenant_id: str):
+    """Helper to create a member."""
+    headers = {"Authorization": f"Bearer {token}"}
+    response = await client.post(
+        f"/tenants/{tenant_id}/members",
+        json={
+            "full_name": "Aluno Teste",
+            "email": f"aluno_{uuid.uuid4().hex[:8]}@test.com",
+            "status": "COMUNGANTE",
+            "gender": "M",
+            "office": "MEMBRO",
+        },
+        headers=headers,
+    )
+    return response.json()
 
 
 @pytest.mark.asyncio
 class TestEBDEndpoints:
     """Test EBD API endpoints."""
 
-    async def get_auth_token(self, client, email="ebd_user@test.com"):
-        try:
-            await client.post("/auth/register", json={"email": email, "name": "EBD User", "password": "password123"})
-        except Exception:
-            pass
-        response = await client.post("/auth/login", data={"username": email, "password": "password123"})
-        return response.json()["access_token"]
-
-    async def create_tenant(self, client, token, slug="ebd-church"):
+    async def test_ebd_full_flow(self, client: AsyncClient):
+        """Test complete EBD flow."""
+        token = await get_auth_token(client)
         headers = {"Authorization": f"Bearer {token}"}
-        response = await client.post("/tenants", json={"name": "EBD Church", "slug": slug}, headers=headers)
-        return response.json()
+        tenant = await create_tenant(client, token)
+        tenant_id = tenant["id"]
 
-    async def create_member(self, client, token, tenant_id, name="Aluno Teste"):
-        headers = {"Authorization": f"Bearer {token}"}
-        response = await client.post(
-            f"/tenants/{tenant_id}/members",
+        # 1. Create Class
+        class_resp = await client.post(
+            "/ebd/classes",
+            params={"tenant_id": tenant_id},
+            json={"name": "Jardim de Infância", "min_age": 3, "max_age": 5},
+            headers=headers,
+        )
+        assert class_resp.status_code == 200
+        ebd_class = class_resp.json()
+        class_id = ebd_class["id"]
+
+        # 2. Create Member
+        member = await create_member(client, token, tenant_id)
+        member_id = member["id"]
+
+        # 3. Enroll Student
+        enroll_resp = await client.post(
+            f"/ebd/classes/{class_id}/students",
+            params={"tenant_id": tenant_id},
+            json={"member_id": member_id, "role": "STUDENT"},
+            headers=headers
+        )
+        assert enroll_resp.status_code == 200
+
+        # 4. Create Lesson
+        lesson_resp = await client.post(
+            f"/ebd/classes/{class_id}/lessons",
+            params={"tenant_id": tenant_id},
             json={
-                "full_name": name,
-                "email": "aluno@test.com",
-                "status": "COMUNGANTE",
-                "gender": "M",
-                "role": "MEMBRO",
+                "ebd_class_id": class_id,
+                "date": "2023-12-31",
+                "topic": "A Criação",
+                "description": "Deus criou tudo.",
             },
             headers=headers,
         )
-        return response.json()
+        assert lesson_resp.status_code == 200
 
-    async def test_ebd_full_flow(self):
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-            token = await self.get_auth_token(client, "ebd_admin@test.com")
-            headers = {"Authorization": f"Bearer {token}"}
-            tenant = await self.create_tenant(client, token, "ebd-main")
-            tenant_id = tenant["id"]
-
-            # 1. Create Class
-            class_resp = await client.post(
-                "/ebd/classes",
-                params={"tenant_id": tenant_id},
-                json={"name": "Jardim de Infância", "min_age": 3, "max_age": 5},
-                headers=headers,
-            )
-            assert class_resp.status_code == 200
-            ebd_class = class_resp.json()
-            class_id = ebd_class["id"]
-
-            # 2. Create Member
-            member = await self.create_member(client, token, tenant_id)
-            member_id = member["id"]
-
-            # 3. Enroll Student
-            enroll_resp = await client.post(
-                f"/ebd/classes/{class_id}/students", json={"member_id": member_id, "role": "STUDENT"}, headers=headers
-            )
-            assert enroll_resp.status_code == 200
-
-            # 4. Create Lesson
-            lesson_resp = await client.post(
-                f"/ebd/classes/{class_id}/lessons",
-                json={
-                    "ebd_class_id": class_id,
-                    "date": "2023-12-31",
-                    "topic": "A Criação",
-                    "description": "Deus criou tudo.",
-                },
-                headers=headers,
-            )
-            assert lesson_resp.status_code == 200
-
-            # 5. List Classes
-            list_resp = await client.get("/ebd/classes", params={"tenant_id": tenant_id}, headers=headers)
-            classes = list_resp.json()
-            assert len(classes) >= 1
-
-        app.dependency_overrides.clear()
+        # 5. List Classes
+        list_resp = await client.get("/ebd/classes", params={"tenant_id": tenant_id}, headers=headers)
+        classes = list_resp.json()
+        assert len(classes) >= 1

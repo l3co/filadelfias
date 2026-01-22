@@ -22,8 +22,15 @@ async def create_member(
     """
     await verify_permission(tenant_id, current_user, "members", "create")
     
+    member_dict = member_data.model_dump(exclude_unset=True)
+    # Map deprecated 'role' field to 'office' if present
+    if "role" in member_dict and "office" not in member_dict:
+        member_dict["office"] = member_dict.pop("role")
+    elif "role" in member_dict:
+        member_dict.pop("role")
+    
     created_member = await member_repository.create_member(
-        tenant_id=tenant_id, **member_data.model_dump(exclude_unset=True)
+        tenant_id=tenant_id, **member_dict
     )
     return created_member
 

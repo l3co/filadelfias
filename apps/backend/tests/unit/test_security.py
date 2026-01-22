@@ -2,6 +2,10 @@
 Unit tests for security utilities (password hashing and JWT).
 """
 
+import pytest
+
+pytestmark = pytest.mark.unit
+
 from datetime import timedelta
 
 from src.infra.security import (

@@ -320,7 +320,8 @@ async def create_financial_data(tenant_id: str):
     accounts = []
     account_types = [
         {"name": "Caixa Geral", "type": "checking", "balance": 15000.00},
-        {"name": "Dízimos e Ofertas", "type": "savings", "balance": 8500.00},
+        {"name": "Dízimos", "type": "savings", "balance": 5500.00},
+        {"name": "Ofertas", "type": "savings", "balance": 3000.00},
         {"name": "Missões", "type": "savings", "balance": 3200.00},
         {"name": "Construção", "type": "savings", "balance": 25000.00},
     ]

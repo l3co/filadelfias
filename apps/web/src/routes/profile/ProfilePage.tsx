@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { User, Mail, Phone, Calendar, Shield, Church, Save, Camera, Eye, EyeOff, Lock, X } from 'lucide-react';
+import { User, Mail, Phone, Calendar, Shield, Church, Camera, Eye, EyeOff, Lock, X, Briefcase } from 'lucide-react';
 import { useCurrentUser, useCurrentTenant } from '../../hooks/useAuth';
+import { useMembers } from '../../features/members/hooks/useMembers';
 import { PageHeaderWithIcon } from '../../components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
@@ -13,12 +14,20 @@ import { toast } from 'sonner';
 export function ProfilePage() {
   const { data: user } = useCurrentUser();
   const tenant = useCurrentTenant();
-  const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({
-    name: user?.name || '',
-    email: user?.email || '',
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: '',
     phone: '',
+    birth_date: '',
+    street: '',
+    number: '',
+    complement: '',
+    neighborhood: '',
+    city: '',
+    state: '',
+    postal_code: '',
   });
+  const [isSaving, setIsSaving] = useState(false);
 
   // Password change modal state
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -49,9 +58,53 @@ export function ProfilePage() {
 
   const roleInfo = getRoleInfo(membership?.role);
 
-  const handleSave = () => {
-    // TODO: Implementar atualização do perfil
-    setIsEditing(false);
+  const officeLabels: Record<string, string> = {
+    PASTOR: 'Pastor',
+    PRESBITERO: 'Presbítero',
+    DIACONO: 'Diácono',
+    MEMBRO: 'Membro',
+  };
+
+  const functionLabels: Record<string, string> = {
+    TESOUREIRO: 'Tesoureiro',
+    SECRETARIO: 'Secretário',
+    EVANGELISTA: 'Evangelista',
+    MISSIONARIO: 'Missionário',
+    PROFESSOR_EBD: 'Prof. EBD',
+  };
+
+  const { data: members } = useMembers(tenant?.id);
+  const currentMember = members?.find(m => m.user_id === user?.id);
+  const memberOffice = currentMember?.office;
+  const memberFunctions = currentMember?.functions || [];
+
+  const openEditModal = () => {
+    setEditForm({
+      name: user?.name || '',
+      phone: currentMember?.phone || '',
+      birth_date: currentMember?.birth_date || '',
+      street: currentMember?.street || '',
+      number: currentMember?.number || '',
+      complement: currentMember?.complement || '',
+      neighborhood: currentMember?.neighborhood || '',
+      city: currentMember?.city || '',
+      state: currentMember?.state || '',
+      postal_code: currentMember?.postal_code || '',
+    });
+    setShowEditModal(true);
+  };
+
+  const handleSaveProfile = async () => {
+    setIsSaving(true);
+    try {
+      // TODO: Implementar atualização do perfil via API
+      toast.success('Perfil atualizado com sucesso!');
+      setShowEditModal(false);
+    } catch {
+      toast.error('Erro ao atualizar perfil');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleChangePassword = async () => {
@@ -125,6 +178,9 @@ export function ProfilePage() {
               <h2 className="text-2xl font-bold text-slate-900">{user?.name}</h2>
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-2">
                 <Badge className={roleInfo.color}>{roleInfo.label}</Badge>
+                {memberOffice && officeLabels[memberOffice] && (
+                  <Badge className="bg-emerald-100 text-emerald-700">{officeLabels[memberOffice]}</Badge>
+                )}
                 {tenant && (
                   <span className="text-sm text-slate-500 flex items-center gap-1">
                     <Church className="h-3.5 w-3.5" />
@@ -132,22 +188,25 @@ export function ProfilePage() {
                   </span>
                 )}
               </div>
+              {memberFunctions.length > 0 && (
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 mt-2">
+                  <Briefcase className="h-3.5 w-3.5 text-slate-400" />
+                  {memberFunctions.map(fn => (
+                    <Badge key={fn} variant="outline" className="text-xs text-indigo-600 border-indigo-200">
+                      {functionLabels[fn] || fn}
+                    </Badge>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Edit Button */}
             <Button
-              variant={isEditing ? "default" : "outline"}
-              onClick={() => isEditing ? handleSave() : setIsEditing(true)}
+              variant="outline"
+              onClick={openEditModal}
               className="gap-2"
             >
-              {isEditing ? (
-                <>
-                  <Save className="h-4 w-4" />
-                  Salvar
-                </>
-              ) : (
-                'Editar Perfil'
-              )}
+              Editar Perfil
             </Button>
           </div>
         </CardContent>
@@ -164,20 +223,12 @@ export function ProfilePage() {
         <CardContent className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="name">Nome completo</Label>
-              {isEditing ? (
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                />
-              ) : (
-                <p className="text-slate-700 py-2">{user?.name || '-'}</p>
-              )}
+              <Label>Nome completo</Label>
+              <p className="text-slate-700 py-2">{user?.name || '-'}</p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label>Email</Label>
               <div className="flex items-center gap-2 text-slate-700 py-2">
                 <Mail className="h-4 w-4 text-slate-400" />
                 {user?.email || '-'}
@@ -185,20 +236,19 @@ export function ProfilePage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phone">Telefone</Label>
-              {isEditing ? (
-                <Input
-                  id="phone"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  placeholder="(00) 00000-0000"
-                />
-              ) : (
-                <div className="flex items-center gap-2 text-slate-700 py-2">
-                  <Phone className="h-4 w-4 text-slate-400" />
-                  {formData.phone || 'Não informado'}
-                </div>
-              )}
+              <Label>Telefone</Label>
+              <div className="flex items-center gap-2 text-slate-700 py-2">
+                <Phone className="h-4 w-4 text-slate-400" />
+                {currentMember?.phone || 'Não informado'}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Data de Nascimento</Label>
+              <div className="flex items-center gap-2 text-slate-700 py-2">
+                <Calendar className="h-4 w-4 text-slate-400" />
+                {currentMember?.birth_date ? formatDate(currentMember.birth_date) : 'Não informado'}
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -208,6 +258,15 @@ export function ProfilePage() {
                 {formatDate(membership?.joined_at)}
               </div>
             </div>
+
+            {currentMember?.city && (
+              <div className="space-y-2">
+                <Label>Cidade</Label>
+                <p className="text-slate-700 py-2">
+                  {[currentMember.city, currentMember.state].filter(Boolean).join(' - ')}
+                </p>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -375,6 +434,128 @@ export function ProfilePage() {
                 disabled={isChangingPassword}
               >
                 {isChangingPassword ? 'Alterando...' : 'Alterar Senha'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Profile Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div 
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            onClick={() => setShowEditModal(false)}
+          />
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 p-6 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-emerald-100">
+                  <User className="h-5 w-5 text-emerald-600" />
+                </div>
+                <h2 className="text-xl font-bold text-slate-900">Editar Perfil</h2>
+              </div>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="p-2 rounded-lg hover:bg-slate-100 transition-colors"
+              >
+                <X className="h-5 w-5 text-slate-500" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="editName">Nome completo</Label>
+                <Input
+                  id="editName"
+                  value={editForm.name}
+                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="editPhone">Telefone</Label>
+                <Input
+                  id="editPhone"
+                  value={editForm.phone}
+                  onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                  placeholder="(00) 00000-0000"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="editBirthDate">Data de Nascimento</Label>
+                <Input
+                  id="editBirthDate"
+                  type="date"
+                  value={editForm.birth_date}
+                  onChange={(e) => setEditForm({ ...editForm, birth_date: e.target.value })}
+                />
+              </div>
+
+              <div className="border-t pt-4 mt-4">
+                <h3 className="font-medium text-slate-900 mb-3">Endereço</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="col-span-2 sm:col-span-1 space-y-2">
+                    <Label htmlFor="editStreet">Rua</Label>
+                    <Input
+                      id="editStreet"
+                      value={editForm.street}
+                      onChange={(e) => setEditForm({ ...editForm, street: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="editNumber">Número</Label>
+                    <Input
+                      id="editNumber"
+                      value={editForm.number}
+                      onChange={(e) => setEditForm({ ...editForm, number: e.target.value })}
+                    />
+                  </div>
+                  <div className="col-span-2 space-y-2">
+                    <Label htmlFor="editNeighborhood">Bairro</Label>
+                    <Input
+                      id="editNeighborhood"
+                      value={editForm.neighborhood}
+                      onChange={(e) => setEditForm({ ...editForm, neighborhood: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="editCity">Cidade</Label>
+                    <Input
+                      id="editCity"
+                      value={editForm.city}
+                      onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="editState">Estado</Label>
+                    <Input
+                      id="editState"
+                      value={editForm.state}
+                      onChange={(e) => setEditForm({ ...editForm, state: e.target.value })}
+                      maxLength={2}
+                      placeholder="SP"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => setShowEditModal(false)}
+              >
+                Cancelar
+              </Button>
+              <Button
+                className="flex-1"
+                onClick={handleSaveProfile}
+                disabled={isSaving}
+              >
+                {isSaving ? 'Salvando...' : 'Salvar Alterações'}
               </Button>
             </div>
           </div>

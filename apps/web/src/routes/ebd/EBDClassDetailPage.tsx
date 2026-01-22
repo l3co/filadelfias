@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/ta
 import { EmptyState } from '../../components/EmptyState';
 import { EnrollStudentDialog } from '../../features/ebd/components/EnrollStudentDialog';
 import { CreateLessonDialog } from '../../features/ebd/components/CreateLessonDialog';
+import { LessonComments } from '../../features/ebd/components/LessonComments';
 
 export function EBDClassDetailPage() {
     const { classId } = useParams<{ classId: string }>();
@@ -20,6 +21,7 @@ export function EBDClassDetailPage() {
     const [activeTab, setActiveTab] = useState<string>('students');
     const [isEnrollDialogOpen, setIsEnrollDialogOpen] = useState(false);
     const [isLessonDialogOpen, setIsLessonDialogOpen] = useState(false);
+    const [expandedLessonId, setExpandedLessonId] = useState<string | null>(null);
 
     const { data: classes } = useQuery({
         queryKey: ['ebd-classes', tenant?.id],
@@ -211,20 +213,40 @@ export function EBDClassDetailPage() {
                                             </Badge>
                                         </div>
                                     </CardHeader>
-                                    <CardContent className="pt-0">
+                                    <CardContent className="pt-0 space-y-4">
                                         {lesson.description && (
-                                            <p className="text-sm text-gray-600 mb-2">{lesson.description}</p>
+                                            <p className="text-sm text-gray-600">{lesson.description}</p>
                                         )}
-                                        {lesson.homework_url && (
-                                            <a
-                                                href={lesson.homework_url}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
+                                        <div className="flex items-center gap-3">
+                                            {lesson.homework_url && (
+                                                <a
+                                                    href={lesson.homework_url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
+                                                >
+                                                    <ExternalLink size={14} />
+                                                    Material
+                                                </a>
+                                            )}
+                                            <button
+                                                onClick={() => setExpandedLessonId(expandedLessonId === lesson.id ? null : lesson.id)}
+                                                className="text-sm text-gray-500 hover:text-indigo-600 transition-colors"
                                             >
-                                                <ExternalLink size={14} />
-                                                Material da Lição
-                                            </a>
+                                                {expandedLessonId === lesson.id ? 'Ocultar comentários' : 'Ver comentários'}
+                                            </button>
+                                        </div>
+                                        
+                                        {expandedLessonId === lesson.id && (
+                                            <div className="pt-4 border-t border-gray-100">
+                                                <LessonComments
+                                                    lessonId={lesson.id}
+                                                    tenantId={tenant!.id}
+                                                    currentMemberId={students?.find(s => s.member_id)?.member_id}
+                                                    members={members || []}
+                                                    canDelete={true}
+                                                />
+                                            </div>
                                         )}
                                     </CardContent>
                                 </Card>

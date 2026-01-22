@@ -6,6 +6,7 @@ from src.modules.ebd.repository import (
     ebd_class_repository,
     ebd_lesson_repository,
     ebd_student_repository,
+    ebd_comment_repository,
 )
 from src.modules.ebd.schemas import (
     EBDClassCreate,
@@ -14,6 +15,8 @@ from src.modules.ebd.schemas import (
     EBDLessonResponse,
     EBDStudentCreate,
     EBDStudentResponse,
+    EBDCommentCreate,
+    EBDCommentResponse,
 )
 from src.middleware.permissions import (
     require_view_ebd,
@@ -137,3 +140,51 @@ async def list_lessons(
     Requires: ebd:view permission.
     """
     return await ebd_lesson_repository.get_by_class(class_id)
+
+
+# Comments
+@router.post("/lessons/{lesson_id}/comments", response_model=EBDCommentResponse)
+async def create_comment(
+    lesson_id: str,
+    data: EBDCommentCreate,
+    tenant_id: str = Query(..., description="ID of the tenant"),
+    auth_context: dict = Depends(require_view_ebd),
+):
+    """
+    Add a comment to a lesson.
+    Requires: ebd:view permission (any enrolled member can comment).
+    """
+    return await ebd_comment_repository.create_comment(
+        lesson_id=lesson_id,
+        member_id=str(data.member_id),
+        content=data.content,
+        parent_id=str(data.parent_id) if data.parent_id else None,
+    )
+
+
+@router.get("/lessons/{lesson_id}/comments", response_model=List[EBDCommentResponse])
+async def list_comments(
+    lesson_id: str,
+    tenant_id: str = Query(..., description="ID of the tenant"),
+    auth_context: dict = Depends(require_view_ebd),
+):
+    """
+    List comments for a lesson.
+    Requires: ebd:view permission.
+    """
+    return await ebd_comment_repository.get_by_lesson(lesson_id)
+
+
+@router.delete("/lessons/{lesson_id}/comments/{comment_id}")
+async def delete_comment(
+    lesson_id: str,
+    comment_id: str,
+    tenant_id: str = Query(..., description="ID of the tenant"),
+    auth_context: dict = Depends(require_manage_ebd),
+):
+    """
+    Delete a comment.
+    Requires: ebd:manage permission.
+    """
+    await ebd_comment_repository.delete_comment(lesson_id, comment_id)
+    return {"message": "Comment deleted successfully"}

@@ -130,6 +130,52 @@ class EBDLessonRepository:
         return [doc.to_dict() for doc in classes[0].reference.collection("lessons").stream()]
 
 
+class EBDCommentRepository:
+    @property
+    def db(self):
+        return get_db()
+
+    async def create_comment(self, lesson_id: str, member_id: str, content: str, parent_id: str = None) -> dict:
+        # Find the lesson to add comment as subcollection
+        lessons = self.db.collection_group("lessons").where("id", "==", str(lesson_id)).limit(1).get()
+        if not lessons:
+            raise ValueError("Lesson not found")
+
+        lesson_doc = lessons[0]
+        doc_id = str(uuid.uuid4())
+
+        data = {
+            "id": doc_id,
+            "lesson_id": str(lesson_id),
+            "member_id": str(member_id),
+            "content": content,
+            "parent_id": str(parent_id) if parent_id else None,
+            "created_at": datetime.utcnow(),
+        }
+
+        lesson_doc.reference.collection("comments").document(doc_id).set(data)
+        return data
+
+    async def get_by_lesson(self, lesson_id: str) -> List[dict]:
+        lessons = self.db.collection_group("lessons").where("id", "==", str(lesson_id)).limit(1).get()
+        if not lessons:
+            return []
+        comments = [doc.to_dict() for doc in lessons[0].reference.collection("comments").stream()]
+        return sorted(comments, key=lambda x: x.get("created_at", datetime.min), reverse=False)
+
+    async def delete_comment(self, lesson_id: str, comment_id: str) -> bool:
+        lessons = self.db.collection_group("lessons").where("id", "==", str(lesson_id)).limit(1).get()
+        if not lessons:
+            return False
+
+        comment_ref = lessons[0].reference.collection("comments").document(comment_id)
+        if comment_ref.get().exists:
+            comment_ref.delete()
+            return True
+        return False
+
+
 ebd_class_repository = EBDClassRepository()
 ebd_student_repository = EBDStudentRepository()
 ebd_lesson_repository = EBDLessonRepository()
+ebd_comment_repository = EBDCommentRepository()

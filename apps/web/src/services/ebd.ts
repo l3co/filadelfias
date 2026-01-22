@@ -28,6 +28,23 @@ export interface EBDLesson {
     homework_url?: string;
 }
 
+export interface EBDComment {
+    id: string;
+    lesson_id: string;
+    member_id: string;
+    member_name?: string;
+    content: string;
+    parent_id?: string;
+    created_at: string;
+}
+
+export interface CreateCommentDTO {
+    lesson_id: string;
+    member_id: string;
+    content: string;
+    parent_id?: string;
+}
+
 export interface CreateClassDTO {
     name: string;
     description?: string;
@@ -88,5 +105,26 @@ export const ebdService = {
 
     removeStudent: async (classId: string, studentId: string) => {
         await api.delete(`/ebd/classes/${classId}/students/${studentId}`);
+    },
+
+    // Comments
+    listComments: async (lessonId: string, tenantId: string) => {
+        const { data } = await api.get<EBDComment[]>(`/ebd/lessons/${lessonId}/comments`, {
+            params: { tenant_id: tenantId }
+        });
+        return data;
+    },
+
+    createComment: async (lessonId: string, tenantId: string, comment: CreateCommentDTO) => {
+        const { data } = await api.post<EBDComment>(`/ebd/lessons/${lessonId}/comments`, comment, {
+            params: { tenant_id: tenantId }
+        });
+        return data;
+    },
+
+    deleteComment: async (lessonId: string, commentId: string, tenantId: string) => {
+        await api.delete(`/ebd/lessons/${lessonId}/comments/${commentId}`, {
+            params: { tenant_id: tenantId }
+        });
     }
 };

@@ -58,6 +58,27 @@ class EBDLessonCreate(EBDLessonBase):
 class EBDLessonResponse(EBDLessonBase):
     id: UUID
     ebd_class_id: UUID
+    bible_reference: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+class EBDCommentCreate(BaseModel):
+    lesson_id: UUID
+    member_id: UUID
+    content: str = Field(..., min_length=1, max_length=1000)
+    parent_id: Optional[UUID] = None  # For replies
+
+
+class EBDCommentResponse(BaseModel):
+    id: UUID
+    lesson_id: UUID
+    member_id: UUID
+    member_name: Optional[str] = None
+    content: str
+    parent_id: Optional[UUID] = None
+    created_at: datetime
 
     class Config:
         from_attributes = True

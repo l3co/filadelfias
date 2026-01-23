@@ -30,15 +30,15 @@ def generate_temporary_password(length: int = 12) -> str:
     lower = secrets.choice("abcdefghijkmnpqrstuvwxyz")
     digit = secrets.choice("23456789")
     special = secrets.choice("!@#$%^&*")
-    
+
     # Fill the rest
     chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%^&*"
     remaining = "".join(secrets.choice(chars) for _ in range(length - 4))
-    
+
     # Combine and shuffle
     password = list(upper + lower + digit + special + remaining)
     secrets.SystemRandom().shuffle(password)
-    
+
     return "".join(password)
 
 

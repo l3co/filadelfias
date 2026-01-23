@@ -9,6 +9,7 @@ from uuid import UUID
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
 from src.domain.validators import validate_password_strength
+
 from .enums import EcclesiasticalFunction, EcclesiasticalOffice, EcclesiasticalRole, Gender, MaritalStatus, MemberStatus
 
 

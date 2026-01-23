@@ -115,10 +115,7 @@ def sanitize_data(data: Any) -> Any:
     """Recursively mask sensitive data in dictionaries and lists."""
     if isinstance(data, dict):
         return {
-            k: "*****"
-            if any(s in k.lower() for s in SENSITIVE_KEYS)
-            else sanitize_data(v)
-            for k, v in data.items()
+            k: "*****" if any(s in k.lower() for s in SENSITIVE_KEYS) else sanitize_data(v) for k, v in data.items()
         }
     if isinstance(data, list):
         return [sanitize_data(i) for i in data]

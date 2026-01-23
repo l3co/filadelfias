@@ -6,7 +6,6 @@ import os
 
 import resend
 
-
 from src.services.logging_service import log_error, log_info, log_warning
 
 

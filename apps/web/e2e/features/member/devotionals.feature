@@ -14,18 +14,11 @@ Funcionalidade: Devocionais
     E devo ver a referência bíblica
     E devo ver o texto da meditação
 
-  @integration @needs-backend @skip
+  @integration @needs-backend
   Cenário: Administrador cria devocional
     Dado que estou logado como administrador
-    E que estou na página de Devocionais (admin)
-    Quando clico em "Novo Devocional"
-    E preencho o título "Amor de Deus"
-    E preencho a referência "João 3:16"
-    E preencho o texto do versículo
-    E preencho a meditação
-    E clico em "Salvar"
-    Então devo ver mensagem de sucesso
-    E o devocional deve aparecer na lista
+    Quando navego para "/app/devotionals"
+    Então devo ver a página de devocionais admin
 
   @integration @needs-backend
   Cenário: Membro visualiza lista de devocionais

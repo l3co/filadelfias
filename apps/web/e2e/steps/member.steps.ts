@@ -95,6 +95,15 @@ Then('devo ver lista de devocionais', async ({ page }) => {
     await expect(page.getByRole('heading', { level: 3 }).first()).toBeVisible({ timeout: 5000 });
 });
 
+When('navego para {string}', async ({ page }, path: string) => {
+    await page.goto(path);
+    await page.waitForLoadState('networkidle');
+});
+
+Then('devo ver a página de devocionais admin', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: /devocional|devocionais/i }).first()).toBeVisible({ timeout: 5000 });
+});
+
 Then('cada devocional deve mostrar título', async ({ page }) => {
     const items = page.locator('[role="listitem"], tr, .card, .item');
     await expect(items.first()).toBeVisible();

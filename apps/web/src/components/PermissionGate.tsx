@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * Componentes de controle de acesso baseado em permissões
  * 

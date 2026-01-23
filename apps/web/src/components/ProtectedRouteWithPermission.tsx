@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * Componente de rota protegida com verificação de permissões
  * Combina autenticação + autorização baseada em RBAC

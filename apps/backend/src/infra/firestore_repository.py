@@ -3,7 +3,7 @@ Base Firestore repository with common CRUD operations.
 """
 
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any, Generic, Optional, TypeVar
 
 from google.cloud.firestore import Client, CollectionReference
@@ -42,6 +42,16 @@ class FirestoreRepository(Generic[T]):
         data["updated_at"] = now
         return data
 
+    def _serialize_data(self, data: dict) -> dict:
+        """Convert date objects to ISO strings for Firestore compatibility."""
+        serialized = {}
+        for key, value in data.items():
+            if isinstance(value, date) and not isinstance(value, datetime):
+                serialized[key] = value.isoformat()
+            else:
+                serialized[key] = value
+        return serialized
+
     async def create(self, data: dict, doc_id: str | None = None) -> dict:
         """Create a new document."""
         doc_id = doc_id or self._generate_id()
@@ -68,6 +78,7 @@ class FirestoreRepository(Generic[T]):
         if not doc_ref.get().exists:
             return None
         data = self._add_timestamps(data.copy(), is_update=True)
+        data = self._serialize_data(data)
         doc_ref.update(data)
         return await self.get(doc_id)
 
@@ -130,6 +141,7 @@ class TenantScopedRepository(FirestoreRepository[T]):
         if not doc_ref.get().exists:
             return None
         data = self._add_timestamps(data.copy(), is_update=True)
+        data = self._serialize_data(data)
         doc_ref.update(data)
         return await self.get(tenant_id, doc_id)
 

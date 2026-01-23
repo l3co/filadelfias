@@ -50,13 +50,13 @@ class CouncilRepository:
             return None
 
         council_data = doc.to_dict()
-        members = council_data.get("members", [])
+        member_ids = council_data.get("member_ids", [])
 
-        if member_id not in members:
-            members.append(member_id)
-            doc_ref.update({"members": members, "updated_at": datetime.utcnow()})
+        if member_id not in member_ids:
+            member_ids.append(member_id)
+            doc_ref.update({"member_ids": member_ids, "updated_at": datetime.utcnow()})
 
-        council_data["members"] = members
+        council_data["member_ids"] = member_ids
         return council_data
 
     async def remove_member(self, tenant_id: str, council_id: str, member_id: str) -> dict | None:
@@ -67,13 +67,13 @@ class CouncilRepository:
             return None
 
         council_data = doc.to_dict()
-        members = council_data.get("members", [])
+        member_ids = council_data.get("member_ids", [])
 
-        if member_id in members:
-            members.remove(member_id)
-            doc_ref.update({"members": members, "updated_at": datetime.utcnow()})
+        if member_id in member_ids:
+            member_ids.remove(member_id)
+            doc_ref.update({"member_ids": member_ids, "updated_at": datetime.utcnow()})
 
-        council_data["members"] = members
+        council_data["member_ids"] = member_ids
         return council_data
 
 

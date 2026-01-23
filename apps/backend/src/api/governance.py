@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from src.middleware.permissions import (
     require_create_governance,
@@ -15,6 +15,7 @@ from src.modules.governance.schemas import (
     CouncilUpdate,
     MeetingCreate,
     MeetingResponse,
+    MeetingUpdate,
 )
 
 router = APIRouter(prefix="/governance", tags=["Governance"])
@@ -66,6 +67,7 @@ async def create_meeting(
         scheduled_date=data.date,
         location=data.location,
         status=data.status,
+        meeting_type=data.meeting_type,
     )
 
 
@@ -80,6 +82,71 @@ async def list_meetings(
     Requires: Pastor, Presbítero or Diácono (governance:view permission).
     """
     return await meeting_repository.get_by_council(council_id)
+
+
+@router.get("/meetings/{meeting_id}", response_model=MeetingResponse)
+async def get_meeting(
+    meeting_id: str,
+    tenant_id: str = Query(..., description="ID of the tenant/church"),
+    auth_context: dict = Depends(require_view_governance),
+):
+    """
+    Retrieve a single meeting by ID.
+    Requires: Pastor, Presbítero or Diácono (governance:view permission).
+    """
+    meeting = await meeting_repository.get_by_id(meeting_id)
+    if not meeting:
+        raise HTTPException(status_code=404, detail="Meeting not found")
+    return meeting
+
+
+@router.patch("/meetings/{meeting_id}", response_model=MeetingResponse)
+async def update_meeting(
+    meeting_id: str,
+    data: MeetingUpdate,
+    tenant_id: str = Query(..., description="ID of the tenant/church"),
+    auth_context: dict = Depends(require_manage_governance),
+):
+    """
+    Update meeting details, minutes, or attendee list.
+    Requires: Pastor or Presbítero with manage permission (governance:manage).
+
+    Cannot update completed meetings (returns 400 error).
+    """
+    existing = await meeting_repository.get_by_id(meeting_id)
+    if not existing:
+        raise HTTPException(status_code=404, detail="Meeting not found")
+
+    if existing.get("status") == "COMPLETED":
+        raise HTTPException(status_code=400, detail="Cannot update a completed meeting")
+
+    update_data = data.model_dump(exclude_unset=True)
+    result = await meeting_repository.update_meeting(meeting_id, update_data)
+    return result
+
+
+@router.post("/meetings/{meeting_id}/complete", response_model=MeetingResponse)
+async def complete_meeting(
+    meeting_id: str,
+    tenant_id: str = Query(..., description="ID of the tenant/church"),
+    auth_context: dict = Depends(require_manage_governance),
+):
+    """
+    Mark a meeting as completed.
+    Requires: Pastor or Presbítero with manage permission (governance:manage).
+
+    This is a one-way operation - completed meetings cannot be reopened.
+    The completion timestamp is recorded automatically.
+    """
+    existing = await meeting_repository.get_by_id(meeting_id)
+    if not existing:
+        raise HTTPException(status_code=404, detail="Meeting not found")
+
+    if existing.get("status") == "COMPLETED":
+        raise HTTPException(status_code=400, detail="Meeting is already completed")
+
+    result = await meeting_repository.complete_meeting(meeting_id)
+    return result
 
 
 @router.patch("/councils/{council_id}", response_model=CouncilResponse)
@@ -127,8 +194,6 @@ async def add_council_member(
     """
     result = await council_repository.add_member(tenant_id, council_id, data.member_id)
     if not result:
-        from fastapi import HTTPException
-
         raise HTTPException(status_code=404, detail="Council not found")
     return result
 
@@ -146,7 +211,5 @@ async def remove_council_member(
     """
     result = await council_repository.remove_member(tenant_id, council_id, member_id)
     if not result:
-        from fastapi import HTTPException
-
         raise HTTPException(status_code=404, detail="Council not found")
     return result

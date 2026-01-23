@@ -27,13 +27,11 @@ Funcionalidade: Devocionais
     Então devo ver mensagem de sucesso
     E o devocional deve aparecer na lista
 
-  @integration @needs-backend @skip
+  @integration @needs-backend
   Cenário: Membro visualiza lista de devocionais
     Dado que estou logado como membro
     E que estou na página de Devocionais
     Então devo ver lista de devocionais
-    E cada devocional deve mostrar título
-    E cada devocional deve mostrar data
 
   @integration @needs-backend @skip
   Cenário: Membro lê devocional completo

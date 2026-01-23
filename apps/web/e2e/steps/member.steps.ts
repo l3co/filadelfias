@@ -91,7 +91,8 @@ Then('o devocional deve aparecer na lista', async ({ page }) => {
 });
 
 Then('devo ver lista de devocionais', async ({ page }) => {
-    await expect(page.locator('table, [role="list"], ul, ol, .grid, .list').first()).toBeVisible();
+    // Check that at least one devotional heading is visible
+    await expect(page.getByRole('heading', { level: 3 }).first()).toBeVisible({ timeout: 5000 });
 });
 
 Then('cada devocional deve mostrar título', async ({ page }) => {

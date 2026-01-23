@@ -196,25 +196,25 @@ enum MeetingType {
 ## Checklist de Implementação
 
 ### Backend
-- [ ] Expandir `MeetingBase` com novos campos
-- [ ] Expandir `MeetingResponse` com novos campos
-- [ ] Adicionar `MeetingUpdate` schema
-- [ ] Implementar `update_meeting` no repository
-- [ ] Implementar `get_meeting_by_id` no repository
-- [ ] Adicionar endpoint `PATCH /governance/meetings/{id}`
-- [ ] Adicionar endpoint `POST /governance/meetings/{id}/complete`
-- [ ] Testes unitários (opcional)
+- [x] Expandir `MeetingBase` com novos campos
+- [x] Expandir `MeetingResponse` com novos campos
+- [x] Adicionar `MeetingUpdate` schema
+- [x] Implementar `update_meeting` no repository
+- [x] Implementar `get_meeting_by_id` no repository
+- [x] Adicionar endpoint `PATCH /governance/meetings/{id}`
+- [x] Adicionar endpoint `POST /governance/meetings/{id}/complete`
+- [x] Testes de integração (test_governance_endpoints.py)
 
 ### Frontend
-- [ ] Criar `MeetingCard.tsx`
-- [ ] Criar `MeetingsDialog.tsx` com listagem real
-- [ ] Criar `CreateMeetingDialog.tsx`
-- [ ] Criar `MeetingDetailsDialog.tsx`
-- [ ] Adicionar `useMeetings` hook
-- [ ] Adicionar `useCreateMeeting` hook
-- [ ] Adicionar `useUpdateMeeting` hook
-- [ ] Integrar com `CouncilList.tsx`
-- [ ] Testes E2E (opcional)
+- [x] Criar `MeetingCard.tsx`
+- [x] Criar `MeetingsDialog.tsx` com listagem real
+- [x] Criar `CreateMeetingDialog.tsx`
+- [x] Criar `MeetingDetailsDialog.tsx`
+- [x] Adicionar `useMeetings` hook
+- [x] Adicionar `useCreateMeeting` hook
+- [x] Adicionar `useUpdateMeeting` hook
+- [x] Integrar com `CouncilList.tsx`
+- [x] Testes E2E (meetings.feature + governance.steps.ts)
 
 ---
 

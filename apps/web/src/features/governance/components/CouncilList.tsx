@@ -1,6 +1,7 @@
-import { useState, memo } from 'react';
+import { useState, memo, useMemo } from 'react';
 import { Users, Landmark, Gavel, Calendar, MoreVertical, Pencil, Trash2, UserPlus } from 'lucide-react';
 import { ManageMembersDialog } from './ManageMembersDialog';
+import { MeetingsDialog } from './MeetingsDialog';
 import { Card, CardContent, CardTitle } from "../../../components/ui/card";
 import { Badge } from "../../../components/ui/badge";
 import { Button } from "../../../components/ui/button";
@@ -10,13 +11,6 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "../../../components/ui/dropdown-menu";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from "../../../components/ui/dialog";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -30,6 +24,8 @@ import {
 import { CardSkeleton } from "../../../components/LoadingState";
 import { EmptyState } from "../../../components/EmptyState";
 import type { Council } from '../../../services/governance';
+import { useCurrentTenant } from '../../../hooks/useAuth';
+import { useMembers } from '../../members/hooks/useMembers';
 
 interface CouncilListProps {
     councils?: Council[];
@@ -39,10 +35,21 @@ interface CouncilListProps {
 }
 
 export const CouncilList = memo(function CouncilList({ councils, isLoading, onDelete, onEdit }: CouncilListProps) {
+    const tenant = useCurrentTenant();
+    const { data: members } = useMembers(tenant?.id);
     const [selectedCouncil, setSelectedCouncil] = useState<Council | null>(null);
     const [showMeetings, setShowMeetings] = useState(false);
     const [councilToDelete, setCouncilToDelete] = useState<Council | null>(null);
     const [managingMembers, setManagingMembers] = useState<Council | null>(null);
+
+    // Get member names for the selected council (for attendance tracking)
+    const selectedCouncilMembers = useMemo(() => {
+        if (!selectedCouncil || !members) return [];
+        const memberIds = selectedCouncil.member_ids || [];
+        return members
+            .filter(m => memberIds.includes(m.id))
+            .map(m => ({ id: m.id, name: m.full_name }));
+    }, [selectedCouncil, members]);
 
     if (isLoading) {
         return (
@@ -176,21 +183,15 @@ export const CouncilList = memo(function CouncilList({ councils, isLoading, onDe
             </div>
 
             {/* Meetings Dialog */}
-            <Dialog open={showMeetings} onOpenChange={setShowMeetings}>
-                <DialogContent className="max-w-md">
-                    <DialogHeader>
-                        <DialogTitle>Reuniões - {selectedCouncil?.name}</DialogTitle>
-                        <DialogDescription>
-                            Histórico de reuniões deste órgão.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="py-4">
-                        <p className="text-center text-gray-500 py-4">
-                            Funcionalidade de reuniões em desenvolvimento.
-                        </p>
-                    </div>
-                </DialogContent>
-            </Dialog>
+            <MeetingsDialog
+                isOpen={showMeetings}
+                onClose={() => {
+                    setShowMeetings(false);
+                    setSelectedCouncil(null);
+                }}
+                council={selectedCouncil}
+                membersList={selectedCouncilMembers}
+            />
 
             {/* Delete Confirmation Dialog */}
             <AlertDialog open={!!councilToDelete} onOpenChange={() => setCouncilToDelete(null)}>

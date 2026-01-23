@@ -91,7 +91,6 @@ async def invite_member(
     """
     Invite a member to the platform.
     Creates a user account with temporary password and sends welcome email.
-    
     Permissions:
     - Invite as MEMBER: Requires members:edit permission.
     - Invite as ADMIN: Requires settings:manage permission.

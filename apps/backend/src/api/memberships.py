@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, status
+
 from src.api.auth import get_current_user
 from src.domain.schemas import MembershipResponse, MembershipUpdateRole
-from src.infra.repositories import member_repository, membership_repository
+from src.infra.repositories import membership_repository
 from src.middleware.permissions import verify_permission
 
 router = APIRouter(tags=["Memberships"])
@@ -38,10 +39,10 @@ async def update_membership_role(
     membership = await membership_repository.get_by_user_and_tenant(user_id, tenant_id)
     if not membership:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não é membro desta igreja")
-    
+
     # Update role
     await membership_repository.update_role(membership["id"], data.role)
-    
+
     # Return updated
     updated = await membership_repository.get_by_user_and_tenant(user_id, tenant_id)
     return updated

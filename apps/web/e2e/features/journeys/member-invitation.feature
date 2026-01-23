@@ -25,8 +25,8 @@ Funcionalidade: Convite e acesso de membro
     E o membro deve ver o dashboard de membros
     E o membro NÃO deve ver menu de administração
 
-  @journey @integration @needs-backend @skip
+  @journey @integration @needs-backend
   Cenário: Membro não tem acesso à área administrativa
-    Dado que estou logado como membro
-    Quando tento acessar "/app/tesouraria"
+    Dado que estou logado como Membro
+    Quando tento acessar "/app/financial"
     Então devo ser redirecionado para "/membro" ou ver mensagem de acesso negado

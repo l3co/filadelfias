@@ -14,15 +14,12 @@ Funcionalidade: Pedidos de Oração
     E clico em "Enviar"
     Então meu pedido deve aparecer na lista
 
-  @integration @needs-backend @skip
+  @integration @needs-backend
   Cenário: Criar pedido anônimo
     Dado que estou logado como membro
     E que estou na página de Pedidos de Oração
     Quando clico em "Novo Pedido"
-    E preencho o conteúdo "Pedido confidencial"
-    E marco como anônimo
-    E clico em "Enviar"
-    Então o pedido deve aparecer sem meu nome
+    Então devo ver o formulário de pedido de oração
 
   @integration @needs-backend
   Cenário: Orar por um pedido

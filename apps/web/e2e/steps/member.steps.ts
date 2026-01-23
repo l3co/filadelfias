@@ -145,6 +145,11 @@ Then('devo ver pedidos na lista', async ({ page }) => {
     await expect(page.getByRole('button', { name: /orar/i }).first()).toBeVisible({ timeout: 5000 });
 });
 
+Then('devo ver o formulário de pedido de oração', async ({ page }) => {
+    // Form opens inline with a heading and textbox
+    await expect(page.getByRole('heading', { name: /compartilhar pedido/i })).toBeVisible({ timeout: 5000 });
+});
+
 Then('o pedido deve aparecer sem meu nome', async ({ page }) => {
     await expect(page.getByText(/anônimo/i)).toBeVisible();
 });

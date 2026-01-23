@@ -88,7 +88,7 @@ Given('que estou logado como membro com função {string}', async ({ page }, fun
     }
 });
 
-Given('que estou logado como Diácono com função {string}', async ({ page }, _functionName: string) => {
+Given('que estou logado como Diácono com função {string}', async ({ page }) => {
     // For this scenario, we'd need a special test user that is both Diácono and has a function
     // For now, we'll use the tesoureiro user as an example
     await page.goto('/login');

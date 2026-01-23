@@ -187,9 +187,9 @@ export const CouncilList = memo(function CouncilList({ councils, isLoading, onDe
                         </DialogDescription>
                     </DialogHeader>
                     <div className="py-4">
-                        {selectedCouncil && 'members' in selectedCouncil && Array.isArray((selectedCouncil as any).members) ? (
+                        {selectedCouncil && 'members' in selectedCouncil && Array.isArray((selectedCouncil as { members?: string[] }).members) ? (
                             <ul className="space-y-2">
-                                {((selectedCouncil as any).members as string[]).map((member, idx) => (
+                                {((selectedCouncil as { members: string[] }).members).map((member, idx) => (
                                     <li key={idx} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
                                         <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-medium text-sm">
                                             {member.charAt(0)}

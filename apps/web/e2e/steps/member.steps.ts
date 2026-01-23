@@ -168,7 +168,7 @@ Then('o pedido deve aparecer sem meu nome', async ({ page }) => {
     await expect(page.getByText(/anônimo/i)).toBeVisible();
 });
 
-Given('que existe um pedido de oração', async ({ page: _page }) => {
+Given('que existe um pedido de oração', async () => {
     // Assume a prayer request exists - would be set up via API
 });
 
@@ -177,7 +177,7 @@ Then('o contador de orações deve aumentar', async ({ page }) => {
     await expect(page.getByText(/[1-9]\d*\s*pessoa|pessoas\s*oraram/i).first()).toBeVisible({ timeout: 5000 });
 });
 
-Given('que criei pedidos de oração', async ({ page: _page }) => {
+Given('que criei pedidos de oração', async () => {
     // Assume user has created prayer requests
 });
 
@@ -231,7 +231,7 @@ Then('cada evento deve mostrar local', async ({ page }) => {
     await expect(page.getByText(/templo|auditório|igreja|salão/i).first()).toBeVisible();
 });
 
-Given('que existe um evento {string}', async ({ page: _page }, _eventTitle: string) => {
+Given('que existe um evento {string}', async () => {
     // Assume event exists - would be set up via API
 });
 
@@ -256,7 +256,7 @@ Then('devo ver o local', async ({ page }) => {
     await expect(page.getByText(/local|endereço/i)).toBeVisible();
 });
 
-Given('que existe um evento futuro', async ({ page: _page }) => {
+Given('que existe um evento futuro', async () => {
     // Assume event exists
 });
 

@@ -114,7 +114,7 @@ Then('a classe deve aparecer na lista', async ({ page }) => {
     await expect(list.first()).toBeVisible();
 });
 
-Given('que existe uma classe {string}', async ({ page: _page }, _className: string) => {
+Given('que existe uma classe {string}', async () => {
     // Assume class exists - would be set up via API
 });
 
@@ -205,7 +205,7 @@ Then('a lição deve aparecer na lista', async ({ page }) => {
     await expect(page.locator('[role="list"], table, .lessons').first()).toBeVisible({ timeout: 5000 });
 });
 
-Given('que existe uma classe {string} com alunos', async ({ page: _page }, _className: string) => {
+Given('que existe uma classe {string} com alunos', async () => {
     // Assume class with students exists
 });
 

@@ -63,7 +63,7 @@ export function usePermissions(): UsePermissionsReturn {
   const currentMember = useMemo(() => {
     if (!user?.id || !members) return null;
     return members.find((m: Member) => m.user_id === user.id) || null;
-  }, [user?.id, members]);
+  }, [user, members]);
 
   // Determina o role do sistema (do membership)
   const systemRole = useMemo((): SystemRole => {
@@ -77,7 +77,7 @@ export function usePermissions(): UsePermissionsReturn {
     if (role === 'ADMIN') return 'ADMIN';
     if (role === 'MODERATOR') return 'MODERATOR';
     return 'ATTENDEE';
-  }, [user?.memberships, tenant?.id]);
+  }, [user, tenant]);
 
   // Calcula permissões
   const permissions = useMemo(() => {

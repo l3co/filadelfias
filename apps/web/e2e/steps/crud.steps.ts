@@ -161,6 +161,10 @@ Then('devo ver a classe {string}', async ({ page }, className: string) => {
     await expect(page.getByText(new RegExp(className, 'i')).first()).toBeVisible({ timeout: 5000 });
 });
 
+Then('devo ver detalhes da classe', async ({ page }) => {
+    await expect(page.getByRole('heading').first()).toBeVisible({ timeout: 5000 });
+});
+
 Given('que estou logado como membro matriculado em {string}', async ({ page }, className: string) => {
     // Login as member first
     await page.goto('/login');

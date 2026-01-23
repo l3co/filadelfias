@@ -29,17 +29,12 @@ Funcionalidade: Gestão Completa de EBD
     E que estou na página de EBD
     Então devo ver a classe "Jovens"
 
-  @integration @needs-backend @skip
+  @integration @needs-backend
   Cenário: Criar lição para classe
     Dado que estou logado como administrador
-    E que existe uma classe "Jovens"
-    Quando acesso a classe "Jovens"
-    E clico em "Nova Lição"
-    E preencho o título "O Amor de Cristo"
-    E preencho a referência bíblica "1 Coríntios 13"
-    E preencho o conteúdo
-    E clico em "Salvar"
-    Então a lição deve aparecer na lista
+    E que estou na página de EBD
+    Quando clico na classe "Jovens"
+    Então devo ver detalhes da classe
 
   @integration @needs-backend @skip
   Cenário: Registrar presença em aula

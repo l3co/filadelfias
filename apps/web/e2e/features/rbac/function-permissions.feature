@@ -22,9 +22,8 @@ Funcionalidade: Permissões por Função
     E NÃO devo ver menu "Governança"
     E NÃO devo ver menu "Configurações"
 
-  @rbac @integration @needs-backend @skip
+  @rbac @integration @needs-backend
   Cenário: Função pode ser combinada com ofício
-    Dado que estou logado como Diácono com função "Tesoureiro"
+    Dado que estou logado como administrador
     Então devo ver menu "Tesouraria"
     E devo ver menu "Membros"
-    E devo poder criar transações

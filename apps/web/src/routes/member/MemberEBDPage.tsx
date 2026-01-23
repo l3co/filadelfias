@@ -5,17 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/ca
 import { Badge } from '../../components/ui/badge';
 import { EmptyState } from '../../components/EmptyState';
 import { useCurrentTenant } from '../../hooks/useAuth';
-import { ebdService, type MyEBDClass, type EBDLesson } from '../../services/ebd';
+import { ebdService, type EBDLesson } from '../../services/ebd';
 
 function getLessonStatus(lessonDate: string): 'completed' | 'current' | 'upcoming' {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  
+
   const date = new Date(lessonDate);
   date.setHours(0, 0, 0, 0);
-  
+
   const diffDays = Math.floor((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-  
+
   if (diffDays < 0) return 'completed';
   if (diffDays <= 7) return 'current';
   return 'upcoming';
@@ -37,7 +37,7 @@ function getNextSunday(): string {
 function getCurrentLesson(lessons: EBDLesson[]): EBDLesson | null {
   const sorted = [...lessons].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   const today = new Date();
-  
+
   for (const lesson of sorted) {
     const lessonDate = new Date(lesson.date);
     if (lessonDate >= today || getLessonStatus(lesson.date) === 'current') {
@@ -49,7 +49,7 @@ function getCurrentLesson(lessons: EBDLesson[]): EBDLesson | null {
 
 export function MemberEBDPage() {
   const tenant = useCurrentTenant();
-  
+
   const { data: userClass, isLoading } = useQuery({
     queryKey: ['my-ebd-class', tenant?.id],
     queryFn: () => ebdService.getMyClass(tenant!.id),
@@ -121,7 +121,7 @@ export function MemberEBDPage() {
                 <p className="font-medium text-gray-900">{userClass.description || userClass.name}</p>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
                 <Clock size={20} className="text-green-600" />
@@ -131,7 +131,7 @@ export function MemberEBDPage() {
                 <p className="font-medium text-gray-900">Domingos às 9h</p>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
                 <MapPin size={20} className="text-amber-600" />
@@ -141,7 +141,7 @@ export function MemberEBDPage() {
                 <p className="font-medium text-gray-900">{userClass.location || 'A definir'}</p>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-rose-100 flex items-center justify-center">
                 <Calendar size={20} className="text-rose-600" />
@@ -183,31 +183,28 @@ export function MemberEBDPage() {
             {sortedLessons.map((lesson, index) => {
               const status = getLessonStatus(lesson.date);
               return (
-                <Card 
-                  key={lesson.id} 
-                  className={`transition-all ${
-                    status === 'current' 
-                      ? 'border-2 border-indigo-300 bg-indigo-50/50' 
+                <Card
+                  key={lesson.id}
+                  className={`transition-all ${status === 'current'
+                      ? 'border-2 border-indigo-300 bg-indigo-50/50'
                       : status === 'completed'
-                      ? 'opacity-75'
-                      : ''
-                  }`}
+                        ? 'opacity-75'
+                        : ''
+                    }`}
                 >
                   <CardContent className="p-4 flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                        status === 'completed' 
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${status === 'completed'
                           ? 'bg-green-100 text-green-700'
                           : status === 'current'
-                          ? 'bg-indigo-500 text-white'
-                          : 'bg-gray-100 text-gray-500'
-                      }`}>
+                            ? 'bg-indigo-500 text-white'
+                            : 'bg-gray-100 text-gray-500'
+                        }`}>
                         {index + 1}
                       </div>
                       <div>
-                        <p className={`font-medium ${
-                          status === 'completed' ? 'text-gray-500' : 'text-gray-900'
-                        }`}>
+                        <p className={`font-medium ${status === 'completed' ? 'text-gray-500' : 'text-gray-900'
+                          }`}>
                           {lesson.topic}
                         </p>
                         <p className="text-sm text-gray-400">{formatLessonDate(lesson.date)}</p>

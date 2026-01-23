@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCurrentUser } from '../../hooks/useAuth';
 import { useViaCEP } from '../../hooks/useViaCEP';
 import { api } from '../../lib/api';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
-import { 
+import {
     Church, MapPin, Phone, Save, Loader2, AlertCircle, CheckCircle2,
     Building2, Trash2, Globe, Instagram, Youtube, MessageCircle
 } from 'lucide-react';
@@ -39,13 +39,13 @@ export function ChurchSettingsPage() {
     const [successMessage, setSuccessMessage] = useState('');
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [deleteConfirmText, setDeleteConfirmText] = useState('');
-    
+
     const tenant = user?.memberships?.[0]?.tenant;
     const tenantId = tenant?.id;
     const userRole = user?.memberships?.[0]?.role?.toUpperCase();
     const isAdmin = userRole === 'ADMIN' || userRole === 'MODERATOR';
 
-    const { register, handleSubmit, setValue, watch, formState: { errors, isDirty } } = useForm<ChurchFormData>({
+    const { register, handleSubmit, setValue, control, formState: { errors, isDirty } } = useForm<ChurchFormData>({
         defaultValues: {
             name: '',
             slug: '',
@@ -66,7 +66,7 @@ export function ChurchSettingsPage() {
         }
     });
 
-    const formValues = watch();
+    const formValues = useWatch({ control });
 
     useEffect(() => {
         if (tenant) {
@@ -195,7 +195,7 @@ export function ChurchSettingsPage() {
                         <Building2 size={20} className="text-green-600" />
                         Dados Básicos
                     </h2>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="md:col-span-2">
                             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -209,7 +209,7 @@ export function ChurchSettingsPage() {
                                 <span className="text-xs text-red-500 mt-1">{errors.name.message}</span>
                             )}
                         </div>
-                        
+
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Identificador (URL)
@@ -230,7 +230,7 @@ export function ChurchSettingsPage() {
                         <MapPin size={20} className="text-green-600" />
                         Endereço
                     </h2>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">CEP</label>
@@ -248,7 +248,7 @@ export function ChurchSettingsPage() {
                                 )}
                             </div>
                         </div>
-                        
+
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Estado</label>
                             <Input
@@ -258,7 +258,7 @@ export function ChurchSettingsPage() {
                                 className="uppercase"
                             />
                         </div>
-                        
+
                         <div className="md:col-span-2">
                             <label className="block text-sm font-medium text-gray-700 mb-2">Cidade</label>
                             <Input
@@ -266,7 +266,7 @@ export function ChurchSettingsPage() {
                                 placeholder="São Paulo"
                             />
                         </div>
-                        
+
                         <div className="md:col-span-2">
                             <label className="block text-sm font-medium text-gray-700 mb-2">Logradouro</label>
                             <Input
@@ -274,7 +274,7 @@ export function ChurchSettingsPage() {
                                 placeholder="Rua, Avenida..."
                             />
                         </div>
-                        
+
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Número</label>
                             <Input
@@ -282,7 +282,7 @@ export function ChurchSettingsPage() {
                                 placeholder="123"
                             />
                         </div>
-                        
+
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Complemento</label>
                             <Input
@@ -290,7 +290,7 @@ export function ChurchSettingsPage() {
                                 placeholder="Sala, Bloco..."
                             />
                         </div>
-                        
+
                         <div className="md:col-span-2">
                             <label className="block text-sm font-medium text-gray-700 mb-2">Bairro</label>
                             <Input
@@ -307,7 +307,7 @@ export function ChurchSettingsPage() {
                         <Phone size={20} className="text-green-600" />
                         Contato
                     </h2>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Telefone</label>
@@ -316,7 +316,7 @@ export function ChurchSettingsPage() {
                                 placeholder="(11) 99999-9999"
                             />
                         </div>
-                        
+
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
                             <Input
@@ -334,7 +334,7 @@ export function ChurchSettingsPage() {
                         <Globe size={20} className="text-green-600" />
                         Mídias Sociais
                     </h2>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Website</label>
@@ -344,7 +344,7 @@ export function ChurchSettingsPage() {
                                 placeholder="https://www.igreja.com.br"
                             />
                         </div>
-                        
+
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 <span className="flex items-center gap-2">
@@ -356,7 +356,7 @@ export function ChurchSettingsPage() {
                                 placeholder="(11) 99999-9999"
                             />
                         </div>
-                        
+
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 <span className="flex items-center gap-2">
@@ -369,7 +369,7 @@ export function ChurchSettingsPage() {
                                 placeholder="https://instagram.com/suaigreja"
                             />
                         </div>
-                        
+
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 <span className="flex items-center gap-2">
@@ -382,7 +382,7 @@ export function ChurchSettingsPage() {
                                 placeholder="https://youtube.com/@suaigreja"
                             />
                         </div>
-                        
+
                         <div className="md:col-span-2">
                             <label className="block text-sm font-medium text-gray-700 mb-2">Facebook</label>
                             <Input

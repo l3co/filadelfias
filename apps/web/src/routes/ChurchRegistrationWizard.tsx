@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { useNavigate, Link } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { api } from '../lib/api';
 import { useViaCEP } from '../hooks/useViaCEP';
-import { 
+import {
     Church, Building2, MapPin, User, CheckCircle2, ArrowRight, ArrowLeft,
     AlertCircle, Loader2, Mail, Lock, Phone, Link2
 } from 'lucide-react';
@@ -44,8 +44,8 @@ export function ChurchRegistrationWizard() {
     const [error, setError] = useState('');
     const navigate = useNavigate();
     const { fetchAddress, isLoading: isFetchingCEP } = useViaCEP();
-    
-    const { register, handleSubmit, watch, setValue, formState: { errors }, trigger } = useForm<FormData>({
+
+    const { register, handleSubmit, setValue, control, formState: { errors }, trigger } = useForm<FormData>({
         defaultValues: {
             church_name: '',
             church_slug: '',
@@ -64,7 +64,7 @@ export function ChurchRegistrationWizard() {
         }
     });
 
-    const formValues = watch();
+    const formValues = useWatch({ control });
 
     const registerMutation = useMutation({
         mutationFn: async (data: FormData) => {
@@ -121,14 +121,14 @@ export function ChurchRegistrationWizard() {
     const handleChurchNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const name = e.target.value;
         setValue('church_name', name);
-        if (!formValues.church_slug || formValues.church_slug === generateSlug(formValues.church_name)) {
+        if (!formValues.church_slug || formValues.church_slug === generateSlug(formValues.church_name || '')) {
             setValue('church_slug', generateSlug(name));
         }
     };
 
     const nextStep = async () => {
         let fieldsToValidate: (keyof FormData)[] = [];
-        
+
         if (currentStep === 1) {
             fieldsToValidate = ['church_name', 'church_slug'];
         } else if (currentStep === 2) {
@@ -162,40 +162,38 @@ export function ChurchRegistrationWizard() {
             <div className="hidden lg:flex lg:w-[400px] bg-gradient-to-br from-[#002333] via-green-900 to-[#002333] relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-96 h-96 bg-green-500/10 rounded-full blur-3xl" />
                 <div className="absolute bottom-0 left-0 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl" />
-                
+
                 <div className="relative z-10 flex flex-col justify-center px-12 text-white w-full">
                     <Link to="/" className="mb-12">
                         <h1 className="text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-teal-300">
                             Filadélfias
                         </h1>
                     </Link>
-                    
+
                     <h2 className="text-2xl font-bold mb-2">Cadastre sua Igreja</h2>
                     <p className="text-green-100/70 mb-10">
                         Preencha os dados para começar a usar a plataforma.
                     </p>
-                    
+
                     {/* Progress Steps */}
                     <div className="space-y-4">
                         {steps.map((step, i) => {
                             const Icon = step.icon;
                             const isCompleted = currentStep > step.number;
                             const isCurrent = currentStep === step.number;
-                            
+
                             return (
                                 <div key={i} className="flex items-center gap-4">
-                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
-                                        isCompleted 
-                                            ? 'bg-green-500 text-white' 
-                                            : isCurrent 
-                                                ? 'bg-white text-green-700' 
-                                                : 'bg-white/10 text-white/40'
-                                    }`}>
+                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${isCompleted
+                                        ? 'bg-green-500 text-white'
+                                        : isCurrent
+                                            ? 'bg-white text-green-700'
+                                            : 'bg-white/10 text-white/40'
+                                        }`}>
                                         {isCompleted ? <CheckCircle2 size={20} /> : <Icon size={20} />}
                                     </div>
-                                    <span className={`text-sm font-medium ${
-                                        isCompleted || isCurrent ? 'text-white' : 'text-white/40'
-                                    }`}>
+                                    <span className={`text-sm font-medium ${isCompleted || isCurrent ? 'text-white' : 'text-white/40'
+                                        }`}>
                                         {step.title}
                                     </span>
                                 </div>
@@ -265,7 +263,7 @@ export function ChurchRegistrationWizard() {
                                                 <Link2 size={18} className="text-gray-400" />
                                             </div>
                                             <input
-                                                {...register('church_slug', { 
+                                                {...register('church_slug', {
                                                     required: 'Identificador obrigatório',
                                                     pattern: { value: /^[a-z0-9-]+$/, message: 'Use apenas letras minúsculas, números e hifens' }
                                                 })}
@@ -419,7 +417,7 @@ export function ChurchRegistrationWizard() {
                                                 <Mail size={18} className="text-gray-400" />
                                             </div>
                                             <input
-                                                {...register('admin_email', { 
+                                                {...register('admin_email', {
                                                     required: 'Email obrigatório',
                                                     pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Email inválido' }
                                                 })}
@@ -455,7 +453,7 @@ export function ChurchRegistrationWizard() {
                                                     <Lock size={18} className="text-gray-400" />
                                                 </div>
                                                 <input
-                                                    {...register('admin_password', { 
+                                                    {...register('admin_password', {
                                                         required: 'Senha obrigatória',
                                                         minLength: { value: 8, message: 'Mínimo 8 caracteres' }
                                                     })}

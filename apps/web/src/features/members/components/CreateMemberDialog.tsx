@@ -1,4 +1,4 @@
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import {
@@ -27,7 +27,7 @@ const FUNCTIONS_OPTIONS: { value: EcclesiasticalFunction; label: string }[] = [
 ];
 
 export function CreateMemberDialog({ isOpen, onClose, tenantId }: Props) {
-    const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<MemberCreateData>({
+    const { register, handleSubmit, reset, setValue, control, formState: { errors } } = useForm<MemberCreateData>({
         defaultValues: {
             status: 'ACTIVE',
             office: 'MEMBRO',
@@ -35,9 +35,9 @@ export function CreateMemberDialog({ isOpen, onClose, tenantId }: Props) {
     });
     const createMember = useCreateMember(tenantId);
     const { fetchAddress, isLoading: isFetchingCEP } = useViaCEP();
-    
-    const formValues = watch();
-    const selectedFunctions = watch('functions') || [];
+
+    const formValues = useWatch({ control });
+    const selectedFunctions = useWatch({ control, name: 'functions' }) || [];
 
     const onSubmit = (data: MemberCreateData) => {
         // Clean empty strings to null
@@ -47,7 +47,7 @@ export function CreateMemberDialog({ isOpen, onClose, tenantId }: Props) {
                 value === '' ? null : value
             ])
         ) as MemberCreateData;
-        
+
         createMember.mutate(cleanedData, {
             onSuccess: () => {
                 reset();
@@ -92,7 +92,7 @@ export function CreateMemberDialog({ isOpen, onClose, tenantId }: Props) {
                     {/* Dados Pessoais */}
                     <div className="space-y-4">
                         <h3 className="text-sm font-semibold text-gray-700 border-b pb-2">Dados Pessoais</h3>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="md:col-span-2 space-y-2">
                                 <label className="text-sm font-medium text-gray-700">Nome Completo *</label>
@@ -198,7 +198,7 @@ export function CreateMemberDialog({ isOpen, onClose, tenantId }: Props) {
                             <MapPin size={16} className="text-green-600" />
                             Endereço
                         </h3>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-700">CEP</label>
@@ -216,7 +216,7 @@ export function CreateMemberDialog({ isOpen, onClose, tenantId }: Props) {
                                     )}
                                 </div>
                             </div>
-                            
+
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-700">Estado</label>
                                 <Input
@@ -226,7 +226,7 @@ export function CreateMemberDialog({ isOpen, onClose, tenantId }: Props) {
                                     className="uppercase"
                                 />
                             </div>
-                            
+
                             <div className="md:col-span-2 space-y-2">
                                 <label className="text-sm font-medium text-gray-700">Cidade</label>
                                 <Input
@@ -234,7 +234,7 @@ export function CreateMemberDialog({ isOpen, onClose, tenantId }: Props) {
                                     placeholder="São Paulo"
                                 />
                             </div>
-                            
+
                             <div className="md:col-span-2 space-y-2">
                                 <label className="text-sm font-medium text-gray-700">Logradouro</label>
                                 <Input
@@ -242,7 +242,7 @@ export function CreateMemberDialog({ isOpen, onClose, tenantId }: Props) {
                                     placeholder="Rua, Avenida..."
                                 />
                             </div>
-                            
+
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-700">Número</label>
                                 <Input
@@ -250,7 +250,7 @@ export function CreateMemberDialog({ isOpen, onClose, tenantId }: Props) {
                                     placeholder="123"
                                 />
                             </div>
-                            
+
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-700">Complemento</label>
                                 <Input
@@ -258,7 +258,7 @@ export function CreateMemberDialog({ isOpen, onClose, tenantId }: Props) {
                                     placeholder="Apto, Bloco..."
                                 />
                             </div>
-                            
+
                             <div className="md:col-span-2 space-y-2">
                                 <label className="text-sm font-medium text-gray-700">Bairro</label>
                                 <Input
@@ -272,7 +272,7 @@ export function CreateMemberDialog({ isOpen, onClose, tenantId }: Props) {
                     {/* Dados Eclesiásticos */}
                     <div className="space-y-4">
                         <h3 className="text-sm font-semibold text-gray-700 border-b pb-2">Dados Eclesiásticos</h3>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-700">Status</label>
@@ -308,11 +308,10 @@ export function CreateMemberDialog({ isOpen, onClose, tenantId }: Props) {
                                             key={fn.value}
                                             type="button"
                                             onClick={() => handleFunctionToggle(fn.value)}
-                                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                                                selectedFunctions.includes(fn.value)
+                                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${selectedFunctions.includes(fn.value)
                                                     ? 'bg-green-100 text-green-700 border-2 border-green-500'
                                                     : 'bg-gray-100 text-gray-600 border-2 border-transparent hover:bg-gray-200'
-                                            }`}
+                                                }`}
                                         >
                                             {fn.label}
                                         </button>

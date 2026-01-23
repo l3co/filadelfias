@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { Lock, ArrowLeft, CheckCircle2, Eye, EyeOff } from 'lucide-react';
@@ -18,9 +18,9 @@ export function ResetPasswordPage() {
     const token = searchParams.get('token');
     const [showPassword, setShowPassword] = useState(false);
     const [success, setSuccess] = useState(false);
-    
-    const { register, handleSubmit, watch, formState: { errors } } = useForm<ResetPasswordData>();
-    const password = watch('new_password');
+
+    const { register, handleSubmit, control, formState: { errors } } = useForm<ResetPasswordData>();
+    const password = useWatch({ control, name: 'new_password' });
 
     const resetPasswordMutation = useMutation({
         mutationFn: async (data: ResetPasswordData) => {
@@ -110,7 +110,7 @@ export function ResetPasswordPage() {
                                 <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                                 <Input
                                     type={showPassword ? 'text' : 'password'}
-                                    {...register('new_password', { 
+                                    {...register('new_password', {
                                         required: 'Senha é obrigatória',
                                         minLength: {
                                             value: 6,
@@ -139,7 +139,7 @@ export function ResetPasswordPage() {
                                 <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                                 <Input
                                     type={showPassword ? 'text' : 'password'}
-                                    {...register('confirm_password', { 
+                                    {...register('confirm_password', {
                                         required: 'Confirmação é obrigatória',
                                         validate: value => value === password || 'As senhas não coincidem'
                                     })}
@@ -162,8 +162,8 @@ export function ResetPasswordPage() {
                     </form>
 
                     <div className="mt-6 text-center">
-                        <Link 
-                            to="/login" 
+                        <Link
+                            to="/login"
                             className="text-sm text-gray-500 hover:text-green-600 inline-flex items-center gap-1"
                         >
                             <ArrowLeft size={14} />

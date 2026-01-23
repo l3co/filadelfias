@@ -12,11 +12,15 @@ import {
   ADMISSION_TYPE_OPTIONS
 } from '../../../constants';
 import type { Member, MemberCreateData } from '../../../types/members.types';
-import { User, Mail, Phone, Calendar, MapPin, Heart, Loader2 } from 'lucide-react';
+import { User, Mail, Phone, Calendar, MapPin, Heart, Loader2, Shield } from 'lucide-react';
 
 type EcclesiasticalFunction = 'TESOUREIRO' | 'SECRETARIO' | 'EVANGELISTA' | 'MISSIONARIO' | 'PROFESSOR_EBD';
 
 export type MemberFormData = MemberCreateData;
+
+export interface MemberFormState extends MemberFormData {
+  isAdmin: boolean;
+}
 
 interface MemberFormProps {
   member?: Member | null;
@@ -35,11 +39,12 @@ export function MemberForm({
 }: MemberFormProps) {
   const { fetchAddress, isLoading: isFetchingCEP } = useViaCEP();
 
-  const { register, handleSubmit, setValue, control, formState: { errors, isDirty } } = useForm<MemberFormData>({
+  const { register, handleSubmit, setValue, control, formState: { errors, isDirty } } = useForm<MemberFormState>({
     defaultValues: {
       status: 'ACTIVE',
       office: 'MEMBRO',
       functions: [],
+      isAdmin: false,
     }
   });
 
@@ -72,6 +77,9 @@ export function MemberForm({
       setValue('admission_date', member.admission_date || '');
       setValue('admission_type', member.admission_type);
       setValue('origin_church', member.origin_church || '');
+
+      // Set admin state
+      setValue('isAdmin', member.system_role === 'ADMIN');
     }
   }, [member, setValue]);
 
@@ -97,14 +105,20 @@ export function MemberForm({
     }
   };
 
-  const handleFormSubmit = (data: MemberFormData) => {
+  const handleFormSubmit = (data: MemberFormState) => {
+    const { isAdmin, ...rest } = data;
+
     // Clean empty strings to null
     const cleanedData = Object.fromEntries(
-      Object.entries(data).map(([key, value]) => [
+      Object.entries(rest).map(([key, value]) => [
         key,
         value === '' ? null : value
       ])
     ) as MemberFormData;
+
+    // Set system_role based on checkbox
+    cleanedData.system_role = isAdmin ? 'ADMIN' : 'MEMBER';
+
     onSubmit(cleanedData);
   };
 
@@ -331,8 +345,8 @@ export function MemberForm({
                   type="button"
                   onClick={() => handleFunctionToggle(fn.value)}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${selectedFunctions.includes(fn.value)
-                      ? 'bg-green-100 text-green-700 border-2 border-green-500'
-                      : 'bg-gray-100 text-gray-600 border-2 border-transparent hover:bg-gray-200'
+                    ? 'bg-green-100 text-green-700 border-2 border-green-500'
+                    : 'bg-gray-100 text-gray-600 border-2 border-transparent hover:bg-gray-200'
                     }`}
                 >
                   {fn.label}
@@ -375,6 +389,40 @@ export function MemberForm({
               {...register('origin_church')}
               placeholder="Nome da igreja de origem (se transferência)"
             />
+          </div>
+        </div>
+      </div>
+
+      {/* Acesso ao Sistema */}
+      <div className="space-y-4">
+        <h3 className="text-sm font-semibold text-gray-700 border-b pb-2 flex items-center gap-2">
+          <Shield size={16} className="text-purple-600" />
+          Acesso ao Sistema
+        </h3>
+
+        <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
+          <div className="flex items-start gap-3">
+            <div className="flex items-center h-5">
+              <input
+                id="isAdmin"
+                type="checkbox"
+                {...register('isAdmin')}
+                className="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500 cursor-pointer"
+              />
+            </div>
+            <div className="flex-1">
+              <label htmlFor="isAdmin" className="font-medium text-gray-900 cursor-pointer select-none">
+                Administrador do Sistema
+              </label>
+              <p className="text-sm text-gray-500 mt-1">
+                Concede acesso total às configurações, financeiro e gestão de membros da igreja.
+                {member?.user_id && (
+                  <span className="block mt-1 text-green-600 font-medium text-xs">
+                    ✓ Usuário já possui acesso ativo. Alterar esta opção atualizará a permissão imediatamente.
+                  </span>
+                )}
+              </p>
+            </div>
           </div>
         </div>
       </div>

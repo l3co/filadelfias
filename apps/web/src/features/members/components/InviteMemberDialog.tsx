@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../../../components/ui/dialog';
 import { Button } from '../../../components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../components/ui/select';
@@ -22,6 +22,14 @@ export function InviteMemberDialog({
     isLoading = false
 }: InviteMemberDialogProps) {
     const [role, setRole] = useState<'ADMIN' | 'MEMBER'>('MEMBER');
+
+    useEffect(() => {
+        if (member?.system_role) {
+            setRole(member.system_role as 'ADMIN' | 'MEMBER');
+        } else {
+            setRole('MEMBER');
+        }
+    }, [member]);
 
     if (!member) return null;
 

@@ -2,7 +2,7 @@
 Member repository for Firestore (tenant-scoped).
 """
 
-from datetime import date
+from datetime import date, datetime
 from typing import Optional
 
 from src.infra.firestore_repository import TenantScopedRepository
@@ -35,36 +35,32 @@ class MemberRepository(TenantScopedRepository):
         status: str = "COMUNGANTE",
         office: str = "MEMBRO",
         user_id: Optional[str] = None,
+        **kwargs,
     ) -> dict:
         """Create a new member."""
+        # Base data with defaults
         data = {
             "full_name": full_name,
             "email": email,
             "phone": phone,
             "birth_date": birth_date.isoformat() if birth_date else None,
             "gender": gender,
-            "marital_status": None,
-            "marriage_date": None,
-            "spouse_name": None,
-            "street": None,
-            "number": None,
-            "complement": None,
-            "neighborhood": None,
-            "city": None,
-            "state": None,
-            "postal_code": None,
-            "photo_url": None,
             "status": status,
             "role": office,
             "office": office,
-            "functions": [],
-            "baptism_date": None,
-            "profession_of_faith_date": None,
-            "admission_date": None,
-            "admission_type": None,
-            "origin_church": None,
             "user_id": user_id,
+            "created_at": datetime.utcnow().isoformat(),
         }
+
+        # Convert date objects in kwargs to ISO format strings
+        for key, value in kwargs.items():
+            if isinstance(value, (date, datetime)):
+                kwargs[key] = value.isoformat()
+
+        # Merge additional fields (address, ecclesiastical, system_role, etc.)
+        # This fixes the bug where address/marriage data was being discarded on creation
+        data.update(kwargs)
+        
         return await self.create(tenant_id, data)
 
     async def get_by_status(self, tenant_id: str, status: str) -> list[dict]:

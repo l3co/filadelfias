@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from src.api.auth import get_current_user
 from src.domain.schemas import MemberCreate, MemberResponse, MemberUpdate
-from src.infra.repositories import member_repository
+from src.infra.repositories import member_repository, membership_repository
 from src.middleware.permissions import verify_permission
 
 router = APIRouter()
@@ -19,10 +19,16 @@ async def create_member(
     """
     Create a new member in a tenant.
     Requires: Pastor, Presbítero, Diácono or Secretário (members:create permission).
+    If creating as ADMIN (system_role), requires 'settings:manage'.
     """
     await verify_permission(tenant_id, current_user, "members", "create")
 
     member_dict = member_data.model_dump(exclude_unset=True)
+
+    # Check permission for system_role
+    if member_dict.get("system_role") == "ADMIN":
+        await verify_permission(tenant_id, current_user, "settings", "manage")
+
     # Map deprecated 'role' field to 'office' if present
     if "role" in member_dict and "office" not in member_dict:
         member_dict["office"] = member_dict.pop("role")
@@ -78,6 +84,7 @@ async def update_member(
     """
     Update a member's data.
     Requires: Pastor, Presbítero or Secretário (members:edit permission).
+    If updating system_role to/from ADMIN, requires 'settings:manage'.
     """
     await verify_permission(tenant_id, current_user, "members", "edit")
 
@@ -87,6 +94,21 @@ async def update_member(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Membro não encontrado")
 
     update_data = member_data.model_dump(exclude_unset=True)
+
+    # Handle system_role update
+    if "system_role" in update_data:
+        new_role = update_data["system_role"]
+        
+        # Verify permission to manage roles
+        if new_role == "ADMIN" or member.get("system_role") == "ADMIN":
+            await verify_permission(tenant_id, current_user, "settings", "manage")
+
+        # Sync with Membership if user exists
+        if member.get("user_id"):
+            membership = await membership_repository.get_by_user_and_tenant(member["user_id"], tenant_id)
+            if membership:
+                await membership_repository.update_role(membership["id"], new_role)
+
     updated_member = await member_repository.update(tenant_id, member_id, update_data)
 
     return updated_member

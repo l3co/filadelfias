@@ -4,10 +4,10 @@
 
 export type EcclesiasticalOffice = 'MEMBRO' | 'DIACONO' | 'PRESBITERO' | 'PASTOR';
 
-export type EcclesiasticalFunction = 
-  | 'TESOUREIRO' 
-  | 'SECRETARIO' 
-  | 'EVANGELISTA' 
+export type EcclesiasticalFunction =
+  | 'TESOUREIRO'
+  | 'SECRETARIO'
+  | 'EVANGELISTA'
   | 'MISSIONARIO'
   | 'PROFESSOR_EBD';
 
@@ -29,7 +29,7 @@ export interface Member {
   marital_status?: MaritalStatus;
   marriage_date?: string;
   spouse_name?: string;
-  
+
   // Structured Address
   street?: string;
   number?: string;
@@ -38,7 +38,7 @@ export interface Member {
   city?: string;
   state?: string;
   postal_code?: string;
-  
+
   photo_url?: string;
   status: MemberStatus;
   role: string; // Deprecated
@@ -51,6 +51,7 @@ export interface Member {
   origin_church?: string;
   tenant_id: string;
   user_id?: string;
+  system_role?: 'ADMIN' | 'MEMBER';
   created_at: string;
   updated_at: string;
 }
@@ -64,7 +65,7 @@ export interface MemberCreateData {
   marital_status?: MaritalStatus;
   marriage_date?: string;
   spouse_name?: string;
-  
+
   // Structured Address
   street?: string;
   number?: string;
@@ -73,7 +74,7 @@ export interface MemberCreateData {
   city?: string;
   state?: string;
   postal_code?: string;
-  
+
   status: MemberStatus;
   role?: string; // Deprecated
   office: EcclesiasticalOffice;
@@ -83,6 +84,7 @@ export interface MemberCreateData {
   admission_date?: string;
   admission_type?: AdmissionType;
   origin_church?: string;
+  system_role?: 'ADMIN' | 'MEMBER';
 }
 
 export type MemberUpdateData = Partial<MemberCreateData>;

@@ -5,6 +5,7 @@ API endpoints for member invitations.
 import secrets
 from datetime import datetime, timedelta
 
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from pydantic import BaseModel, field_validator
 
@@ -85,27 +86,33 @@ async def invite_member(
     request: Request,
     tenant_id: str,
     member_id: str,
-    role: str = Query("MEMBER", pattern="^(ADMIN|MEMBER)$", description="System role for the user"),
+    role: Optional[str] = Query(None, pattern="^(ADMIN|MEMBER)$", description="System role for the user"),
     current_user: dict = Depends(get_current_user),
 ):
     """
     Invite a member to the platform.
     Creates a user account with temporary password and sends welcome email.
+    
     Permissions:
     - Invite as MEMBER: Requires members:edit permission.
     - Invite as ADMIN: Requires settings:manage permission.
     """
-    # Verify permission based on role being assigned
-    if role == "ADMIN":
-        await verify_permission(tenant_id, current_user, "settings", "manage")
-    else:
-        await verify_permission(tenant_id, current_user, "members", "edit")
-
-    # Get member
+    # Get member first to check if they have a predefined role
     member = await member_repository.get(tenant_id, member_id)
 
     if not member:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Membro não encontrado")
+
+    # Determine role
+    target_role = role
+    if not target_role:
+        target_role = member.get("system_role", "MEMBER")
+
+    # Verify permission based on role being assigned
+    if target_role == "ADMIN":
+        await verify_permission(tenant_id, current_user, "settings", "manage")
+    else:
+        await verify_permission(tenant_id, current_user, "members", "edit")
 
     if not member.get("email"):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Membro não possui email cadastrado")
@@ -139,7 +146,7 @@ async def invite_member(
     await membership_repository.create_membership(
         user_id=new_user["id"],
         tenant_id=tenant_id,
-        role=role,
+        role=target_role,
         status="ACTIVE",
     )
 

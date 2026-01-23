@@ -13,14 +13,8 @@ pytestmark = pytest.mark.integration
 async def get_auth_token(client: AsyncClient):
     """Helper to register and login a user."""
     email = f"user_{uuid.uuid4().hex[:8]}@test.com"
-    await client.post(
-        "/auth/register",
-        json={"email": email, "name": "Test User", "password": "password123"}
-    )
-    response = await client.post(
-        "/auth/login",
-        data={"username": email, "password": "password123"}
-    )
+    await client.post("/auth/register", json={"email": email, "name": "Test User", "password": "password123"})
+    response = await client.post("/auth/login", data={"username": email, "password": "password123"})
     return response.json()["access_token"]
 
 
@@ -28,11 +22,7 @@ async def create_tenant(client: AsyncClient, token: str):
     """Helper to create a tenant."""
     slug = f"church-{uuid.uuid4().hex[:8]}"
     headers = {"Authorization": f"Bearer {token}"}
-    response = await client.post(
-        "/tenants",
-        json={"name": "Test Church", "slug": slug},
-        headers=headers
-    )
+    response = await client.post("/tenants", json={"name": "Test Church", "slug": slug}, headers=headers)
     return response.json()
 
 
@@ -84,10 +74,7 @@ class TestMembersEndpoints:
             headers=headers,
         )
 
-        response = await client.get(
-            f"/tenants/{tenant_id}/members",
-            headers=headers
-        )
+        response = await client.get(f"/tenants/{tenant_id}/members", headers=headers)
 
         assert response.status_code == 200
         data = response.json()

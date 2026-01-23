@@ -94,7 +94,9 @@ class EBDStudentRepository:
 
         for class_doc in classes:
             # Check if member is enrolled in this class
-            students = class_doc.reference.collection("students").where("member_id", "==", str(member_id)).limit(1).get()
+            students = (
+                class_doc.reference.collection("students").where("member_id", "==", str(member_id)).limit(1).get()
+            )
             if students:
                 class_data = class_doc.to_dict()
                 student_data = students[0].to_dict()

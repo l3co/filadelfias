@@ -74,7 +74,7 @@ class TestEBDEndpoints:
             f"/ebd/classes/{class_id}/students",
             params={"tenant_id": tenant_id},
             json={"member_id": member_id, "role": "STUDENT"},
-            headers=headers
+            headers=headers,
         )
         assert enroll_resp.status_code == 200
 

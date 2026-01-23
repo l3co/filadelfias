@@ -45,9 +45,9 @@ class TestEventsEndpoints:
                 "description": "Culto dominical às 19h",
                 "start_date": "2024-12-15T19:00:00",
                 "end_date": "2024-12-15T21:00:00",
-                "location": "Templo Principal"
+                "location": "Templo Principal",
             },
-            headers=headers
+            headers=headers,
         )
 
         assert response.status_code == 200
@@ -63,8 +63,18 @@ class TestEventsEndpoints:
         tenant_id = tenant["id"]
 
         # Create events
-        await client.post("/events", params={"tenant_id": tenant_id}, json={"title": "Evento 1", "start_date": "2024-12-15T19:00:00"}, headers=headers)
-        await client.post("/events", params={"tenant_id": tenant_id}, json={"title": "Evento 2", "start_date": "2024-12-16T19:00:00"}, headers=headers)
+        await client.post(
+            "/events",
+            params={"tenant_id": tenant_id},
+            json={"title": "Evento 1", "start_date": "2024-12-15T19:00:00"},
+            headers=headers,
+        )
+        await client.post(
+            "/events",
+            params={"tenant_id": tenant_id},
+            json={"title": "Evento 2", "start_date": "2024-12-16T19:00:00"},
+            headers=headers,
+        )
 
         # List events
         response = await client.get("/events", params={"tenant_id": tenant_id}, headers=headers)
@@ -82,7 +92,12 @@ class TestEventsEndpoints:
         tenant_id = tenant["id"]
 
         # Create event
-        create_resp = await client.post("/events", params={"tenant_id": tenant_id}, json={"title": "Evento Específico", "start_date": "2024-12-15T19:00:00"}, headers=headers)
+        create_resp = await client.post(
+            "/events",
+            params={"tenant_id": tenant_id},
+            json={"title": "Evento Específico", "start_date": "2024-12-15T19:00:00"},
+            headers=headers,
+        )
         event_id = create_resp.json()["id"]
 
         # Get event
@@ -111,11 +126,18 @@ class TestEventsEndpoints:
         tenant_id = tenant["id"]
 
         # Create event
-        create_resp = await client.post("/events", params={"tenant_id": tenant_id}, json={"title": "Evento Original", "start_date": "2024-12-15T19:00:00"}, headers=headers)
+        create_resp = await client.post(
+            "/events",
+            params={"tenant_id": tenant_id},
+            json={"title": "Evento Original", "start_date": "2024-12-15T19:00:00"},
+            headers=headers,
+        )
         event_id = create_resp.json()["id"]
 
         # Update event
-        response = await client.patch(f"/events/{event_id}", params={"tenant_id": tenant_id}, json={"title": "Evento Atualizado"}, headers=headers)
+        response = await client.patch(
+            f"/events/{event_id}", params={"tenant_id": tenant_id}, json={"title": "Evento Atualizado"}, headers=headers
+        )
 
         assert response.status_code == 200
         data = response.json()
@@ -128,7 +150,9 @@ class TestEventsEndpoints:
         tenant = await create_tenant(client, token)
         tenant_id = tenant["id"]
 
-        response = await client.patch("/events/nonexistent-id", params={"tenant_id": tenant_id}, json={"title": "New Title"}, headers=headers)
+        response = await client.patch(
+            "/events/nonexistent-id", params={"tenant_id": tenant_id}, json={"title": "New Title"}, headers=headers
+        )
         assert response.status_code == 404
 
     async def test_delete_event(self, client: AsyncClient):
@@ -139,7 +163,12 @@ class TestEventsEndpoints:
         tenant_id = tenant["id"]
 
         # Create event
-        create_resp = await client.post("/events", params={"tenant_id": tenant_id}, json={"title": "Evento a Deletar", "start_date": "2024-12-15T19:00:00"}, headers=headers)
+        create_resp = await client.post(
+            "/events",
+            params={"tenant_id": tenant_id},
+            json={"title": "Evento a Deletar", "start_date": "2024-12-15T19:00:00"},
+            headers=headers,
+        )
         event_id = create_resp.json()["id"]
 
         # Delete event

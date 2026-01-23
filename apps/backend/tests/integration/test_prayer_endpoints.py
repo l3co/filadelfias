@@ -37,7 +37,12 @@ class TestPrayerEndpoints:
         tenant = await create_tenant(client, token)
         tenant_id = tenant["id"]
 
-        response = await client.post("/prayer/requests", params={"tenant_id": tenant_id}, json={"content": "Por favor, orem pela minha família.", "category": "family", "is_anonymous": False}, headers=headers)
+        response = await client.post(
+            "/prayer/requests",
+            params={"tenant_id": tenant_id},
+            json={"content": "Por favor, orem pela minha família.", "category": "family", "is_anonymous": False},
+            headers=headers,
+        )
 
         assert response.status_code == 200
         data = response.json()
@@ -51,7 +56,12 @@ class TestPrayerEndpoints:
         tenant = await create_tenant(client, token)
         tenant_id = tenant["id"]
 
-        response = await client.post("/prayer/requests", params={"tenant_id": tenant_id}, json={"content": "Pedido confidencial.", "category": "spiritual", "is_anonymous": True}, headers=headers)
+        response = await client.post(
+            "/prayer/requests",
+            params={"tenant_id": tenant_id},
+            json={"content": "Pedido confidencial.", "category": "spiritual", "is_anonymous": True},
+            headers=headers,
+        )
 
         assert response.status_code == 200
         data = response.json()
@@ -64,8 +74,18 @@ class TestPrayerEndpoints:
         tenant = await create_tenant(client, token)
         tenant_id = tenant["id"]
 
-        await client.post("/prayer/requests", params={"tenant_id": tenant_id}, json={"content": "Pedido de oração 1", "category": "health"}, headers=headers)
-        await client.post("/prayer/requests", params={"tenant_id": tenant_id}, json={"content": "Pedido de oração 2", "category": "work"}, headers=headers)
+        await client.post(
+            "/prayer/requests",
+            params={"tenant_id": tenant_id},
+            json={"content": "Pedido de oração 1", "category": "health"},
+            headers=headers,
+        )
+        await client.post(
+            "/prayer/requests",
+            params={"tenant_id": tenant_id},
+            json={"content": "Pedido de oração 2", "category": "work"},
+            headers=headers,
+        )
 
         response = await client.get("/prayer/requests", params={"tenant_id": tenant_id}, headers=headers)
 
@@ -81,10 +101,17 @@ class TestPrayerEndpoints:
         tenant = await create_tenant(client, token)
         tenant_id = tenant["id"]
 
-        create_resp = await client.post("/prayer/requests", params={"tenant_id": tenant_id}, json={"content": "Pedido para orar por saúde"}, headers=headers)
+        create_resp = await client.post(
+            "/prayer/requests",
+            params={"tenant_id": tenant_id},
+            json={"content": "Pedido para orar por saúde"},
+            headers=headers,
+        )
         request_id = create_resp.json()["id"]
 
-        response = await client.post(f"/prayer/requests/{request_id}/pray", params={"tenant_id": tenant_id}, headers=headers)
+        response = await client.post(
+            f"/prayer/requests/{request_id}/pray", params={"tenant_id": tenant_id}, headers=headers
+        )
 
         assert response.status_code == 200
         data = response.json()
@@ -98,7 +125,9 @@ class TestPrayerEndpoints:
         tenant = await create_tenant(client, token)
         tenant_id = tenant["id"]
 
-        response = await client.post("/prayer/requests/nonexistent-id/pray", params={"tenant_id": tenant_id}, headers=headers)
+        response = await client.post(
+            "/prayer/requests/nonexistent-id/pray", params={"tenant_id": tenant_id}, headers=headers
+        )
         assert response.status_code == 404
 
     async def test_delete_prayer_request(self, client: AsyncClient):
@@ -108,13 +137,22 @@ class TestPrayerEndpoints:
         tenant = await create_tenant(client, token)
         tenant_id = tenant["id"]
 
-        create_resp = await client.post("/prayer/requests", params={"tenant_id": tenant_id}, json={"content": "Pedido a ser deletado"}, headers=headers)
+        create_resp = await client.post(
+            "/prayer/requests",
+            params={"tenant_id": tenant_id},
+            json={"content": "Pedido a ser deletado"},
+            headers=headers,
+        )
         request_id = create_resp.json()["id"]
 
-        response = await client.delete(f"/prayer/requests/{request_id}", params={"tenant_id": tenant_id}, headers=headers)
+        response = await client.delete(
+            f"/prayer/requests/{request_id}", params={"tenant_id": tenant_id}, headers=headers
+        )
         assert response.status_code == 200
 
-        pray_resp = await client.post(f"/prayer/requests/{request_id}/pray", params={"tenant_id": tenant_id}, headers=headers)
+        pray_resp = await client.post(
+            f"/prayer/requests/{request_id}/pray", params={"tenant_id": tenant_id}, headers=headers
+        )
         assert pray_resp.status_code == 404
 
     async def test_delete_prayer_request_not_found(self, client: AsyncClient):
@@ -124,7 +162,9 @@ class TestPrayerEndpoints:
         tenant = await create_tenant(client, token)
         tenant_id = tenant["id"]
 
-        response = await client.delete("/prayer/requests/nonexistent-id", params={"tenant_id": tenant_id}, headers=headers)
+        response = await client.delete(
+            "/prayer/requests/nonexistent-id", params={"tenant_id": tenant_id}, headers=headers
+        )
         assert response.status_code == 404
 
     async def test_prayer_requests_require_auth(self, client: AsyncClient):

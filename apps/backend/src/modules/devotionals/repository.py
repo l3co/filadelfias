@@ -25,12 +25,14 @@ class DevotionalRepository:
         devotional_data = data.model_dump()
         # Convert date to string for Firestore
         devotional_data["date"] = data.date.isoformat()
-        devotional_data.update({
-            "id": doc_id,
-            "tenant_id": str(tenant_id),
-            "created_at": datetime.utcnow(),
-            "updated_at": datetime.utcnow()
-        })
+        devotional_data.update(
+            {
+                "id": doc_id,
+                "tenant_id": str(tenant_id),
+                "created_at": datetime.utcnow(),
+                "updated_at": datetime.utcnow(),
+            }
+        )
 
         collection.document(doc_id).set(devotional_data)
         return devotional_data

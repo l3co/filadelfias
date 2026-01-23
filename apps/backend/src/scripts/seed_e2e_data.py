@@ -322,12 +322,7 @@ async def seed_test_data():
         category="family",
         is_anonymous=False,
     )
-    await prayer_request_repository.create(
-        tenant["id"],
-        member_profile["id"],
-        TEST_MEMBER["name"],
-        prayer_data
-    )
+    await prayer_request_repository.create(tenant["id"], member_profile["id"], TEST_MEMBER["name"], prayer_data)
     print("  ✓ Prayer request created")
 
     # 14. Create sample Event (future)

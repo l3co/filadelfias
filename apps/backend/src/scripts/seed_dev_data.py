@@ -69,31 +69,120 @@ COMMON_PASSWORD = "mudar@123"
 
 # Brazilian first names
 FIRST_NAMES = [
-    "João", "Maria", "José", "Ana", "Pedro", "Paula", "Carlos", "Juliana",
-    "Fernando", "Beatriz", "Ricardo", "Camila", "Roberto", "Fernanda", "Marcos",
-    "Patrícia", "Paulo", "Aline", "Rafael", "Carla", "Lucas", "Mariana",
-    "Gabriel", "Letícia", "Daniel", "Renata", "Felipe", "Adriana", "Bruno",
-    "Tatiana", "Rodrigo", "Vanessa", "Thiago", "Priscila", "Diego", "Simone",
-    "Gustavo", "Daniela", "Leonardo", "Cristina", "Marcelo", "Sandra", "André",
-    "Luciana", "Fábio", "Mônica", "Vinícius", "Elaine", "Mateus", "Silvia",
-    "Henrique", "Raquel", "César", "Débora", "Alexandre", "Andréia", "Leandro",
-    "Cláudia", "Antônio", "Rosana"
+    "João",
+    "Maria",
+    "José",
+    "Ana",
+    "Pedro",
+    "Paula",
+    "Carlos",
+    "Juliana",
+    "Fernando",
+    "Beatriz",
+    "Ricardo",
+    "Camila",
+    "Roberto",
+    "Fernanda",
+    "Marcos",
+    "Patrícia",
+    "Paulo",
+    "Aline",
+    "Rafael",
+    "Carla",
+    "Lucas",
+    "Mariana",
+    "Gabriel",
+    "Letícia",
+    "Daniel",
+    "Renata",
+    "Felipe",
+    "Adriana",
+    "Bruno",
+    "Tatiana",
+    "Rodrigo",
+    "Vanessa",
+    "Thiago",
+    "Priscila",
+    "Diego",
+    "Simone",
+    "Gustavo",
+    "Daniela",
+    "Leonardo",
+    "Cristina",
+    "Marcelo",
+    "Sandra",
+    "André",
+    "Luciana",
+    "Fábio",
+    "Mônica",
+    "Vinícius",
+    "Elaine",
+    "Mateus",
+    "Silvia",
+    "Henrique",
+    "Raquel",
+    "César",
+    "Débora",
+    "Alexandre",
+    "Andréia",
+    "Leandro",
+    "Cláudia",
+    "Antônio",
+    "Rosana",
 ]
 
 # Brazilian last names
 LAST_NAMES = [
-    "Silva", "Santos", "Oliveira", "Souza", "Rodrigues", "Ferreira", "Alves",
-    "Pereira", "Lima", "Gomes", "Costa", "Ribeiro", "Martins", "Carvalho",
-    "Rocha", "Almeida", "Nascimento", "Araújo", "Melo", "Barbosa", "Cardoso",
-    "Correia", "Dias", "Pinto", "Teixeira", "Moreira", "Monteiro", "Mendes",
-    "Barros", "Freitas", "Cavalcanti", "Campos", "Duarte", "Reis", "Xavier"
+    "Silva",
+    "Santos",
+    "Oliveira",
+    "Souza",
+    "Rodrigues",
+    "Ferreira",
+    "Alves",
+    "Pereira",
+    "Lima",
+    "Gomes",
+    "Costa",
+    "Ribeiro",
+    "Martins",
+    "Carvalho",
+    "Rocha",
+    "Almeida",
+    "Nascimento",
+    "Araújo",
+    "Melo",
+    "Barbosa",
+    "Cardoso",
+    "Correia",
+    "Dias",
+    "Pinto",
+    "Teixeira",
+    "Moreira",
+    "Monteiro",
+    "Mendes",
+    "Barros",
+    "Freitas",
+    "Cavalcanti",
+    "Campos",
+    "Duarte",
+    "Reis",
+    "Xavier",
 ]
 
 # Member functions
 MEMBER_FUNCTIONS = [
-    "Presbítero", "Diácono", "Líder de Louvor", "Professor EBD",
-    "Tesoureiro", "Secretário", "Líder de Jovens", "Líder de Crianças",
-    "Coordenador de Missões", "Líder de Célula", "Membro"
+    "Presbítero",
+    "Diácono",
+    "Líder de Louvor",
+    "Professor EBD",
+    "Tesoureiro",
+    "Secretário",
+    "Líder de Jovens",
+    "Líder de Crianças",
+    "Coordenador de Missões",
+    "Líder de Célula",
+    "Membro",
 ]
 
 # EBD class names
@@ -121,7 +210,18 @@ MISSION_FIELDS = [
 
 def generate_email(name: str) -> str:
     """Generate email from name."""
-    clean_name = name.lower().replace(" ", ".").replace("á", "a").replace("é", "e").replace("í", "i").replace("ó", "o").replace("ú", "u").replace("ã", "a").replace("õ", "o").replace("ç", "c")
+    clean_name = (
+        name.lower()
+        .replace(" ", ".")
+        .replace("á", "a")
+        .replace("é", "e")
+        .replace("í", "i")
+        .replace("ó", "o")
+        .replace("ú", "u")
+        .replace("ã", "a")
+        .replace("õ", "o")
+        .replace("ç", "c")
+    )
     return f"{clean_name}@ipfiladelfia.org.br"
 
 
@@ -301,7 +401,7 @@ async def create_ebd_classes(tenant_id: str, members: list):
 
         # Add 4 lessons (last month)
         for week in range(1, 5):
-            lesson_date = datetime.now().date() - timedelta(days=(5-week) * 7)
+            lesson_date = datetime.now().date() - timedelta(days=(5 - week) * 7)
             await ebd_lesson_repository.create_lesson(
                 class_id=ebd_class["id"],
                 date=lesson_date,
@@ -476,9 +576,9 @@ async def create_missionaries(tenant_id: str, members: list):
 
 async def main():
     """Main seed function."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("🌱 SEED SCRIPT - Igreja Presbiteriana Filadélfia")
-    print("="*60)
+    print("=" * 60)
 
     try:
         # Clean existing data
@@ -508,9 +608,9 @@ async def main():
         # Create missionaries
         # await create_missionaries(tenant_id, all_members)
 
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("✅ SEED COMPLETED SUCCESSFULLY!")
-        print("="*60)
+        print("=" * 60)
         print("\n📊 Summary:")
         print(f"  • Church: {tenant['name']}")
         print(f"  • Admin: {admin_user['email']} (password: {COMMON_PASSWORD})")
@@ -518,11 +618,12 @@ async def main():
         print(f"  • EBD Classes: {len(EBD_CLASSES)}")
         print(f"  • All user passwords: {COMMON_PASSWORD}")
         print("\n🚀 You can now login and explore the system!")
-        print("="*60 + "\n")
+        print("=" * 60 + "\n")
 
     except Exception as e:
         print(f"\n❌ Error during seed: {e}")
         import traceback
+
         traceback.print_exc()
         raise
 

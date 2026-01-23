@@ -111,6 +111,7 @@ def auth_headers():
 # SHARED FIXTURES FOR INTEGRATION TESTS
 # =============================================================================
 
+
 @pytest.fixture
 async def registered_user(client: AsyncClient) -> dict:
     """
@@ -118,20 +119,15 @@ async def registered_user(client: AsyncClient) -> dict:
     Returns dict with: id, email, name, token, headers
     """
     import uuid
+
     unique_id = uuid.uuid4().hex[:8]
     email = f"testuser_{unique_id}@test.com"
 
     # Register
-    await client.post(
-        "/auth/register",
-        json={"email": email, "name": "Test User", "password": "password123"}
-    )
+    await client.post("/auth/register", json={"email": email, "name": "Test User", "password": "password123"})
 
     # Login to get token
-    login_resp = await client.post(
-        "/auth/login",
-        data={"username": email, "password": "password123"}
-    )
+    login_resp = await client.post("/auth/login", data={"username": email, "password": "password123"})
     token = login_resp.json()["access_token"]
 
     # Get user info
@@ -154,12 +150,11 @@ async def tenant_with_admin(client: AsyncClient, registered_user: dict) -> dict:
     Returns dict with: tenant (id, name, slug), user, headers
     """
     import uuid
+
     unique_slug = f"test-church-{uuid.uuid4().hex[:8]}"
 
     resp = await client.post(
-        "/tenants",
-        json={"name": "Test Church", "slug": unique_slug},
-        headers=registered_user["headers"]
+        "/tenants", json={"name": "Test Church", "slug": unique_slug}, headers=registered_user["headers"]
     )
     tenant_data = resp.json()
 
@@ -189,7 +184,7 @@ async def member_in_tenant(client: AsyncClient, tenant_with_admin: dict) -> dict
             "gender": "M",
             "role": "MEMBRO",
         },
-        headers=headers
+        headers=headers,
     )
     member_data = resp.json()
 

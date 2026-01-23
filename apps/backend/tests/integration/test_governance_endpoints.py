@@ -90,7 +90,9 @@ class TestGovernanceEndpoints:
         assert meeting_data["status"] == "SCHEDULED"
 
         # List Meetings
-        resp = await client.get(f"/governance/councils/{council_id}/meetings", params={"tenant_id": tenant_id}, headers=headers)
+        resp = await client.get(
+            f"/governance/councils/{council_id}/meetings", params={"tenant_id": tenant_id}, headers=headers
+        )
         assert resp.status_code == 200
         meetings = resp.json()
         assert len(meetings) == 1

@@ -37,7 +37,18 @@ class TestDevotionalsEndpoints:
         tenant = await create_tenant(client, token)
         tenant_id = tenant["id"]
 
-        response = await client.post("/devotionals", params={"tenant_id": tenant_id}, json={"title": "Devocional de Hoje", "verse_reference": "João 3:16", "verse_text": "Porque Deus amou o mundo...", "meditation": "Reflexão sobre o amor de Deus", "date": "2024-12-15"}, headers=headers)
+        response = await client.post(
+            "/devotionals",
+            params={"tenant_id": tenant_id},
+            json={
+                "title": "Devocional de Hoje",
+                "verse_reference": "João 3:16",
+                "verse_text": "Porque Deus amou o mundo...",
+                "meditation": "Reflexão sobre o amor de Deus",
+                "date": "2024-12-15",
+            },
+            headers=headers,
+        )
 
         assert response.status_code == 200
         data = response.json()
@@ -51,8 +62,30 @@ class TestDevotionalsEndpoints:
         tenant = await create_tenant(client, token)
         tenant_id = tenant["id"]
 
-        await client.post("/devotionals", params={"tenant_id": tenant_id}, json={"title": "Devocional 1", "verse_reference": "Sl 23:1", "verse_text": "O Senhor é meu pastor", "meditation": "Meditação 1", "date": "2024-12-14"}, headers=headers)
-        await client.post("/devotionals", params={"tenant_id": tenant_id}, json={"title": "Devocional 2", "verse_reference": "Sl 91:1", "verse_text": "Aquele que habita", "meditation": "Meditação 2", "date": "2024-12-15"}, headers=headers)
+        await client.post(
+            "/devotionals",
+            params={"tenant_id": tenant_id},
+            json={
+                "title": "Devocional 1",
+                "verse_reference": "Sl 23:1",
+                "verse_text": "O Senhor é meu pastor",
+                "meditation": "Meditação 1",
+                "date": "2024-12-14",
+            },
+            headers=headers,
+        )
+        await client.post(
+            "/devotionals",
+            params={"tenant_id": tenant_id},
+            json={
+                "title": "Devocional 2",
+                "verse_reference": "Sl 91:1",
+                "verse_text": "Aquele que habita",
+                "meditation": "Meditação 2",
+                "date": "2024-12-15",
+            },
+            headers=headers,
+        )
 
         response = await client.get("/devotionals", params={"tenant_id": tenant_id}, headers=headers)
 
@@ -68,7 +101,18 @@ class TestDevotionalsEndpoints:
         tenant = await create_tenant(client, token)
         tenant_id = tenant["id"]
 
-        create_resp = await client.post("/devotionals", params={"tenant_id": tenant_id}, json={"title": "Devocional Específico", "verse_reference": "Jo 1:1", "verse_text": "No princípio era o Verbo", "meditation": "Meditação específica", "date": "2024-12-15"}, headers=headers)
+        create_resp = await client.post(
+            "/devotionals",
+            params={"tenant_id": tenant_id},
+            json={
+                "title": "Devocional Específico",
+                "verse_reference": "Jo 1:1",
+                "verse_text": "No princípio era o Verbo",
+                "meditation": "Meditação específica",
+                "date": "2024-12-15",
+            },
+            headers=headers,
+        )
         devot_id = create_resp.json()["id"]
 
         response = await client.get(f"/devotionals/{devot_id}", params={"tenant_id": tenant_id}, headers=headers)
@@ -94,7 +138,18 @@ class TestDevotionalsEndpoints:
         tenant = await create_tenant(client, token)
         tenant_id = tenant["id"]
 
-        await client.post("/devotionals", params={"tenant_id": tenant_id}, json={"title": "Devocional Data Específica", "verse_reference": "Lc 2:11", "verse_text": "Hoje vos nasceu", "meditation": "Meditação de Natal", "date": "2024-12-25"}, headers=headers)
+        await client.post(
+            "/devotionals",
+            params={"tenant_id": tenant_id},
+            json={
+                "title": "Devocional Data Específica",
+                "verse_reference": "Lc 2:11",
+                "verse_text": "Hoje vos nasceu",
+                "meditation": "Meditação de Natal",
+                "date": "2024-12-25",
+            },
+            headers=headers,
+        )
 
         response = await client.get("/devotionals/date/2024-12-25", params={"tenant_id": tenant_id}, headers=headers)
 
@@ -109,10 +164,26 @@ class TestDevotionalsEndpoints:
         tenant = await create_tenant(client, token)
         tenant_id = tenant["id"]
 
-        create_resp = await client.post("/devotionals", params={"tenant_id": tenant_id}, json={"title": "Devocional Original", "verse_reference": "Rm 8:28", "verse_text": "Todas as coisas cooperam", "meditation": "Meditação original", "date": "2024-12-15"}, headers=headers)
+        create_resp = await client.post(
+            "/devotionals",
+            params={"tenant_id": tenant_id},
+            json={
+                "title": "Devocional Original",
+                "verse_reference": "Rm 8:28",
+                "verse_text": "Todas as coisas cooperam",
+                "meditation": "Meditação original",
+                "date": "2024-12-15",
+            },
+            headers=headers,
+        )
         devot_id = create_resp.json()["id"]
 
-        response = await client.patch(f"/devotionals/{devot_id}", params={"tenant_id": tenant_id}, json={"title": "Devocional Atualizado"}, headers=headers)
+        response = await client.patch(
+            f"/devotionals/{devot_id}",
+            params={"tenant_id": tenant_id},
+            json={"title": "Devocional Atualizado"},
+            headers=headers,
+        )
 
         assert response.status_code == 200
         data = response.json()
@@ -125,7 +196,18 @@ class TestDevotionalsEndpoints:
         tenant = await create_tenant(client, token)
         tenant_id = tenant["id"]
 
-        create_resp = await client.post("/devotionals", params={"tenant_id": tenant_id}, json={"title": "Devocional a Deletar", "verse_reference": "Fp 4:13", "verse_text": "Tudo posso", "meditation": "Meditação a deletar", "date": "2024-12-15"}, headers=headers)
+        create_resp = await client.post(
+            "/devotionals",
+            params={"tenant_id": tenant_id},
+            json={
+                "title": "Devocional a Deletar",
+                "verse_reference": "Fp 4:13",
+                "verse_text": "Tudo posso",
+                "meditation": "Meditação a deletar",
+                "date": "2024-12-15",
+            },
+            headers=headers,
+        )
         devot_id = create_resp.json()["id"]
 
         response = await client.delete(f"/devotionals/{devot_id}", params={"tenant_id": tenant_id}, headers=headers)

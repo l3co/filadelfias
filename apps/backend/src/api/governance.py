@@ -128,6 +128,7 @@ async def add_council_member(
     result = await council_repository.add_member(tenant_id, council_id, data.member_id)
     if not result:
         from fastapi import HTTPException
+
         raise HTTPException(status_code=404, detail="Council not found")
     return result
 
@@ -146,6 +147,6 @@ async def remove_council_member(
     result = await council_repository.remove_member(tenant_id, council_id, member_id)
     if not result:
         from fastapi import HTTPException
+
         raise HTTPException(status_code=404, detail="Council not found")
     return result
-

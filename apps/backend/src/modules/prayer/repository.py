@@ -23,16 +23,18 @@ class PrayerRequestRepository:
         doc_id = str(uuid.uuid4())
 
         request_data = data.model_dump()
-        request_data.update({
-            "id": doc_id,
-            "tenant_id": str(tenant_id),
-            "member_id": member_id,
-            "author_name": "Anônimo" if data.is_anonymous else author_name,
-            "prayer_count": 0,
-            "prayed_by": [],
-            "created_at": datetime.utcnow(),
-            "updated_at": datetime.utcnow()
-        })
+        request_data.update(
+            {
+                "id": doc_id,
+                "tenant_id": str(tenant_id),
+                "member_id": member_id,
+                "author_name": "Anônimo" if data.is_anonymous else author_name,
+                "prayer_count": 0,
+                "prayed_by": [],
+                "created_at": datetime.utcnow(),
+                "updated_at": datetime.utcnow(),
+            }
+        )
 
         collection.document(doc_id).set(request_data)
         return request_data
@@ -62,11 +64,7 @@ class PrayerRequestRepository:
             return data  # Already prayed
 
         prayed_by.append(user_id)
-        doc_ref.update({
-            "prayer_count": len(prayed_by),
-            "prayed_by": prayed_by,
-            "updated_at": datetime.utcnow()
-        })
+        doc_ref.update({"prayer_count": len(prayed_by), "prayed_by": prayed_by, "updated_at": datetime.utcnow()})
 
         return doc_ref.get().to_dict()
 

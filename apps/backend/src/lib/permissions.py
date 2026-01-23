@@ -42,35 +42,78 @@ class Action(str, Enum):
 OFFICE_PERMISSIONS: dict[str, Set[str]] = {
     "PASTOR": {
         # Membros
-        "members:view", "members:create", "members:edit", "members:delete", "members:manage",
+        "members:view",
+        "members:create",
+        "members:edit",
+        "members:delete",
+        "members:manage",
         # Governança
-        "governance:view", "governance:create", "governance:edit", "governance:delete", "governance:manage",
+        "governance:view",
+        "governance:create",
+        "governance:edit",
+        "governance:delete",
+        "governance:manage",
         # Financeiro
-        "financial:view", "financial:create", "financial:edit", "financial:delete", "financial:manage",
+        "financial:view",
+        "financial:create",
+        "financial:edit",
+        "financial:delete",
+        "financial:manage",
         # EBD
-        "ebd:view", "ebd:create", "ebd:edit", "ebd:delete", "ebd:manage",
+        "ebd:view",
+        "ebd:create",
+        "ebd:edit",
+        "ebd:delete",
+        "ebd:manage",
         # Missões
-        "missions:view", "missions:create", "missions:edit", "missions:delete", "missions:manage",
+        "missions:view",
+        "missions:create",
+        "missions:edit",
+        "missions:delete",
+        "missions:manage",
         # Eventos
-        "events:view", "events:create", "events:edit", "events:delete", "events:manage",
+        "events:view",
+        "events:create",
+        "events:edit",
+        "events:delete",
+        "events:manage",
         # Configurações
-        "settings:view", "settings:edit", "settings:manage",
+        "settings:view",
+        "settings:edit",
+        "settings:manage",
         # Relatórios
-        "reports:view", "reports:manage",
+        "reports:view",
+        "reports:manage",
     },
     "PRESBITERO": {
         # Membros
-        "members:view", "members:create", "members:edit", "members:manage",
+        "members:view",
+        "members:create",
+        "members:edit",
+        "members:manage",
         # Governança - acesso total (compõe o Conselho)
-        "governance:view", "governance:create", "governance:edit", "governance:delete", "governance:manage",
+        "governance:view",
+        "governance:create",
+        "governance:edit",
+        "governance:delete",
+        "governance:manage",
         # Financeiro
-        "financial:view", "financial:create", "financial:edit",
+        "financial:view",
+        "financial:create",
+        "financial:edit",
         # EBD
-        "ebd:view", "ebd:create", "ebd:edit", "ebd:manage",
+        "ebd:view",
+        "ebd:create",
+        "ebd:edit",
+        "ebd:manage",
         # Missões
-        "missions:view", "missions:create", "missions:edit",
+        "missions:view",
+        "missions:create",
+        "missions:edit",
         # Eventos
-        "events:view", "events:create", "events:edit",
+        "events:view",
+        "events:create",
+        "events:edit",
         # Configurações
         "settings:view",
         # Relatórios
@@ -78,17 +121,20 @@ OFFICE_PERMISSIONS: dict[str, Set[str]] = {
     },
     "DIACONO": {
         # Membros
-        "members:view", "members:create",
+        "members:view",
+        "members:create",
         # Governança - pode visualizar
         "governance:view",
         # Financeiro
         "financial:view",
         # EBD
-        "ebd:view", "ebd:create",
+        "ebd:view",
+        "ebd:create",
         # Missões
         "missions:view",
         # Eventos
-        "events:view", "events:create",
+        "events:view",
+        "events:create",
         # Relatórios
         "reports:view",
     },
@@ -109,27 +155,41 @@ OFFICE_PERMISSIONS: dict[str, Set[str]] = {
 # Permissões extras por função
 FUNCTION_PERMISSIONS: dict[str, Set[str]] = {
     "TESOUREIRO": {
-        "financial:view", "financial:create", "financial:edit", "financial:delete", "financial:manage",
+        "financial:view",
+        "financial:create",
+        "financial:edit",
+        "financial:delete",
+        "financial:manage",
         "reports:view",
     },
     "SECRETARIO": {
-        "members:view", "members:create", "members:edit",
-        "governance:view", "governance:create",
-        "reports:view", "reports:manage",
+        "members:view",
+        "members:create",
+        "members:edit",
+        "governance:view",
+        "governance:create",
+        "reports:view",
+        "reports:manage",
     },
     "EVANGELISTA": {
-        "missions:view", "missions:create",
-        "events:view", "events:create",
+        "missions:view",
+        "missions:create",
+        "events:view",
+        "events:create",
     },
     "MISSIONARIO": {
-        "missions:view", "missions:create", "missions:edit",
+        "missions:view",
+        "missions:create",
+        "missions:edit",
     },
 }
 
 # Permissões por role do sistema (membership.role)
 SYSTEM_ROLE_PERMISSIONS: dict[str, Set[str]] = {
     "ADMIN": {
-        "settings:view", "settings:edit", "settings:manage",
+        "settings:view",
+        "settings:edit",
+        "settings:manage",
         "members:manage",
         "financial:manage",
         "governance:manage",
@@ -140,16 +200,15 @@ SYSTEM_ROLE_PERMISSIONS: dict[str, Set[str]] = {
     },
     "MODERATOR": {
         "settings:view",
-        "members:view", "members:create", "members:edit",
+        "members:view",
+        "members:create",
+        "members:edit",
     },
     "ATTENDEE": set(),
 }
 
 
-def get_member_permissions(
-    member: Optional[dict],
-    system_role: str = "ATTENDEE"
-) -> Set[str]:
+def get_member_permissions(member: Optional[dict], system_role: str = "ATTENDEE") -> Set[str]:
     """
     Calcula todas as permissões de um membro.
 
@@ -183,11 +242,7 @@ def get_member_permissions(
     return permissions
 
 
-def has_permission(
-    permissions: Set[str],
-    resource: str,
-    action: str
-) -> bool:
+def has_permission(permissions: Set[str], resource: str, action: str) -> bool:
     """
     Verifica se tem uma permissão específica.
 
@@ -212,12 +267,7 @@ def has_permission(
     return False
 
 
-def check_permission(
-    member: Optional[dict],
-    system_role: str,
-    resource: str,
-    action: str
-) -> bool:
+def check_permission(member: Optional[dict], system_role: str, resource: str, action: str) -> bool:
     """
     Verifica se um membro tem permissão para uma ação.
 

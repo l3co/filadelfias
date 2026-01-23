@@ -3,7 +3,6 @@ Middleware de Permissões para FastAPI
 Verifica permissões RBAC baseado no Manual Presbiteriano
 """
 
-
 from fastapi import Depends, HTTPException, Query, status
 
 from src.api.auth import get_current_user
@@ -18,6 +17,7 @@ from src.lib.permissions import (
 # ============================================================================
 # HELPER FUNCTIONS
 # ============================================================================
+
 
 def _action_label(action: str) -> str:
     labels = {
@@ -96,6 +96,7 @@ async def verify_permission(
 # ============================================================================
 # PERMISSION CHECKER (for Query params - governance, financial, ebd, missions)
 # ============================================================================
+
 
 class PermissionChecker:
     """

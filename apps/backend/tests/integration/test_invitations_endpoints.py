@@ -34,8 +34,14 @@ async def create_member(client: AsyncClient, token: str, tenant_id: str, email: 
     headers = {"Authorization": f"Bearer {token}"}
     response = await client.post(
         f"/tenants/{tenant_id}/members",
-        json={"full_name": "Membro Para Convite", "email": email, "status": "COMUNGANTE", "gender": "M", "office": "MEMBRO"},
-        headers=headers
+        json={
+            "full_name": "Membro Para Convite",
+            "email": email,
+            "status": "COMUNGANTE",
+            "gender": "M",
+            "office": "MEMBRO",
+        },
+        headers=headers,
     )
     return response.json()
 
@@ -97,7 +103,7 @@ class TestInvitationEndpoints:
         member_resp = await client.post(
             f"/tenants/{tenant_id}/members",
             json={"full_name": "Membro Sem Email", "status": "COMUNGANTE", "gender": "M", "role": "MEMBRO"},
-            headers=headers
+            headers=headers,
         )
         member_id = member_resp.json()["id"]
 
@@ -146,7 +152,9 @@ class TestForgotPasswordEndpoints:
         email = f"forgot_{uuid.uuid4().hex[:8]}@test.com"
         await client.post("/auth/register", json={"email": email, "name": "Forgot User", "password": "password123"})
 
-        with patch("src.services.email_service.email_service.send_password_reset_email", new_callable=AsyncMock) as mock_email:
+        with patch(
+            "src.services.email_service.email_service.send_password_reset_email", new_callable=AsyncMock
+        ) as mock_email:
             mock_email.return_value = True
             response = await client.post("/auth/forgot-password", json={"email": email})
             mock_email.assert_called_once()
@@ -167,7 +175,9 @@ class TestResetPasswordEndpoints:
 
     async def test_reset_password_invalid_token(self, client: AsyncClient):
         """Test reset password with invalid token fails."""
-        response = await client.post("/auth/reset-password", json={"token": "invalid-token", "new_password": "newpass123"})
+        response = await client.post(
+            "/auth/reset-password", json={"token": "invalid-token", "new_password": "newpass123"}
+        )
         assert response.status_code == 400
         assert "token" in response.json()["detail"].lower()
 
@@ -184,7 +194,11 @@ class TestChangePasswordEndpoints:
         token = login_resp.json()["access_token"]
         headers = {"Authorization": f"Bearer {token}"}
 
-        response = await client.post("/auth/change-password", json={"current_password": "password123", "new_password": "newpassword456"}, headers=headers)
+        response = await client.post(
+            "/auth/change-password",
+            json={"current_password": "password123", "new_password": "newpassword456"},
+            headers=headers,
+        )
 
         assert response.status_code == 200
         assert "sucesso" in response.json()["message"].lower() or "success" in response.json()["message"].lower()
@@ -200,12 +214,18 @@ class TestChangePasswordEndpoints:
         token = login_resp.json()["access_token"]
         headers = {"Authorization": f"Bearer {token}"}
 
-        response = await client.post("/auth/change-password", json={"current_password": "wrongpassword", "new_password": "newpassword456"}, headers=headers)
+        response = await client.post(
+            "/auth/change-password",
+            json={"current_password": "wrongpassword", "new_password": "newpassword456"},
+            headers=headers,
+        )
 
         assert response.status_code == 400
         assert "incorreta" in response.json()["detail"].lower() or "incorrect" in response.json()["detail"].lower()
 
     async def test_change_password_requires_auth(self, client: AsyncClient):
         """Test that changing password requires authentication."""
-        response = await client.post("/auth/change-password", json={"current_password": "password123", "new_password": "newpassword456"})
+        response = await client.post(
+            "/auth/change-password", json={"current_password": "password123", "new_password": "newpassword456"}
+        )
         assert response.status_code == 401

@@ -23,12 +23,14 @@ class EventRepository:
         doc_id = str(uuid.uuid4())
 
         event_data = data.model_dump()
-        event_data.update({
-            "id": doc_id,
-            "tenant_id": str(tenant_id),
-            "created_at": datetime.utcnow(),
-            "updated_at": datetime.utcnow()
-        })
+        event_data.update(
+            {
+                "id": doc_id,
+                "tenant_id": str(tenant_id),
+                "created_at": datetime.utcnow(),
+                "updated_at": datetime.utcnow(),
+            }
+        )
 
         collection.document(doc_id).set(event_data)
         return event_data

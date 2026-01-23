@@ -18,8 +18,7 @@ class TestAuthEndpoints:
         """Test user registration endpoint."""
         email = f"newuser_{uuid.uuid4().hex[:8]}@example.com"
         response = await client.post(
-            "/auth/register",
-            json={"email": email, "name": "New User", "password": "password123"}
+            "/auth/register", json={"email": email, "name": "New User", "password": "password123"}
         )
 
         assert response.status_code == 201
@@ -54,16 +53,10 @@ class TestAuthEndpoints:
         email = f"login_{uuid.uuid4().hex[:8]}@example.com"
 
         # Register user
-        await client.post(
-            "/auth/register",
-            json={"email": email, "name": "Login User", "password": "password123"}
-        )
+        await client.post("/auth/register", json={"email": email, "name": "Login User", "password": "password123"})
 
         # Login
-        response = await client.post(
-            "/auth/login",
-            data={"username": email, "password": "password123"}
-        )
+        response = await client.post("/auth/login", data={"username": email, "password": "password123"})
 
         assert response.status_code == 200
         data = response.json()
@@ -81,10 +74,7 @@ class TestAuthEndpoints:
         )
 
         # Try to login with wrong password
-        response = await client.post(
-            "/auth/login",
-            data={"username": email, "password": "wrongpassword"}
-        )
+        response = await client.post("/auth/login", data={"username": email, "password": "wrongpassword"})
 
         assert response.status_code == 401
 
@@ -93,16 +83,10 @@ class TestAuthEndpoints:
         email = f"getme_{uuid.uuid4().hex[:8]}@example.com"
 
         # Register user
-        await client.post(
-            "/auth/register",
-            json={"email": email, "name": "Get Me User", "password": "password123"}
-        )
+        await client.post("/auth/register", json={"email": email, "name": "Get Me User", "password": "password123"})
 
         # Login to get token
-        login_response = await client.post(
-            "/auth/login",
-            data={"username": email, "password": "password123"}
-        )
+        login_response = await client.post("/auth/login", data={"username": email, "password": "password123"})
         token = login_response.json()["access_token"]
 
         # Get current user

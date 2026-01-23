@@ -29,9 +29,7 @@ async def create_member(
     elif "role" in member_dict:
         member_dict.pop("role")
 
-    created_member = await member_repository.create_member(
-        tenant_id=tenant_id, **member_dict
-    )
+    created_member = await member_repository.create_member(tenant_id=tenant_id, **member_dict)
     return created_member
 
 

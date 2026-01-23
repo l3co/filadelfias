@@ -191,3 +191,50 @@ export const testEvents = {
     },
 } as const;
 
+/**
+ * Governance test data (councils and meetings).
+ */
+export const testGovernance = {
+    councils: {
+        session: {
+            name: 'Conselho da Igreja',
+            type: 'SESSION',
+            description: 'Conselho deliberativo principal',
+        },
+        deacons: {
+            name: 'Junta Diaconal',
+            type: 'DEACONS',
+            description: 'Órgão de serviço e assistência',
+        },
+        assembly: {
+            name: 'Assembleia Geral',
+            type: 'ASSEMBLY',
+            description: 'Reunião de todos os membros',
+        },
+    },
+    meetings: {
+        ordinary: {
+            date: '2026-02-15',
+            time: '19:30',
+            location: 'Salão da Igreja',
+            agenda: 'Reunião ordinária mensal - Planejamento do semestre',
+            meetingType: 'ORDINARY',
+        },
+        extraordinary: {
+            date: '2026-02-20',
+            time: '10:00',
+            location: 'Sala de Reuniões',
+            agenda: 'Reunião extraordinária - Assunto urgente',
+            meetingType: 'EXTRAORDINARY',
+        },
+        completed: {
+            date: '2026-01-10',
+            time: '19:30',
+            location: 'Salão da Igreja',
+            agenda: 'Reunião ordinária - Janeiro',
+            minutes: 'Ata da reunião: Foram discutidos os temas da pauta e tomadas as seguintes decisões...',
+            attendees: ['member-1', 'member-2', 'member-3'],
+        },
+    },
+} as const;
+

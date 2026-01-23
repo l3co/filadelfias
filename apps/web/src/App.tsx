@@ -115,6 +115,7 @@ function App() {
           <Route path="eventos" element={<MemberEventsPage />} />
           <Route path="missoes" element={<MemberMissionsPage />} />
           <Route path="biblia" element={<BiblePage />} />
+          <Route path="hinario" element={<HymnalPage />} />
           <Route path="manual" element={<ManualPage />} />
           <Route path="ebd" element={<MemberEBDPage />} />
           <Route path="oracao" element={<MemberPrayerPage />} />

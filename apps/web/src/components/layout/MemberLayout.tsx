@@ -1,7 +1,7 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { 
   Bell, LogOut, Menu, User, ChevronDown, Home, X,
-  BookOpen, BookMarked, Users, Calendar, Globe, GraduationCap, Heart, MessageCircle
+  BookOpen, BookMarked, Music, Users, Calendar, Globe, GraduationCap, Heart, MessageCircle
 } from 'lucide-react';
 import { useCurrentUser, useLogout, useCurrentTenant } from '../../hooks/useAuth';
 import { Button } from '../ui/button';
@@ -18,6 +18,7 @@ import { cn } from '../../lib/utils';
 const navItems = [
   { href: '/membro', label: 'Início', icon: Home },
   { href: '/membro/biblia', label: 'Bíblia', icon: BookOpen },
+  { href: '/membro/hinario', label: 'Hinário', icon: Music },
   { href: '/membro/manual', label: 'Manual', icon: BookMarked },
   { href: '/membro/devocionais', label: 'Devocionais', icon: Heart },
   { href: '/membro/diretorio', label: 'Membros', icon: Users },

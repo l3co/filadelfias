@@ -1,6 +1,6 @@
 import { createBdd } from 'playwright-bdd';
 import { expect } from '@playwright/test';
-import { testDevotionals, testPrayerRequests, testEvents } from '../support/fixtures';
+import { testDevotionals } from '../support/fixtures';
 
 const { Given, When, Then } = createBdd();
 
@@ -138,7 +138,7 @@ Then('o pedido deve aparecer sem meu nome', async ({ page }) => {
     await expect(page.getByText(/anônimo/i)).toBeVisible();
 });
 
-Given('que existe um pedido de oração', async ({ page }) => {
+Given('que existe um pedido de oração', async ({ page: _page }) => {
     // Assume a prayer request exists - would be set up via API
 });
 
@@ -148,7 +148,7 @@ Then('o contador de orações deve aumentar', async ({ page }) => {
     await expect(page.getByText(/\d+\s*(oração|orações|prayed)/i)).toBeVisible();
 });
 
-Given('que criei pedidos de oração', async ({ page }) => {
+Given('que criei pedidos de oração', async ({ page: _page }) => {
     // Assume user has created prayer requests
 });
 
@@ -189,7 +189,7 @@ Then('cada evento deve mostrar local', async ({ page }) => {
     await expect(page.getByText(/local|endereço|onde/i)).toBeVisible();
 });
 
-Given('que existe um evento {string}', async ({ page }, eventTitle: string) => {
+Given('que existe um evento {string}', async ({ page: _page }, _eventTitle: string) => {
     // Assume event exists - would be set up via API
 });
 
@@ -214,7 +214,7 @@ Then('devo ver o local', async ({ page }) => {
     await expect(page.getByText(/local|endereço/i)).toBeVisible();
 });
 
-Given('que existe um evento futuro', async ({ page }) => {
+Given('que existe um evento futuro', async ({ page: _page }) => {
     // Assume event exists
 });
 

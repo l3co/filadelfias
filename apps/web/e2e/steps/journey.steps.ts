@@ -13,7 +13,7 @@ const { Given, When, Then } = createBdd();
 // Member Invitation Steps
 // ============================================================================
 
-Given('que existe um membro cadastrado {string}', async ({ page }, memberName: string) => {
+Given('que existe um membro cadastrado {string}', async ({ page: _page }, _memberName: string) => {
     // This step assumes the member already exists in the database
     // In a real scenario, this would be set up via API or database seeding
     // For now, we'll use the test member from fixtures
@@ -113,10 +113,10 @@ When('clico em card {string}', async ({ page }, cardTitle: string) => {
 
 Then('devo ser redirecionado para {string} ou ver mensagem de acesso negado', async ({ page }, path: string) => {
     await page.waitForLoadState('networkidle');
-    
+
     const currentUrl = page.url();
     const isRedirected = currentUrl.includes(path);
-    
+
     if (!isRedirected) {
         await expect(page.getByText(/acesso negado|não autorizado|sem permissão/i)).toBeVisible();
     } else {

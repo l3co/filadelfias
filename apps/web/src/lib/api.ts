@@ -54,9 +54,12 @@ api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
-            // Clear token and redirect to login
+            // Clear token on 401, but only redirect if NOT on login page
+            // This allows login errors to be shown to the user
             localStorage.removeItem('access_token');
-            window.location.href = '/login';
+            if (!window.location.pathname.includes('/login')) {
+                window.location.href = '/login';
+            }
         }
         return Promise.reject(error);
     }

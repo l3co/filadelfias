@@ -96,7 +96,7 @@ Then('a classe deve aparecer na lista', async ({ page }) => {
     await expect(list.first()).toBeVisible();
 });
 
-Given('que existe uma classe {string}', async ({ page }, className: string) => {
+Given('que existe uma classe {string}', async ({ page: _page }, _className: string) => {
     // Assume class exists - would be set up via API
 });
 
@@ -116,7 +116,7 @@ Then('o aluno deve aparecer na lista da classe', async ({ page }) => {
     await expect(page.locator('[role="list"], table, .students').first()).toBeVisible();
 });
 
-Given('que estou logado como membro matriculado em {string}', async ({ page }, className: string) => {
+Given('que estou logado como membro matriculado em {string}', async ({ page }, _className: string) => {
     // This would require special test setup - for now, use regular member login
     await page.goto('/login');
     // Login logic would go here
@@ -143,7 +143,7 @@ Then('a lição deve aparecer na lista', async ({ page }) => {
     await expect(page.locator('[role="list"], table, .lessons').first()).toBeVisible();
 });
 
-Given('que existe uma classe {string} com alunos', async ({ page }, className: string) => {
+Given('que existe uma classe {string} com alunos', async ({ page: _page }, _className: string) => {
     // Assume class with students exists
 });
 

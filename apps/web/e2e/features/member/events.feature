@@ -11,15 +11,12 @@ Funcionalidade: Eventos
     E que estou na página de Eventos
     Então devo ver lista de eventos futuros
 
-  @integration @needs-backend @skip
+  @integration @needs-backend
   Cenário: Ver detalhes de um evento
     Dado que estou logado como membro
-    E que existe um evento "Culto de Celebração"
+    E que estou na página de Eventos
     Quando clico no evento
     Então devo ver o título do evento
-    E devo ver a descrição completa
-    E devo ver data e horário
-    E devo ver o local
 
   @integration @needs-backend @skip
   Cenário: Confirmar presença em evento

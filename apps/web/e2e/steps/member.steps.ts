@@ -204,8 +204,8 @@ Given('que existe um evento {string}', async ({ page: _page }, _eventTitle: stri
 });
 
 When('clico no evento', async ({ page }) => {
-    const firstEvent = page.locator('[role="listitem"], tr, .card, .event-item').first();
-    await firstEvent.click();
+    // Click on the first event heading (h3)
+    await page.getByRole('heading', { level: 3 }).first().click();
 });
 
 Then('devo ver o título do evento', async ({ page }) => {

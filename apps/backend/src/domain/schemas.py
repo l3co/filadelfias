@@ -6,8 +6,9 @@ from datetime import date, datetime
 from typing import List, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 
+from src.domain.validators import validate_password_strength
 from .enums import EcclesiasticalFunction, EcclesiasticalOffice, EcclesiasticalRole, Gender, MaritalStatus, MemberStatus
 
 
@@ -62,6 +63,11 @@ class UserCreate(UserBase):
     """Schema for user registration."""
 
     password: str = Field(..., min_length=8, max_length=100)
+
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, v):
+        return validate_password_strength(v)
 
 
 class UserLogin(BaseModel):
@@ -210,6 +216,11 @@ class ChurchRegistrationRequest(BaseModel):
     admin_email: EmailStr
     admin_password: str = Field(..., min_length=8, max_length=100)
     admin_phone: Optional[str] = None
+
+    @field_validator("admin_password")
+    @classmethod
+    def validate_password(cls, v):
+        return validate_password_strength(v)
 
 
 class ChurchRegistrationResponse(BaseModel):

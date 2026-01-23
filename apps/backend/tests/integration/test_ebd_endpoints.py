@@ -13,8 +13,8 @@ pytestmark = pytest.mark.integration
 async def get_auth_token(client: AsyncClient):
     """Helper to register and login a user."""
     email = f"user_{uuid.uuid4().hex[:8]}@test.com"
-    await client.post("/auth/register", json={"email": email, "name": "Test User", "password": "password123"})
-    response = await client.post("/auth/login", data={"username": email, "password": "password123"})
+    await client.post("/auth/register", json={"email": email, "name": "Test User", "password": "S3cureP@ssword!"})
+    response = await client.post("/auth/login", data={"username": email, "password": "S3cureP@ssword!"})
     return response.json()["access_token"]
 
 

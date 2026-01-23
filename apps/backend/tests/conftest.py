@@ -124,10 +124,10 @@ async def registered_user(client: AsyncClient) -> dict:
     email = f"testuser_{unique_id}@test.com"
 
     # Register
-    await client.post("/auth/register", json={"email": email, "name": "Test User", "password": "password123"})
+    await client.post("/auth/register", json={"email": email, "name": "Test User", "password": "S3cureP@ssword!"})
 
     # Login to get token
-    login_resp = await client.post("/auth/login", data={"username": email, "password": "password123"})
+    login_resp = await client.post("/auth/login", data={"username": email, "password": "S3cureP@ssword!"})
     token = login_resp.json()["access_token"]
 
     # Get user info

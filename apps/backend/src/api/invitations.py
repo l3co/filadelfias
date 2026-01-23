@@ -6,9 +6,10 @@ import secrets
 from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 from src.api.auth import get_current_user
+from src.domain.validators import validate_password_strength
 from src.infra.repositories import (
     member_repository,
     membership_repository,
@@ -22,11 +23,23 @@ from src.services.email_service import email_service
 router = APIRouter()
 
 
-def generate_temporary_password(length: int = 8) -> str:
-    """Generate a random temporary password."""
-    # Use a mix of uppercase, lowercase, and digits (no confusing chars)
-    chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
-    return "".join(secrets.choice(chars) for _ in range(length))
+def generate_temporary_password(length: int = 12) -> str:
+    """Generate a random temporary password that meets strength requirements."""
+    # Ensure at least one of each required char type
+    upper = secrets.choice("ABCDEFGHJKLMNPQRSTUVWXYZ")
+    lower = secrets.choice("abcdefghijkmnpqrstuvwxyz")
+    digit = secrets.choice("23456789")
+    special = secrets.choice("!@#$%^&*")
+    
+    # Fill the rest
+    chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%^&*"
+    remaining = "".join(secrets.choice(chars) for _ in range(length - 4))
+    
+    # Combine and shuffle
+    password = list(upper + lower + digit + special + remaining)
+    secrets.SystemRandom().shuffle(password)
+    
+    return "".join(password)
 
 
 def generate_reset_token() -> str:
@@ -49,10 +62,20 @@ class ResetPasswordRequest(BaseModel):
     token: str
     new_password: str
 
+    @field_validator("new_password")
+    @classmethod
+    def validate_password(cls, v):
+        return validate_password_strength(v)
+
 
 class ChangePasswordRequest(BaseModel):
     current_password: str
     new_password: str
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_password(cls, v):
+        return validate_password_strength(v)
 
 
 @router.post("/tenants/{tenant_id}/members/{member_id}/invite", response_model=InviteResponse)

@@ -124,11 +124,67 @@ class MeetingRepository:
         return data
 
     async def get_by_council(self, council_id: str) -> List[dict]:
+        """
+        List all meetings for a given council.
+
+        Returns meetings ordered by date (newest first) for display in the frontend.
+        """
         councils = self.db.collection_group("councils").where("id", "==", str(council_id)).limit(1).get()
         if not councils:
             return []
 
-        return [doc.to_dict() for doc in councils[0].reference.collection("meetings").stream()]
+        meetings = [doc.to_dict() for doc in councils[0].reference.collection("meetings").stream()]
+        # Sort by date descending (newest first)
+        meetings.sort(key=lambda m: m.get("date", datetime.min), reverse=True)
+        return meetings
+
+    async def get_by_id(self, meeting_id: str) -> dict | None:
+        """
+        Retrieve a single meeting by its ID.
+
+        Uses collection_group to search across all tenant councils since meetings
+        are nested under councils in the Firestore structure.
+        """
+        meetings = self.db.collection_group("meetings").where("id", "==", str(meeting_id)).limit(1).get()
+        if not meetings:
+            return None
+        return meetings[0].to_dict()
+
+    async def update_meeting(self, meeting_id: str, data: dict) -> dict | None:
+        """
+        Update meeting fields (agenda, location, minutes, attendees, etc).
+
+        Searches for the meeting by ID and applies partial update.
+        This is used for both editing meeting details and recording minutes/attendance.
+        """
+        meetings = self.db.collection_group("meetings").where("id", "==", str(meeting_id)).limit(1).get()
+        if not meetings:
+            return None
+
+        doc_ref = meetings[0].reference
+        data["updated_at"] = datetime.utcnow()
+        doc_ref.update(data)
+        return doc_ref.get().to_dict()
+
+    async def complete_meeting(self, meeting_id: str) -> dict | None:
+        """
+        Mark a meeting as completed.
+
+        Sets the status to COMPLETED and records the completion timestamp.
+        Once completed, meetings should not be further edited (enforced at API level).
+        """
+        meetings = self.db.collection_group("meetings").where("id", "==", str(meeting_id)).limit(1).get()
+        if not meetings:
+            return None
+
+        doc_ref = meetings[0].reference
+        update_data = {
+            "status": "COMPLETED",
+            "completed_at": datetime.utcnow(),
+            "updated_at": datetime.utcnow(),
+        }
+        doc_ref.update(update_data)
+        return doc_ref.get().to_dict()
 
 
 council_repository = CouncilRepository()

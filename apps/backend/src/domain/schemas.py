@@ -159,7 +159,9 @@ class MemberBase(BaseModel):
 class MemberCreate(MemberBase):
     """Schema for creating a new member."""
 
-    system_role: Optional[str] = Field(None, pattern="^(ADMIN|MEMBER)$", description="Role do sistema (ADMIN ou MEMBER)")
+    system_role: Optional[str] = Field(
+        None, pattern="^(ADMIN|MEMBER)$", description="Role do sistema (ADMIN ou MEMBER)"
+    )
 
 
 class MemberUpdate(BaseModel):
@@ -192,8 +194,10 @@ class MemberUpdate(BaseModel):
     admission_date: Optional[date] = None
     admission_type: Optional[str] = None
     origin_church: Optional[str] = None
-    
-    system_role: Optional[str] = Field(None, pattern="^(ADMIN|MEMBER)$", description="Role do sistema (ADMIN ou MEMBER)")
+
+    system_role: Optional[str] = Field(
+        None, pattern="^(ADMIN|MEMBER)$", description="Role do sistema (ADMIN ou MEMBER)"
+    )
 
 
 class MemberResponse(MemberBase):

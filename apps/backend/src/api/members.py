@@ -98,7 +98,7 @@ async def update_member(
     # Handle system_role update
     if "system_role" in update_data:
         new_role = update_data["system_role"]
-        
+
         # Verify permission to manage roles
         if new_role == "ADMIN" or member.get("system_role") == "ADMIN":
             await verify_permission(tenant_id, current_user, "settings", "manage")

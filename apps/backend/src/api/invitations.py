@@ -4,8 +4,8 @@ API endpoints for member invitations.
 
 import secrets
 from datetime import datetime, timedelta
-
 from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from pydantic import BaseModel, field_validator
 
@@ -92,7 +92,7 @@ async def invite_member(
     """
     Invite a member to the platform.
     Creates a user account with temporary password and sends welcome email.
-    
+
     Permissions:
     - Invite as MEMBER: Requires members:edit permission.
     - Invite as ADMIN: Requires settings:manage permission.

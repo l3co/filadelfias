@@ -60,7 +60,7 @@ class MemberRepository(TenantScopedRepository):
         # Merge additional fields (address, ecclesiastical, system_role, etc.)
         # This fixes the bug where address/marriage data was being discarded on creation
         data.update(kwargs)
-        
+
         return await self.create(tenant_id, data)
 
     async def get_by_status(self, tenant_id: str, status: str) -> list[dict]:

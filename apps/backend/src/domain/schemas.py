@@ -146,6 +146,15 @@ class MemberBase(BaseModel):
     admission_type: Optional[str] = None
     origin_church: Optional[str] = None
 
+    @field_validator("status", mode="before")
+    @classmethod
+    def map_legacy_status(cls, v):
+        if isinstance(v, str) and v.upper() == "ACTIVE":
+            return MemberStatus.Comungante
+        if isinstance(v, str) and v.upper() == "INACTIVE":
+            return MemberStatus.NaoComungante
+        return v
+
 
 class MemberCreate(MemberBase):
     """Schema for creating a new member."""

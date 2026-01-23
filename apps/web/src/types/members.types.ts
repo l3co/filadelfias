@@ -11,7 +11,7 @@ export type EcclesiasticalFunction =
   | 'MISSIONARIO'
   | 'PROFESSOR_EBD';
 
-export type MemberStatus = 'ACTIVE' | 'INACTIVE' | 'TRANSFERRED' | 'DECEASED' | 'EXCLUDED';
+export type MemberStatus = 'PROCESSO' | 'COMUNGANTE' | 'NAO_COMUNGANTE' | 'DISCIPLINA' | 'AFASTADO' | 'TRANSFERIDO' | 'FALECIDO';
 
 export type Gender = 'MALE' | 'FEMALE';
 

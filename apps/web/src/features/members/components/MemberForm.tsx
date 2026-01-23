@@ -41,7 +41,7 @@ export function MemberForm({
 
   const { register, handleSubmit, setValue, control, formState: { errors, isDirty } } = useForm<MemberFormState>({
     defaultValues: {
-      status: 'ACTIVE',
+      status: 'COMUNGANTE',
       office: 'MEMBRO',
       functions: [],
       isAdmin: false,
@@ -114,7 +114,7 @@ export function MemberForm({
         key,
         value === '' ? null : value
       ])
-    ) as MemberFormData;
+    ) as unknown as MemberFormData;
 
     // Set system_role based on checkbox
     cleanedData.system_role = isAdmin ? 'ADMIN' : 'MEMBER';

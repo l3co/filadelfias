@@ -2,12 +2,12 @@
  * Member Constants
  */
 
-import type { 
-  EcclesiasticalOffice, 
-  EcclesiasticalFunction, 
+import type {
+  EcclesiasticalOffice,
+  EcclesiasticalFunction,
+  MemberStatus,
 } from '../types/members.types';
 
-type MemberStatus = 'ACTIVE' | 'INACTIVE' | 'TRANSFERRED' | 'DECEASED' | 'EXCLUDED';
 type Gender = 'MALE' | 'FEMALE';
 type MaritalStatus = 'SINGLE' | 'MARRIED' | 'DIVORCED' | 'WIDOWED';
 type AdmissionType = 'BAPTISM' | 'PROFESSION' | 'TRANSFER' | 'JURISDICTION';
@@ -33,11 +33,13 @@ export const FUNCTION_OPTIONS: SelectOption<EcclesiasticalFunction>[] = [
 ];
 
 export const STATUS_OPTIONS: SelectOption<MemberStatus>[] = [
-  { value: 'ACTIVE', label: 'Ativo' },
-  { value: 'INACTIVE', label: 'Inativo' },
-  { value: 'TRANSFERRED', label: 'Transferido' },
-  { value: 'DECEASED', label: 'Falecido' },
-  { value: 'EXCLUDED', label: 'Excluído' },
+  { value: 'PROCESSO', label: 'Em Processo' },
+  { value: 'COMUNGANTE', label: 'Comungante (Ativo)' },
+  { value: 'NAO_COMUNGANTE', label: 'Não Comungante' },
+  { value: 'DISCIPLINA', label: 'Sob Disciplina' },
+  { value: 'AFASTADO', label: 'Afastado' },
+  { value: 'TRANSFERIDO', label: 'Transferido' },
+  { value: 'FALECIDO', label: 'Falecido' },
 ];
 
 export const GENDER_OPTIONS: SelectOption<Gender>[] = [
@@ -76,9 +78,11 @@ export const FUNCTION_LABELS: Record<EcclesiasticalFunction, string> = {
 };
 
 export const STATUS_LABELS: Record<MemberStatus, string> = {
-  ACTIVE: 'Ativo',
-  INACTIVE: 'Inativo',
-  TRANSFERRED: 'Transferido',
-  DECEASED: 'Falecido',
-  EXCLUDED: 'Excluído',
+  PROCESSO: 'Em Processo',
+  COMUNGANTE: 'Comungante',
+  NAO_COMUNGANTE: 'Não Comungante',
+  DISCIPLINA: 'Sob Disciplina',
+  AFASTADO: 'Afastado',
+  TRANSFERIDO: 'Transferido',
+  FALECIDO: 'Falecido',
 };

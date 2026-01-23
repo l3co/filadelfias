@@ -91,7 +91,7 @@ class EBDStudentRepository:
         """Find the EBD class where a member is enrolled."""
         # Get all classes for tenant
         classes = self.db.collection("tenants").document(str(tenant_id)).collection("ebd_classes").stream()
-        
+
         for class_doc in classes:
             # Check if member is enrolled in this class
             students = class_doc.reference.collection("students").where("member_id", "==", str(member_id)).limit(1).get()
@@ -100,7 +100,7 @@ class EBDStudentRepository:
                 student_data = students[0].to_dict()
                 class_data["enrollment"] = student_data
                 return class_data
-        
+
         return None
 
 

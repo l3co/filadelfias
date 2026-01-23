@@ -37,6 +37,45 @@ class CouncilRepository:
         """Delete a council by ID."""
         self._get_collection(tenant_id).document(council_id).delete()
 
+    async def get_by_id(self, tenant_id: str, council_id: str) -> dict | None:
+        """Get a council by ID."""
+        doc = self._get_collection(tenant_id).document(council_id).get()
+        return doc.to_dict() if doc.exists else None
+
+    async def add_member(self, tenant_id: str, council_id: str, member_id: str) -> dict | None:
+        """Add a member to a council."""
+        doc_ref = self._get_collection(tenant_id).document(council_id)
+        doc = doc_ref.get()
+        if not doc.exists:
+            return None
+
+        council_data = doc.to_dict()
+        members = council_data.get("members", [])
+
+        if member_id not in members:
+            members.append(member_id)
+            doc_ref.update({"members": members, "updated_at": datetime.utcnow()})
+
+        council_data["members"] = members
+        return council_data
+
+    async def remove_member(self, tenant_id: str, council_id: str, member_id: str) -> dict | None:
+        """Remove a member from a council."""
+        doc_ref = self._get_collection(tenant_id).document(council_id)
+        doc = doc_ref.get()
+        if not doc.exists:
+            return None
+
+        council_data = doc.to_dict()
+        members = council_data.get("members", [])
+
+        if member_id in members:
+            members.remove(member_id)
+            doc_ref.update({"members": members, "updated_at": datetime.utcnow()})
+
+        council_data["members"] = members
+        return council_data
+
 
 class MeetingRepository:
     @property

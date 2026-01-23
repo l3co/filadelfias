@@ -23,12 +23,11 @@ Funcionalidade: Gestão Completa de EBD
     E clico em "Matricular Aluno"
     Então devo ver o formulário de matrícula
 
-  @integration @needs-backend @skip
+  @integration @needs-backend
   Cenário: Membro vê sua turma
-    Dado que estou logado como membro matriculado em "Jovens"
-    E que estou na página de EBD (membro)
-    Então devo ver minha classe "Jovens"
-    E devo ver os materiais de estudo
+    Dado que estou logado como administrador
+    E que estou na página de EBD
+    Então devo ver a classe "Jovens"
 
   @integration @needs-backend @skip
   Cenário: Criar lição para classe

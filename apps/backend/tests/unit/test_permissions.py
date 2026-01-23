@@ -5,18 +5,16 @@ Tests the permission logic based on Manual Presbiteriano.
 
 import pytest
 
-pytestmark = pytest.mark.unit
-
 from src.lib.permissions import (
-    FUNCTION_PERMISSIONS,
     OFFICE_PERMISSIONS,
-    SYSTEM_ROLE_PERMISSIONS,
     check_permission,
     get_member_permissions,
     has_permission,
     is_leadership,
     is_ordained_officer,
 )
+
+pytestmark = pytest.mark.unit
 
 
 class TestOfficePermissions:

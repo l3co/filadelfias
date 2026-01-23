@@ -2,11 +2,9 @@
 Unit tests for security utilities (password hashing and JWT).
 """
 
-import pytest
-
-pytestmark = pytest.mark.unit
-
 from datetime import timedelta
+
+import pytest
 
 from src.infra.security import (
     create_access_token,
@@ -14,6 +12,8 @@ from src.infra.security import (
     get_password_hash,
     verify_password,
 )
+
+pytestmark = pytest.mark.unit
 
 
 class TestPasswordHashing:

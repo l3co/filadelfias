@@ -1,6 +1,6 @@
 import logging
 import uuid
-from datetime import datetime, date
+from datetime import date, datetime
 from typing import List, Optional
 from uuid import UUID
 
@@ -57,7 +57,7 @@ class DevotionalRepository:
     async def update(self, tenant_id: UUID, devotional_id: str, data: DevotionalUpdate) -> Optional[dict]:
         collection = self._get_collection(str(tenant_id))
         doc_ref = collection.document(devotional_id)
-        
+
         if not doc_ref.get().exists:
             return None
 
@@ -65,17 +65,17 @@ class DevotionalRepository:
         if "date" in update_data and update_data["date"]:
             update_data["date"] = update_data["date"].isoformat()
         update_data["updated_at"] = datetime.utcnow()
-        
+
         doc_ref.update(update_data)
         return doc_ref.get().to_dict()
 
     async def delete(self, tenant_id: UUID, devotional_id: str) -> bool:
         collection = self._get_collection(str(tenant_id))
         doc_ref = collection.document(devotional_id)
-        
+
         if not doc_ref.get().exists:
             return False
-        
+
         doc_ref.delete()
         return True
 

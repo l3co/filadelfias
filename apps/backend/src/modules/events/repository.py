@@ -45,23 +45,23 @@ class EventRepository:
     async def update(self, tenant_id: UUID, event_id: str, data: EventUpdate) -> Optional[dict]:
         collection = self._get_collection(str(tenant_id))
         doc_ref = collection.document(event_id)
-        
+
         if not doc_ref.get().exists:
             return None
 
         update_data = data.model_dump(exclude_unset=True)
         update_data["updated_at"] = datetime.utcnow()
-        
+
         doc_ref.update(update_data)
         return doc_ref.get().to_dict()
 
     async def delete(self, tenant_id: UUID, event_id: str) -> bool:
         collection = self._get_collection(str(tenant_id))
         doc_ref = collection.document(event_id)
-        
+
         if not doc_ref.get().exists:
             return False
-        
+
         doc_ref.delete()
         return True
 

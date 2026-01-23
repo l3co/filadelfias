@@ -40,12 +40,12 @@ class CouncilRepository(TenantScopedRepository):
         council = await self.get(council_id, tenant_id)
         if not council:
             return None
-        
+
         member_ids = council.get("member_ids", [])
         if member_id not in member_ids:
             member_ids.append(member_id)
             await self.update(council_id, {"member_ids": member_ids}, tenant_id)
-        
+
         return await self.get(council_id, tenant_id)
 
     async def remove_member(self, tenant_id: str, council_id: str, member_id: str) -> Optional[dict]:
@@ -53,12 +53,12 @@ class CouncilRepository(TenantScopedRepository):
         council = await self.get(council_id, tenant_id)
         if not council:
             return None
-        
+
         member_ids = council.get("member_ids", [])
         if member_id in member_ids:
             member_ids.remove(member_id)
             await self.update(council_id, {"member_ids": member_ids}, tenant_id)
-        
+
         return await self.get(council_id, tenant_id)
 
 

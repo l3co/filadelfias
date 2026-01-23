@@ -1,11 +1,11 @@
 from typing import List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 
-from src.modules.events.schemas import EventCreate, EventUpdate, EventResponse
-from src.modules.events.repository import event_repository
 from src.middleware.permissions import require_authenticated
+from src.modules.events.repository import event_repository
+from src.modules.events.schemas import EventCreate, EventResponse, EventUpdate
 
 router = APIRouter(prefix="/events", tags=["Events"])
 

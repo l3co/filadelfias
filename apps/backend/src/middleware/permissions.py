@@ -3,7 +3,6 @@ Middleware de Permissões para FastAPI
 Verifica permissões RBAC baseado no Manual Presbiteriano
 """
 
-from typing import Callable, Optional
 
 from fastapi import Depends, HTTPException, Query, status
 
@@ -15,7 +14,6 @@ from src.lib.permissions import (
     is_leadership,
     is_ordained_officer,
 )
-
 
 # ============================================================================
 # HELPER FUNCTIONS
@@ -54,37 +52,37 @@ async def verify_permission(
 ) -> dict:
     """
     Verifica se o usuário tem permissão para a ação.
-    
+
     Args:
         tenant_id: ID do tenant
         current_user: Usuário autenticado
         resource: Recurso (members, governance, etc.)
         action: Ação (view, create, edit, delete, manage)
-    
+
     Returns:
         dict com user, member, permissions
-    
+
     Raises:
         HTTPException 403 se não tiver permissão
     """
     user_id = current_user["id"]
-    
+
     # Busca membership do usuário no tenant
     membership = await membership_repository.get_by_user_and_tenant(user_id, tenant_id)
     system_role = membership.get("role", "ATTENDEE") if membership else "ATTENDEE"
-    
+
     # Busca membro vinculado ao usuário
     member = await member_repository.get_by_user_id(tenant_id, user_id)
-    
+
     # Verifica permissão
     has_access = check_permission(member, system_role, resource, action)
-    
+
     if not has_access:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=f"Você não tem permissão para {_action_label(action)} {_resource_label(resource)}",
         )
-    
+
     # Retorna contexto enriquecido
     return {
         "user": current_user,
@@ -103,7 +101,7 @@ class PermissionChecker:
     """
     Dependency que verifica permissões do usuário.
     Usa tenant_id como Query parameter.
-    
+
     Uso:
         @router.post("/councils")
         async def create_council(
@@ -113,11 +111,11 @@ class PermissionChecker:
         ):
             ...
     """
-    
+
     def __init__(self, resource: str, action: str):
         self.resource = resource
         self.action = action
-    
+
     async def __call__(
         self,
         tenant_id: str = Query(..., description="ID of the tenant/church"),
@@ -129,7 +127,7 @@ class PermissionChecker:
 class RequireLeadership:
     """
     Dependency que exige que o usuário seja Pastor ou Presbítero.
-    
+
     Uso:
         @router.post("/councils")
         async def create_council(
@@ -137,25 +135,25 @@ class RequireLeadership:
         ):
             ...
     """
-    
+
     async def __call__(
         self,
         tenant_id: str = Query(..., description="ID of the tenant/church"),
         current_user: dict = Depends(get_current_user),
     ) -> dict:
         user_id = current_user["id"]
-        
+
         # Busca membro vinculado ao usuário
         member = await member_repository.get_by_user_id(tenant_id, user_id)
-        
+
         if not member or not is_leadership(member.get("office")):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Apenas pastores e presbíteros podem realizar esta ação",
             )
-        
+
         membership = await membership_repository.get_by_user_and_tenant(user_id, tenant_id)
-        
+
         return {
             "user": current_user,
             "member": member,
@@ -168,24 +166,24 @@ class RequireOfficer:
     Dependency que exige que o usuário seja um oficial ordenado
     (Pastor, Presbítero ou Diácono).
     """
-    
+
     async def __call__(
         self,
         tenant_id: str = Query(..., description="ID of the tenant/church"),
         current_user: dict = Depends(get_current_user),
     ) -> dict:
         user_id = current_user["id"]
-        
+
         member = await member_repository.get_by_user_id(tenant_id, user_id)
-        
+
         if not member or not is_ordained_officer(member.get("office")):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Apenas oficiais ordenados podem realizar esta ação",
             )
-        
+
         membership = await membership_repository.get_by_user_and_tenant(user_id, tenant_id)
-        
+
         return {
             "user": current_user,
             "member": member,
@@ -220,7 +218,7 @@ class RequireAuthenticated:
     """
     Dependency que apenas exige que o usuário esteja autenticado.
     Não verifica permissões específicas.
-    
+
     Uso:
         @router.get("/events")
         async def list_events(
@@ -228,17 +226,17 @@ class RequireAuthenticated:
         ):
             ...
     """
-    
+
     async def __call__(
         self,
         tenant_id: str = Query(..., description="ID of the tenant/church"),
         current_user: dict = Depends(get_current_user),
     ) -> dict:
         user_id = current_user["id"]
-        
+
         membership = await membership_repository.get_by_user_and_tenant(user_id, tenant_id)
         member = await member_repository.get_by_user_id(tenant_id, user_id)
-        
+
         return {
             "user": current_user,
             "member": member,

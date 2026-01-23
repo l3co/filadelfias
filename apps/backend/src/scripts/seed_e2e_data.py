@@ -198,14 +198,14 @@ async def seed_test_data():
     rbac_users = [TEST_PASTOR, TEST_PRESBITERO, TEST_DIACONO, TEST_TESOUREIRO, TEST_SECRETARIO]
     for test_user in rbac_users:
         print(f"  Creating {test_user['office']} user: {test_user['name']}...")
-        
+
         # Create user
         user = await user_repository.create_user(
             email=test_user["email"],
             name=test_user["name"],
             password=test_user["password"],
         )
-        
+
         # Create membership (ADMIN for officers, MEMBER for functions)
         role = "ADMIN" if test_user["office"] in ["PASTOR", "PRESBITERO", "DIACONO"] else "MEMBER"
         await membership_repository.create_membership(
@@ -214,7 +214,7 @@ async def seed_test_data():
             role=role,
             status="ACTIVE",
         )
-        
+
         # Create member profile with office
         await member_repository.create_member(
             tenant_id=tenant["id"],
@@ -295,6 +295,7 @@ async def seed_test_data():
 
     # 12. Create sample Devotional (today)
     from datetime import date, datetime, timedelta
+
     from src.modules.devotionals.repository import devotional_repository
     from src.modules.devotionals.schemas import DevotionalCreate
 
@@ -321,13 +322,13 @@ async def seed_test_data():
         category="family",
         is_anonymous=False,
     )
-    prayer_request = await prayer_request_repository.create(
-        tenant["id"], 
+    await prayer_request_repository.create(
+        tenant["id"],
         member_profile["id"],
         TEST_MEMBER["name"],
         prayer_data
     )
-    print(f"  ✓ Prayer request created")
+    print("  ✓ Prayer request created")
 
     # 14. Create sample Event (future)
     from src.modules.events.repository import event_repository

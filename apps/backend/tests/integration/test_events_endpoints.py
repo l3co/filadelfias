@@ -2,8 +2,9 @@
 Integration tests for events endpoints.
 """
 
-import pytest
 import uuid
+
+import pytest
 from httpx import AsyncClient
 
 pytestmark = pytest.mark.integration

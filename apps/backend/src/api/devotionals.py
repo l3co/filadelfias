@@ -1,12 +1,12 @@
+from datetime import date
 from typing import List, Optional
 from uuid import UUID
-from datetime import date
 
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 
-from src.modules.devotionals.schemas import DevotionalCreate, DevotionalUpdate, DevotionalResponse
-from src.modules.devotionals.repository import devotional_repository
 from src.middleware.permissions import require_authenticated
+from src.modules.devotionals.repository import devotional_repository
+from src.modules.devotionals.schemas import DevotionalCreate, DevotionalResponse, DevotionalUpdate
 
 router = APIRouter(prefix="/devotionals", tags=["Devotionals"])
 

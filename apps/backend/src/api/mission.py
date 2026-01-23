@@ -3,12 +3,12 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query
 
+from src.middleware.permissions import (
+    PermissionChecker,
+    require_view_missions,
+)
 from src.modules.missions.schemas import MissionaryCreate, MissionaryResponse
 from src.services.mission_service import MissionService
-from src.middleware.permissions import (
-    require_view_missions,
-    PermissionChecker,
-)
 
 router = APIRouter(prefix="/missions", tags=["Missions"])
 

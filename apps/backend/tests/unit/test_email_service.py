@@ -3,12 +3,13 @@ Unit tests for email service.
 Uses mocking to test without actual email sending.
 """
 
+from unittest.mock import patch
+
 import pytest
 
-pytestmark = pytest.mark.unit
-from unittest.mock import AsyncMock, MagicMock, patch
-
 from src.services.email_service import EmailService
+
+pytestmark = pytest.mark.unit
 
 
 class TestEmailServiceConfiguration:
@@ -73,20 +74,20 @@ class TestSendWelcomeEmail:
         """Should return True when email is sent successfully."""
         with patch.dict("os.environ", {"RESEND_API_KEY": "test-key"}):
             service = EmailService()
-            
+
             with patch("resend.Emails.send") as mock_send:
                 mock_send.return_value = {"id": "test-email-id"}
-                
+
                 result = await service.send_welcome_email(
                     to_email="test@test.com",
                     member_name="Test User",
                     church_name="Test Church",
                     temporary_password="ABC123"
                 )
-                
+
                 assert result is True
                 mock_send.assert_called_once()
-                
+
                 # Check email content
                 call_args = mock_send.call_args[0][0]
                 assert call_args["to"] == ["test@test.com"]
@@ -99,17 +100,17 @@ class TestSendWelcomeEmail:
         """Should return False when email sending fails."""
         with patch.dict("os.environ", {"RESEND_API_KEY": "test-key"}):
             service = EmailService()
-            
+
             with patch("resend.Emails.send") as mock_send:
                 mock_send.side_effect = Exception("API Error")
-                
+
                 result = await service.send_welcome_email(
                     to_email="test@test.com",
                     member_name="Test User",
                     church_name="Test Church",
                     temporary_password="ABC123"
                 )
-                
+
                 assert result is False
 
 
@@ -136,19 +137,19 @@ class TestSendPasswordResetEmail:
             "FRONTEND_URL": "https://app.test.com"
         }):
             service = EmailService()
-            
+
             with patch("resend.Emails.send") as mock_send:
                 mock_send.return_value = {"id": "test-email-id"}
-                
+
                 result = await service.send_password_reset_email(
                     to_email="test@test.com",
                     user_name="Test User",
                     reset_token="abc123token"
                 )
-                
+
                 assert result is True
                 mock_send.assert_called_once()
-                
+
                 # Check email content
                 call_args = mock_send.call_args[0][0]
                 assert call_args["to"] == ["test@test.com"]
@@ -161,16 +162,16 @@ class TestSendPasswordResetEmail:
         """Should return False when email sending fails."""
         with patch.dict("os.environ", {"RESEND_API_KEY": "test-key"}):
             service = EmailService()
-            
+
             with patch("resend.Emails.send") as mock_send:
                 mock_send.side_effect = Exception("API Error")
-                
+
                 result = await service.send_password_reset_email(
                     to_email="test@test.com",
                     user_name="Test User",
                     reset_token="abc123token"
                 )
-                
+
                 assert result is False
 
 
@@ -182,19 +183,19 @@ class TestEmailContent:
         """Welcome email should contain all required elements."""
         with patch.dict("os.environ", {"RESEND_API_KEY": "test-key"}):
             service = EmailService()
-            
+
             with patch("resend.Emails.send") as mock_send:
                 mock_send.return_value = {"id": "test"}
-                
+
                 await service.send_welcome_email(
                     to_email="member@church.com",
                     member_name="João Silva",
                     church_name="Igreja Presbiteriana",
                     temporary_password="TEMP1234"
                 )
-                
+
                 html_content = mock_send.call_args[0][0]["html"]
-                
+
                 # Check required content
                 assert "João Silva" in html_content
                 assert "Igreja Presbiteriana" in html_content
@@ -211,18 +212,18 @@ class TestEmailContent:
             "FRONTEND_URL": "https://app.filadelfias.com"
         }):
             service = EmailService()
-            
+
             with patch("resend.Emails.send") as mock_send:
                 mock_send.return_value = {"id": "test"}
-                
+
                 await service.send_password_reset_email(
                     to_email="user@test.com",
                     user_name="Maria Santos",
                     reset_token="secure-token-123"
                 )
-                
+
                 html_content = mock_send.call_args[0][0]["html"]
-                
+
                 # Check required content
                 assert "Maria Santos" in html_content
                 assert "secure-token-123" in html_content

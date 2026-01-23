@@ -1,11 +1,11 @@
 from typing import List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 
-from src.modules.prayer.schemas import PrayerRequestCreate, PrayerRequestResponse
-from src.modules.prayer.repository import prayer_request_repository
 from src.middleware.permissions import require_authenticated
+from src.modules.prayer.repository import prayer_request_repository
+from src.modules.prayer.schemas import PrayerRequestCreate, PrayerRequestResponse
 
 router = APIRouter(prefix="/prayer", tags=["Prayer"])
 
@@ -19,10 +19,10 @@ async def create_prayer_request(
     """Create a new prayer request."""
     user = auth_context.get("user") or {}
     member = auth_context.get("member") or {}
-    
+
     member_id = member.get("id") or user.get("id") or "unknown"
     author_name = member.get("full_name") or user.get("name") or "Membro"
-    
+
     return await prayer_request_repository.create(tenant_id, member_id, author_name, data)
 
 
@@ -44,7 +44,7 @@ async def pray_for_request(
     """Increment prayer count for a request."""
     user = auth_context.get("user") or {}
     user_id = user.get("id") or "unknown"
-    
+
     result = await prayer_request_repository.increment_prayer_count(tenant_id, request_id, user_id)
     if not result:
         raise HTTPException(status_code=404, detail="Prayer request not found")

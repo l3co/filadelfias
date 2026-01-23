@@ -7,9 +7,9 @@ They are skipped in CI. Run locally with: pytest -m firestore
 
 import pytest
 
-pytestmark = pytest.mark.unit
-
 from src.infra.repositories import UserRepository
+
+pytestmark = pytest.mark.unit
 
 
 class TestUserRepositoryStructure:

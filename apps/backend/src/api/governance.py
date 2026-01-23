@@ -2,12 +2,19 @@ from typing import List
 
 from fastapi import APIRouter, Depends, Query
 
-from src.modules.governance.repository import council_repository, meeting_repository
-from src.modules.governance.schemas import CouncilCreate, CouncilUpdate, CouncilMemberAdd, CouncilResponse, MeetingCreate, MeetingResponse
 from src.middleware.permissions import (
-    require_view_governance,
     require_create_governance,
     require_manage_governance,
+    require_view_governance,
+)
+from src.modules.governance.repository import council_repository, meeting_repository
+from src.modules.governance.schemas import (
+    CouncilCreate,
+    CouncilMemberAdd,
+    CouncilResponse,
+    CouncilUpdate,
+    MeetingCreate,
+    MeetingResponse,
 )
 
 router = APIRouter(prefix="/governance", tags=["Governance"])

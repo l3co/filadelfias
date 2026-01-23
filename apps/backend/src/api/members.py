@@ -21,14 +21,14 @@ async def create_member(
     Requires: Pastor, Presbítero, Diácono or Secretário (members:create permission).
     """
     await verify_permission(tenant_id, current_user, "members", "create")
-    
+
     member_dict = member_data.model_dump(exclude_unset=True)
     # Map deprecated 'role' field to 'office' if present
     if "role" in member_dict and "office" not in member_dict:
         member_dict["office"] = member_dict.pop("role")
     elif "role" in member_dict:
         member_dict.pop("role")
-    
+
     created_member = await member_repository.create_member(
         tenant_id=tenant_id, **member_dict
     )
@@ -45,7 +45,7 @@ async def list_members(
     Requires: members:view permission (all members have this).
     """
     await verify_permission(tenant_id, current_user, "members", "view")
-    
+
     members = await member_repository.get_all(tenant_id)
     return members
 
@@ -61,7 +61,7 @@ async def get_member(
     Requires: members:view permission.
     """
     await verify_permission(tenant_id, current_user, "members", "view")
-    
+
     member = await member_repository.get(tenant_id, member_id)
 
     if not member:
@@ -82,7 +82,7 @@ async def update_member(
     Requires: Pastor, Presbítero or Secretário (members:edit permission).
     """
     await verify_permission(tenant_id, current_user, "members", "edit")
-    
+
     member = await member_repository.get(tenant_id, member_id)
 
     if not member:

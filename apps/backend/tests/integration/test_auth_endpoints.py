@@ -2,8 +2,9 @@
 Integration tests for authentication endpoints.
 """
 
-import pytest
 import uuid
+
+import pytest
 from httpx import AsyncClient
 
 pytestmark = pytest.mark.integration
@@ -32,7 +33,7 @@ class TestAuthEndpoints:
     async def test_register_duplicate_email(self, client: AsyncClient):
         """Test that registering with duplicate email fails."""
         email = f"duplicate_{uuid.uuid4().hex[:8]}@example.com"
-        
+
         # Register first user
         await client.post(
             "/auth/register",
@@ -51,7 +52,7 @@ class TestAuthEndpoints:
     async def test_login_success(self, client: AsyncClient):
         """Test successful login."""
         email = f"login_{uuid.uuid4().hex[:8]}@example.com"
-        
+
         # Register user
         await client.post(
             "/auth/register",
@@ -72,7 +73,7 @@ class TestAuthEndpoints:
     async def test_login_wrong_password(self, client: AsyncClient):
         """Test login with wrong password fails."""
         email = f"wrongpass_{uuid.uuid4().hex[:8]}@example.com"
-        
+
         # Register user
         await client.post(
             "/auth/register",
@@ -90,7 +91,7 @@ class TestAuthEndpoints:
     async def test_get_current_user(self, client: AsyncClient):
         """Test getting current user profile with valid token."""
         email = f"getme_{uuid.uuid4().hex[:8]}@example.com"
-        
+
         # Register user
         await client.post(
             "/auth/register",

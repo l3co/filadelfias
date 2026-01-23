@@ -2,9 +2,10 @@
 Integration tests for invitation and password endpoints.
 """
 
-import pytest
 import uuid
-from unittest.mock import patch, AsyncMock
+from unittest.mock import AsyncMock, patch
+
+import pytest
 from httpx import AsyncClient
 
 pytestmark = pytest.mark.integration

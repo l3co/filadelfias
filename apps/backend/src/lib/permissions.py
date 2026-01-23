@@ -150,34 +150,34 @@ def get_member_permissions(
 ) -> Set[str]:
     """
     Calcula todas as permissões de um membro.
-    
+
     Args:
         member: Dados do membro (office, functions)
         system_role: Role do sistema (ADMIN, MODERATOR, ATTENDEE)
-    
+
     Returns:
         Set de permissões no formato 'resource:action'
     """
     permissions: Set[str] = set()
-    
+
     # 1. Adiciona permissões do role do sistema
     role_perms = SYSTEM_ROLE_PERMISSIONS.get(system_role.upper(), set())
     permissions.update(role_perms)
-    
+
     if not member:
         return permissions
-    
+
     # 2. Adiciona permissões do ofício eclesiástico
     office = member.get("office", "MEMBRO")
     office_perms = OFFICE_PERMISSIONS.get(office.upper(), OFFICE_PERMISSIONS["MEMBRO"])
     permissions.update(office_perms)
-    
+
     # 3. Adiciona permissões das funções
     functions = member.get("functions") or []
     for func in functions:
         func_perms = FUNCTION_PERMISSIONS.get(func.upper(), set())
         permissions.update(func_perms)
-    
+
     return permissions
 
 
@@ -188,25 +188,25 @@ def has_permission(
 ) -> bool:
     """
     Verifica se tem uma permissão específica.
-    
+
     Args:
         permissions: Set de permissões do usuário
         resource: Recurso (members, governance, financial, etc.)
         action: Ação (view, create, edit, delete, manage)
-    
+
     Returns:
         True se tem permissão
     """
     permission = f"{resource}:{action}"
-    
+
     # Verifica permissão exata
     if permission in permissions:
         return True
-    
+
     # 'manage' implica todas as outras ações
     if f"{resource}:manage" in permissions:
         return True
-    
+
     return False
 
 
@@ -218,13 +218,13 @@ def check_permission(
 ) -> bool:
     """
     Verifica se um membro tem permissão para uma ação.
-    
+
     Args:
         member: Dados do membro
         system_role: Role do sistema
         resource: Recurso
         action: Ação
-    
+
     Returns:
         True se tem permissão
     """

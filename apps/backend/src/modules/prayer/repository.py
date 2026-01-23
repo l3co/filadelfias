@@ -5,7 +5,7 @@ from typing import List, Optional
 from uuid import UUID
 
 from src.infra.firebase import get_db
-from src.modules.prayer.schemas import PrayerRequestCreate, PrayerRequestUpdate
+from src.modules.prayer.schemas import PrayerRequestCreate
 
 logger = logging.getLogger(__name__)
 
@@ -51,32 +51,32 @@ class PrayerRequestRepository:
         collection = self._get_collection(str(tenant_id))
         doc_ref = collection.document(request_id)
         doc = doc_ref.get()
-        
+
         if not doc.exists:
             return None
-        
+
         data = doc.to_dict()
         prayed_by = data.get("prayed_by", [])
-        
+
         if user_id in prayed_by:
             return data  # Already prayed
-        
+
         prayed_by.append(user_id)
         doc_ref.update({
             "prayer_count": len(prayed_by),
             "prayed_by": prayed_by,
             "updated_at": datetime.utcnow()
         })
-        
+
         return doc_ref.get().to_dict()
 
     async def delete(self, tenant_id: UUID, request_id: str) -> bool:
         collection = self._get_collection(str(tenant_id))
         doc_ref = collection.document(request_id)
-        
+
         if not doc_ref.get().exists:
             return False
-        
+
         doc_ref.delete()
         return True
 

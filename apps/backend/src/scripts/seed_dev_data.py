@@ -22,7 +22,6 @@ import asyncio
 import os
 import random
 from datetime import datetime, timedelta
-from uuid import uuid4
 
 # Configure environment
 os.environ.setdefault("ENVIRONMENT", "development")
@@ -36,8 +35,12 @@ from src.infra.repositories.member_repository import member_repository  # noqa: 
 from src.infra.repositories.membership_repository import membership_repository  # noqa: E402
 from src.infra.repositories.tenant_repository import tenant_repository  # noqa: E402
 from src.infra.repositories.user_repository import user_repository  # noqa: E402
-from src.modules.ebd.repository import ebd_class_repository, ebd_student_repository, ebd_lesson_repository  # noqa: E402
-from src.modules.financial.repository import financial_account_repository, transaction_repository, transaction_category_repository  # noqa: E402
+from src.modules.ebd.repository import ebd_class_repository, ebd_lesson_repository, ebd_student_repository  # noqa: E402
+from src.modules.financial.repository import (  # noqa: E402
+    financial_account_repository,
+    transaction_category_repository,
+    transaction_repository,
+)
 from src.modules.governance.repository import council_repository, meeting_repository  # noqa: E402
 
 # Church data
@@ -88,7 +91,7 @@ LAST_NAMES = [
 
 # Member functions
 MEMBER_FUNCTIONS = [
-    "Presbítero", "Diácono", "Líder de Louvor", "Professor EBD", 
+    "Presbítero", "Diácono", "Líder de Louvor", "Professor EBD",
     "Tesoureiro", "Secretário", "Líder de Jovens", "Líder de Crianças",
     "Coordenador de Missões", "Líder de Célula", "Membro"
 ]
@@ -130,7 +133,7 @@ def generate_phone() -> str:
 async def clean_existing_data():
     """Clean existing data for the church."""
     print("\n🧹 Cleaning existing data...")
-    
+
     existing_tenant = await tenant_repository.get_by_slug(CHURCH_DATA["slug"])
     if existing_tenant:
         print(f"  Found existing church: {existing_tenant['name']}")
@@ -139,11 +142,11 @@ async def clean_existing_data():
         for m in members:
             await member_repository.delete(existing_tenant["id"], m["id"])
         print(f"  ✓ Deleted {len(members)} members")
-        
+
         # Delete tenant
         await tenant_repository.delete(existing_tenant["id"])
-        print(f"  ✓ Deleted church")
-    
+        print("  ✓ Deleted church")
+
     # Delete admin user if exists
     existing_admin = await user_repository.get_by_email(ADMIN_USER["email"])
     if existing_admin:
@@ -151,7 +154,7 @@ async def clean_existing_data():
         for m in memberships:
             await membership_repository.delete(m["id"])
         await user_repository.delete(existing_admin["id"])
-        print(f"  ✓ Deleted admin user")
+        print("  ✓ Deleted admin user")
 
 
 async def create_church():
@@ -165,7 +168,7 @@ async def create_church():
 async def create_admin_user(tenant_id: str):
     """Create admin user and membership."""
     print("\n👤 Creating admin user...")
-    
+
     # Create user
     user = await user_repository.create_user(
         email=ADMIN_USER["email"],
@@ -173,15 +176,15 @@ async def create_admin_user(tenant_id: str):
         name=ADMIN_USER["name"],
     )
     print(f"  ✓ Created user: {user['name']} ({user['email']})")
-    
+
     # Create membership
-    membership = await membership_repository.create_membership(
+    await membership_repository.create_membership(
         user_id=user["id"],
         tenant_id=tenant_id,
         role="admin",
     )
-    print(f"  ✓ Created admin membership")
-    
+    print("  ✓ Created admin membership")
+
     # Create member profile
     member = await member_repository.create_member(
         tenant_id=tenant_id,
@@ -194,35 +197,34 @@ async def create_admin_user(tenant_id: str):
         office="PRESBITERO",
         user_id=user["id"],
     )
-    print(f"  ✓ Created member profile")
-    
+    print("  ✓ Created member profile")
+
     return user, member
 
 
 async def create_members(tenant_id: str, count: int = 55):
     """Create random members."""
     print(f"\n👥 Creating {count} members...")
-    
+
     members = []
     users = []
-    
+
     for i in range(count):
         # Generate random name
         first_name = random.choice(FIRST_NAMES)
         last_name = random.choice(LAST_NAMES)
         full_name = f"{first_name} {last_name}"
         email = generate_email(full_name)
-        
+
         # Random data
         gender = random.choice(["M", "F"])
-        marital_status = random.choice(["Solteiro", "Casado", "Viúvo", "Divorciado"])
         birth_year = random.randint(1940, 2010)
         birth_date = datetime(birth_year, random.randint(1, 12), random.randint(1, 28)).date()
-        
+
         # Random functions (1-3 per member)
         num_functions = random.randint(0, 3)
         functions = random.sample(MEMBER_FUNCTIONS, num_functions) if num_functions > 0 else []
-        
+
         # Create user (30% chance)
         user_id = None
         if random.random() < 0.3:
@@ -233,7 +235,7 @@ async def create_members(tenant_id: str, count: int = 55):
                     name=full_name,
                 )
                 user_id = user["id"]
-                
+
                 # Create membership
                 await membership_repository.create_membership(
                     user_id=user["id"],
@@ -243,11 +245,11 @@ async def create_members(tenant_id: str, count: int = 55):
                 users.append(user)
             except Exception as e:
                 print(f"  ⚠️  Could not create user for {full_name}: {e}")
-        
+
         # Create member
         # Map random function to office (without accents to match enum)
         office = "PRESBITERO" if "Presbítero" in functions else "DIACONO" if "Diácono" in functions else "MEMBRO"
-        
+
         member = await member_repository.create_member(
             tenant_id=tenant_id,
             full_name=full_name,
@@ -260,10 +262,10 @@ async def create_members(tenant_id: str, count: int = 55):
             user_id=user_id,
         )
         members.append(member)
-        
+
         if (i + 1) % 10 == 0:
             print(f"  ✓ Created {i + 1}/{count} members...")
-    
+
     print(f"  ✓ Created {len(members)} members ({len(users)} with user accounts)")
     return members
 
@@ -271,7 +273,7 @@ async def create_members(tenant_id: str, count: int = 55):
 async def create_ebd_classes(tenant_id: str, members: list):
     """Create EBD classes with students and lessons."""
     print("\n📚 Creating EBD classes...")
-    
+
     classes = []
     for class_data in EBD_CLASSES:
         # Create class
@@ -283,11 +285,11 @@ async def create_ebd_classes(tenant_id: str, members: list):
             schedule="Domingo, 9:00",
         )
         classes.append(ebd_class)
-        
+
         # Add 5-15 students per class
         num_students = random.randint(5, 15)
         selected_members = random.sample(members, min(num_students, len(members)))
-        
+
         for member in selected_members:
             await ebd_student_repository.create_student(
                 class_id=ebd_class["id"],
@@ -296,7 +298,7 @@ async def create_ebd_classes(tenant_id: str, members: list):
                 parent_name=random.choice(members)["full_name"] if random.random() > 0.5 else None,
                 phone=member.get("phone"),
             )
-        
+
         # Add 4 lessons (last month)
         for week in range(1, 5):
             lesson_date = datetime.now().date() - timedelta(days=(5-week) * 7)
@@ -307,7 +309,7 @@ async def create_ebd_classes(tenant_id: str, members: list):
                 teacher=ebd_class["teacher"],
                 attendance=random.randint(num_students - 3, num_students),
             )
-    
+
     print(f"  ✓ Created {len(classes)} EBD classes with students and lessons")
     return classes
 
@@ -315,7 +317,7 @@ async def create_ebd_classes(tenant_id: str, members: list):
 async def create_financial_data(tenant_id: str):
     """Create financial accounts and transactions."""
     print("\n💰 Creating financial data...")
-    
+
     # Create accounts
     accounts = []
     account_types = [
@@ -325,7 +327,7 @@ async def create_financial_data(tenant_id: str):
         {"name": "Missões", "type": "savings", "balance": 3200.00},
         {"name": "Construção", "type": "savings", "balance": 25000.00},
     ]
-    
+
     for acc_data in account_types:
         account = await financial_account_repository.create_account(
             tenant_id=tenant_id,
@@ -334,9 +336,9 @@ async def create_financial_data(tenant_id: str):
             balance=acc_data["balance"],
         )
         accounts.append(account)
-    
+
     print(f"  ✓ Created {len(accounts)} financial accounts")
-    
+
     # Create categories
     categories = []
     category_types = [
@@ -359,7 +361,7 @@ async def create_financial_data(tenant_id: str):
         {"name": "Salários", "type": "EXPENSE"},
         {"name": "Outras Despesas", "type": "EXPENSE"},
     ]
-    
+
     for cat_data in category_types:
         category = await transaction_category_repository.create_category(
             tenant_id=tenant_id,
@@ -367,9 +369,9 @@ async def create_financial_data(tenant_id: str):
             type=cat_data["type"],
         )
         categories.append(category)
-    
+
     print(f"  ✓ Created {len(categories)} transaction categories")
-    
+
     # Create transactions (last 3 months)
     transaction_types = [
         {"type": "income", "category": "Dízimos", "amount_range": (100, 500)},
@@ -380,7 +382,7 @@ async def create_financial_data(tenant_id: str):
         {"type": "expense", "category": "Material de Limpeza", "amount_range": (50, 150)},
         {"type": "expense", "category": "Missões", "amount_range": (500, 1500)},
     ]
-    
+
     transactions_created = 0
     for days_ago in range(90):
         # Random number of transactions per day (0-3)
@@ -388,7 +390,7 @@ async def create_financial_data(tenant_id: str):
         for _ in range(num_transactions):
             trans_type = random.choice(transaction_types)
             amount = random.uniform(*trans_type["amount_range"])
-            
+
             await transaction_repository.create_transaction(
                 tenant_id=tenant_id,
                 account_id=random.choice(accounts)["id"],
@@ -399,26 +401,26 @@ async def create_financial_data(tenant_id: str):
                 description=f"{trans_type['category']} - {datetime.now().date() - timedelta(days=days_ago)}",
             )
             transactions_created += 1
-    
+
     print(f"  ✓ Created {transactions_created} financial transactions")
 
 
 async def create_governance_data(tenant_id: str, members: list):
     """Create councils and meetings."""
     print("\n⚖️  Creating governance data...")
-    
+
     # Create councils
     council_types = [
         {"name": "Conselho", "type": "SESSION", "description": "Conselho da Igreja"},
         {"name": "Junta Diaconal", "type": "DEACONS", "description": "Junta de Diáconos"},
     ]
-    
+
     councils = []
     for council_data in council_types:
         # Select council members (5-10)
         num_members = random.randint(5, 10)
         council_members = random.sample(members, min(num_members, len(members)))
-        
+
         council = await council_repository.create_council(
             tenant_id=tenant_id,
             name=council_data["name"],
@@ -427,15 +429,15 @@ async def create_governance_data(tenant_id: str, members: list):
             members=[m["full_name"] for m in council_members],
         )
         councils.append(council)
-    
+
     print(f"  ✓ Created {len(councils)} councils")
-    
+
     # Create meetings for each council (last 6 months)
     meetings_created = 0
     for council in councils:
         for month_ago in range(6):
             meeting_date = datetime.now() - timedelta(days=month_ago * 30 + random.randint(0, 15))
-            
+
             # Select attendees (subset of council members)
             council_member_names = council.get("members", [])
             if council_member_names:
@@ -443,79 +445,33 @@ async def create_governance_data(tenant_id: str, members: list):
                 attendees = random.sample(council_member_names, min(num_attendees, len(council_member_names)))
             else:
                 attendees = []
-            
+
             await meeting_repository.create_meeting(
                 council_id=council["id"],
                 title=f"Reunião {council['name']} - {meeting_date.strftime('%B/%Y')}",
                 scheduled_date=meeting_date.date(),
                 location="Salão da Igreja",
-                agenda=f"1. Abertura em oração\n2. Leitura da ata anterior\n3. Assuntos gerais\n4. Decisões\n5. Encerramento",
+                agenda="1. Abertura em oração\n2. Leitura da ata anterior\n3. Assuntos gerais\n4. Decisões\n5. Encerramento",
                 attendees=attendees,
                 decisions=f"Aprovado: {random.choice(['Orçamento para missões', 'Reforma do templo', 'Compra de equipamentos', 'Evento evangelístico', 'Curso de capacitação'])}",
             )
             meetings_created += 1
-    
+
     print(f"  ✓ Created {meetings_created} meetings")
 
 
 async def create_governance_meetings(tenant_id: str, members: list):
     """Create governance meetings."""
-    print("\n⚖️  Creating governance meetings...")
-    
-    meeting_types = ["Conselho", "Assembleia", "Diretoria"]
-    meetings_created = 0
-    
-    # Create meetings for the last 6 months
-    for month_ago in range(6):
-        for meeting_type in meeting_types:
-            meeting_date = datetime.now() - timedelta(days=month_ago * 30)
-            
-            # Select attendees (5-15 members)
-            num_attendees = random.randint(5, 15)
-            attendees = [m["name"] for m in random.sample(members, min(num_attendees, len(members)))]
-            
-            await governance_meeting_repository.create_meeting(
-                tenant_id=tenant_id,
-                title=f"Reunião do {meeting_type} - {meeting_date.strftime('%B/%Y')}",
-                meeting_type=meeting_type.lower(),
-                date=meeting_date.date(),
-                time=f"{random.randint(18, 20)}:00",
-                location="Salão da Igreja",
-                agenda=f"1. Abertura\n2. Leitura da ata anterior\n3. Assuntos gerais\n4. Encerramento",
-                attendees=attendees,
-                decisions=f"Aprovado orçamento de R$ {random.randint(1000, 5000)},00 para {random.choice(['missões', 'reformas', 'eventos', 'materiais'])}",
-            )
-            meetings_created += 1
-    
-    print(f"  ✓ Created {meetings_created} governance meetings")
+    # TODO: Implement when governance_meeting_repository is available
+    print("\n⚖️  Skipping governance meetings (repository not implemented yet)...")
+    _ = tenant_id, members  # Suppress unused variable warnings
 
 
 async def create_missionaries(tenant_id: str, members: list):
     """Create missionaries and mission fields."""
-    print("\n🌍 Creating missionaries...")
-    
-    missionaries_created = 0
-    for field in MISSION_FIELDS:
-        # Select 1-2 missionaries per field
-        num_missionaries = random.randint(1, 2)
-        selected_members = random.sample(members, min(num_missionaries, len(members)))
-        
-        for member in selected_members:
-            await missionary_repository.create_missionary(
-                tenant_id=tenant_id,
-                name=member["name"],
-                email=member.get("email"),
-                phone=member.get("phone"),
-                field=field["name"],
-                country=field["country"],
-                city=field["city"],
-                start_date=(datetime.now().date() - timedelta(days=random.randint(365, 1825))),
-                support_amount=random.randint(500, 2000),
-                description=f"Missionário(a) atuando em {field['city']}, {field['country']}",
-            )
-            missionaries_created += 1
-    
-    print(f"  ✓ Created {missionaries_created} missionaries")
+    # TODO: Implement when missionary_repository is available
+    print("\n🌍 Skipping missionaries (repository not implemented yet)...")
+    _ = tenant_id, members  # Suppress unused variable warnings
 
 
 async def main():
@@ -523,39 +479,39 @@ async def main():
     print("\n" + "="*60)
     print("🌱 SEED SCRIPT - Igreja Presbiteriana Filadélfia")
     print("="*60)
-    
+
     try:
         # Clean existing data
         await clean_existing_data()
-        
+
         # Create church
         tenant = await create_church()
         tenant_id = tenant["id"]
-        
+
         # Create admin user
         admin_user, admin_member = await create_admin_user(tenant_id)
-        
+
         # Create members
         members = await create_members(tenant_id, count=55)
         all_members = [admin_member] + members
-        
+
         # Create EBD classes
         await create_ebd_classes(tenant_id, all_members)
-        
+
         # Create financial data
         await create_financial_data(tenant_id)
-        
+
         # Create governance data (councils and meetings)
         await create_governance_data(tenant_id, all_members)
-        
+
         # TODO: Uncomment when missionaries module is fully implemented
         # Create missionaries
         # await create_missionaries(tenant_id, all_members)
-        
+
         print("\n" + "="*60)
         print("✅ SEED COMPLETED SUCCESSFULLY!")
         print("="*60)
-        print(f"\n📊 Summary:")
+        print("\n📊 Summary:")
         print(f"  • Church: {tenant['name']}")
         print(f"  • Admin: {admin_user['email']} (password: {COMMON_PASSWORD})")
         print(f"  • Members: {len(all_members)} total")
@@ -563,7 +519,7 @@ async def main():
         print(f"  • All user passwords: {COMMON_PASSWORD}")
         print("\n🚀 You can now login and explore the system!")
         print("="*60 + "\n")
-        
+
     except Exception as e:
         print(f"\n❌ Error during seed: {e}")
         import traceback

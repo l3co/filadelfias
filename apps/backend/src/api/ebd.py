@@ -2,26 +2,26 @@ from typing import List
 
 from fastapi import APIRouter, Depends, Query
 
+from src.middleware.permissions import (
+    PermissionChecker,
+    require_manage_ebd,
+    require_view_ebd,
+)
 from src.modules.ebd.repository import (
     ebd_class_repository,
+    ebd_comment_repository,
     ebd_lesson_repository,
     ebd_student_repository,
-    ebd_comment_repository,
 )
 from src.modules.ebd.schemas import (
     EBDClassCreate,
     EBDClassResponse,
+    EBDCommentCreate,
+    EBDCommentResponse,
     EBDLessonCreate,
     EBDLessonResponse,
     EBDStudentCreate,
     EBDStudentResponse,
-    EBDCommentCreate,
-    EBDCommentResponse,
-)
-from src.middleware.permissions import (
-    require_view_ebd,
-    require_manage_ebd,
-    PermissionChecker,
 )
 
 router = APIRouter(prefix="/ebd", tags=["Education (EBD)"])

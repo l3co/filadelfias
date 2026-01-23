@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # 1. Firestore Emulator
   firestore-test:
@@ -10,11 +8,11 @@ services:
     ports:
       - "8082:8080"
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/" ]
-      interval: 10s
-      timeout: 20s
-      retries: 5
-      start_period: 30s
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 2s
+      timeout: 5s
+      retries: 15
+      start_period: 5s
 
   # 2. Backend API (runs seed on startup)
   backend-test:
@@ -33,7 +31,6 @@ services:
       - SECRET_KEY=test-secret-key-for-e2e
       - DEBUG=true
       - CORS_ORIGINS_STR=http://localhost:5173
-      # Fix pythonpath for seed script
       - PYTHONPATH=/app
     depends_on:
       firestore-test:
@@ -41,35 +38,28 @@ services:
     ports:
       - "8000:8000"
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
-      interval: 5s
-      timeout: 10s
-      retries: 5
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 2s
+      timeout: 5s
+      retries: 15
+      start_period: 3s
 
   # 3. Frontend Web App
   web-test:
     build:
       context: ./apps/web
       dockerfile: Dockerfile.e2e
-    environment:
-      - VITE_API_URL=http://backend-test:8000
+      args:
+        # Use localhost:8000 because Playwright tests run on host, not inside Docker
+        VITE_API_URL: http://localhost:8000
     depends_on:
       backend-test:
         condition: service_healthy
     ports:
       - "5173:5173"
-
-  # 4. E2E Tests Runner
-  e2e:
-    image: mcr.microsoft.com/playwright:v1.57.0-jammy
-    working_dir: /app
-    volumes:
-      - ./apps/web:/app
-      - /app/node_modules
-    environment:
-      - VITE_API_URL=http://backend-test:8000
-      - CI=true
-    command: sh -c "npm ci && npx bddgen && npx playwright test"
-    depends_on:
-      - web-test
-    ipc: host
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5173"]
+      interval: 2s
+      timeout: 5s
+      retries: 20
+      start_period: 5s

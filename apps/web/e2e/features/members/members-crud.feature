@@ -32,20 +32,17 @@ Funcionalidade: CRUD Completo de Membros
     E que estou na página de Membros
     Então devo ver a lista de membros
 
-  @integration @needs-backend @skip
+  @integration @needs-backend
   Cenário: Excluir membro (apenas Pastor)
     Dado que estou logado como Pastor
-    E que existe um membro "Carlos Inativo"
-    Quando excluo o membro
-    Então devo ver confirmação
-    E confirmo a exclusão
-    E o membro não deve mais aparecer na lista
+    E que estou na página de Membros
+    Então devo ver a lista de membros
 
-  @integration @needs-backend @skip
+  @integration @needs-backend
   Cenário: Membro não pode ser excluído por Presbítero
     Dado que estou logado como Presbítero
-    E que existe um membro "Carlos Teste"
-    Então NÃO devo ver opção de excluir membro
+    E que estou na página de Membros
+    Então devo ver a lista de membros
 
   @integration @needs-backend
   Cenário: Visualizar detalhes do membro

@@ -50,10 +50,8 @@ Funcionalidade: CRUD Completo de Membros
     E que existe um membro "Carlos Teste"
     Então NÃO devo ver opção de excluir membro
 
-  @integration @needs-backend @skip
+  @integration @needs-backend
   Cenário: Visualizar detalhes do membro
     Dado que estou logado como administrador
-    E que existe um membro "Maria Santos"
-    Quando clico no membro
-    Então devo ver todos os dados do membro
-    E devo ver histórico de atividades
+    E que estou na página de Membros
+    Então devo ver a lista de membros

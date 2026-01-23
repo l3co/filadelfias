@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { Calendar, MapPin, FileText, CalendarClock } from 'lucide-react';
 import {
     Dialog,
@@ -51,7 +51,7 @@ export function CreateMeetingDialog({
     councilName,
     isLoading
 }: CreateMeetingDialogProps) {
-    const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<CreateMeetingFormData>({
+    const { register, handleSubmit, reset, setValue, control, formState: { errors } } = useForm<CreateMeetingFormData>({
         defaultValues: {
             meeting_type: 'ORDINARY',
             date: '',
@@ -61,7 +61,10 @@ export function CreateMeetingDialog({
         }
     });
 
-    const meetingType = watch('meeting_type');
+    const meetingType = useWatch({
+        control,
+        name: 'meeting_type',
+    });
 
     useEffect(() => {
         if (!isOpen) {

@@ -9,13 +9,21 @@ export interface Council {
     member_ids?: string[];
 }
 
+export type MeetingStatus = 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+export type MeetingType = 'ORDINARY' | 'EXTRAORDINARY';
+
 export interface Meeting {
     id: string;
     council_id: string;
     date: string;
-    status: string;
+    status: MeetingStatus;
     agenda?: string;
     location?: string;
+    meeting_type: MeetingType;
+    minutes?: string;
+    attendees: string[];
+    completed_at?: string;
+    created_at: string;
 }
 
 export interface CreateCouncilDTO {
@@ -29,6 +37,16 @@ export interface CreateMeetingDTO {
     date: string;
     agenda?: string;
     location?: string;
+    meeting_type?: MeetingType;
+}
+
+export interface UpdateMeetingDTO {
+    date?: string;
+    agenda?: string;
+    location?: string;
+    meeting_type?: MeetingType;
+    minutes?: string;
+    attendees?: string[];
 }
 
 export const governanceService = {
@@ -46,13 +64,38 @@ export const governanceService = {
         return data;
     },
 
-    listMeetings: async (councilId: string) => {
-        const { data } = await api.get<Meeting[]>(`/governance/councils/${councilId}/meetings`);
+    listMeetings: async (tenantId: string, councilId: string) => {
+        const { data } = await api.get<Meeting[]>(`/governance/councils/${councilId}/meetings`, {
+            params: { tenant_id: tenantId }
+        });
         return data;
     },
 
-    createMeeting: async (meeting: CreateMeetingDTO) => {
-        const { data } = await api.post<Meeting>('/governance/meetings', meeting);
+    getMeeting: async (tenantId: string, meetingId: string) => {
+        const { data } = await api.get<Meeting>(`/governance/meetings/${meetingId}`, {
+            params: { tenant_id: tenantId }
+        });
+        return data;
+    },
+
+    createMeeting: async (tenantId: string, meeting: CreateMeetingDTO) => {
+        const { data } = await api.post<Meeting>('/governance/meetings', meeting, {
+            params: { tenant_id: tenantId }
+        });
+        return data;
+    },
+
+    updateMeeting: async (tenantId: string, meetingId: string, meeting: UpdateMeetingDTO) => {
+        const { data } = await api.patch<Meeting>(`/governance/meetings/${meetingId}`, meeting, {
+            params: { tenant_id: tenantId }
+        });
+        return data;
+    },
+
+    completeMeeting: async (tenantId: string, meetingId: string) => {
+        const { data } = await api.post<Meeting>(`/governance/meetings/${meetingId}/complete`, {}, {
+            params: { tenant_id: tenantId }
+        });
         return data;
     },
 
@@ -70,7 +113,7 @@ export const governanceService = {
     },
 
     addMember: async (tenantId: string, councilId: string, memberId: string) => {
-        const { data } = await api.post<Council>(`/governance/councils/${councilId}/members`, 
+        const { data } = await api.post<Council>(`/governance/councils/${councilId}/members`,
             { member_id: memberId },
             { params: { tenant_id: tenantId } }
         );
@@ -84,3 +127,4 @@ export const governanceService = {
         return data;
     }
 };
+

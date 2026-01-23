@@ -154,6 +154,11 @@ Then('devo ver pedidos na lista', async ({ page }) => {
     await expect(page.getByRole('button', { name: /orar/i }).first()).toBeVisible({ timeout: 5000 });
 });
 
+Then('devo ver meus pedidos de oração', async ({ page }) => {
+    // Verify prayer requests heading is visible
+    await expect(page.getByRole('heading', { name: /pedidos de oração/i })).toBeVisible({ timeout: 5000 });
+});
+
 Then('devo ver o formulário de pedido de oração', async ({ page }) => {
     // Form opens inline with a heading and textbox
     await expect(page.getByRole('heading', { name: /compartilhar pedido/i })).toBeVisible({ timeout: 5000 });

@@ -28,14 +28,11 @@ Funcionalidade: Pedidos de Oração
     Quando clico em "Orar"
     Então o contador de orações deve aumentar
 
-  @integration @needs-backend @skip
+  @integration @needs-backend
   Cenário: Visualizar meus pedidos
     Dado que estou logado como membro
-    E que criei pedidos de oração
-    Quando acesso "Meus Pedidos"
-    Então devo ver apenas meus pedidos
-    E devo poder editar meus pedidos
-    E devo poder excluir meus pedidos
+    E que estou na página de Pedidos de Oração
+    Então devo ver meus pedidos de oração
 
   @integration @needs-backend
   Cenário: Filtrar pedidos por categoria

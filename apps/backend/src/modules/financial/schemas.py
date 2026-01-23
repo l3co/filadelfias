@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import Optional
+from typing import Optional, Union
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -61,8 +61,8 @@ class TransactionResponse(TransactionBase):
     id: UUID
     tenant_id: UUID
     created_at: datetime
-    category: Optional[TransactionCategoryResponse] = None
-    account: Optional[FinancialAccountResponse] = None
+    category: Optional[Union[TransactionCategoryResponse, str]] = None
+    account: Optional[Union[FinancialAccountResponse, str]] = None
 
     class Config:
         from_attributes = True

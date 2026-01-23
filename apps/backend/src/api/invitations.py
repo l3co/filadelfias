@@ -85,7 +85,7 @@ async def invite_member(
     request: Request,
     tenant_id: str,
     member_id: str,
-    role: str = Query("MEMBER", regex="^(ADMIN|MEMBER)$", description="System role for the user"),
+    role: str = Query("MEMBER", pattern="^(ADMIN|MEMBER)$", description="System role for the user"),
     current_user: dict = Depends(get_current_user),
 ):
     """

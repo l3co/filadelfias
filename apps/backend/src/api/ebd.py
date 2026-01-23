@@ -62,6 +62,31 @@ async def list_classes(
     return await ebd_class_repository.get_all(tenant_id)
 
 
+@router.get("/my-class")
+async def get_my_class(
+    tenant_id: str = Query(..., description="ID of the tenant"),
+    auth_context: dict = Depends(require_view_ebd),
+):
+    """
+    Get the EBD class where the current user's member is enrolled.
+    Returns class info with lessons.
+    """
+    member_id = auth_context.get("member_id")
+    if not member_id:
+        return None
+    
+    # Get the class
+    ebd_class = await ebd_student_repository.get_class_by_member(tenant_id, member_id)
+    if not ebd_class:
+        return None
+    
+    # Get lessons for this class
+    lessons = await ebd_lesson_repository.get_by_class(ebd_class["id"])
+    ebd_class["lessons"] = lessons
+    
+    return ebd_class
+
+
 # Students
 @router.post("/classes/{class_id}/students", response_model=EBDStudentResponse)
 async def enroll_student(

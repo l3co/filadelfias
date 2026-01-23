@@ -67,7 +67,19 @@ export interface CreateLessonDTO {
     homework_url?: string;
 }
 
+export interface MyEBDClass extends EBDClass {
+    lessons?: EBDLesson[];
+    enrollment?: EBDStudent;
+}
+
 export const ebdService = {
+    getMyClass: async (tenantId: string) => {
+        const { data } = await api.get<MyEBDClass | null>('/ebd/my-class', {
+            params: { tenant_id: tenantId }
+        });
+        return data;
+    },
+
     listClasses: async (tenantId: string) => {
         const { data } = await api.get<EBDClass[]>('/ebd/classes', {
             params: { tenant_id: tenantId }

@@ -1,49 +1,79 @@
-import { GraduationCap, Users, Calendar, BookOpen, Clock, MapPin } from 'lucide-react';
+import { GraduationCap, Users, Calendar, BookOpen, Clock, MapPin, Loader2 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { PageHeaderWithIcon } from '../../components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
 import { EmptyState } from '../../components/EmptyState';
+import { useCurrentTenant } from '../../hooks/useAuth';
+import { ebdService, type MyEBDClass, type EBDLesson } from '../../services/ebd';
 
-interface EBDClass {
-  id: string;
-  name: string;
-  teacher: string;
-  schedule: string;
-  location: string;
-  currentLesson: string;
-  nextClass: string;
-  totalStudents: number;
+function getLessonStatus(lessonDate: string): 'completed' | 'current' | 'upcoming' {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  const date = new Date(lessonDate);
+  date.setHours(0, 0, 0, 0);
+  
+  const diffDays = Math.floor((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  
+  if (diffDays < 0) return 'completed';
+  if (diffDays <= 7) return 'current';
+  return 'upcoming';
 }
 
-const mockUserClass: EBDClass | null = {
-  id: '1',
-  name: 'Jovens e Adultos',
-  teacher: 'Prof. Carlos Mendes',
-  schedule: 'Domingos às 9h',
-  location: 'Sala 3 - Anexo',
-  currentLesson: 'A Soberania de Deus',
-  nextClass: 'Domingo, 26 de Janeiro',
-  totalStudents: 18,
-};
-
-interface Lesson {
-  id: string;
-  number: number;
-  title: string;
-  date: string;
-  status: 'completed' | 'current' | 'upcoming';
+function formatLessonDate(dateStr: string): string {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
 }
 
-const mockLessons: Lesson[] = [
-  { id: '1', number: 1, title: 'Introdução ao Trimestre', date: '05/01', status: 'completed' },
-  { id: '2', number: 2, title: 'A Natureza de Deus', date: '12/01', status: 'completed' },
-  { id: '3', number: 3, title: 'A Soberania de Deus', date: '19/01', status: 'current' },
-  { id: '4', number: 4, title: 'A Providência Divina', date: '26/01', status: 'upcoming' },
-  { id: '5', number: 5, title: 'A Graça de Deus', date: '02/02', status: 'upcoming' },
-];
+function getNextSunday(): string {
+  const today = new Date();
+  const daysUntilSunday = (7 - today.getDay()) % 7 || 7;
+  const nextSunday = new Date(today);
+  nextSunday.setDate(today.getDate() + daysUntilSunday);
+  return nextSunday.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+}
+
+function getCurrentLesson(lessons: EBDLesson[]): EBDLesson | null {
+  const sorted = [...lessons].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const today = new Date();
+  
+  for (const lesson of sorted) {
+    const lessonDate = new Date(lesson.date);
+    if (lessonDate >= today || getLessonStatus(lesson.date) === 'current') {
+      return lesson;
+    }
+  }
+  return sorted[sorted.length - 1] || null;
+}
 
 export function MemberEBDPage() {
-  const userClass = mockUserClass;
+  const tenant = useCurrentTenant();
+  
+  const { data: userClass, isLoading } = useQuery({
+    queryKey: ['my-ebd-class', tenant?.id],
+    queryFn: () => ebdService.getMyClass(tenant!.id),
+    enabled: !!tenant?.id,
+  });
+
+  const lessons = userClass?.lessons || [];
+  const sortedLessons = [...lessons].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const currentLesson = getCurrentLesson(lessons);
+
+  if (isLoading) {
+    return (
+      <div className="max-w-3xl mx-auto">
+        <PageHeaderWithIcon
+          icon={GraduationCap}
+          title="Minha Turma - EBD"
+          description="Escola Bíblica Dominical"
+        />
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+        </div>
+      </div>
+    );
+  }
 
   if (!userClass) {
     return (
@@ -76,7 +106,7 @@ export function MemberEBDPage() {
           <div className="flex items-center justify-between">
             <CardTitle className="text-xl">{userClass.name}</CardTitle>
             <Badge variant="secondary" className="bg-white/20 text-white">
-              {userClass.totalStudents} alunos
+              {sortedLessons.length} lições
             </Badge>
           </div>
         </CardHeader>
@@ -87,8 +117,8 @@ export function MemberEBDPage() {
                 <Users size={20} className="text-indigo-600" />
               </div>
               <div>
-                <p className="text-xs text-gray-500">Professor(a)</p>
-                <p className="font-medium text-gray-900">{userClass.teacher}</p>
+                <p className="text-xs text-gray-500">Descrição</p>
+                <p className="font-medium text-gray-900">{userClass.description || userClass.name}</p>
               </div>
             </div>
             
@@ -98,7 +128,7 @@ export function MemberEBDPage() {
               </div>
               <div>
                 <p className="text-xs text-gray-500">Horário</p>
-                <p className="font-medium text-gray-900">{userClass.schedule}</p>
+                <p className="font-medium text-gray-900">Domingos às 9h</p>
               </div>
             </div>
             
@@ -108,7 +138,7 @@ export function MemberEBDPage() {
               </div>
               <div>
                 <p className="text-xs text-gray-500">Local</p>
-                <p className="font-medium text-gray-900">{userClass.location}</p>
+                <p className="font-medium text-gray-900">{userClass.location || 'A definir'}</p>
               </div>
             </div>
             
@@ -118,7 +148,7 @@ export function MemberEBDPage() {
               </div>
               <div>
                 <p className="text-xs text-gray-500">Próxima Aula</p>
-                <p className="font-medium text-gray-900">{userClass.nextClass}</p>
+                <p className="font-medium text-gray-900 capitalize">{getNextSunday()}</p>
               </div>
             </div>
           </div>
@@ -126,71 +156,78 @@ export function MemberEBDPage() {
       </Card>
 
       {/* Current Lesson Highlight */}
-      <Card className="mb-6 border-2 border-indigo-200 bg-indigo-50">
-        <CardContent className="p-5">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-xl bg-indigo-500 flex items-center justify-center flex-shrink-0">
-              <BookOpen size={24} className="text-white" />
+      {currentLesson && (
+        <Card className="mb-6 border-2 border-indigo-200 bg-indigo-50">
+          <CardContent className="p-5">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-xl bg-indigo-500 flex items-center justify-center flex-shrink-0">
+                <BookOpen size={24} className="text-white" />
+              </div>
+              <div>
+                <p className="text-sm text-indigo-600 font-medium mb-1">Lição Atual</p>
+                <h3 className="text-lg font-bold text-gray-900">{currentLesson.topic}</h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  {currentLesson.description || 'Prepare-se estudando o texto bíblico da lição antes do encontro'}
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-indigo-600 font-medium mb-1">Lição Atual</p>
-              <h3 className="text-lg font-bold text-gray-900">{userClass.currentLesson}</h3>
-              <p className="text-sm text-gray-600 mt-1">
-                Prepare-se estudando o texto bíblico da lição antes do encontro
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Lessons List */}
-      <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Lições do Trimestre</h3>
-        <div className="space-y-2">
-          {mockLessons.map((lesson) => (
-            <Card 
-              key={lesson.id} 
-              className={`transition-all ${
-                lesson.status === 'current' 
-                  ? 'border-2 border-indigo-300 bg-indigo-50/50' 
-                  : lesson.status === 'completed'
-                  ? 'opacity-75'
-                  : ''
-              }`}
-            >
-              <CardContent className="p-4 flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                    lesson.status === 'completed' 
-                      ? 'bg-green-100 text-green-700'
-                      : lesson.status === 'current'
-                      ? 'bg-indigo-500 text-white'
-                      : 'bg-gray-100 text-gray-500'
-                  }`}>
-                    {lesson.number}
-                  </div>
-                  <div>
-                    <p className={`font-medium ${
-                      lesson.status === 'completed' ? 'text-gray-500' : 'text-gray-900'
-                    }`}>
-                      {lesson.title}
-                    </p>
-                    <p className="text-sm text-gray-400">{lesson.date}</p>
-                  </div>
-                </div>
-                {lesson.status === 'current' && (
-                  <Badge className="bg-indigo-500">Atual</Badge>
-                )}
-                {lesson.status === 'completed' && (
-                  <Badge variant="outline" className="text-green-600 border-green-200">
-                    Concluída
-                  </Badge>
-                )}
-              </CardContent>
-            </Card>
-          ))}
+      {sortedLessons.length > 0 && (
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Lições do Trimestre</h3>
+          <div className="space-y-2">
+            {sortedLessons.map((lesson, index) => {
+              const status = getLessonStatus(lesson.date);
+              return (
+                <Card 
+                  key={lesson.id} 
+                  className={`transition-all ${
+                    status === 'current' 
+                      ? 'border-2 border-indigo-300 bg-indigo-50/50' 
+                      : status === 'completed'
+                      ? 'opacity-75'
+                      : ''
+                  }`}
+                >
+                  <CardContent className="p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                        status === 'completed' 
+                          ? 'bg-green-100 text-green-700'
+                          : status === 'current'
+                          ? 'bg-indigo-500 text-white'
+                          : 'bg-gray-100 text-gray-500'
+                      }`}>
+                        {index + 1}
+                      </div>
+                      <div>
+                        <p className={`font-medium ${
+                          status === 'completed' ? 'text-gray-500' : 'text-gray-900'
+                        }`}>
+                          {lesson.topic}
+                        </p>
+                        <p className="text-sm text-gray-400">{formatLessonDate(lesson.date)}</p>
+                      </div>
+                    </div>
+                    {status === 'current' && (
+                      <Badge className="bg-indigo-500">Atual</Badge>
+                    )}
+                    {status === 'completed' && (
+                      <Badge variant="outline" className="text-green-600 border-green-200">
+                        Concluída
+                      </Badge>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

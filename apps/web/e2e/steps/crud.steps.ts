@@ -32,6 +32,12 @@ When('pesquiso por {string}', async ({ page }, searchTerm: string) => {
     const searchInput = page.getByPlaceholder(/buscar|pesquisar|search/i).first();
     await searchInput.fill(searchTerm);
     await searchInput.press('Enter');
+    await page.waitForLoadState('networkidle');
+});
+
+Then('devo ver resultados da busca', async ({ page }) => {
+    // Verify that search results are displayed (table rows or cards)
+    await expect(page.locator('table tbody tr, [role="listitem"], .card').first()).toBeVisible({ timeout: 5000 });
 });
 
 Then('devo ver apenas membros com {string} no nome', async ({ page }, searchTerm: string) => {

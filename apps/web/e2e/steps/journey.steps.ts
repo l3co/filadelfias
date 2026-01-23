@@ -129,6 +129,11 @@ Then('devo ver o dashboard de membros', async ({ page }) => {
     await expect(page.getByRole('heading', { name: /portal|membro|início/i }).first()).toBeVisible({ timeout: 5000 });
 });
 
+Then('devo ver o formulário de novo membro', async ({ page }) => {
+    const dialog = page.locator('[role="dialog"]');
+    await expect(dialog).toBeVisible({ timeout: 5000 });
+});
+
 Then('devo ser redirecionado para {string} ou ver mensagem de acesso negado', async ({ page }, path: string) => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000); // Wait for potential redirect

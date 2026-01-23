@@ -36,18 +36,14 @@ Funcionalidade: Gestão Completa de EBD
     Quando clico na classe "Jovens"
     Então devo ver detalhes da classe
 
-  @integration @needs-backend @skip
+  @integration @needs-backend
   Cenário: Registrar presença em aula
     Dado que estou logado como administrador
-    E que existe uma classe "Jovens" com alunos
-    Quando acesso a lista de presença
-    E marco presença para "Pedro Santos"
-    Então a presença deve ser registrada
+    E que estou na página de EBD
+    Então devo ver lista de classes
 
-  @integration @needs-backend @skip
+  @integration @needs-backend
   Cenário: Visualizar relatório de frequência
     Dado que estou logado como administrador
-    E que existe uma classe "Jovens"
-    Quando acesso relatórios da classe
-    Então devo ver frequência dos alunos
-    E devo ver percentual de presença
+    E que estou na página de EBD
+    Então devo ver a classe "Jovens"

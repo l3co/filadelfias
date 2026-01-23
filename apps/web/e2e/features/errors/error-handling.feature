@@ -14,10 +14,10 @@ Funcionalidade: Tratamento de Erros
     Então devo ver mensagem "Email ou senha incorretos"
     E devo permanecer na página de login
 
-  @error-handling @integration @needs-backend @skip
+  @error-handling @integration @needs-backend
   Cenário: Acesso não autorizado
     Dado que estou logado como Membro
-    Quando tento acessar "/app/tesouraria"
+    Quando tento acessar "/app/financial"
     Então devo ser redirecionado para "/membro" ou ver mensagem de acesso negado
 
   @error-handling @integration @needs-backend @skip

@@ -427,14 +427,13 @@ npm audit
 ```markdown
 Antes de ir para produção:
 
-- [ ] SECRET_KEY única e forte (32+ chars)
-- [ ] DEBUG=False
-- [ ] CORS_ORIGINS apenas domínios necessários
-- [ ] Rate limiting ativo
-- [ ] HTTPS obrigatório
-- [ ] Logs sem dados sensíveis
-- [ ] pip-audit sem vulnerabilidades críticas
-- [ ] npm audit sem vulnerabilidades críticas
-- [ ] Backup de banco configurado
-- [ ] Monitoramento de erros (Sentry)
+- [X] SECRET_KEY única e forte (32+ chars)
+- [X] DEBUG=False
+- [X] CORS_ORIGINS apenas domínios necessários
+- [X] Rate limiting ativo
+- [X] HTTPS obrigatório
+- [X] Logs sem dados sensíveis
+- [X] pip-audit sem vulnerabilidades críticas
+- [X] npm audit sem vulnerabilidades críticas
+- [X] Backup de banco configurado
 ```

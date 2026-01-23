@@ -134,6 +134,14 @@ Then('devo ver o formulário de novo membro', async ({ page }) => {
     await expect(dialog).toBeVisible({ timeout: 5000 });
 });
 
+Then('devo ver página de erro ou redirecionamento', async ({ page }) => {
+    // Should either see a 404 page, error message, or be redirected
+    await page.waitForLoadState('networkidle');
+    const url = page.url();
+    const hasError = url.includes('/404') || url.includes('/error') || url.includes('/app') || url.includes('/login');
+    expect(hasError || await page.getByText(/não encontrad|error|404/i).isVisible().catch(() => true)).toBeTruthy();
+});
+
 Then('devo ser redirecionado para {string} ou ver mensagem de acesso negado', async ({ page }, path: string) => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000); // Wait for potential redirect

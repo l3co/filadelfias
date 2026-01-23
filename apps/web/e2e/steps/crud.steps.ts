@@ -109,6 +109,10 @@ Given('que existe uma classe {string}', async ({ page: _page }, _className: stri
 });
 
 When('acesso a classe {string}', async ({ page }, className: string) => {
+    await page.getByText(new RegExp(className, 'i')).click();
+});
+
+When('clico na classe {string}', async ({ page }, className: string) => {
     await page.getByText(new RegExp(className, 'i')).first().click();
 });
 

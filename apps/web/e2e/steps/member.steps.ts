@@ -149,8 +149,8 @@ Given('que existe um pedido de oração', async ({ page: _page }) => {
 });
 
 Then('o contador de orações deve aumentar', async ({ page }) => {
-    // Wait for counter to be visible (with built-in retry)
-    await expect(page.getByText(/\d+\s*(oração|orações|prayed)/i)).toBeVisible({ timeout: 5000 });
+    // Format: "X pessoas oraram" - wait for at least 1
+    await expect(page.getByText(/[1-9]\d*\s*pessoa|pessoas\s*oraram/i).first()).toBeVisible({ timeout: 5000 });
 });
 
 Given('que criei pedidos de oração', async ({ page: _page }) => {

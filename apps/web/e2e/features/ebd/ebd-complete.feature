@@ -18,9 +18,8 @@ Funcionalidade: Gestão Completa de EBD
   @integration @needs-backend @skip
   Cenário: Matricular aluno em classe
     Dado que estou logado como administrador
-    E que existe uma classe "Jovens"
-    E que existe um membro "Pedro Santos"
-    Quando acesso a classe "Jovens"
+    E que estou na página de EBD
+    Quando clico na classe "Jovens"
     E clico em "Adicionar Aluno"
     E seleciono "Pedro Santos"
     Então o aluno deve aparecer na lista da classe

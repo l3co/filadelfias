@@ -25,11 +25,11 @@ Funcionalidade: Pedidos de Oração
     E clico em "Enviar"
     Então o pedido deve aparecer sem meu nome
 
-  @integration @needs-backend @skip
+  @integration @needs-backend
   Cenário: Orar por um pedido
     Dado que estou logado como membro
-    E que existe um pedido de oração
-    Quando clico em "Orei por este pedido"
+    E que estou na página de Pedidos de Oração
+    Quando clico em "Orar"
     Então o contador de orações deve aumentar
 
   @integration @needs-backend @skip

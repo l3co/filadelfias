@@ -71,7 +71,9 @@ async def get_my_class(
     Get the EBD class where the current user's member is enrolled.
     Returns class info with lessons.
     """
-    member_id = auth_context.get("member_id")
+    member = auth_context.get("member")
+    member_id = member.get("id") if member else None
+    
     if not member_id:
         return None
 

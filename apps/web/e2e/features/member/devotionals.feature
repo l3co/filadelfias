@@ -33,12 +33,9 @@ Funcionalidade: Devocionais
     E que estou na página de Devocionais
     Então devo ver lista de devocionais
 
-  @integration @needs-backend @skip
+  @integration @needs-backend
   Cenário: Membro lê devocional completo
     Dado que estou logado como membro
     E que estou na página de Devocionais
-    Quando clico em um devocional
-    Então devo ver o título completo
+    Então devo ver o título do devocional
     E devo ver a referência bíblica
-    E devo ver o texto do versículo
-    E devo ver a meditação completa

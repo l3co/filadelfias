@@ -3,7 +3,7 @@ import { Plus, Users, Search, X } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCurrentTenant } from '../../hooks/useAuth';
 import { useMembers } from '../../features/members/hooks/useMembers';
-import { MembersTable } from '../../features/members/components/MembersTable';
+import { MembersCards } from '../../features/members/components/MembersCards';
 import { MemberDialog } from '../../features/members/components/MemberDialog';
 import { InviteSuccessDialog } from '../../features/members/components/InviteSuccessDialog';
 import { Button } from '../../components/ui/button';
@@ -162,8 +162,8 @@ export function MembersPage() {
                 </div>
             </div>
 
-            {/* Table */}
-            <MembersTable 
+            {/* Cards */}
+            <MembersCards 
                 members={filteredMembers} 
                 isLoading={isLoading} 
                 onEditMember={(member) => setEditingMember(member)}

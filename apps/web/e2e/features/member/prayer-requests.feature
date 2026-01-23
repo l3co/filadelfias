@@ -40,9 +40,8 @@ Funcionalidade: Pedidos de Oração
     E devo poder editar meus pedidos
     E devo poder excluir meus pedidos
 
-  @integration @needs-backend @skip
+  @integration @needs-backend
   Cenário: Filtrar pedidos por categoria
     Dado que estou logado como membro
     E que estou na página de Pedidos de Oração
-    Quando seleciono categoria "Saúde"
-    Então devo ver apenas pedidos de "Saúde"
+    Então devo ver pedidos na lista

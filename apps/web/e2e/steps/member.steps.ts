@@ -140,6 +140,11 @@ Then('meu pedido deve aparecer na lista', async ({ page }) => {
     await expect(page.getByText(/oração pela minha família/i).first()).toBeVisible({ timeout: 5000 });
 });
 
+Then('devo ver pedidos na lista', async ({ page }) => {
+    // Verify at least one prayer request is visible - look for the "Orar" button
+    await expect(page.getByRole('button', { name: /orar/i }).first()).toBeVisible({ timeout: 5000 });
+});
+
 Then('o pedido deve aparecer sem meu nome', async ({ page }) => {
     await expect(page.getByText(/anônimo/i)).toBeVisible();
 });

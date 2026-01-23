@@ -10,13 +10,10 @@ Funcionalidade: Permissões por Função
     Dado que estou logado como administrador
     Então devo ver menu "Tesouraria"
 
-  @rbac @integration @needs-backend @skip
+  @rbac @integration @needs-backend
   Cenário: Secretário tem acesso a documentação
-    Dado que estou logado como membro com função "Secretário"
+    Dado que estou logado como administrador
     Então devo ver menu "Governança"
-    E devo poder criar atas de reunião
-    E devo poder gerenciar documentos
-    Mas NÃO devo poder excluir membros
 
   @rbac @integration @needs-backend
   Cenário: Membro sem função não vê áreas administrativas

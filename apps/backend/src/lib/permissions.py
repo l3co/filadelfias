@@ -95,6 +95,8 @@ OFFICE_PERMISSIONS: dict[str, Set[str]] = {
     "MEMBRO": {
         # Membros - apenas visualizar
         "members:view",
+        # Governança - visualizar conselhos e membros
+        "governance:view",
         # EBD
         "ebd:view",
         # Missões

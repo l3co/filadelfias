@@ -106,7 +106,7 @@ export function PublicLayout() {
                             </span>
                         </div>
                         <p className="text-gray-500 text-sm italic leading-relaxed">
-                            "Esta é uma homenagem a um dos nossos amado Reverendo Eliézer Marra. Em uma das suas pregações a respeito do livro de Apocalipse, uma vez ele disse: tenho uma proposta, que tal mudarmos o nome de nossa Igreja para Filadélfia?"
+                            "Esta plataforma foi criada pela Igreja Presbiteriana de Vila Gustavo, para auxiliar na gestão da igreja e comunidade."
                         </p>
                     </div>
 

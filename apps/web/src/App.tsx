@@ -43,6 +43,7 @@ const MemberMissionsPage = lazy(() => import('./routes/member/MemberMissionsPage
 const MemberDevotionalsPage = lazy(() => import('./routes/member/MemberDevotionalsPage').then(m => ({ default: m.MemberDevotionalsPage })));
 const MemberPrayerPage = lazy(() => import('./routes/member/MemberPrayerPage').then(m => ({ default: m.MemberPrayerPage })));
 const MemberEBDPage = lazy(() => import('./routes/member/MemberEBDPage').then(m => ({ default: m.MemberEBDPage })));
+const MemberGovernancePage = lazy(() => import('./routes/member/MemberGovernancePage').then(m => ({ default: m.MemberGovernancePage })));
 
 // Lazy loaded pages - Shared
 const ProfilePage = lazy(() => import('./routes/profile/ProfilePage').then(m => ({ default: m.ProfilePage })));
@@ -120,6 +121,7 @@ function App() {
           <Route path="ebd" element={<MemberEBDPage />} />
           <Route path="oracao" element={<MemberPrayerPage />} />
           <Route path="devocionais" element={<MemberDevotionalsPage />} />
+          <Route path="governanca" element={<MemberGovernancePage />} />
           <Route path="perfil" element={<ProfilePage />} />
         </Route>
 

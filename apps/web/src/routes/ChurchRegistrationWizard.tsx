@@ -86,7 +86,7 @@ export function ChurchRegistrationWizard() {
             return response.data;
         },
         onSuccess: (data) => {
-            localStorage.setItem('token', data.access_token);
+            localStorage.setItem('access_token', data.access_token);
             navigate('/app');
         },
         onError: (error: AxiosError<{ detail?: string }>) => {

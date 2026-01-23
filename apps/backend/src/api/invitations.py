@@ -5,7 +5,7 @@ API endpoints for member invitations.
 import secrets
 from datetime import datetime, timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel
 
 from src.api.auth import get_current_user
@@ -16,6 +16,7 @@ from src.infra.repositories import (
     user_repository,
 )
 from src.infra.security import get_password_hash, verify_password
+from src.middleware.rate_limiter import limiter
 from src.services.email_service import email_service
 
 router = APIRouter()
@@ -55,7 +56,9 @@ class ChangePasswordRequest(BaseModel):
 
 
 @router.post("/tenants/{tenant_id}/members/{member_id}/invite", response_model=InviteResponse)
+@limiter.limit("10/minute")
 async def invite_member(
+    request: Request,
     tenant_id: str,
     member_id: str,
     current_user: dict = Depends(get_current_user),
@@ -123,7 +126,8 @@ async def invite_member(
 
 
 @router.post("/auth/forgot-password")
-async def forgot_password(data: ForgotPasswordRequest):
+@limiter.limit("3/minute")
+async def forgot_password(request: Request, data: ForgotPasswordRequest):
     """
     Request password reset email.
     """
@@ -146,7 +150,8 @@ async def forgot_password(data: ForgotPasswordRequest):
 
 
 @router.post("/auth/reset-password")
-async def reset_password(data: ResetPasswordRequest):
+@limiter.limit("5/minute")
+async def reset_password(request: Request, data: ResetPasswordRequest):
     """
     Reset password using token.
     """
@@ -162,7 +167,9 @@ async def reset_password(data: ResetPasswordRequest):
 
 
 @router.post("/auth/change-password")
+@limiter.limit("5/minute")
 async def change_password(
+    request: Request,
     data: ChangePasswordRequest,
     current_user: dict = Depends(get_current_user),
 ):

@@ -2,7 +2,7 @@
 API endpoints for church registration.
 """
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Request, status
 
 from src.domain.schemas import ChurchRegistrationRequest, ChurchRegistrationResponse, TenantResponse, UserResponse
 from src.infra.repositories import (
@@ -12,13 +12,15 @@ from src.infra.repositories import (
     user_repository,
 )
 from src.infra.security import create_access_token
+from src.middleware.rate_limiter import limiter
 from src.services.logging_service import log_info, log_warning
 
 router = APIRouter()
 
 
 @router.post("/churches/register", response_model=ChurchRegistrationResponse, status_code=status.HTTP_201_CREATED)
-async def register_church(data: ChurchRegistrationRequest):
+@limiter.limit("3/minute")
+async def register_church(request: Request, data: ChurchRegistrationRequest):
     """
     Register a new church with admin user.
     This is the main entry point for new churches joining the platform.

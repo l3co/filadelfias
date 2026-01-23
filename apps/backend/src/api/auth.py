@@ -2,12 +2,13 @@
 Authentication API endpoints.
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from src.domain.schemas import Token, UserCreate, UserResponse
 from src.infra.repositories import membership_repository, tenant_repository, user_repository
 from src.infra.security import create_access_token, decode_access_token, verify_password
+from src.middleware.rate_limiter import limiter
 from src.services.deletion_service import delete_user_data
 from src.services.logging_service import log_info, log_warning, set_request_context
 
@@ -17,11 +18,15 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-async def register(user_data: UserCreate):
+@limiter.limit("3/minute")
+async def register(request: Request, user_data: UserCreate):
     """
     Register a new user (orphan user - not associated with any church).
 
+    Rate limited to 3 requests per minute per IP.
+
     Args:
+        request: FastAPI request object (for rate limiting)
         user_data: User registration data
 
     Returns:
@@ -43,11 +48,15 @@ async def register(user_data: UserCreate):
 
 
 @router.post("/login", response_model=Token)
-async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+@limiter.limit("5/minute")
+async def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends()):
     """
     Login with email and password.
 
+    Rate limited to 5 requests per minute per IP to prevent brute force attacks.
+
     Args:
+        request: FastAPI request object (for rate limiting)
         form_data: OAuth2 form with username (email) and password
 
     Returns:

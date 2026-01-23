@@ -12,6 +12,7 @@ class Settings(BaseSettings):
 
     # Application
     app_name: str = "Filadelfias API"
+    environment: str = "development"
     debug: bool = False
 
     # Database

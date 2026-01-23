@@ -2,8 +2,10 @@
 Filadelfias API - Main Application Entry Point
 """
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from slowapi.errors import RateLimitExceeded
 
 from src.api.auth import router as auth_router
 from src.api.bible import router as bible_router
@@ -22,12 +24,28 @@ from src.api.prayer import router as prayer_router
 from src.api.tenants import router as tenants_router
 from src.config import settings
 from src.middleware import LoggingMiddleware
+from src.middleware.rate_limiter import limiter
 
 app = FastAPI(
     title="Filadelfias API",
     description="Multi-tenant church management platform",
     version="0.1.0",
 )
+
+# Rate Limiter Configuration
+app.state.limiter = limiter
+
+
+@app.exception_handler(RateLimitExceeded)
+async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
+    """Custom handler for rate limit exceeded errors."""
+    return JSONResponse(
+        status_code=429,
+        content={
+            "detail": "Muitas tentativas. Aguarde alguns minutos antes de tentar novamente.",
+            "retry_after": exc.detail,
+        },
+    )
 
 # Logging Middleware (must be added first to wrap all requests)
 app.add_middleware(LoggingMiddleware)
@@ -37,8 +55,10 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "X-Request-ID", "X-Tenant-ID"],
+    expose_headers=["X-Request-ID"],
+    max_age=600,
 )
 
 # Include routers

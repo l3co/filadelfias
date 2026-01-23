@@ -73,7 +73,7 @@ async def get_my_class(
     """
     member = auth_context.get("member")
     member_id = member.get("id") if member else None
-    
+
     if not member_id:
         return None
 

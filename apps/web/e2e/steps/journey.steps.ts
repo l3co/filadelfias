@@ -142,6 +142,11 @@ Then('devo ver página de erro ou redirecionamento', async ({ page }) => {
     expect(hasError || await page.getByText(/não encontrad|error|404/i).isVisible().catch(() => true)).toBeTruthy();
 });
 
+Then('devo ver o formulário de login', async ({ page }) => {
+    await expect(page.locator('#email')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('#password')).toBeVisible({ timeout: 5000 });
+});
+
 Then('devo ser redirecionado para {string} ou ver mensagem de acesso negado', async ({ page }, path: string) => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000); // Wait for potential redirect

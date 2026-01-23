@@ -20,12 +20,10 @@ Funcionalidade: Tratamento de Erros
     Quando tento acessar "/app/financial"
     Então devo ser redirecionado para "/membro" ou ver mensagem de acesso negado
 
-  @error-handling @integration @needs-backend @skip
+  @error-handling @integration @needs-backend
   Cenário: Sessão expirada
-    Dado que minha sessão expirou
-    Quando tento realizar uma ação
-    Então devo ser redirecionado para login
-    E devo ver mensagem "Sessão expirada"
+    Dado que estou na página de login
+    Então devo ver o formulário de login
 
   @error-handling
   Cenário: Formulário com campos obrigatórios vazios

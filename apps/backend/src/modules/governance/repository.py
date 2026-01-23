@@ -42,6 +42,21 @@ class CouncilRepository:
         doc = self._get_collection(tenant_id).document(council_id).get()
         return doc.to_dict() if doc.exists else None
 
+    async def get(self, council_id: str, tenant_id: str) -> dict | None:
+        """Get a council by ID (alias for compatibility)."""
+        return await self.get_by_id(tenant_id, council_id)
+
+    async def update(self, council_id: str, data: dict, tenant_id: str) -> dict | None:
+        """Update a council."""
+        doc_ref = self._get_collection(tenant_id).document(council_id)
+        doc = doc_ref.get()
+        if not doc.exists:
+            return None
+
+        data["updated_at"] = datetime.utcnow()
+        doc_ref.update(data)
+        return doc_ref.get().to_dict()
+
     async def add_member(self, tenant_id: str, council_id: str, member_id: str) -> dict | None:
         """Add a member to a council."""
         doc_ref = self._get_collection(tenant_id).document(council_id)

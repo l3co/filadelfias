@@ -41,6 +41,46 @@ TEST_MEMBER = {
     "name": "Maria Silva",
 }
 
+# RBAC test users - must match apps/web/e2e/support/fixtures.ts
+TEST_PASTOR = {
+    "email": "pastor@igreja.com",
+    "password": "S3nh@Pastor",
+    "name": "Rev. João Silva",
+    "office": "PASTOR",
+}
+
+TEST_PRESBITERO = {
+    "email": "presbitero@igreja.com",
+    "password": "S3nh@Presb",
+    "name": "Presb. Carlos Santos",
+    "office": "PRESBITERO",
+}
+
+TEST_DIACONO = {
+    "email": "diacono@igreja.com",
+    "password": "S3nh@Diac",
+    "name": "Diác. Pedro Lima",
+    "office": "DIACONO",
+}
+
+TEST_TESOUREIRO = {
+    "email": "tesoureiro@igreja.com",
+    "password": "S3nh@Tes",
+    "name": "Ana Tesoureira",
+    "office": "MEMBRO",
+    "functions": ["TESOUREIRO"],
+}
+
+TEST_SECRETARIO = {
+    "email": "secretario@igreja.com",
+    "password": "S3nh@Sec",
+    "name": "José Secretário",
+    "office": "MEMBRO",
+    "functions": ["SECRETARIO"],
+}
+
+ALL_TEST_USERS = [TEST_ADMIN, TEST_MEMBER, TEST_PASTOR, TEST_PRESBITERO, TEST_DIACONO, TEST_TESOUREIRO, TEST_SECRETARIO]
+
 TEST_CHURCH = {
     "name": "Igreja Teste E2E",
     "slug": "igreja-teste-e2e",
@@ -59,8 +99,8 @@ async def clean_test_data():
     """Remove existing test data before seeding."""
     print("🧹 Cleaning existing test data...")
 
-    # Delete test users if exist
-    for test_user in [TEST_ADMIN, TEST_MEMBER]:
+    # Delete all test users if exist
+    for test_user in ALL_TEST_USERS:
         existing_user = await user_repository.get_by_email(test_user["email"])
         if existing_user:
             # Delete memberships first
@@ -154,7 +194,40 @@ async def seed_test_data():
     )
     print(f"  ✓ Member profile created (ID: {member_profile['id']})")
 
-    # 7. Create sample Missionary
+    # 7. Create RBAC test users (Pastor, Presbítero, Diácono, Tesoureiro, Secretário)
+    rbac_users = [TEST_PASTOR, TEST_PRESBITERO, TEST_DIACONO, TEST_TESOUREIRO, TEST_SECRETARIO]
+    for test_user in rbac_users:
+        print(f"  Creating {test_user['office']} user: {test_user['name']}...")
+        
+        # Create user
+        user = await user_repository.create_user(
+            email=test_user["email"],
+            name=test_user["name"],
+            password=test_user["password"],
+        )
+        
+        # Create membership (ADMIN for officers, MEMBER for functions)
+        role = "ADMIN" if test_user["office"] in ["PASTOR", "PRESBITERO", "DIACONO"] else "MEMBER"
+        await membership_repository.create_membership(
+            user_id=user["id"],
+            tenant_id=tenant["id"],
+            role=role,
+            status="ACTIVE",
+        )
+        
+        # Create member profile with office
+        await member_repository.create_member(
+            tenant_id=tenant["id"],
+            full_name=test_user["name"],
+            email=test_user["email"],
+            phone="(11) 77777-7777",
+            status="COMUNGANTE",
+            office=test_user["office"],
+            user_id=user["id"],
+        )
+        print(f"  ✓ {test_user['office']} created: {test_user['email']}")
+
+    # 8. Create sample Missionary
     from src.modules.missions.repository import missionary_repository
     from src.modules.missions.schemas import MissionaryCreate
 
@@ -176,7 +249,7 @@ async def seed_test_data():
     print("  Creating sample EBD class...")
     ebd_class = await ebd_class_repository.create_class(
         tenant_id=tenant["id"],
-        name="Classe Jovens",
+        name="Jovens",
         description="Estudo Bíblico para jovens",
         location="Sala 1",
         min_age=18,
@@ -208,10 +281,85 @@ async def seed_test_data():
     )
     print(f"  ✓ Council created: {council['name']}")
 
+    # 11. Create test member "Pedro Santos" for EBD tests
+    print("  Creating test member Pedro Santos...")
+    pedro_member = await member_repository.create_member(
+        tenant_id=tenant["id"],
+        full_name="Pedro Santos",
+        email="pedro@email.com",
+        phone="(11) 77777-7777",
+        status="COMUNGANTE",
+        office="MEMBRO",
+    )
+    print(f"  ✓ Member created: {pedro_member['full_name']}")
+
+    # 12. Create sample Devotional (today)
+    from datetime import date, datetime, timedelta
+    from src.modules.devotionals.repository import devotional_repository
+    from src.modules.devotionals.schemas import DevotionalCreate
+
+    print("  Creating sample devotional...")
+    devotional_data = DevotionalCreate(
+        title="O Amor de Deus",
+        date=date.today(),
+        verse_reference="João 3:16",
+        verse_text="Porque Deus amou o mundo de tal maneira que deu o seu Filho unigênito, para que todo aquele que nele crê não pereça, mas tenha a vida eterna.",
+        meditation="O amor de Deus é incondicional e eterno. Ele nos amou primeiro, quando ainda éramos pecadores. Este amor não depende de nossas ações ou méritos, mas da natureza de Deus, que é amor.",
+        reflection="Como você tem respondido ao amor de Deus em sua vida?",
+        prayer="Senhor, obrigado pelo Teu amor incondicional. Ajuda-me a amar os outros como Tu me amas. Amém.",
+    )
+    devotional = await devotional_repository.create(tenant["id"], devotional_data)
+    print(f"  ✓ Devotional created: {devotional['title']}")
+
+    # 13. Create sample Prayer Request
+    from src.modules.prayer.repository import prayer_request_repository
+    from src.modules.prayer.schemas import PrayerRequestCreate
+
+    print("  Creating sample prayer request...")
+    prayer_data = PrayerRequestCreate(
+        content="Oração pela minha família que está passando por dificuldades financeiras.",
+        category="family",
+        is_anonymous=False,
+    )
+    prayer_request = await prayer_request_repository.create(
+        tenant["id"], 
+        member_profile["id"],
+        TEST_MEMBER["name"],
+        prayer_data
+    )
+    print(f"  ✓ Prayer request created")
+
+    # 14. Create sample Event (future)
+    from src.modules.events.repository import event_repository
+    from src.modules.events.schemas import EventCreate
+
+    print("  Creating sample events...")
+    event_data = EventCreate(
+        title="Culto de Celebração",
+        description="Culto dominical de celebração e louvor",
+        location="Templo Principal",
+        start_date=datetime.now() + timedelta(days=3),
+        category="culto",
+    )
+    event = await event_repository.create(tenant["id"], event_data)
+    print(f"  ✓ Event created: {event['title']}")
+
+    # Create another future event
+    event_data2 = EventCreate(
+        title="Conferência Missionária",
+        description="Conferência anual de missões",
+        location="Auditório Central",
+        start_date=datetime.now() + timedelta(days=30),
+        category="conferencia",
+    )
+    event2 = await event_repository.create(tenant["id"], event_data2)
+    print(f"  ✓ Event created: {event2['title']}")
+
     return {
         "tenant": tenant,
         "admin_user": admin_user,
         "member_user": member_user,
+        "pedro_member": pedro_member,
     }
 
 

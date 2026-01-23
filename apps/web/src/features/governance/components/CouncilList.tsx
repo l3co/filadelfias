@@ -40,7 +40,6 @@ interface CouncilListProps {
 
 export const CouncilList = memo(function CouncilList({ councils, isLoading, onDelete, onEdit }: CouncilListProps) {
     const [selectedCouncil, setSelectedCouncil] = useState<Council | null>(null);
-    const [showMembers, setShowMembers] = useState(false);
     const [showMeetings, setShowMeetings] = useState(false);
     const [councilToDelete, setCouncilToDelete] = useState<Council | null>(null);
     const [managingMembers, setManagingMembers] = useState<Council | null>(null);
@@ -78,8 +77,7 @@ export const CouncilList = memo(function CouncilList({ councils, isLoading, onDe
     };
 
     const handleViewMembers = (council: Council) => {
-        setSelectedCouncil(council);
-        setShowMembers(true);
+        setManagingMembers(council);
     };
 
     const handleViewMeetings = (council: Council) => {
@@ -176,34 +174,6 @@ export const CouncilList = memo(function CouncilList({ councils, isLoading, onDe
                     );
                 })}
             </div>
-
-            {/* Members Dialog */}
-            <Dialog open={showMembers} onOpenChange={setShowMembers}>
-                <DialogContent className="max-w-md">
-                    <DialogHeader>
-                        <DialogTitle>Membros - {selectedCouncil?.name}</DialogTitle>
-                        <DialogDescription>
-                            Lista de membros deste órgão governamental.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="py-4">
-                        {selectedCouncil && 'members' in selectedCouncil && Array.isArray((selectedCouncil as { members?: string[] }).members) ? (
-                            <ul className="space-y-2">
-                                {((selectedCouncil as { members: string[] }).members).map((member, idx) => (
-                                    <li key={idx} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
-                                        <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-medium text-sm">
-                                            {member.charAt(0)}
-                                        </div>
-                                        <span className="text-sm">{member}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
-                            <p className="text-center text-gray-500 py-4">Nenhum membro cadastrado.</p>
-                        )}
-                    </div>
-                </DialogContent>
-            </Dialog>
 
             {/* Meetings Dialog */}
             <Dialog open={showMeetings} onOpenChange={setShowMeetings}>

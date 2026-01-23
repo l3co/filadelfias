@@ -9,7 +9,7 @@ import {
 } from "../../../components/ui/dialog";
 import { useCurrentTenant } from '../../../hooks/useAuth';
 import { useMembers } from '../../members/hooks/useMembers';
-import { useAddCouncilMember, useRemoveCouncilMember } from '../hooks/useGovernance';
+import { useAddCouncilMember, useRemoveCouncilMember, useGovernance } from '../hooks/useGovernance';
 import type { Council } from '../../../services/governance';
 
 interface Props {
@@ -21,13 +21,16 @@ interface Props {
 export function ManageMembersDialog({ isOpen, onClose, council }: Props) {
     const tenant = useCurrentTenant();
     const { data: members } = useMembers(tenant?.id);
+    const { data: councils } = useGovernance(tenant?.id);
     const addMember = useAddCouncilMember(tenant?.id);
     const removeMember = useRemoveCouncilMember(tenant?.id);
     const [searchTerm, setSearchTerm] = useState('');
 
     if (!council) return null;
 
-    const councilMemberIds = council.member_ids || [];
+    // Busca o council atualizado da query para refletir mudanças
+    const currentCouncil = councils?.find(c => c.id === council.id) || council;
+    const councilMemberIds = currentCouncil.member_ids || [];
     
     const councilMembers = members?.filter(m => councilMemberIds.includes(m.id)) || [];
     const availableMembers = members?.filter(m => 

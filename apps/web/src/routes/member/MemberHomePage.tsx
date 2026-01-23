@@ -7,7 +7,8 @@ import {
   Calendar, 
   Globe, 
   GraduationCap, 
-  MessageCircle 
+  MessageCircle,
+  Gavel
 } from 'lucide-react';
 import { useCurrentUser, useCurrentTenant } from '../../hooks/useAuth';
 import { WelcomeBanner } from '../../components/WelcomeBanner';
@@ -65,6 +66,14 @@ export function MemberHomePage() {
           description="Conheça os irmãos da nossa igreja"
           href="/membro/diretorio"
           color="emerald"
+        />
+        
+        <HomeCard
+          icon={Gavel}
+          title="Governança"
+          description="Conheça os órgãos de liderança"
+          href="/membro/governanca"
+          color="purple"
         />
         
         <HomeCard

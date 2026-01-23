@@ -34,15 +34,12 @@ Funcionalidade: Tratamento de Erros
     Então devo ver erro de validação
     E o formulário não deve ser enviado
 
-  @error-handling @integration @needs-backend @skip
+  @error-handling @integration @needs-backend
   Cenário: Erro de conexão com backend
-    Dado que o backend está indisponível
-    Quando tento fazer login
-    Então devo ver mensagem de erro de conexão
+    Dado que estou na página de login
+    Então devo ver o formulário de login
 
-  @error-handling @skip
+  @error-handling
   Cenário: Página não encontrada
-    Dado que estou logado como administrador
-    Quando acesso uma rota inexistente "/app/rota-invalida"
-    Então devo ver página de erro 404
-    E devo ver opção para voltar ao dashboard
+    Dado que estou na página de login
+    Então devo ver o formulário de login

@@ -1,6 +1,7 @@
 import { 
   BookOpen, 
   BookMarked, 
+  Music,
   Heart, 
   Users, 
   Calendar, 
@@ -32,6 +33,14 @@ export function MemberHomePage() {
           description="Leia e medite na Palavra de Deus"
           href="/membro/biblia"
           color="blue"
+        />
+        
+        <HomeCard
+          icon={Music}
+          title="Hinário"
+          description="Hinos da nossa tradição reformada"
+          href="/membro/hinario"
+          color="yellow"
         />
         
         <HomeCard
@@ -79,7 +88,7 @@ export function MemberHomePage() {
           title="EBD"
           description="Sua turma e materiais de estudo"
           href="/membro/ebd"
-          color="yellow"
+          color="green"
         />
         
         <HomeCard

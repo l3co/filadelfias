@@ -1,22 +1,30 @@
 #!/bin/bash
-echo "🚀 Starting Local E2E Tests with Firestore Emulator..."
+set -e
 
-# Clean up any orphans
-docker compose -f docker-compose.test.yml down --remove-orphans
+# ============================================================================
+# E2E Tests - Simple approach:
+# 1. Start infrastructure (if not running)
+# 2. Run tests locally with Playwright
+# 3. Keep infrastructure running for fast re-runs
+# ============================================================================
 
-# Build and Run
-# Exit code from 'e2e' service will determine success/failure
-docker compose -f docker-compose.test.yml up --build --exit-code-from e2e
+cd "$(dirname "$0")"
 
-exit_code=$?
-
-if [ $exit_code -eq 0 ]; then
-    echo "✅ Tests Passed!"
+# Check if infrastructure is already running
+if curl -s http://localhost:8000/health > /dev/null 2>&1; then
+    echo "✅ Infrastructure already running"
 else
-    echo "❌ Tests Failed!"
+    echo "🚀 Starting infrastructure..."
+    docker compose -f docker-compose.test.yml up -d --build --wait
+    echo "✅ Infrastructure ready"
 fi
 
-# Cleanup
-# docker compose -f docker-compose.test.yml down
+echo ""
+echo "🧪 Running E2E tests..."
+echo "════════════════════════════════════════════════════════════"
 
-exit $exit_code
+cd apps/web
+
+# Generate BDD files and run tests
+npx bddgen
+npx playwright test --config=playwright.config.ts "$@"

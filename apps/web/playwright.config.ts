@@ -8,6 +8,7 @@ import { defineBddConfig, cucumberReporter } from 'playwright-bdd';
 const testDir = defineBddConfig({
   features: 'e2e/features/**/*.feature',
   steps: 'e2e/steps/**/*.ts',
+  tags: 'not @skip',
 });
 
 export default defineConfig({
@@ -17,12 +18,13 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: [
-    process.env.CI ? ['html'] : ['list'],
+    ['list'],
+    ['html', { open: 'never', outputFolder: 'playwright-report' }],
     cucumberReporter('html', { outputFile: 'reports/cucumber-report.html' }),
     cucumberReporter('json', { outputFile: 'reports/cucumber-report.json' }),
   ],
   use: {
-    baseURL: 'http://localhost:5173',
+    baseURL: process.env.BASE_URL || 'http://localhost:5173',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'on-first-retry',

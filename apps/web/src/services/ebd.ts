@@ -94,29 +94,39 @@ export const ebdService = {
         return data;
     },
 
-    enrollStudent: async (classId: string, studentData: EnrollStudentDTO) => {
-        const { data } = await api.post<EBDStudent>(`/ebd/classes/${classId}/students`, studentData);
+    enrollStudent: async (classId: string, studentData: EnrollStudentDTO, tenantId: string) => {
+        const { data } = await api.post<EBDStudent>(`/ebd/classes/${classId}/students`, studentData, {
+            params: { tenant_id: tenantId }
+        });
         return data;
     },
 
-    listStudents: async (classId: string) => {
-        const { data } = await api.get<EBDStudent[]>(`/ebd/classes/${classId}/students`);
+    listStudents: async (classId: string, tenantId: string) => {
+        const { data } = await api.get<EBDStudent[]>(`/ebd/classes/${classId}/students`, {
+            params: { tenant_id: tenantId }
+        });
         return data;
     },
 
-    createLesson: async (classId: string, data: CreateLessonDTO) => {
+    createLesson: async (classId: string, data: CreateLessonDTO, tenantId: string) => {
         const payload = { ...data, ebd_class_id: classId };
-        const { data: result } = await api.post<EBDLesson>(`/ebd/classes/${classId}/lessons`, payload);
+        const { data: result } = await api.post<EBDLesson>(`/ebd/classes/${classId}/lessons`, payload, {
+            params: { tenant_id: tenantId }
+        });
         return result;
     },
 
-    listLessons: async (classId: string) => {
-        const { data } = await api.get<EBDLesson[]>(`/ebd/classes/${classId}/lessons`);
+    listLessons: async (classId: string, tenantId: string) => {
+        const { data } = await api.get<EBDLesson[]>(`/ebd/classes/${classId}/lessons`, {
+            params: { tenant_id: tenantId }
+        });
         return data;
     },
 
-    removeStudent: async (classId: string, studentId: string) => {
-        await api.delete(`/ebd/classes/${classId}/students/${studentId}`);
+    removeStudent: async (classId: string, studentId: string, tenantId: string) => {
+        await api.delete(`/ebd/classes/${classId}/students/${studentId}`, {
+            params: { tenant_id: tenantId }
+        });
     },
 
     // Comments

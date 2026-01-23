@@ -17,14 +17,15 @@ interface Props {
     isOpen: boolean;
     onClose: () => void;
     classId: string;
+    tenantId: string;
 }
 
-export function CreateLessonDialog({ isOpen, onClose, classId }: Props) {
+export function CreateLessonDialog({ isOpen, onClose, classId, tenantId }: Props) {
     const queryClient = useQueryClient();
     const { register, handleSubmit, reset, formState: { errors } } = useForm<CreateLessonDTO>();
 
     const createMutation = useMutation({
-        mutationFn: (data: CreateLessonDTO) => ebdService.createLesson(classId, data),
+        mutationFn: (data: CreateLessonDTO) => ebdService.createLesson(classId, data, tenantId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['ebd-lessons', classId] });
             toast.success('Lição criada com sucesso!');

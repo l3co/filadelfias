@@ -19,14 +19,15 @@ interface Props {
     classId: string;
     members: Member[];
     enrolledMemberIds: string[];
+    tenantId: string;
 }
 
-export function EnrollStudentDialog({ isOpen, onClose, classId, members, enrolledMemberIds }: Props) {
+export function EnrollStudentDialog({ isOpen, onClose, classId, members, enrolledMemberIds, tenantId }: Props) {
     const queryClient = useQueryClient();
     const { register, handleSubmit, reset, formState: { errors } } = useForm<EnrollStudentDTO>();
 
     const enrollMutation = useMutation({
-        mutationFn: (data: EnrollStudentDTO) => ebdService.enrollStudent(classId, data),
+        mutationFn: (data: EnrollStudentDTO) => ebdService.enrollStudent(classId, data, tenantId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['ebd-students', classId] });
             toast.success('Aluno matriculado com sucesso!');

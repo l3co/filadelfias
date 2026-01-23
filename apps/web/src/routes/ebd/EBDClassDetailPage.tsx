@@ -33,14 +33,14 @@ export function EBDClassDetailPage() {
 
     const { data: students, isLoading: studentsLoading } = useQuery({
         queryKey: ['ebd-students', classId],
-        queryFn: () => ebdService.listStudents(classId!),
-        enabled: !!classId,
+        queryFn: () => ebdService.listStudents(classId!, tenant!.id),
+        enabled: !!classId && !!tenant?.id,
     });
 
     const { data: lessons, isLoading: lessonsLoading } = useQuery({
         queryKey: ['ebd-lessons', classId],
-        queryFn: () => ebdService.listLessons(classId!),
-        enabled: !!classId,
+        queryFn: () => ebdService.listLessons(classId!, tenant!.id),
+        enabled: !!classId && !!tenant?.id,
     });
 
     const { data: members } = useMembers(tenant?.id);
@@ -48,7 +48,7 @@ export function EBDClassDetailPage() {
     const queryClient = useQueryClient();
 
     const removeStudentMutation = useMutation({
-        mutationFn: (studentId: string) => ebdService.removeStudent(classId!, studentId),
+        mutationFn: (studentId: string) => ebdService.removeStudent(classId!, studentId, tenant!.id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['ebd-students', classId] });
             toast.success('Aluno removido da turma!');
@@ -236,7 +236,7 @@ export function EBDClassDetailPage() {
                                                 {expandedLessonId === lesson.id ? 'Ocultar comentários' : 'Ver comentários'}
                                             </button>
                                         </div>
-                                        
+
                                         {expandedLessonId === lesson.id && (
                                             <div className="pt-4 border-t border-gray-100">
                                                 <LessonComments
@@ -263,12 +263,14 @@ export function EBDClassDetailPage() {
                 classId={classId}
                 members={members || []}
                 enrolledMemberIds={students?.map(s => s.member_id) || []}
+                tenantId={tenant!.id}
             />
 
             <CreateLessonDialog
                 isOpen={isLessonDialogOpen}
                 onClose={() => setIsLessonDialogOpen(false)}
                 classId={classId}
+                tenantId={tenant!.id}
             />
         </div>
     );

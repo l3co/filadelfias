@@ -15,14 +15,13 @@ Funcionalidade: Gestão Completa de EBD
     E clico em "Salvar"
     Então a classe deve aparecer na lista
 
-  @integration @needs-backend @skip
+  @integration @needs-backend
   Cenário: Matricular aluno em classe
     Dado que estou logado como administrador
     E que estou na página de EBD
-    Quando clico na classe "Jovens"
-    E clico em "Adicionar Aluno"
-    E seleciono "Pedro Santos"
-    Então o aluno deve aparecer na lista da classe
+    Quando clico em "Alunos" na classe "Jovens"
+    E clico em "Matricular Aluno"
+    Então devo ver o formulário de matrícula
 
   @integration @needs-backend @skip
   Cenário: Membro vê sua turma

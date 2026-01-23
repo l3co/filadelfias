@@ -116,7 +116,25 @@ When('clico na classe {string}', async ({ page }, className: string) => {
     await page.getByText(new RegExp(className, 'i')).first().click();
 });
 
+When('clico em {string} na classe {string}', async ({ page }, linkText: string, className: string) => {
+    // Find the class card containing the class name, then click the specific link
+    const classCard = page.locator('div, article, section').filter({ hasText: new RegExp(className, 'i') }).first();
+    await classCard.getByRole('link', { name: new RegExp(linkText, 'i') }).first().click();
+    await page.waitForLoadState('networkidle');
+});
+
 When('seleciono {string}', async ({ page }, option: string) => {
+    // Try native select (combobox) first - look for one in a dialog
+    const dialog = page.locator('[role="dialog"]');
+    if (await dialog.isVisible().catch(() => false)) {
+        const select = dialog.getByRole('combobox').first();
+        if (await select.isVisible().catch(() => false)) {
+            await select.selectOption({ label: option });
+            return;
+        }
+    }
+    
+    // Fallback to clicking option directly
     await page.getByRole('option', { name: new RegExp(option, 'i') })
         .or(page.getByText(new RegExp(option, 'i')))
         .first()
@@ -125,6 +143,12 @@ When('seleciono {string}', async ({ page }, option: string) => {
 
 Then('o aluno deve aparecer na lista da classe', async ({ page }) => {
     await expect(page.locator('[role="list"], table, .students').first()).toBeVisible({ timeout: 5000 });
+});
+
+Then('devo ver o formulário de matrícula', async ({ page }) => {
+    const dialog = page.locator('[role="dialog"]');
+    await expect(dialog).toBeVisible({ timeout: 5000 });
+    await expect(dialog.getByRole('combobox').first()).toBeVisible();
 });
 
 Given('que estou logado como membro matriculado em {string}', async ({ page }, className: string) => {

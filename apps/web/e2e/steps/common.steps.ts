@@ -136,7 +136,25 @@ When('clico no link {string}', async ({ page }, linkText: string) => {
 });
 
 When('clico em {string}', async ({ page }, text: string) => {
-    // Try button first, then link, then any clickable element
+    // If a dialog is open, prioritize clicking within the dialog
+    const dialog = page.locator('[role="dialog"]');
+    if (await dialog.isVisible().catch(() => false)) {
+        // Use exact match for dialog buttons to avoid matching similar names
+        const dialogButton = dialog.getByRole('button', { name: text, exact: true });
+        if (await dialogButton.isVisible().catch(() => false)) {
+            await dialogButton.click();
+            await page.waitForLoadState('networkidle').catch(() => {});
+            return;
+        }
+        // Fallback to regex match within dialog
+        const dialogButtonRegex = dialog.getByRole('button', { name: new RegExp(`^${text}$`, 'i') });
+        if (await dialogButtonRegex.isVisible().catch(() => false)) {
+            await dialogButtonRegex.click();
+            await page.waitForLoadState('networkidle').catch(() => {});
+            return;
+        }
+    }
+
     const button = page.getByRole('button', { name: new RegExp(text, 'i') });
     if (await button.isVisible().catch(() => false)) {
         await button.click();

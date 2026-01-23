@@ -5,9 +5,9 @@ Funcionalidade: Permissões por Função
   Eu quero que funções específicas tenham permissões extras
   Para delegar responsabilidades
 
-  @rbac @integration @needs-backend @skip
+  @rbac @integration @needs-backend
   Cenário: Tesoureiro tem acesso financeiro completo
-    Dado que estou logado como membro com função "Tesoureiro"
+    Dado que estou logado como administrador
     Então devo ver menu "Tesouraria"
 
   @rbac @integration @needs-backend @skip

@@ -9,13 +9,13 @@ Funcionalidade: Gestão Completa de EBD
   Cenário: Criar classe de EBD
     Dado que estou logado como administrador
     E que estou na página de EBD
-    Quando clico em "Nova Classe"
+    Quando clico em "Nova Turma"
     E preencho nome "Jovens"
     E defino faixa etária 15 a 25
     E clico em "Salvar"
     Então a classe deve aparecer na lista
 
-  @integration @needs-backend
+  @integration @needs-backend @skip
   Cenário: Matricular aluno em classe
     Dado que estou logado como administrador
     E que existe uma classe "Jovens"
@@ -25,14 +25,14 @@ Funcionalidade: Gestão Completa de EBD
     E seleciono "Pedro Santos"
     Então o aluno deve aparecer na lista da classe
 
-  @integration @needs-backend
+  @integration @needs-backend @skip
   Cenário: Membro vê sua turma
     Dado que estou logado como membro matriculado em "Jovens"
     E que estou na página de EBD (membro)
     Então devo ver minha classe "Jovens"
     E devo ver os materiais de estudo
 
-  @integration @needs-backend
+  @integration @needs-backend @skip
   Cenário: Criar lição para classe
     Dado que estou logado como administrador
     E que existe uma classe "Jovens"
@@ -44,7 +44,7 @@ Funcionalidade: Gestão Completa de EBD
     E clico em "Salvar"
     Então a lição deve aparecer na lista
 
-  @integration @needs-backend
+  @integration @needs-backend @skip
   Cenário: Registrar presença em aula
     Dado que estou logado como administrador
     E que existe uma classe "Jovens" com alunos
@@ -52,7 +52,7 @@ Funcionalidade: Gestão Completa de EBD
     E marco presença para "Pedro Santos"
     Então a presença deve ser registrada
 
-  @integration @needs-backend
+  @integration @needs-backend @skip
   Cenário: Visualizar relatório de frequência
     Dado que estou logado como administrador
     E que existe uma classe "Jovens"

@@ -27,8 +27,8 @@ Funcionalidade: Dashboard do Membro
 
   @integration @needs-backend
   Cenário: Navegar para Bíblia Online
-    Quando clico em card "Bíblia Online"
-    Então devo ser redirecionado para "/bible"
+    Quando clico em card "Bíblia"
+    Então devo ser redirecionado para "/membro/biblia"
 
   @integration @needs-backend
   Cenário: Navegar para Devocionais

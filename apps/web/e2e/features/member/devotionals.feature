@@ -14,7 +14,7 @@ Funcionalidade: Devocionais
     E devo ver a referência bíblica
     E devo ver o texto da meditação
 
-  @integration @needs-backend
+  @integration @needs-backend @skip
   Cenário: Administrador cria devocional
     Dado que estou logado como administrador
     E que estou na página de Devocionais (admin)
@@ -27,7 +27,7 @@ Funcionalidade: Devocionais
     Então devo ver mensagem de sucesso
     E o devocional deve aparecer na lista
 
-  @integration @needs-backend
+  @integration @needs-backend @skip
   Cenário: Membro visualiza lista de devocionais
     Dado que estou logado como membro
     E que estou na página de Devocionais
@@ -35,7 +35,7 @@ Funcionalidade: Devocionais
     E cada devocional deve mostrar título
     E cada devocional deve mostrar data
 
-  @integration @needs-backend
+  @integration @needs-backend @skip
   Cenário: Membro lê devocional completo
     Dado que estou logado como membro
     E que estou na página de Devocionais

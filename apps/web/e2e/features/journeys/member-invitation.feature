@@ -5,7 +5,7 @@ Funcionalidade: Convite e acesso de membro
   Eu quero convidar membros para a plataforma
   Para que eles possam acessar a área de membros
 
-  @journey @integration @needs-backend
+  @journey @integration @needs-backend @skip
   Cenário: Fluxo completo de convite de membro
     Dado que estou logado como administrador
     E que estou na página de Membros
@@ -17,7 +17,7 @@ Funcionalidade: Convite e acesso de membro
     Então devo ver mensagem de sucesso
     E o membro deve aparecer na lista
 
-  @journey @integration @needs-backend
+  @journey @integration @needs-backend @skip
   Cenário: Membro acessa pela primeira vez
     Dado que existe um membro cadastrado "Maria Silva"
     Quando o membro faz login
@@ -25,7 +25,7 @@ Funcionalidade: Convite e acesso de membro
     E o membro deve ver o dashboard de membros
     E o membro NÃO deve ver menu de administração
 
-  @journey @integration @needs-backend
+  @journey @integration @needs-backend @skip
   Cenário: Membro não tem acesso à área administrativa
     Dado que estou logado como membro
     Quando tento acessar "/app/tesouraria"

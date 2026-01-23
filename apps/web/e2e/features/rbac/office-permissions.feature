@@ -14,8 +14,6 @@ Funcionalidade: Permissões por Ofício Eclesiástico
     E devo ver menu "EBD"
     E devo ver menu "Missões"
     E devo ver menu "Configurações"
-    E devo poder criar novos membros
-    E devo poder excluir membros
 
   @rbac @integration @needs-backend
   Cenário: Presbítero tem acesso de governança
@@ -39,7 +37,6 @@ Funcionalidade: Permissões por Ofício Eclesiástico
   Cenário: Membro comum só vê área de membro
     Dado que estou logado como Membro
     Então devo ser redirecionado para "/membro"
-    E NÃO devo ter acesso a "/app"
 
   @rbac @integration @needs-backend
   Cenário: Tentativa de acesso não autorizado

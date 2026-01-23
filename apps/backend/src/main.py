@@ -47,6 +47,7 @@ async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
         },
     )
 
+
 # Logging Middleware (must be added first to wrap all requests)
 app.add_middleware(LoggingMiddleware)
 

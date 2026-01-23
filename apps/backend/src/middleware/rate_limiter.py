@@ -7,6 +7,8 @@ Uses slowapi to protect against brute force attacks and abuse.
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
+from src.config import settings
+
 
 def get_client_ip(request) -> str:
     """
@@ -33,8 +35,6 @@ def get_client_ip(request) -> str:
     # Fallback to direct connection IP
     return get_remote_address(request)
 
-
-from src.config import settings
 
 # Create limiter instance with custom key function
 # Disable rate limiting during tests to prevent failure

@@ -24,12 +24,12 @@ export function InviteMemberDialog({
     const [role, setRole] = useState<'ADMIN' | 'MEMBER'>('MEMBER');
 
     useEffect(() => {
-        if (member?.system_role) {
-            setRole(member.system_role as 'ADMIN' | 'MEMBER');
-        } else {
-            setRole('MEMBER');
+        const newRole = (member?.system_role as 'ADMIN' | 'MEMBER') || 'MEMBER';
+        if (role !== newRole) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setRole(newRole);
         }
-    }, [member]);
+    }, [member, role]);
 
     if (!member) return null;
 

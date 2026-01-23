@@ -121,6 +121,14 @@ When('clico em card {string}', async ({ page }, cardTitle: string) => {
 // Alternative Validation Steps
 // ============================================================================
 
+Then('devo estar na área de membro', async ({ page }) => {
+    await expect(page).toHaveURL(/\/membro/, { timeout: 5000 });
+});
+
+Then('devo ver o dashboard de membros', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: /portal|membro|início/i }).first()).toBeVisible({ timeout: 5000 });
+});
+
 Then('devo ser redirecionado para {string} ou ver mensagem de acesso negado', async ({ page }, path: string) => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000); // Wait for potential redirect

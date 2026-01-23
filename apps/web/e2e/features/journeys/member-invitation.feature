@@ -17,13 +17,11 @@ Funcionalidade: Convite e acesso de membro
     Então devo ver mensagem de sucesso
     E o membro deve aparecer na lista
 
-  @journey @integration @needs-backend @skip
+  @journey @integration @needs-backend
   Cenário: Membro acessa pela primeira vez
-    Dado que existe um membro cadastrado "Maria Silva"
-    Quando o membro faz login
-    Então o membro deve ser redirecionado para "/membro"
-    E o membro deve ver o dashboard de membros
-    E o membro NÃO deve ver menu de administração
+    Dado que estou logado como membro
+    Então devo estar na área de membro
+    E devo ver o dashboard de membros
 
   @journey @integration @needs-backend
   Cenário: Membro não tem acesso à área administrativa

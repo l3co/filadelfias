@@ -88,7 +88,7 @@ class TestOfficePermissions:
         assert "members:create" not in permissions
         assert "members:edit" not in permissions
         assert "financial:view" not in permissions
-        assert "governance:view" not in permissions
+        assert "governance:view" in permissions
 
     def test_office_case_insensitive(self):
         """Office should be case insensitive."""

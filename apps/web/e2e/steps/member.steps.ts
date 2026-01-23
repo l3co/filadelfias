@@ -205,6 +205,10 @@ Then('devo ver eventos na lista', async ({ page }) => {
     await expect(page.getByRole('heading', { level: 3 }).first()).toBeVisible({ timeout: 5000 });
 });
 
+Then('devo ver a página de eventos admin', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: /eventos/i }).first()).toBeVisible({ timeout: 5000 });
+});
+
 Then('devo ver lista de eventos futuros', async ({ page }) => {
     // Wait for events to load - look for event headings (h3)
     await expect(

@@ -207,11 +207,3 @@ Then('cada reunião deve mostrar indicador de presença', async ({ page }) => {
 Then('cada reunião deve ter opção {string}', async ({ page }, optionText: string) => {
     await expect(page.getByRole('button', { name: new RegExp(optionText, 'i') }).first()).toBeVisible();
 });
-
-Then('devo ver lista de conselhos', async ({ page }) => {
-    // Wait for councils to load
-    await expect(
-        page.locator('[data-testid="council-card"]').first()
-            .or(page.getByText(/conselho|junta|sessão/i).first())
-    ).toBeVisible({ timeout: 10000 });
-});

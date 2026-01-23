@@ -13,7 +13,7 @@ Funcionalidade: Gestão de Reuniões
   Cenário: Visualizar lista de reuniões vazia
     Quando eu abro o dialog de reuniões do conselho
     Então devo ver a mensagem "Nenhuma reunião agendada"
-    E devo ver o botão "Nova Reunião"
+    E devo ver botão "Nova Reunião"
 
   @integration @needs-backend
   Cenário: Agendar nova reunião ordinária
@@ -76,7 +76,7 @@ Funcionalidade: Gestão de Reuniões
   Cenário: Finalizar reunião
     Dado que existe uma reunião agendada no conselho
     E que registrei a ata e as presenças
-    Quando eu clico em "Finalizar Reunião"
+    Quando clico em "Finalizar Reunião"
     Então devo ver a mensagem "Reunião finalizada com sucesso"
     E a reunião deve aparecer na aba "Realizadas"
     E a reunião deve mostrar badge "Finalizada"

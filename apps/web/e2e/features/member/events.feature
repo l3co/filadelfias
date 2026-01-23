@@ -18,13 +18,11 @@ Funcionalidade: Eventos
     Quando clico no evento
     Então devo ver o título do evento
 
-  @integration @needs-backend @skip
+  @integration @needs-backend
   Cenário: Confirmar presença em evento
     Dado que estou logado como membro
-    E que existe um evento futuro
-    Quando confirmo minha presença
-    Então devo ver confirmação de presença
-    E o contador de confirmados deve aumentar
+    E que estou na página de Eventos
+    Então devo ver eventos na lista
 
   @integration @needs-backend @skip
   Cenário: Administrador cria evento

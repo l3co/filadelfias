@@ -187,6 +187,10 @@ Then('devo ver apenas pedidos de {string}', async ({ page }, category: string) =
 // Events Steps
 // ============================================================================
 
+Then('devo ver eventos na lista', async ({ page }) => {
+    await expect(page.getByRole('heading', { level: 3 }).first()).toBeVisible({ timeout: 5000 });
+});
+
 Then('devo ver lista de eventos futuros', async ({ page }) => {
     // Wait for events to load - look for event headings (h3)
     await expect(

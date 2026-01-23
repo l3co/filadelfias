@@ -5,6 +5,8 @@ from typing import Any, Dict, List, Optional
 import httpx
 from pydantic import BaseModel
 
+from src.services.logging_service import log_error, log_info, log_warning
+
 # Mapping of abbreviations to full Portuguese names
 BOOK_NAMES = {
     "gn": "Gênesis",
@@ -127,9 +129,9 @@ class BibleService:
         try:
             with open(path, "r", encoding="utf-8-sig") as f:
                 cls._versions_cache[version] = json.load(f)
-            print(f"Bible version '{version}' loaded: {len(cls._versions_cache[version])} books")
+            log_info("Bible version loaded", version=version, books_count=len(cls._versions_cache[version]))
         except FileNotFoundError:
-            print(f"Bible version data not found at {path}")
+            log_error(f"Bible version data not found at {path}", version=version)
             cls._versions_cache[version] = []
 
     @classmethod
@@ -164,7 +166,7 @@ class BibleService:
                 data = response.json()
                 return [v["text"] for v in data.get("verses", [])]
         except Exception as e:
-            print(f"Error fetching remote chapter: {e}")
+            log_error("Error fetching remote chapter", error=str(e), version=version, abbrev=abbrev, chapter=chapter)
             return []
 
     @classmethod
@@ -197,7 +199,7 @@ class BibleService:
         if version_config.is_remote:
             verses = await cls._fetch_remote_chapter(version, abbrev, chapter)
             if not verses:
-                print(f"Remote fetch failed for {version}, falling back to {cls.DEFAULT_VERSION}")
+                log_warning(f"Remote fetch failed for {version}, falling back to {cls.DEFAULT_VERSION}")
                 fallback_chapters = cls._get_local_data(cls.DEFAULT_VERSION)[book_idx]["chapters"]
                 verses = fallback_chapters[chapter - 1]
         else:

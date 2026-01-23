@@ -7,6 +7,9 @@ import os
 import resend
 
 
+from src.services.logging_service import log_error, log_info, log_warning
+
+
 class EmailService:
     """Service for sending emails via Resend."""
 
@@ -38,7 +41,7 @@ class EmailService:
             True if email was sent successfully
         """
         if not self.is_configured():
-            print(f"[EMAIL] Resend not configured. Would send welcome email to {to_email}")
+            log_warning("Email service not configured - skipping welcome email", to_email=to_email)
             return False
 
         html_content = f"""
@@ -103,10 +106,11 @@ class EmailService:
                     "html": html_content,
                 }
             )
-            print(f"[EMAIL] Welcome email sent to {to_email}: {response}")
+            # Log success but avoid logging full response if it contains sensitive info
+            log_info("Welcome email sent", to_email=to_email, response_id=response.get("id"))
             return True
         except Exception as e:
-            print(f"[EMAIL] Error sending welcome email: {e}")
+            log_error("Failed to send welcome email", error=str(e), to_email=to_email)
             return False
 
     async def send_password_reset_email(self, to_email: str, user_name: str, reset_token: str) -> bool:
@@ -122,7 +126,7 @@ class EmailService:
             True if email was sent successfully
         """
         if not self.is_configured():
-            print(f"[EMAIL] Resend not configured. Would send reset email to {to_email}")
+            log_warning("Email service not configured - skipping reset email", to_email=to_email)
             return False
 
         reset_url = f"{self.frontend_url}/reset-password?token={reset_token}"
@@ -182,10 +186,10 @@ class EmailService:
                     "html": html_content,
                 }
             )
-            print(f"[EMAIL] Password reset email sent to {to_email}: {response}")
+            log_info("Password reset email sent", to_email=to_email, response_id=response.get("id"))
             return True
         except Exception as e:
-            print(f"[EMAIL] Error sending password reset email: {e}")
+            log_error("Failed to send password reset email", error=str(e), to_email=to_email)
             return False
 
 

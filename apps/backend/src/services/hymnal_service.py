@@ -4,6 +4,8 @@ from typing import Dict, List, Optional
 
 from pydantic import BaseModel
 
+from src.services.logging_service import log_error, log_info
+
 
 class Hymn(BaseModel):
     number: int
@@ -26,9 +28,9 @@ class HymnalService:
             with open(path, "r", encoding="utf-8") as f:
                 cls._data = json.load(f)
             cls._loaded = True
-            print(f"Hymnal data loaded: {len(cls._data)} hymns")
+            log_info("Hymnal data loaded", count=len(cls._data))
         except FileNotFoundError:
-            print(f"Hymnal data not found at {path}")
+            log_error(f"Hymnal data not found at {path}")
             cls._data = []
 
     @classmethod

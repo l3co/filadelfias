@@ -107,8 +107,29 @@ def generate_request_id() -> str:
     return str(uuid.uuid4())[:8]
 
 
+# Sensitive keys to mask in logs
+SENSITIVE_KEYS = ("password", "token", "secret", "key", "authorization", "auth", "credential", "pass")
+
+
+def sanitize_data(data: Any) -> Any:
+    """Recursively mask sensitive data in dictionaries and lists."""
+    if isinstance(data, dict):
+        return {
+            k: "*****"
+            if any(s in k.lower() for s in SENSITIVE_KEYS)
+            else sanitize_data(v)
+            for k, v in data.items()
+        }
+    if isinstance(data, list):
+        return [sanitize_data(i) for i in data]
+    return data
+
+
 def log_with_data(level: str, message: str, **data: Any) -> None:
-    """Log a message with additional structured data."""
+    """Log a message with additional structured data (sanitized)."""
+    # Sanitize data before logging
+    clean_data = sanitize_data(data)
+
     record = logger.makeRecord(
         logger.name,
         getattr(logging, level.upper()),
@@ -118,7 +139,7 @@ def log_with_data(level: str, message: str, **data: Any) -> None:
         (),
         None,
     )
-    record.extra_data = data
+    record.extra_data = clean_data
     logger.handle(record)
 
 

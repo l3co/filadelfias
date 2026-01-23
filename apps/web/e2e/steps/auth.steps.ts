@@ -39,7 +39,8 @@ Given('que estou logado como membro', async ({ page }) => {
     await page.getByRole('button', { name: /entrar/i }).click();
 
     try {
-        await expect(page).toHaveURL(/\/app/, { timeout: 10000 });
+        // Members may be redirected to /membro or /app depending on their role
+        await page.waitForURL(/\/(app|membro)/, { timeout: 10000 });
     } catch {
         throw new Error('Login failed - backend may not be running or test user does not exist.');
     }

@@ -63,8 +63,8 @@ When('seleciono o filtro {string}', async ({ page }, filter: string) => {
 // ============================================================================
 
 Then('não devo ver membros que não contêm {string}', async ({ page }, text: string) => {
-    // Wait a moment for filter to apply
-    await page.waitForTimeout(500);
+    // Wait for filter to apply
+    await page.waitForLoadState('networkidle');
 
     const table = page.locator('table tbody, [role="grid"]');
     const rows = table.locator('tr, [role="row"]');
@@ -80,7 +80,8 @@ Then('não devo ver membros que não contêm {string}', async ({ page }, text: s
 });
 
 Then('devo ver apenas membros comungantes', async ({ page }) => {
-    await page.waitForTimeout(500);
+    // Wait for filter to apply
+    await page.waitForLoadState('networkidle');
     // Verify that only comungantes are shown
     const statusCells = page.locator('td:has-text("Comungante"), [data-status="comungante"]');
     const count = await statusCells.count();

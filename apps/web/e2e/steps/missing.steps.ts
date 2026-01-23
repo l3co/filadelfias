@@ -32,9 +32,8 @@ Then('devo ver erro de validação', async ({ page }) => {
 
 Then('o formulário não deve ser enviado', async ({ page }) => {
     // Form should still be visible (not submitted)
-    await page.waitForTimeout(500);
     // Check that we're still on the same page with the form
-    await expect(page.locator('form').first()).toBeVisible();
+    await expect(page.locator('form').first()).toBeVisible({ timeout: 3000 });
 });
 
 // ============================================================================
@@ -42,7 +41,24 @@ Then('o formulário não deve ser enviado', async ({ page }) => {
 // ============================================================================
 
 When('seleciono status {string}', async ({ page }, status: string) => {
-    await page.getByLabel(/status/i).click();
+    // MemberForm uses native select inside dialog
+    const dialog = page.locator('[role="dialog"]');
+    const selectInDialog = dialog.locator('select').filter({ has: page.locator(`option:text-matches("${status}", "i")`) }).first();
+    
+    if (await selectInDialog.isVisible().catch(() => false)) {
+        await selectInDialog.selectOption({ label: status });
+        return;
+    }
+    
+    // Try any select on the page
+    const statusSelect = page.locator('select').filter({ has: page.locator(`option:text-matches("${status}", "i")`) }).first();
+    if (await statusSelect.isVisible().catch(() => false)) {
+        await statusSelect.selectOption({ label: status });
+        return;
+    }
+    
+    // Fallback: use combobox pattern
+    await page.getByRole('combobox').first().click();
     await page.getByRole('option', { name: new RegExp(status, 'i') }).click();
 });
 
@@ -51,10 +67,9 @@ When('seleciono status {string}', async ({ page }, status: string) => {
 // ============================================================================
 
 Then('o membro deve aparecer na lista', async ({ page }) => {
-    // Wait for list to update
-    await page.waitForTimeout(1000);
+    // Wait for list to be visible
     const list = page.locator('table, [role="list"], ul, ol, .grid, .list');
-    await expect(list.first()).toBeVisible();
+    await expect(list.first()).toBeVisible({ timeout: 5000 });
 });
 
 // ============================================================================
@@ -64,6 +79,7 @@ Then('o membro deve aparecer na lista', async ({ page }) => {
 // Note: These are already defined in member.steps.ts but Playwright may not find them
 // due to escaped parentheses in the step name. Adding them here as well.
 
+// Steps with escaped parentheses - exact syntax required by bddgen
 Given('que estou na página de EBD \\(membro)', async ({ page }) => {
     await page.goto('/membro/ebd');
     await page.waitForLoadState('networkidle');
@@ -91,20 +107,6 @@ When('preencho a descrição', async ({ page }) => {
 // RBAC Negative Assertion Steps
 // ============================================================================
 
-Then('NÃO devo poder excluir membros', async ({ page }) => {
-    await page.goto('/app/members');
-    const deleteButton = page.getByRole('button', { name: /excluir|remover|delete/i });
-    
-    await expect(deleteButton).not.toBeVisible().catch(() => {
-        // If element doesn't exist, that's acceptable
-        return Promise.resolve();
-    });
-});
-
-Then('NÃO devo ver menu {string}', async ({ page }, menuItem: string) => {
-    const sidebar = page.locator('nav, aside, [role="navigation"]');
-    
-    await expect(sidebar.getByText(new RegExp(menuItem, 'i'))).not.toBeVisible().catch(() => {
-        return Promise.resolve();
-    });
-});
+// NOTE: These steps are now correctly defined in rbac.steps.ts:
+// - 'NÃO devo poder excluir membros'
+// - 'NÃO devo ver menu {string}'

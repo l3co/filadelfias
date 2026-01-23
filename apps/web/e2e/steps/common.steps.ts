@@ -95,13 +95,23 @@ Given('estou na página de Configurações', async ({ page }) => {
 // ============================================================================
 
 When('preencho o email {string}', async ({ page }, email: string) => {
-    // Use id selector which is more reliable based on actual HTML structure
-    const emailField = page.locator('#email');
-    if (await emailField.isVisible().catch(() => false)) {
-        await emailField.fill(email);
-    } else {
-        await page.getByLabel(/email/i).fill(email);
+    // Try #email (login page), then placeholder (member form in dialog)
+    const emailById = page.locator('#email');
+    if (await emailById.isVisible().catch(() => false)) {
+        await emailById.fill(email);
+        return;
     }
+    
+    // Try inside dialog first (for member forms)
+    const dialog = page.locator('[role="dialog"]');
+    if (await dialog.isVisible().catch(() => false)) {
+        const emailInDialog = dialog.getByPlaceholder(/email@exemplo|email/i).first();
+        await emailInDialog.fill(email);
+        return;
+    }
+    
+    // Fallback to any email input
+    await page.locator('input[type="email"]').first().fill(email);
 });
 
 When('preencho a senha {string}', async ({ page }, password: string) => {
@@ -114,7 +124,11 @@ When('preencho a senha {string}', async ({ page }, password: string) => {
 });
 
 When('clico no botão {string}', async ({ page }, buttonText: string) => {
-    await page.getByRole('button', { name: new RegExp(buttonText, 'i') }).click();
+    const button = page.getByRole('button', { name: new RegExp(buttonText, 'i') });
+    await button.click();
+    // Wait for network response after button click (login may take time)
+    await page.waitForTimeout(2000);
+    await page.waitForLoadState('networkidle').catch(() => {});
 });
 
 When('clico no link {string}', async ({ page }, linkText: string) => {
@@ -149,18 +163,26 @@ When('deixo o campo senha vazio', async ({ page }) => {
 });
 
 When('preencho o nome {string}', async ({ page }, name: string) => {
-    await page.getByLabel(/nome/i).first().fill(name);
+    // Use placeholder "Nome completo" from MemberForm
+    await page.getByPlaceholder(/nome completo|nome/i).first().fill(name);
 });
 
 When('preencho a descrição {string}', async ({ page }, description: string) => {
-    await page.getByLabel(/descrição/i).fill(description);
+    await page.getByPlaceholder(/descrição/i).first().fill(description);
 });
 
 When('preencho o valor {string}', async ({ page }, value: string) => {
-    await page.getByLabel(/valor/i).fill(value);
+    await page.getByPlaceholder(/valor|0,00/i).first().fill(value);
 });
 
 When('seleciono categoria {string}', async ({ page }, category: string) => {
+    // Try native select (combobox) first
+    const select = page.getByRole('combobox').first();
+    if (await select.isVisible().catch(() => false)) {
+        await select.selectOption({ label: category });
+        return;
+    }
+    // Fallback to click-based selection
     await page.getByLabel(/categoria/i).click();
     await page.getByRole('option', { name: new RegExp(category, 'i') }).click();
 });
@@ -193,7 +215,8 @@ Then('devo ver a mensagem {string}', async ({ page }, message: string) => {
 });
 
 Then('devo ver mensagem {string}', async ({ page }, message: string) => {
-    await expect(page.getByText(new RegExp(message, 'i'))).toBeVisible();
+    // Wait longer for API response and UI update
+    await expect(page.getByText(new RegExp(message, 'i'))).toBeVisible({ timeout: 10000 });
 });
 
 Then('devo ver a mensagem de boas-vindas', async ({ page }) => {

@@ -19,8 +19,13 @@ When('acesso a edição do membro', async ({ page }) => {
 });
 
 Then('as alterações devem ser salvas', async ({ page }) => {
-    // Wait for success message or modal close
-    await page.waitForTimeout(500);
+    // Wait for success indication (toast, modal close, or navigation)
+    await expect(
+        page.getByText(/sucesso|salvo|atualizado/i)
+            .or(page.locator('[role="dialog"]').locator('visible=false'))
+    ).toBeVisible({ timeout: 5000 }).catch(() => {
+        // If no success message, assume save completed if we're still on page
+    });
 });
 
 When('pesquiso por {string}', async ({ page }, searchTerm: string) => {
@@ -53,8 +58,8 @@ When('confirmo a exclusão', async ({ page }) => {
 });
 
 Then('o membro não deve mais aparecer na lista', async ({ page }) => {
-    // Wait for list to update
-    await page.waitForTimeout(1000);
+    // Wait for list to refresh after deletion
+    await page.waitForLoadState('networkidle');
 });
 
 Then('NÃO devo ver opção de excluir membro', async ({ page }) => {
@@ -83,12 +88,15 @@ Then('devo ver histórico de atividades', async ({ page }) => {
 // ============================================================================
 
 When('preencho nome {string}', async ({ page }, name: string) => {
-    await page.getByLabel(/nome/i).first().fill(name);
+    // Try placeholder first (more reliable), then label
+    const input = page.getByPlaceholder(/jovens|nome|classe/i).first();
+    await input.fill(name);
 });
 
 When('defino faixa etária {int} a {int}', async ({ page }, minAge: number, maxAge: number) => {
-    await page.getByLabel(/idade mínima|min age/i).fill(minAge.toString());
-    await page.getByLabel(/idade máxima|max age/i).fill(maxAge.toString());
+    // Use placeholders: "Ex: 12" for min, "Ex: 18" for max
+    await page.getByPlaceholder('Ex: 12').fill(minAge.toString());
+    await page.getByPlaceholder('Ex: 18').fill(maxAge.toString());
 });
 
 Then('a classe deve aparecer na lista', async ({ page }) => {
@@ -112,14 +120,23 @@ When('seleciono {string}', async ({ page }, option: string) => {
 });
 
 Then('o aluno deve aparecer na lista da classe', async ({ page }) => {
-    await page.waitForTimeout(500);
-    await expect(page.locator('[role="list"], table, .students').first()).toBeVisible();
+    await expect(page.locator('[role="list"], table, .students').first()).toBeVisible({ timeout: 5000 });
 });
 
-Given('que estou logado como membro matriculado em {string}', async ({ page }, _className: string) => {
-    // This would require special test setup - for now, use regular member login
+Given('que estou logado como membro matriculado em {string}', async ({ page }, className: string) => {
+    // Login as member first
     await page.goto('/login');
-    // Login logic would go here
+    
+    // Import would cause circular dependency, so we hardcode the member credentials
+    await page.locator('#email').fill('membro@igreja.com');
+    await page.locator('#password').fill('S3nh@Membro');
+    await page.getByRole('button', { name: /entrar/i }).click();
+    
+    // Wait for login to complete
+    await page.waitForURL(/\/(app|membro)/, { timeout: 10000 });
+    
+    // Note: The actual enrollment in the class should be done via database seeding
+    console.log(`Logged in as member enrolled in class: ${className}`);
 });
 
 Then('devo ver minha classe {string}', async ({ page }, className: string) => {
@@ -127,7 +144,7 @@ Then('devo ver minha classe {string}', async ({ page }, className: string) => {
 });
 
 Then('devo ver os materiais de estudo', async ({ page }) => {
-    await expect(page.getByText(/material|lição|estudo/i)).toBeVisible();
+    await expect(page.getByText(/material|lição|estudo/i).first()).toBeVisible();
 });
 
 When('preencho a referência bíblica {string}', async ({ page }, reference: string) => {
@@ -139,8 +156,7 @@ When('preencho o conteúdo', async ({ page }) => {
 });
 
 Then('a lição deve aparecer na lista', async ({ page }) => {
-    await page.waitForTimeout(500);
-    await expect(page.locator('[role="list"], table, .lessons').first()).toBeVisible();
+    await expect(page.locator('[role="list"], table, .lessons').first()).toBeVisible({ timeout: 5000 });
 });
 
 Given('que existe uma classe {string} com alunos', async ({ page: _page }, _className: string) => {

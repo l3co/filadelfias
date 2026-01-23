@@ -132,7 +132,7 @@ Then('devo poder criar membros', async ({ page }) => {
     await expect(page.getByRole('button', { name: /novo|adicionar|criar/i })).toBeVisible();
 });
 
-Then('Mas NÃO devo poder excluir membros', async ({ page }) => {
+Then('NÃO devo poder excluir membros', async ({ page }) => {
     await page.goto('/app/members');
     const deleteButton = page.getByRole('button', { name: /excluir|remover|delete/i });
 
@@ -150,7 +150,7 @@ Then('NÃO devo poder editar configurações', async ({ page }) => {
     });
 });
 
-Then('Mas NÃO devo ver menu {string}', async ({ page }, menuItem: string) => {
+Then('NÃO devo ver menu {string}', async ({ page }, menuItem: string) => {
     const sidebar = page.locator('nav, aside, [role="navigation"]');
 
     await expect(sidebar.getByText(new RegExp(menuItem, 'i'))).not.toBeVisible().catch(() => {

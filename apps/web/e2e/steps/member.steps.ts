@@ -66,19 +66,23 @@ Then('devo ver o texto da meditação', async ({ page }) => {
 });
 
 When('preencho o título {string}', async ({ page }, title: string) => {
-    await page.getByLabel(/título/i).fill(title);
+    // Use placeholder since label is not associated with input
+    await page.getByPlaceholder(/graça|título|amor/i).first().fill(title);
 });
 
 When('preencho a referência {string}', async ({ page }, reference: string) => {
-    await page.getByLabel(/referência/i).fill(reference);
+    // Use placeholder: "Ex: João 3:16"
+    await page.getByPlaceholder(/joão|referência/i).first().fill(reference);
 });
 
 When('preencho o texto do versículo', async ({ page }) => {
-    await page.getByLabel(/versículo|texto/i).fill(testDevotionals.today.verseText);
+    // Use placeholder: "Digite o texto do versículo..."
+    await page.getByPlaceholder(/digite o texto|versículo/i).first().fill(testDevotionals.today.verseText);
 });
 
 When('preencho a meditação', async ({ page }) => {
-    await page.getByLabel(/meditação|conteúdo/i).fill(testDevotionals.today.meditation);
+    // Use placeholder: "Escreva a meditação do dia..."
+    await page.getByPlaceholder(/escreva a meditação|meditação/i).first().fill(testDevotionals.today.meditation);
 });
 
 Then('o devocional deve aparecer na lista', async ({ page }) => {
@@ -122,11 +126,13 @@ Then('devo ver a meditação completa', async ({ page }) => {
 // ============================================================================
 
 When('preencho o conteúdo {string}', async ({ page }, content: string) => {
-    await page.getByLabel(/conteúdo|pedido|mensagem/i).fill(content);
+    // Use placeholder: "Compartilhe seu pedido de oração..."
+    await page.getByPlaceholder(/compartilhe|pedido|oração/i).first().fill(content);
 });
 
 When('marco como anônimo', async ({ page }) => {
-    await page.getByLabel(/anônimo|anônima/i).check();
+    // Checkbox with label "Publicar anonimamente"
+    await page.getByText(/anônimo|anonimamente/i).click();
 });
 
 Then('meu pedido deve aparecer na lista', async ({ page }) => {
@@ -143,9 +149,8 @@ Given('que existe um pedido de oração', async ({ page: _page }) => {
 });
 
 Then('o contador de orações deve aumentar', async ({ page }) => {
-    // Wait for counter update
-    await page.waitForTimeout(500);
-    await expect(page.getByText(/\d+\s*(oração|orações|prayed)/i)).toBeVisible();
+    // Wait for counter to be visible (with built-in retry)
+    await expect(page.getByText(/\d+\s*(oração|orações|prayed)/i)).toBeVisible({ timeout: 5000 });
 });
 
 Given('que criei pedidos de oração', async ({ page: _page }) => {
@@ -178,15 +183,20 @@ Then('devo ver apenas pedidos de {string}', async ({ page }, category: string) =
 // ============================================================================
 
 Then('devo ver lista de eventos futuros', async ({ page }) => {
-    await expect(page.locator('[role="list"], table, .grid, .events').first()).toBeVisible();
+    // Wait for events to load - look for event headings (h3)
+    await expect(
+        page.getByRole('heading', { level: 3 }).first()
+    ).toBeVisible({ timeout: 10000 });
 });
 
 Then('cada evento deve mostrar data e horário', async ({ page }) => {
-    await expect(page.getByText(/\d{2}\/\d{2}\/\d{4}|\d{2}:\d{2}/)).toBeVisible();
+    // Format: "segunda-feira, 26 de janeiro de 2026" and "10:06"
+    await expect(page.getByText(/janeiro|fevereiro|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro/i).first()).toBeVisible();
 });
 
 Then('cada evento deve mostrar local', async ({ page }) => {
-    await expect(page.getByText(/local|endereço|onde/i)).toBeVisible();
+    // Look for location text like "Templo Principal" or "Auditório Central"
+    await expect(page.getByText(/templo|auditório|igreja|salão/i).first()).toBeVisible();
 });
 
 Given('que existe um evento {string}', async ({ page: _page }, _eventTitle: string) => {
@@ -227,20 +237,22 @@ Then('devo ver confirmação de presença', async ({ page }) => {
 });
 
 Then('o contador de confirmados deve aumentar', async ({ page }) => {
-    await page.waitForTimeout(500);
-    await expect(page.getByText(/\d+\s*(confirmado|confirmados|attending)/i)).toBeVisible();
+    await expect(page.getByText(/\d+\s*(confirmado|confirmados|attending)/i)).toBeVisible({ timeout: 5000 });
 });
 
 When('seleciono a data {string}', async ({ page }, date: string) => {
-    await page.getByLabel(/data/i).fill(date);
+    // Date input
+    await page.locator('input[type="date"]').first().fill(date);
 });
 
 When('preencho o horário {string}', async ({ page }, time: string) => {
-    await page.getByLabel(/horário|hora/i).fill(time);
+    // Time input
+    await page.locator('input[type="time"]').first().fill(time);
 });
 
 When('preencho o local {string}', async ({ page }, location: string) => {
-    await page.getByLabel(/local|endereço/i).fill(location);
+    // Location input placeholder
+    await page.getByPlaceholder(/local|endereço/i).first().fill(location);
 });
 
 Then('o evento deve aparecer na lista', async ({ page }) => {

@@ -53,6 +53,12 @@ class MembershipResponse(BaseModel):
         from_attributes = True
 
 
+class MembershipUpdateRole(BaseModel):
+    """Schema for updating membership role."""
+
+    role: str = Field(..., pattern="^(ADMIN|MEMBER)$")
+
+
 class UserBase(BaseModel):
     """Base user schema."""
 

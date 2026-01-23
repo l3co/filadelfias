@@ -5,7 +5,7 @@ API endpoints for member invitations.
 import secrets
 from datetime import datetime, timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from pydantic import BaseModel, field_validator
 
 from src.api.auth import get_current_user
@@ -17,6 +17,7 @@ from src.infra.repositories import (
     user_repository,
 )
 from src.infra.security import get_password_hash, verify_password
+from src.middleware.permissions import verify_permission
 from src.middleware.rate_limiter import limiter
 from src.services.email_service import email_service
 
@@ -84,12 +85,23 @@ async def invite_member(
     request: Request,
     tenant_id: str,
     member_id: str,
+    role: str = Query("MEMBER", regex="^(ADMIN|MEMBER)$", description="System role for the user"),
     current_user: dict = Depends(get_current_user),
 ):
     """
     Invite a member to the platform.
     Creates a user account with temporary password and sends welcome email.
+    
+    Permissions:
+    - Invite as MEMBER: Requires members:edit permission.
+    - Invite as ADMIN: Requires settings:manage permission.
     """
+    # Verify permission based on role being assigned
+    if role == "ADMIN":
+        await verify_permission(tenant_id, current_user, "settings", "manage")
+    else:
+        await verify_permission(tenant_id, current_user, "members", "edit")
+
     # Get member
     member = await member_repository.get(tenant_id, member_id)
 
@@ -124,11 +136,11 @@ async def invite_member(
     # Link user to member
     await member_repository.link_user(tenant_id, member_id, new_user["id"])
 
-    # Create membership (as regular member, not admin)
+    # Create membership
     await membership_repository.create_membership(
         user_id=new_user["id"],
         tenant_id=tenant_id,
-        role="MEMBER",
+        role=role,
         status="ACTIVE",
     )
 

@@ -5,6 +5,7 @@ import { useCurrentTenant } from '../../hooks/useAuth';
 import { useMembers } from '../../features/members/hooks/useMembers';
 import { MembersCards } from '../../features/members/components/MembersCards';
 import { MemberDialog } from '../../features/members/components/MemberDialog';
+import { InviteMemberDialog } from '../../features/members/components/InviteMemberDialog';
 import { InviteSuccessDialog } from '../../features/members/components/InviteSuccessDialog';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
@@ -31,21 +32,22 @@ export function MembersPage() {
     const { data: members, isLoading } = useMembers(tenant?.id);
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [editingMember, setEditingMember] = useState<Member | null>(null);
+    const [inviteMember, setInviteMember] = useState<Member | null>(null);
     const [inviteResult, setInviteResult] = useState<{ member: Member; result: InviteResult } | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [officeFilter, setOfficeFilter] = useState<string | null>(null);
 
     const filteredMembers = useMemo(() => {
         if (!members) return [];
-        
+
         return members.filter(member => {
-            const matchesSearch = searchQuery === '' || 
+            const matchesSearch = searchQuery === '' ||
                 member.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 member.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 member.phone?.includes(searchQuery);
-            
+
             const matchesOffice = !officeFilter || member.office === officeFilter;
-            
+
             return matchesSearch && matchesOffice;
         });
     }, [members, searchQuery, officeFilter]);
@@ -60,12 +62,17 @@ export function MembersPage() {
     }, [members]);
 
     const inviteMutation = useMutation({
-        mutationFn: async (member: Member) => {
-            const response = await api.post<InviteResult>(`/tenants/${tenant?.id}/members/${member.id}/invite`);
+        mutationFn: async ({ member, role }: { member: Member; role: 'ADMIN' | 'MEMBER' }) => {
+            const response = await api.post<InviteResult>(
+                `/tenants/${tenant?.id}/members/${member.id}/invite`,
+                {},
+                { params: { role } }
+            );
             return { member, result: response.data };
         },
         onSuccess: (data) => {
             setInviteResult(data);
+            setInviteMember(null);
             queryClient.invalidateQueries({ queryKey: ['members', tenant?.id] });
         }
     });
@@ -134,11 +141,10 @@ export function MembersPage() {
                 <div className="flex flex-wrap gap-2">
                     <button
                         onClick={() => setOfficeFilter(null)}
-                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                            !officeFilter 
-                                ? 'bg-green-600 text-white' 
+                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${!officeFilter
+                                ? 'bg-green-600 text-white'
                                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                        }`}
+                            }`}
                     >
                         Todos
                         <Badge variant="secondary" className="ml-2 bg-white/20">{members?.length || 0}</Badge>
@@ -147,11 +153,10 @@ export function MembersPage() {
                         <button
                             key={key}
                             onClick={() => setOfficeFilter(officeFilter === key ? null : key)}
-                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                                officeFilter === key 
-                                    ? 'bg-green-600 text-white' 
+                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${officeFilter === key
+                                    ? 'bg-green-600 text-white'
                                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                            }`}
+                                }`}
                         >
                             {label}
                             {officeCounts[key] && (
@@ -163,11 +168,11 @@ export function MembersPage() {
             </div>
 
             {/* Cards */}
-            <MembersCards 
-                members={filteredMembers} 
-                isLoading={isLoading} 
+            <MembersCards
+                members={filteredMembers}
+                isLoading={isLoading}
                 onEditMember={(member) => setEditingMember(member)}
-                onInviteMember={(member) => inviteMutation.mutate(member)}
+                onInviteMember={(member) => setInviteMember(member)}
             />
 
             {/* Create/Edit Dialog (Unified) */}
@@ -179,6 +184,15 @@ export function MembersPage() {
                 }}
                 tenantId={tenant.id}
                 member={editingMember}
+            />
+
+            {/* Invite Dialog (Confirm & Role Selection) */}
+            <InviteMemberDialog
+                isOpen={!!inviteMember}
+                onClose={() => setInviteMember(null)}
+                member={inviteMember}
+                onInvite={(member, role) => inviteMutation.mutate({ member, role })}
+                isLoading={inviteMutation.isPending}
             />
 
             {/* Invite Success Dialog */}

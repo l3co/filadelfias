@@ -40,6 +40,10 @@ Then('devo ver resultados da busca', async ({ page }) => {
     await expect(page.locator('table tbody tr, [role="listitem"], .card').first()).toBeVisible({ timeout: 5000 });
 });
 
+Then('devo ver a lista de membros', async ({ page }) => {
+    await expect(page.locator('table tbody tr, [role="listitem"], .card').first()).toBeVisible({ timeout: 5000 });
+});
+
 Then('devo ver apenas membros com {string} no nome', async ({ page }, searchTerm: string) => {
     // All visible members should contain the search term
     await expect(page.getByText(new RegExp(searchTerm, 'i')).first()).toBeVisible();

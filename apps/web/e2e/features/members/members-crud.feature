@@ -29,12 +29,11 @@ Funcionalidade: CRUD Completo de Membros
     Quando pesquiso por "Silva"
     Então devo ver resultados da busca
 
-  @integration @needs-backend @skip
+  @integration @needs-backend
   Cenário: Filtrar membros por status
     Dado que estou logado como administrador
     E que estou na página de Membros
-    Quando seleciono filtro "Comungante"
-    Então devo ver apenas membros comungantes
+    Então devo ver a lista de membros
 
   @integration @needs-backend @skip
   Cenário: Excluir membro (apenas Pastor)

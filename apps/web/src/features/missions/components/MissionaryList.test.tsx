@@ -26,8 +26,8 @@ const mockMissionaries: Missionary[] = [
 
 describe('MissionaryList Component', () => {
     it('should render loading state', () => {
-        render(<MissionaryList isLoading={true} />);
-        expect(screen.getByText('Carregando missões...')).toBeInTheDocument();
+        const { container } = render(<MissionaryList isLoading={true} />);
+        expect(container.getElementsByClassName('animate-pulse').length).toBeGreaterThan(0);
     });
 
     it('should render empty state', () => {

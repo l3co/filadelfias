@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { ClassList } from './ClassList';
 import type { EBDClass } from '../../../services/ebd';
 
@@ -24,18 +25,30 @@ describe('ClassList Component', () => {
         // Quando isLoading é true, nosso componente renderiza placeholders animados.
         // Podemos verificar se não há texto "Nenhuma classe" e se existem elementos genéricos
         // Como é visual, o mais seguro é verificar que não renderiza o estado vazio.
-        const { container } = render(<ClassList isLoading={true} />);
+        const { container } = render(
+            <MemoryRouter>
+                <ClassList isLoading={true} />
+            </MemoryRouter>
+        );
         expect(screen.queryByText('Nenhuma classe')).not.toBeInTheDocument();
         expect(container.getElementsByClassName('animate-pulse').length).toBeGreaterThan(0);
     });
 
     it('should render empty state', () => {
-        render(<ClassList classes={[]} />);
+        render(
+            <MemoryRouter>
+                <ClassList classes={[]} />
+            </MemoryRouter>
+        );
         expect(screen.getByText('Nenhuma classe')).toBeInTheDocument();
     });
 
     it('should render class cards', () => {
-        render(<ClassList classes={mockClasses} />);
+        render(
+            <MemoryRouter>
+                <ClassList classes={mockClasses} />
+            </MemoryRouter>
+        );
         expect(screen.getByText('Jovens')).toBeInTheDocument();
         expect(screen.getByText('Crianças')).toBeInTheDocument();
         expect(screen.getByText('Sala 1')).toBeInTheDocument();

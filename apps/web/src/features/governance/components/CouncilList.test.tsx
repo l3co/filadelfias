@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { CouncilList } from './CouncilList';
 import type { Council } from '../../../services/governance';
 
@@ -19,18 +20,34 @@ const mockCouncils: Council[] = [
 ];
 
 describe('CouncilList Component', () => {
+    const queryClient = new QueryClient({
+        defaultOptions: {
+            queries: {
+                retry: false,
+            },
+        },
+    });
+
+    const renderWithClient = (ui: React.ReactElement) => {
+        return render(
+            <QueryClientProvider client={queryClient}>
+                {ui}
+            </QueryClientProvider>
+        );
+    };
+
     it('should render loading state', () => {
-        render(<CouncilList isLoading={true} />);
-        expect(screen.getByText('Carregando governança...')).toBeInTheDocument();
+        const { container } = renderWithClient(<CouncilList isLoading={true} />);
+        expect(container.getElementsByClassName('animate-pulse').length).toBeGreaterThan(0);
     });
 
     it('should render empty state', () => {
-        render(<CouncilList councils={[]} />);
+        renderWithClient(<CouncilList councils={[]} />);
         expect(screen.getByText('Nenhum órgão governamental')).toBeInTheDocument();
     });
 
     it('should render councils grouped by section', () => {
-        render(<CouncilList councils={mockCouncils} />);
+        renderWithClient(<CouncilList councils={mockCouncils} />);
 
         // Verifica se os nomes dos conselhos estão presentes
         expect(screen.getByText('Conselho da Igreja')).toBeInTheDocument();

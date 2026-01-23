@@ -5,14 +5,13 @@ Funcionalidade: Pedidos de Oração
   Eu quero compartilhar e orar por pedidos
   Para fortalecer nossa comunidade
 
-  @integration @needs-backend @skip
+  @integration @needs-backend
   Cenário: Criar pedido de oração
     Dado que estou logado como membro
     E que estou na página de Pedidos de Oração
     Quando clico em "Novo Pedido"
     E preencho o conteúdo "Oração pela minha família"
-    E seleciono categoria "Família"
-    E clico em "Enviar Pedido"
+    E clico em "Enviar"
     Então meu pedido deve aparecer na lista
 
   @integration @needs-backend @skip

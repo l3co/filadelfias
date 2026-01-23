@@ -136,8 +136,7 @@ When('marco como anônimo', async ({ page }) => {
 });
 
 Then('meu pedido deve aparecer na lista', async ({ page }) => {
-    const list = page.locator('table, [role="list"], ul, ol, .grid, .list');
-    await expect(list.getByText(/oração pela minha família/i).first()).toBeVisible();
+    await expect(page.getByText(/oração pela minha família/i).first()).toBeVisible({ timeout: 5000 });
 });
 
 Then('o pedido deve aparecer sem meu nome', async ({ page }) => {

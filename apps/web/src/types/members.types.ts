@@ -13,11 +13,11 @@ export type EcclesiasticalFunction =
 
 export type MemberStatus = 'PROCESSO' | 'COMUNGANTE' | 'NAO_COMUNGANTE' | 'DISCIPLINA' | 'AFASTADO' | 'TRANSFERIDO' | 'FALECIDO';
 
-export type Gender = 'MALE' | 'FEMALE';
+export type Gender = 'M' | 'F';
 
-export type MaritalStatus = 'SINGLE' | 'MARRIED' | 'DIVORCED' | 'WIDOWED';
+export type MaritalStatus = 'SOLTEIRO' | 'CASADO' | 'DIVORCIADO' | 'VIUVO';
 
-export type AdmissionType = 'BAPTISM' | 'PROFESSION' | 'TRANSFER' | 'JURISDICTION';
+export type AdmissionType = 'BATISMO' | 'PROFISSAO_FE' | 'TRANSFERENCIA' | 'JURISDICAO' | 'RESTAURACAO';
 
 export interface Member {
   id: string;

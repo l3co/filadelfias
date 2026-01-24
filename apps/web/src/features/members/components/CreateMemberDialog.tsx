@@ -10,6 +10,14 @@ import {
 } from "../../../components/ui/dialog";
 import { useCreateMember } from '../hooks/useMembers';
 import { useViaCEP } from '../../../hooks/useViaCEP';
+import {
+    useGenderOptions,
+    useMaritalStatusOptions,
+    useStatusOptions,
+    useOfficeOptions,
+    useFunctionOptions,
+    useAdmissionTypeOptions,
+} from '../../../hooks/useMetadata';
 import type { MemberCreateData, EcclesiasticalFunction } from '../../../types';
 import { User, Mail, Phone, Calendar, MapPin, Heart, Loader2, UserPlus } from 'lucide-react';
 
@@ -19,17 +27,17 @@ type Props = {
     tenantId: string;
 }
 
-const FUNCTIONS_OPTIONS: { value: EcclesiasticalFunction; label: string }[] = [
-    { value: 'TESOUREIRO', label: 'Tesoureiro' },
-    { value: 'SECRETARIO', label: 'Secretário' },
-    { value: 'EVANGELISTA', label: 'Evangelista' },
-    { value: 'MISSIONARIO', label: 'Missionário' },
-];
-
 export function CreateMemberDialog({ isOpen, onClose, tenantId }: Props) {
+    // Metadata hooks - fonte única de verdade do backend
+    const genderOptions = useGenderOptions();
+    const maritalStatusOptions = useMaritalStatusOptions();
+    const statusOptions = useStatusOptions();
+    const officeOptions = useOfficeOptions();
+    const functionOptions = useFunctionOptions();
+    const admissionTypeOptions = useAdmissionTypeOptions();
     const { register, handleSubmit, reset, setValue, control, formState: { errors } } = useForm<MemberCreateData>({
         defaultValues: {
-            status: 'ACTIVE',
+            status: 'COMUNGANTE',
             office: 'MEMBRO',
         }
     });
@@ -151,8 +159,9 @@ export function CreateMemberDialog({ isOpen, onClose, tenantId }: Props) {
                                     className="flex h-10 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
                                 >
                                     <option value="">Selecione...</option>
-                                    <option value="M">Masculino</option>
-                                    <option value="F">Feminino</option>
+                                    {genderOptions.map((opt) => (
+                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                    ))}
                                 </select>
                             </div>
 
@@ -163,10 +172,9 @@ export function CreateMemberDialog({ isOpen, onClose, tenantId }: Props) {
                                     className="flex h-10 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
                                 >
                                     <option value="">Selecione...</option>
-                                    <option value="SOLTEIRO">Solteiro(a)</option>
-                                    <option value="CASADO">Casado(a)</option>
-                                    <option value="VIUVO">Viúvo(a)</option>
-                                    <option value="DIVORCIADO">Divorciado(a)</option>
+                                    {maritalStatusOptions.map((opt) => (
+                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                    ))}
                                 </select>
                             </div>
 
@@ -280,10 +288,9 @@ export function CreateMemberDialog({ isOpen, onClose, tenantId }: Props) {
                                     {...register('status')}
                                     className="flex h-10 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
                                 >
-                                    <option value="COMUNGANTE">Comungante</option>
-                                    <option value="NAO_COMUNGANTE">Não Comungante</option>
-                                    <option value="PROCESSO">Em Processo</option>
-                                    <option value="DISCIPLINA">Em Disciplina</option>
+                                    {statusOptions.map((opt) => (
+                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                    ))}
                                 </select>
                             </div>
 
@@ -293,22 +300,21 @@ export function CreateMemberDialog({ isOpen, onClose, tenantId }: Props) {
                                     {...register('office')}
                                     className="flex h-10 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
                                 >
-                                    <option value="MEMBRO">Membro</option>
-                                    <option value="DIACONO">Diácono</option>
-                                    <option value="PRESBITERO">Presbítero</option>
-                                    <option value="PASTOR">Pastor</option>
+                                    {officeOptions.map((opt) => (
+                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                    ))}
                                 </select>
                             </div>
 
                             <div className="md:col-span-2 space-y-2">
                                 <label className="text-sm font-medium text-gray-700">Funções</label>
                                 <div className="flex flex-wrap gap-2">
-                                    {FUNCTIONS_OPTIONS.map((fn) => (
+                                    {functionOptions.map((fn) => (
                                         <button
                                             key={fn.value}
                                             type="button"
-                                            onClick={() => handleFunctionToggle(fn.value)}
-                                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${selectedFunctions.includes(fn.value)
+                                            onClick={() => handleFunctionToggle(fn.value as EcclesiasticalFunction)}
+                                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${selectedFunctions.includes(fn.value as EcclesiasticalFunction)
                                                     ? 'bg-green-100 text-green-700 border-2 border-green-500'
                                                     : 'bg-gray-100 text-gray-600 border-2 border-transparent hover:bg-gray-200'
                                                 }`}
@@ -341,9 +347,9 @@ export function CreateMemberDialog({ isOpen, onClose, tenantId }: Props) {
                                     className="flex h-10 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
                                 >
                                     <option value="">Selecione...</option>
-                                    <option value="PROFISSAO_FE">Profissão de Fé</option>
-                                    <option value="TRANSFERENCIA">Transferência</option>
-                                    <option value="JURISDICAO">Jurisdição</option>
+                                    {admissionTypeOptions.map((opt) => (
+                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                    ))}
                                 </select>
                             </div>
 

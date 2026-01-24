@@ -1,5 +1,19 @@
 /**
  * Member Constants
+ * 
+ * @deprecated Este arquivo está DEPRECATED. Use o hook useMetadata() para obter
+ * enums e labels do backend. Veja: src/hooks/useMetadata.ts
+ * 
+ * Exemplo de migração:
+ * ```tsx
+ * // Antes (deprecated):
+ * import { OFFICE_OPTIONS, OFFICE_LABELS } from '../constants/member.constants';
+ * 
+ * // Depois (correto):
+ * import { useOfficeOptions, useEnumLabelsMap } from '../hooks/useMetadata';
+ * const officeOptions = useOfficeOptions();
+ * const officeLabels = useEnumLabelsMap('ecclesiastical_offices');
+ * ```
  */
 
 import type {

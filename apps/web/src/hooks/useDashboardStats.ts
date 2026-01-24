@@ -27,8 +27,8 @@ export function useDashboardStats(): DashboardStats {
   // Calculate member stats
   const memberStats = {
     total: members?.length || 0,
-    active: members?.filter(m => m.status === 'ACTIVE').length || 0,
-    inactive: members?.filter(m => m.status === 'INACTIVE').length || 0,
+    active: members?.filter(m => m.status === 'COMUNGANTE').length || 0,
+    inactive: members?.filter(m => m.status === 'NAO_COMUNGANTE' || m.status === 'AFASTADO').length || 0,
     newThisMonth: calculateNewMembersThisMonth(members || []),
   };
 

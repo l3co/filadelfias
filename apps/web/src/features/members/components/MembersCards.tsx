@@ -3,6 +3,7 @@ import { Card, CardContent } from "../../../components/ui/card";
 import { Badge } from "../../../components/ui/badge";
 import { CardSkeleton } from "../../../components/LoadingState";
 import { EmptyState } from "../../../components/EmptyState";
+import { useEnumLabelsMap } from "../../../hooks/useMetadata";
 import type { Member } from "../../../types";
 import { User, Pencil, Mail, Phone, UserPlus, Calendar } from "lucide-react";
 import { Button } from "../../../components/ui/button";
@@ -30,54 +31,32 @@ const getStatusVariant = (status: string) => {
     }
 };
 
-const getStatusLabel = (status: string) => {
-    const labels: Record<string, string> = {
-        'COMUNGANTE': 'Comungante',
-        'ACTIVE': 'Ativo',
-        'NAO_COMUNGANTE': 'Não Comungante',
-        'INACTIVE': 'Inativo',
-        'DISCIPLINA': 'Em Disciplina',
-        'EXCLUDED': 'Excluído',
-        'TRANSFERRED': 'Transferido',
-        'DECEASED': 'Falecido',
-    };
-    return labels[status] || status;
-};
-
-const officeLabels: Record<string, string> = {
-    'PASTOR': 'Pastor',
-    'PRESBITERO': 'Presbítero',
-    'DIACONO': 'Diácono',
-};
-
 const officeColors: Record<string, string> = {
     'PASTOR': 'from-purple-600 to-indigo-600',
     'PRESBITERO': 'from-green-600 to-teal-600',
     'DIACONO': 'from-blue-600 to-cyan-600',
 };
 
-const functionLabels: Record<string, string> = {
-    'TESOUREIRO': 'Tesoureiro',
-    'SECRETARIO': 'Secretário',
-    'EVANGELISTA': 'Evangelista',
-    'MISSIONARIO': 'Missionário',
-    'PROFESSOR_EBD': 'Prof. EBD',
-};
-
 const MemberCard = memo(function MemberCard({ 
     member, 
     onEdit, 
-    onInvite 
+    onInvite,
+    officeLabels,
+    statusLabels,
+    functionLabels,
 }: { 
     member: Member; 
     onEdit?: (member: Member) => void;
     onInvite?: (member: Member) => void;
+    officeLabels: Record<string, string>;
+    statusLabels: Record<string, string>;
+    functionLabels: Record<string, string>;
 }) {
     const initials = member.full_name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
     const gradientClass = officeColors[member.office] || 'from-gray-500 to-gray-600';
 
     return (
-        <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+        <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 overflow-hidden" data-testid={`member-card-${member.id}`} role="listitem">
             <CardContent className="p-0">
                 {/* Header with gradient */}
                 <div className={`h-16 bg-gradient-to-r ${gradientClass} relative`}>
@@ -117,13 +96,13 @@ const MemberCard = memo(function MemberCard({
                         <div className="flex-1 min-w-0">
                             <h3 className="font-semibold text-[#002333] truncate">{member.full_name}</h3>
                             <div className="flex flex-wrap gap-1 mt-1">
-                                {officeLabels[member.office] && (
+                                {officeLabels[member.office] && member.office !== 'MEMBRO' && (
                                     <Badge variant="default" className={`text-[10px] h-5 bg-gradient-to-r ${gradientClass}`}>
                                         {officeLabels[member.office]}
                                     </Badge>
                                 )}
                                 <Badge variant={getStatusVariant(member.status)} className="text-[10px] h-5">
-                                    {getStatusLabel(member.status)}
+                                    {statusLabels[member.status] || member.status}
                                 </Badge>
                             </div>
                         </div>
@@ -183,6 +162,11 @@ export const MembersCards = memo(function MembersCards({
     onEditMember, 
     onInviteMember 
 }: MembersCardsProps) {
+    // Labels do backend - fonte única de verdade
+    const officeLabels = useEnumLabelsMap('ecclesiastical_offices');
+    const statusLabels = useEnumLabelsMap('member_statuses');
+    const functionLabels = useEnumLabelsMap('ecclesiastical_functions');
+
     if (isLoading) {
         return (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -209,6 +193,9 @@ export const MembersCards = memo(function MembersCards({
                     member={member} 
                     onEdit={onEditMember}
                     onInvite={onInviteMember}
+                    officeLabels={officeLabels}
+                    statusLabels={statusLabels}
+                    functionLabels={functionLabels}
                 />
             ))}
         </div>

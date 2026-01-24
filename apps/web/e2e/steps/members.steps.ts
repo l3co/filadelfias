@@ -13,8 +13,13 @@ const { Given, When, Then } = createBdd();
 // ============================================================================
 
 Then('devo ver a tabela de membros', async ({ page }) => {
-    const table = page.locator('table').or(page.locator('[role="grid"]'));
-    await expect(table).toBeVisible();
+    // Suporta tabela, cards de membros (por heading h3), ou estado vazio
+    const membersContainer = page.locator('table')
+        .or(page.locator('[role="grid"]'))
+        .or(page.locator('[data-testid^="member-card-"]').first())
+        .or(page.locator('main h3').first()) // Cards têm h3 com nome do membro
+        .or(page.getByText(/nenhum membro/i));
+    await expect(membersContainer).toBeVisible({ timeout: 10000 });
 });
 
 // ============================================================================

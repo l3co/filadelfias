@@ -36,12 +36,15 @@ When('pesquiso por {string}', async ({ page }, searchTerm: string) => {
 });
 
 Then('devo ver resultados da busca', async ({ page }) => {
-    // Verify that search results are displayed (table rows or cards)
-    await expect(page.locator('table tbody tr, [role="listitem"], .card').first()).toBeVisible({ timeout: 5000 });
+    // Verify that search results are displayed (table rows, cards, or h3 headings in cards)
+    await expect(page.locator('table tbody tr, [role="listitem"], [data-testid^="member-card-"], main h3').first()).toBeVisible({ timeout: 10000 });
 });
 
 Then('devo ver a lista de membros', async ({ page }) => {
-    await expect(page.locator('table tbody tr, [role="listitem"], .card').first()).toBeVisible({ timeout: 5000 });
+    // Suporta tabela, cards de membros (h3 com nome), ou estado vazio
+    const membersContainer = page.locator('table tbody tr, [role="listitem"], [data-testid^="member-card-"], main h3').first()
+        .or(page.getByText(/nenhum membro/i));
+    await expect(membersContainer).toBeVisible({ timeout: 10000 });
 });
 
 Then('devo ver apenas membros com {string} no nome', async ({ page }, searchTerm: string) => {

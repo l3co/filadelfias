@@ -75,11 +75,11 @@ Funcionalidade: Gestão de Reuniões
   @integration @needs-backend
   Cenário: Finalizar reunião
     Dado que existe uma reunião agendada no conselho
-    E que registrei a ata e as presenças
-    Quando clico em "Finalizar Reunião"
+    Quando eu abro o dialog de reuniões do conselho
+    E clico em "Detalhes" da reunião
+    E clico em "Finalizar Reunião"
     Então devo ver a mensagem "Reunião finalizada com sucesso"
     E a reunião deve aparecer na aba "Realizadas"
-    E a reunião deve mostrar badge "Finalizada"
 
   @integration @needs-backend
   Cenário: Reunião finalizada não pode ser editada

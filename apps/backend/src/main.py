@@ -2,7 +2,10 @@
 Filadelfias API - Main Application Entry Point
 """
 
+import os
+
 from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from slowapi.errors import RateLimitExceeded
@@ -46,6 +49,59 @@ async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
             "detail": "Muitas tentativas. Aguarde alguns minutos antes de tentar novamente.",
             "retry_after": exc.detail,
         },
+    )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Custom handler for validation errors - logs details in DEBUG mode."""
+    from src.services.logging_service import log_debug, log_warning
+
+    errors = exc.errors()
+
+    # Serialize errors to be JSON-safe (remove non-serializable objects like ValueError)
+    def serialize_error(err: dict) -> dict:
+        result = {}
+        for k, v in err.items():
+            if k == "ctx":
+                # Skip context which may contain non-serializable objects
+                continue
+            elif isinstance(v, (str, int, float, bool, type(None))):
+                result[k] = v
+            elif isinstance(v, (list, tuple)):
+                result[k] = [str(i) if not isinstance(i, (str, int)) else i for i in v]
+            else:
+                result[k] = str(v)
+        return result
+
+    serializable_errors = [serialize_error(e) for e in errors]
+
+    # Always log validation errors as warning
+    log_warning(
+        "Validation error",
+        path=request.url.path,
+        method=request.method,
+        error_count=len(errors),
+    )
+
+    # In DEBUG mode, log full details including request body
+    if os.getenv("DEBUG", "").lower() in ("true", "1", "yes"):
+        try:
+            body = await request.body()
+            body_str = body.decode("utf-8")[:1000]  # Limit to 1000 chars
+        except Exception:
+            body_str = "<unable to read body>"
+
+        log_debug(
+            "Validation error details",
+            path=request.url.path,
+            errors=serializable_errors,
+            body_preview=body_str,
+        )
+
+    return JSONResponse(
+        status_code=422,
+        content={"detail": serializable_errors},
     )
 
 

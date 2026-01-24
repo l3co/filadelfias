@@ -32,6 +32,28 @@ services:
     depends_on:
       firebase:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  seed:
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile
+    container_name: filadelfias_seed
+    command: python -m src.scripts.seed_dev_data
+    volumes:
+      - ./apps/backend/src:/app/src
+    environment:
+      FIRESTORE_EMULATOR_HOST: firebase:8080
+      SECRET_KEY: dev-secret-key-change-in-production
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: "no"
 
   web:
     image: node:22-alpine

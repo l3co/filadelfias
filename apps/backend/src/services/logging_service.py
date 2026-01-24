@@ -10,6 +10,7 @@ Provides:
 
 import json
 import logging
+import os
 import sys
 import time
 import uuid
@@ -72,8 +73,9 @@ def setup_logging(level: str = "INFO") -> logging.Logger:
     return logger
 
 
-# Global logger instance
-logger = setup_logging()
+# Global logger instance - use DEBUG level if DEBUG env var is set
+_log_level = "DEBUG" if os.getenv("DEBUG", "").lower() in ("true", "1", "yes") else "INFO"
+logger = setup_logging(_log_level)
 
 
 def get_logger(name: str = "filadelfias") -> logging.Logger:

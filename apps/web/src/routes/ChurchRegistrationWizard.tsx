@@ -7,8 +7,64 @@ import { api } from '../lib/api';
 import { useViaCEP } from '../hooks/useViaCEP';
 import {
     Church, Building2, MapPin, User, CheckCircle2, ArrowRight, ArrowLeft,
-    AlertCircle, Loader2, Mail, Lock, Phone, Link2
+    AlertCircle, Loader2, Mail, Lock, Phone, Link2, Check, X
 } from 'lucide-react';
+
+interface PasswordRequirement {
+    label: string;
+    test: (password: string) => boolean;
+}
+
+const PASSWORD_REQUIREMENTS: PasswordRequirement[] = [
+    { label: 'Mínimo 8 caracteres', test: (p) => p.length >= 8 },
+    { label: 'Uma letra maiúscula', test: (p) => /[A-Z]/.test(p) },
+    { label: 'Uma letra minúscula', test: (p) => /[a-z]/.test(p) },
+    { label: 'Um número', test: (p) => /\d/.test(p) },
+    { label: 'Um caractere especial (!@#$%...)', test: (p) => /[!@#$%^&*()_+\-=\[\]{};':",.<>/?]/.test(p) },
+];
+
+function validatePassword(password: string): string | true {
+    for (const req of PASSWORD_REQUIREMENTS) {
+        if (!req.test(password)) {
+            return req.label;
+        }
+    }
+    return true;
+}
+
+function PasswordStrengthIndicator({ password }: { password: string }) {
+    const results = PASSWORD_REQUIREMENTS.map(req => ({
+        ...req,
+        passed: req.test(password || ''),
+    }));
+    
+    const passedCount = results.filter(r => r.passed).length;
+    const strengthPercent = (passedCount / PASSWORD_REQUIREMENTS.length) * 100;
+    
+    const strengthColor = strengthPercent < 40 ? 'bg-red-500' : 
+                          strengthPercent < 80 ? 'bg-yellow-500' : 'bg-green-500';
+
+    if (!password) return null;
+
+    return (
+        <div className="mt-2 space-y-2">
+            <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                <div 
+                    className={`h-full transition-all duration-300 ${strengthColor}`}
+                    style={{ width: `${strengthPercent}%` }}
+                />
+            </div>
+            <div className="grid grid-cols-2 gap-1">
+                {results.map((req, i) => (
+                    <div key={i} className={`flex items-center gap-1.5 text-xs ${req.passed ? 'text-green-600' : 'text-gray-400'}`}>
+                        {req.passed ? <Check size={12} /> : <X size={12} />}
+                        <span>{req.label}</span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -89,8 +145,16 @@ export function ChurchRegistrationWizard() {
             localStorage.setItem('access_token', data.access_token);
             navigate('/app');
         },
-        onError: (error: AxiosError<{ detail?: string }>) => {
-            setError(error.response?.data?.detail || 'Erro ao cadastrar igreja. Tente novamente.');
+        onError: (error: AxiosError<{ detail?: string | Array<{ msg: string }> }>) => {
+            const detail = error.response?.data?.detail;
+            if (Array.isArray(detail)) {
+                // Pydantic validation errors
+                setError(detail.map(e => e.msg).join('. '));
+            } else if (typeof detail === 'string') {
+                setError(detail);
+            } else {
+                setError('Erro ao cadastrar igreja. Tente novamente.');
+            }
         }
     });
 
@@ -445,44 +509,50 @@ export function ChurchRegistrationWizard() {
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">Senha *</label>
-                                            <div className="relative">
-                                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                                    <Lock size={18} className="text-gray-400" />
-                                                </div>
-                                                <input
-                                                    {...register('admin_password', {
-                                                        required: 'Senha obrigatória',
-                                                        minLength: { value: 8, message: 'Mínimo 8 caracteres' }
-                                                    })}
-                                                    type="password"
-                                                    placeholder="••••••••"
-                                                    className="block w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all bg-gray-50/50 hover:bg-white"
-                                                />
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Senha *</label>
+                                        <div className="relative">
+                                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                                <Lock size={18} className="text-gray-400" />
                                             </div>
-                                            {errors.admin_password && (
-                                                <span className="text-xs text-red-500 mt-1 block">{errors.admin_password.message}</span>
-                                            )}
+                                            <input
+                                                {...register('admin_password', {
+                                                    required: 'Senha obrigatória',
+                                                    validate: (value) => {
+                                                        const result = validatePassword(value);
+                                                        return result === true ? true : `Falta: ${result}`;
+                                                    }
+                                                })}
+                                                type="password"
+                                                placeholder="••••••••"
+                                                className="block w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all bg-gray-50/50 hover:bg-white"
+                                            />
                                         </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">Confirmar *</label>
-                                            <div className="relative">
-                                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                                    <Lock size={18} className="text-gray-400" />
-                                                </div>
-                                                <input
-                                                    {...register('admin_password_confirm', { required: 'Confirme a senha' })}
-                                                    type="password"
-                                                    placeholder="••••••••"
-                                                    className="block w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all bg-gray-50/50 hover:bg-white"
-                                                />
+                                        <PasswordStrengthIndicator password={formValues.admin_password || ''} />
+                                        {errors.admin_password && (
+                                            <span className="text-xs text-red-500 mt-1 block">{errors.admin_password.message}</span>
+                                        )}
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Confirmar Senha *</label>
+                                        <div className="relative">
+                                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                                <Lock size={18} className="text-gray-400" />
                                             </div>
-                                            {errors.admin_password_confirm && (
-                                                <span className="text-xs text-red-500 mt-1 block">{errors.admin_password_confirm.message}</span>
-                                            )}
+                                            <input
+                                                {...register('admin_password_confirm', {
+                                                    required: 'Confirme a senha',
+                                                    validate: (value) => value === formValues.admin_password || 'As senhas não coincidem'
+                                                })}
+                                                type="password"
+                                                placeholder="••••••••"
+                                                className="block w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all bg-gray-50/50 hover:bg-white"
+                                            />
                                         </div>
+                                        {errors.admin_password_confirm && (
+                                            <span className="text-xs text-red-500 mt-1 block">{errors.admin_password_confirm.message}</span>
+                                        )}
                                     </div>
                                 </div>
                             )}

@@ -64,6 +64,150 @@ export function MemberCard({ member, onPress }: MemberCardProps) {
 
 ---
 
+## Metadados e Permissões (Pós-Retrofit)
+
+> **Pré-requisito**: O endpoint `GET /api/metadata` deve estar implementado no backend.
+> Consulte: [`retrofit_permissionamentos.md`](../retrofit_permissionamentos.md)
+
+### src/hooks/useMetadata.ts
+
+Este hook é a **fonte única de verdade** para enums, labels e opções de select no mobile.
+Deve ser copiado da web após o retrofit estar concluído.
+
+```typescript
+import { useQuery } from '@tanstack/react-query';
+import { api } from '@/services/api';
+
+interface EnumOption {
+  value: string;
+  label: string;
+}
+
+interface Metadata {
+  enums: {
+    ecclesiastical_offices: EnumOption[];
+    ecclesiastical_functions: EnumOption[];
+    member_statuses: EnumOption[];
+    genders: EnumOption[];
+    marital_statuses: EnumOption[];
+  };
+}
+
+export function useMetadata() {
+  return useQuery<Metadata>({
+    queryKey: ['metadata'],
+    queryFn: async () => {
+      const response = await api.get('/metadata');
+      return response.data;
+    },
+    staleTime: 1000 * 60 * 60, // 1 hora - metadados mudam raramente
+    gcTime: 1000 * 60 * 60 * 24, // 24 horas
+  });
+}
+
+// Helpers para uso direto
+export function useOfficeOptions() {
+  const { data } = useMetadata();
+  return data?.enums.ecclesiastical_offices ?? [];
+}
+
+export function useFunctionOptions() {
+  const { data } = useMetadata();
+  return data?.enums.ecclesiastical_functions ?? [];
+}
+
+export function useStatusOptions() {
+  const { data } = useMetadata();
+  return data?.enums.member_statuses ?? [];
+}
+
+export function useGenderOptions() {
+  const { data } = useMetadata();
+  return data?.enums.genders ?? [];
+}
+
+// Helper para obter label de um valor
+export function useEnumLabel(enumType: keyof Metadata['enums'], value: string): string {
+  const { data } = useMetadata();
+  const options = data?.enums[enumType] ?? [];
+  return options.find(opt => opt.value === value)?.label ?? value;
+}
+```
+
+### src/hooks/usePermissions.ts
+
+Sistema de permissões baseado no cargo/função do membro.
+
+```typescript
+import { useAuthStore } from '@/stores/authStore';
+
+type Resource = 'members' | 'governance' | 'financial' | 'missions' | 'ebd' | 'events' | 'prayer' | 'devotionals';
+type Action = 'view' | 'create' | 'edit' | 'delete' | 'manage';
+
+export function usePermissions() {
+  const { user } = useAuthStore();
+  const currentMember = user?.memberships?.[0];
+  
+  const can = (resource: Resource, action: Action): boolean => {
+    if (!currentMember) return false;
+    
+    const { role } = currentMember;
+    
+    // Admin e Owner têm acesso total
+    if (role === 'ADMIN' || role === 'OWNER') return true;
+    
+    // Membros comuns só podem visualizar
+    if (action !== 'view') return false;
+    
+    // Recursos públicos para membros
+    const publicResources: Resource[] = ['events', 'prayer', 'devotionals', 'ebd'];
+    return publicResources.includes(resource);
+  };
+
+  const isAdmin = currentMember?.role === 'ADMIN' || currentMember?.role === 'OWNER';
+  const isLeader = isAdmin; // Expandir conforme necessário
+
+  return { can, isAdmin, isLeader };
+}
+```
+
+### Uso nos Componentes
+
+```tsx
+// Exemplo: Select de Cargo
+import { useOfficeOptions } from '@/hooks/useMetadata';
+import { Picker } from '@react-native-picker/picker';
+
+function OfficeSelect({ value, onChange }) {
+  const options = useOfficeOptions();
+  
+  return (
+    <Picker selectedValue={value} onValueChange={onChange}>
+      <Picker.Item label="Selecione..." value="" />
+      {options.map(opt => (
+        <Picker.Item key={opt.value} label={opt.label} value={opt.value} />
+      ))}
+    </Picker>
+  );
+}
+
+// Exemplo: Exibir label de um valor
+import { useEnumLabel } from '@/hooks/useMetadata';
+
+function MemberCard({ member }) {
+  const officeLabel = useEnumLabel('ecclesiastical_offices', member.office);
+  
+  return (
+    <View>
+      <Text>{member.name}</Text>
+      <Text>{officeLabel}</Text>
+    </View>
+  );
+}
+```
+
+---
+
 ## Services (Reutilizando da Web)
 
 ### src/services/api.ts

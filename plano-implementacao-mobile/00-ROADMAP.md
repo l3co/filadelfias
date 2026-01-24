@@ -160,3 +160,60 @@ plano-implementacao-mobile/
    - Hinário: Novo Cântico
    - Manual: Edição 2019
 4. **Autenticação**: Usar mesmo fluxo JWT da web, armazenar token em SecureStore
+
+---
+
+## 🔗 Dependência: Retrofit de Permissionamentos
+
+> **IMPORTANTE**: Antes de iniciar o desenvolvimento mobile, é necessário que o **Retrofit do Sistema de Permissionamento** esteja concluído no backend e web.
+> 
+> Consulte: [`retrofit_permissionamentos.md`](../retrofit_permissionamentos.md)
+
+### Por que essa dependência?
+
+O retrofit cria uma **fonte única de verdade** no backend através do endpoint `GET /api/metadata`, que fornece:
+
+- **Enums padronizados**: offices, functions, statuses, genders, etc.
+- **Labels em pt-BR**: prontos para exibição na UI
+- **Permissões**: matriz de permissões por cargo/função
+
+### Benefícios para o Mobile
+
+| Sem Retrofit | Com Retrofit |
+|--------------|--------------|
+| Duplicar enums no mobile | Consumir do endpoint `/metadata` |
+| Hardcode de labels | Labels dinâmicos do backend |
+| Risco de dessincronização | Fonte única de verdade |
+| Manutenção em 3 lugares | Manutenção apenas no backend |
+
+### O que usar no Mobile
+
+```typescript
+// src/hooks/useMetadata.ts (copiar da web após retrofit)
+import { useQuery } from '@tanstack/react-query';
+import { api } from '@/services/api';
+
+export function useMetadata() {
+  return useQuery({
+    queryKey: ['metadata'],
+    queryFn: async () => {
+      const response = await api.get('/metadata');
+      return response.data;
+    },
+    staleTime: 1000 * 60 * 60, // 1 hora
+  });
+}
+
+// Helpers
+export function useOfficeOptions() {
+  const { data } = useMetadata();
+  return data?.enums.ecclesiastical_offices ?? [];
+}
+```
+
+### Checklist Pré-Mobile
+
+- [ ] Endpoint `GET /api/metadata` implementado e testado
+- [ ] Frontend web usando `useMetadata()` em todos os selects
+- [ ] Nenhum hardcode de enums/labels nos componentes web
+- [ ] Documentação do endpoint atualizada

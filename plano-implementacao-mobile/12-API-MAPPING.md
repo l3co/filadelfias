@@ -8,6 +8,87 @@ Este documento mapeia todos os endpoints do backend necessários para o app mobi
 
 ---
 
+## Metadados (Pós-Retrofit)
+
+> **Novo endpoint criado pelo retrofit de permissionamentos.**
+> Consulte: [`retrofit_permissionamentos.md`](../retrofit_permissionamentos.md)
+
+| Método | Endpoint | Descrição | Auth |
+|--------|----------|-----------|------|
+| GET | `/metadata` | Enums, labels e opções de select | ❌ |
+
+### Detalhes
+
+```typescript
+// GET /metadata
+Response: {
+  enums: {
+    ecclesiastical_offices: [
+      { value: "MEMBRO", label: "Membro" },
+      { value: "DIACONO", label: "Diácono" },
+      { value: "PRESBITERO", label: "Presbítero" },
+      { value: "PASTOR", label: "Pastor" }
+    ],
+    ecclesiastical_functions: [
+      { value: "TESOUREIRO", label: "Tesoureiro" },
+      { value: "SECRETARIO", label: "Secretário" },
+      { value: "EVANGELISTA", label: "Evangelista" },
+      { value: "MISSIONARIO", label: "Missionário" }
+    ],
+    member_statuses: [
+      { value: "PROCESSO", label: "Em Processo" },
+      { value: "COMUNGANTE", label: "Comungante" },
+      { value: "NAO_COMUNGANTE", label: "Não Comungante" },
+      { value: "DISCIPLINA", label: "Sob Disciplina" },
+      { value: "AFASTADO", label: "Afastado" },
+      { value: "TRANSFERIDO", label: "Transferido" },
+      { value: "FALECIDO", label: "Falecido" }
+    ],
+    genders: [
+      { value: "M", label: "Masculino" },
+      { value: "F", label: "Feminino" }
+    ],
+    marital_statuses: [
+      { value: "SOLTEIRO", label: "Solteiro(a)" },
+      { value: "CASADO", label: "Casado(a)" },
+      { value: "DIVORCIADO", label: "Divorciado(a)" },
+      { value: "VIUVO", label: "Viúvo(a)" }
+    ]
+  }
+}
+```
+
+### Uso no Mobile
+
+```typescript
+// src/hooks/useMetadata.ts
+import { useQuery } from '@tanstack/react-query';
+import { api } from '@/services/api';
+
+export function useMetadata() {
+  return useQuery({
+    queryKey: ['metadata'],
+    queryFn: () => api.get('/metadata').then(r => r.data),
+    staleTime: 1000 * 60 * 60, // 1 hora
+  });
+}
+
+// Helpers
+export const useOfficeOptions = () => useMetadata().data?.enums.ecclesiastical_offices ?? [];
+export const useFunctionOptions = () => useMetadata().data?.enums.ecclesiastical_functions ?? [];
+export const useStatusOptions = () => useMetadata().data?.enums.member_statuses ?? [];
+export const useGenderOptions = () => useMetadata().data?.enums.genders ?? [];
+```
+
+### Benefícios
+
+- **Sem hardcode**: Todos os selects usam dados do backend
+- **Fonte única**: Mesmo endpoint para web e mobile
+- **Manutenção fácil**: Alterar labels apenas no backend
+- **Cache agressivo**: Metadados raramente mudam
+
+---
+
 ## Autenticação
 
 | Método | Endpoint | Descrição | Auth |

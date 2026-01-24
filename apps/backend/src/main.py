@@ -23,6 +23,7 @@ from src.api.invitations import router as invitations_router
 from src.api.manual import router as manual_router
 from src.api.members import router as members_router
 from src.api.memberships import router as memberships_router
+from src.api.metadata import router as metadata_router
 from src.api.mission import router as mission_router
 from src.api.prayer import router as prayer_router
 from src.api.tenants import router as tenants_router
@@ -136,6 +137,7 @@ app.include_router(events_router)
 app.include_router(prayer_router)
 app.include_router(devotionals_router)
 app.include_router(manual_router)
+app.include_router(metadata_router)
 
 
 @app.get("/health", tags=["Health"])

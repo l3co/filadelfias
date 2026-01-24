@@ -33,16 +33,6 @@ class EcclesiasticalFunction(str, Enum):
     Missionario = "MISSIONARIO"
 
 
-# Mantido para compatibilidade, será removido após migração
-class EcclesiasticalRole(str, Enum):
-    Membro = "MEMBRO"
-    Diacono = "DIACONO"
-    Presbitero = "PRESBITERO"
-    Pastor = "PASTOR"
-    Evangelista = "EVANGELISTA"
-    Missionario = "MISSIONARIO"
-
-
 class Gender(str, Enum):
     Masculino = "M"
     Feminino = "F"

@@ -10,7 +10,7 @@ from pydantic import BaseModel, EmailStr, Field, field_validator
 
 from src.domain.validators import validate_password_strength
 
-from .enums import EcclesiasticalFunction, EcclesiasticalOffice, EcclesiasticalRole, Gender, MaritalStatus, MemberStatus
+from .enums import EcclesiasticalFunction, EcclesiasticalOffice, Gender, MaritalStatus, MemberStatus
 
 
 class TenantBase(BaseModel):
@@ -137,7 +137,7 @@ class MemberBase(BaseModel):
 
     # Ecclesiastical data
     status: MemberStatus = MemberStatus.Comungante
-    role: EcclesiasticalRole = EcclesiasticalRole.Membro  # Deprecated
+    # role field removed - use 'office' instead
     office: EcclesiasticalOffice = EcclesiasticalOffice.Membro
     functions: Optional[List[EcclesiasticalFunction]] = None
     baptism_date: Optional[date] = None

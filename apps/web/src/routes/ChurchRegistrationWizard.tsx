@@ -20,7 +20,7 @@ const PASSWORD_REQUIREMENTS: PasswordRequirement[] = [
     { label: 'Uma letra maiúscula', test: (p) => /[A-Z]/.test(p) },
     { label: 'Uma letra minúscula', test: (p) => /[a-z]/.test(p) },
     { label: 'Um número', test: (p) => /\d/.test(p) },
-    { label: 'Um caractere especial (!@#$%...)', test: (p) => /[!@#$%^&*()_+\-=\[\]{};':",.<>/?]/.test(p) },
+    { label: 'Um caractere especial (!@#$%...)', test: (p) => /[!@#$%^&*()_+\-=[\]{};':",.<>/?]/.test(p) },
 ];
 
 function validatePassword(password: string): string | true {

@@ -25,7 +25,7 @@ const mockMembers: Member[] = [
         role: 'DIACONO',
         status: 'NAO_COMUNGANTE',
         gender: 'F',
-        marital_status: 'SOLTEIRA',
+        marital_status: 'SOLTEIRO',
         birth_date: '1995-01-01',
         phone: '987654321',
         tenant_id: 't1',

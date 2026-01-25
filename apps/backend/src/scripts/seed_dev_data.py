@@ -293,6 +293,7 @@ async def create_admin_user(tenant_id: str):
         phone=generate_phone(),
         birth_date=datetime(1990, 5, 15).date(),
         gender="M",
+        marital_status="CASADO",
         status="COMUNGANTE",
         office="PRESBITERO",
         user_id=user["id"],
@@ -320,6 +321,7 @@ async def create_members(tenant_id: str, count: int = 55):
         gender = random.choice(["M", "F"])
         birth_year = random.randint(1940, 2010)
         birth_date = datetime(birth_year, random.randint(1, 12), random.randint(1, 28)).date()
+        marital_status = random.choice(["SOLTEIRO", "CASADO", "DIVORCIADO", "VIUVO"])
 
         # Random functions (1-3 per member)
         num_functions = random.randint(0, 3)
@@ -357,6 +359,7 @@ async def create_members(tenant_id: str, count: int = 55):
             phone=generate_phone(),
             birth_date=birth_date,
             gender=gender,
+            marital_status=marital_status,
             status="COMUNGANTE" if random.random() > 0.1 else "NAO_COMUNGANTE",
             office=office,
             user_id=user_id,

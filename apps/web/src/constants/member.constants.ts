@@ -22,9 +22,9 @@ import type {
   MemberStatus,
 } from '../types/members.types';
 
-type Gender = 'MALE' | 'FEMALE';
-type MaritalStatus = 'SINGLE' | 'MARRIED' | 'DIVORCED' | 'WIDOWED';
-type AdmissionType = 'BAPTISM' | 'PROFESSION' | 'TRANSFER' | 'JURISDICTION';
+type Gender = 'M' | 'F';
+type MaritalStatus = 'SOLTEIRO' | 'CASADO' | 'DIVORCIADO' | 'VIUVO';
+type AdmissionType = 'BATISMO' | 'PROFISSAO_FE' | 'TRANSFERENCIA' | 'JURISDICAO';
 
 export interface SelectOption<T = string> {
   value: T;
@@ -57,22 +57,22 @@ export const STATUS_OPTIONS: SelectOption<MemberStatus>[] = [
 ];
 
 export const GENDER_OPTIONS: SelectOption<Gender>[] = [
-  { value: 'MALE', label: 'Masculino' },
-  { value: 'FEMALE', label: 'Feminino' },
+  { value: 'M', label: 'Masculino' },
+  { value: 'F', label: 'Feminino' },
 ];
 
 export const MARITAL_STATUS_OPTIONS: SelectOption<MaritalStatus>[] = [
-  { value: 'SINGLE', label: 'Solteiro(a)' },
-  { value: 'MARRIED', label: 'Casado(a)' },
-  { value: 'DIVORCED', label: 'Divorciado(a)' },
-  { value: 'WIDOWED', label: 'Viúvo(a)' },
+  { value: 'SOLTEIRO', label: 'Solteiro(a)' },
+  { value: 'CASADO', label: 'Casado(a)' },
+  { value: 'DIVORCIADO', label: 'Divorciado(a)' },
+  { value: 'VIUVO', label: 'Viúvo(a)' },
 ];
 
 export const ADMISSION_TYPE_OPTIONS: SelectOption<AdmissionType>[] = [
-  { value: 'BAPTISM', label: 'Batismo' },
-  { value: 'PROFESSION', label: 'Profissão de Fé' },
-  { value: 'TRANSFER', label: 'Transferência' },
-  { value: 'JURISDICTION', label: 'Jurisdição' },
+  { value: 'BATISMO', label: 'Batismo' },
+  { value: 'PROFISSAO_FE', label: 'Profissão de Fé' },
+  { value: 'TRANSFERENCIA', label: 'Transferência' },
+  { value: 'JURISDICAO', label: 'Jurisdição' },
 ];
 
 // Labels for display

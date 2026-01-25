@@ -156,6 +156,7 @@ class MemberBase(BaseModel):
         return v
 
 
+
 class MemberCreate(MemberBase):
     """Schema for creating a new member."""
 

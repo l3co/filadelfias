@@ -21,6 +21,7 @@ Construção do aplicativo mobile React Native baseado na versão web existente,
 ```
 plano-implementacao-mobile/
 ├── 00-ROADMAP.md              ← Este arquivo (índice principal)
+├── 00-GUIA-DESENVOLVEDOR.md   ← Guia prático para dev pleno (NOVO)
 ├── 01-SETUP-PROJETO.md        ← Configuração inicial do projeto
 ├── 02-ARQUITETURA.md          ← Estrutura de pastas e padrões
 ├── 03-DESIGN-SYSTEM.md        ← Componentes UI e tema

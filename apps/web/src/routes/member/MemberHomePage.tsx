@@ -10,14 +10,16 @@ import {
   MessageCircle,
   Gavel
 } from 'lucide-react';
-import { useCurrentUser, useCurrentTenant } from '../../hooks/useAuth';
+import { useCurrentUser, useCurrentTenant, useCurrentMembership } from '../../hooks/useAuth';
 import { WelcomeBanner } from '../../components/WelcomeBanner';
 import { HomeCard, HomeCardGrid } from '../../components/HomeCard';
 import { SocialMediaCard } from '../../components/SocialMediaCard';
+import { AdminAccessCard } from '../../components/AdminAccessCard';
 
 export function MemberHomePage() {
   const { data: user } = useCurrentUser();
   const tenant = useCurrentTenant();
+  const membership = useCurrentMembership();
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -27,12 +29,14 @@ export function MemberHomePage() {
         message="O que você gostaria de fazer hoje?"
       />
 
+      <AdminAccessCard userRole={membership?.role} className="mb-6" />
+
       <HomeCardGrid columns={3}>
         <HomeCard
           icon={BookOpen}
           title="Bíblia Online"
           description="Leia e medite na Palavra de Deus"
-          href="/membro/biblia"
+          href="/member/bible"
           color="blue"
         />
         
@@ -40,7 +44,7 @@ export function MemberHomePage() {
           icon={Music}
           title="Hinário"
           description="Hinos da nossa tradição reformada"
-          href="/membro/hinario"
+          href="/member/hymnal"
           color="yellow"
         />
         
@@ -48,7 +52,7 @@ export function MemberHomePage() {
           icon={BookMarked}
           title="Manual Presbiteriano"
           description="Consulte os princípios da nossa fé"
-          href="/membro/manual"
+          href="/member/manual"
           color="purple"
         />
         
@@ -56,7 +60,7 @@ export function MemberHomePage() {
           icon={Heart}
           title="Devocionais"
           description="Reflexões diárias para sua vida espiritual"
-          href="/membro/devocionais"
+          href="/member/devotionals"
           color="red"
         />
         
@@ -64,7 +68,7 @@ export function MemberHomePage() {
           icon={Users}
           title="Membros"
           description="Conheça os irmãos da nossa igreja"
-          href="/membro/diretorio"
+          href="/member/directory"
           color="emerald"
         />
         
@@ -72,7 +76,7 @@ export function MemberHomePage() {
           icon={Gavel}
           title="Governança"
           description="Conheça os órgãos de liderança"
-          href="/membro/governanca"
+          href="/member/governance"
           color="purple"
         />
         
@@ -80,7 +84,7 @@ export function MemberHomePage() {
           icon={Calendar}
           title="Eventos"
           description="Próximos eventos e atividades"
-          href="/membro/eventos"
+          href="/member/events"
           color="orange"
         />
         
@@ -88,7 +92,7 @@ export function MemberHomePage() {
           icon={Globe}
           title="Missões"
           description="Conheça nossos missionários"
-          href="/membro/missoes"
+          href="/member/missions"
           color="indigo"
         />
         
@@ -96,7 +100,7 @@ export function MemberHomePage() {
           icon={GraduationCap}
           title="EBD"
           description="Sua turma e materiais de estudo"
-          href="/membro/ebd"
+          href="/member/education"
           color="green"
         />
         
@@ -104,7 +108,7 @@ export function MemberHomePage() {
           icon={MessageCircle}
           title="Pedidos de Oração"
           description="Compartilhe e ore pelos irmãos"
-          href="/membro/oracao"
+          href="/member/prayer"
           color="pink"
         />
       </HomeCardGrid>

@@ -55,3 +55,9 @@ export function useCurrentTenant() {
     // For MVP, return the first tenant from memberships
     return user?.memberships?.[0]?.tenant;
 }
+
+export function useCurrentMembership() {
+    const { data: user } = useCurrentUser();
+    // For MVP, return the first membership
+    return user?.memberships?.[0];
+}

@@ -1,108 +1,164 @@
 import { View, Text, ScrollView, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { BookOpen, Music, BookMarked, LogIn, Download } from 'lucide-react-native';
+import { BookOpen, Music, BookMarked, LogIn, ChevronRight, Sparkles } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Button } from '@/components/ui/Button';
 import { colors } from '@/constants/colors';
 
 export default function WelcomeScreen() {
     const router = useRouter();
     const insets = useSafeAreaInsets();
 
-    const features = [
-        {
-            icon: BookOpen,
-            title: 'Bíblia Sagrada',
-            description: 'Leia em múltiplas versões',
-            href: '/(public)/bible',
-            color: '#3b82f6',
-        },
-        {
-            icon: Music,
-            title: 'Hinário',
-            description: 'Novo Cântico',
-            href: '/(public)/hymnal',
-            color: '#8b5cf6',
-        },
-        {
-            icon: BookMarked,
-            title: 'Manual IPB',
-            description: 'Edição 2019',
-            href: '/(public)/manual',
-            color: '#059669',
-        },
-    ];
+    const getGreeting = () => {
+        const hour = new Date().getHours();
+        if (hour < 12) return 'Bom dia';
+        if (hour < 18) return 'Boa tarde';
+        return 'Boa noite';
+    };
+
+    const getDailyVerse = () => ({
+        reference: '2 Timóteo 3:16-17',
+        text: 'Toda a Escritura é inspirada por Deus e útil para o ensino, para a repreensão, para a correção, para a educação na justiça.',
+    });
+
+    const verse = getDailyVerse();
 
     return (
-        <View className="flex-1 bg-white" style={{ paddingTop: insets.top }}>
-            {/* Header com Gradiente */}
-            <LinearGradient
-                colors={colors.gradients.primary}
-                className="px-6 pt-8 pb-12 rounded-b-[32px]"
-            >
-                <Text className="text-white text-3xl font-bold">Filadélfias</Text>
-                <Text className="text-emerald-100 mt-2 text-base">
-                    Sua biblioteca cristã de bolso
-                </Text>
-            </LinearGradient>
-
+        <View className="flex-1 bg-slate-50" style={{ paddingTop: insets.top }}>
             <ScrollView
-                className="flex-1 px-4 -mt-6"
+                className="flex-1"
                 showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: 32 }}
             >
-                {/* Cards de Features */}
-                <View className="gap-3">
-                    {features.map((feature) => {
-                        const Icon = feature.icon;
-                        return (
-                            <Pressable
-                                key={feature.href}
-                                onPress={() => router.push(feature.href)}
-                                className="bg-white rounded-2xl p-4 flex-row items-center shadow-lg shadow-slate-200 active:scale-[0.98]"
-                            >
-                                <View
-                                    className="h-14 w-14 rounded-xl items-center justify-center"
-                                    style={{ backgroundColor: `${feature.color}15` }}
-                                >
-                                    <Icon size={28} color={feature.color} />
-                                </View>
-                                <View className="ml-4 flex-1">
-                                    <Text className="font-semibold text-lg text-slate-900">
-                                        {feature.title}
-                                    </Text>
-                                    <Text className="text-slate-500">{feature.description}</Text>
-                                </View>
-                            </Pressable>
-                        );
-                    })}
+                {/* Header */}
+                <View className="px-5 pt-6 pb-4">
+                    <Text className="text-3xl font-bold text-slate-900 tracking-tight">
+                        Filadélfias
+                    </Text>
+                    <Text className="text-slate-500 mt-1">
+                        {getGreeting()}! Sua biblioteca cristã de bolso.
+                    </Text>
                 </View>
 
-                {/* Download Offline */}
+                {/* Card Leia a Bíblia Hoje */}
                 <Pressable
-                    onPress={() => router.push('/(public)/downloads')}
-                    className="mt-6 bg-slate-50 rounded-2xl p-4 flex-row items-center border border-slate-100"
+                    onPress={() => router.push('/(public)/bible')}
+                    className="mx-5 mb-4 active:scale-[0.98]"
                 >
-                    <Download size={24} color={colors.slate[600]} />
-                    <View className="ml-3 flex-1">
-                        <Text className="font-medium text-slate-700">Leitura Offline</Text>
-                        <Text className="text-sm text-slate-500">
-                            Baixe para ler sem internet
+                    <LinearGradient
+                        colors={['#002333', '#064e3b']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        className="rounded-2xl p-5 overflow-hidden"
+                    >
+                        {/* Decorative circles */}
+                        <View className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-emerald-500/10" />
+                        <View className="absolute -bottom-8 -left-8 w-24 h-24 rounded-full bg-teal-500/10" />
+                        
+                        <View className="flex-row items-center mb-3">
+                            <View className="bg-white/10 px-3 py-1.5 rounded-full flex-row items-center">
+                                <Sparkles size={14} color="#6ee7b7" />
+                                <Text className="text-emerald-200 text-xs ml-1.5 font-medium">
+                                    Versículo do dia
+                                </Text>
+                            </View>
+                        </View>
+
+                        <Text className="text-white text-xl font-bold mb-2">
+                            Leia a Bíblia hoje
                         </Text>
+                        <Text className="text-emerald-100 font-semibold mb-1">
+                            {verse.reference}
+                        </Text>
+                        <Text className="text-emerald-100/80 text-sm leading-5" numberOfLines={3}>
+                            {verse.text}
+                        </Text>
+
+                        <View className="flex-row items-center mt-4">
+                            <Text className="text-white font-semibold">Começar leitura</Text>
+                            <ChevronRight size={18} color="#fff" />
+                        </View>
+                    </LinearGradient>
+                </Pressable>
+
+                {/* Card Hinário */}
+                <Pressable
+                    onPress={() => router.push('/(public)/hymnal')}
+                    className="mx-5 mb-4 bg-white rounded-2xl p-5 border border-slate-100 active:scale-[0.98] overflow-hidden"
+                    style={{
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.05,
+                        shadowRadius: 8,
+                        elevation: 2,
+                    }}
+                >
+                    <View className="flex-row items-start">
+                        <View className="bg-violet-100 p-3 rounded-xl">
+                            <Music size={24} color="#8b5cf6" />
+                        </View>
+                        <View className="flex-1 ml-4">
+                            <Text className="text-xl font-bold text-slate-900">Hinário</Text>
+                            <Text className="text-slate-500 mt-0.5">Novo Cântico</Text>
+                        </View>
+                        <ChevronRight size={22} color={colors.slate[400]} />
+                    </View>
+                    
+                    <View className="mt-4 bg-violet-50 rounded-xl p-3">
+                        <Text className="text-violet-700 font-semibold">Castelo Forte</Text>
+                        <Text className="text-violet-600/70 text-sm">Hino mais acessado</Text>
+                    </View>
+                </Pressable>
+
+                {/* Card Manual IPB */}
+                <Pressable
+                    onPress={() => router.push('/(public)/manual')}
+                    className="mx-5 mb-4 bg-white rounded-2xl p-5 border border-slate-100 active:scale-[0.98]"
+                    style={{
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 4 },
+                        shadowOpacity: 0.06,
+                        shadowRadius: 12,
+                        elevation: 3,
+                    }}
+                >
+                    <View className="flex-row items-start">
+                        <View className="bg-emerald-100 p-3 rounded-xl">
+                            <BookMarked size={24} color="#059669" />
+                        </View>
+                        <View className="flex-1 ml-4">
+                            <Text className="text-xl font-bold text-slate-900">Manual IPB</Text>
+                            <Text className="text-slate-500 mt-0.5">Igreja Presbiteriana do Brasil</Text>
+                        </View>
+                        <ChevronRight size={22} color={colors.slate[400]} />
+                    </View>
+                    
+                    <View className="mt-4 bg-emerald-50 rounded-xl p-3">
+                        <Text className="text-emerald-700 font-semibold">Edição 2019</Text>
+                        <Text className="text-emerald-600/70 text-sm">Versão atualizada</Text>
                     </View>
                 </Pressable>
 
                 {/* Botão de Login */}
-                <View className="mt-8 mb-8">
-                    <Button
+                <View className="mx-5 mt-4">
+                    <Pressable
                         onPress={() => router.push('/(auth)/login')}
-                        variant="outline"
-                        icon={<LogIn size={20} color={colors.primary[600]} />}
+                        className="bg-white rounded-2xl p-4 border border-slate-200 flex-row items-center justify-center active:bg-slate-50"
+                        style={{
+                            shadowColor: '#000',
+                            shadowOffset: { width: 0, height: 2 },
+                            shadowOpacity: 0.04,
+                            shadowRadius: 8,
+                            elevation: 2,
+                        }}
                     >
-                        Entrar na minha conta
-                    </Button>
+                        <LogIn size={20} color={colors.primary[600]} />
+                        <Text className="text-emerald-600 font-semibold ml-2">
+                            Entrar na minha conta
+                        </Text>
+                    </Pressable>
 
-                    <Text className="text-center text-sm text-slate-400 mt-4">
+                    <Text className="text-center text-sm text-slate-400 mt-4 leading-5">
                         Membro de uma igreja? Faça login para acessar{'\n'}
                         devocionais, eventos e mais.
                     </Text>

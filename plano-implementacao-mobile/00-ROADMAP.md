@@ -93,6 +93,7 @@ plano-implementacao-mobile/
 ### Portal do Membro
 - [ ] Dashboard Home
 - [ ] Bíblia (integrada)
+- [ ] Hinário (integrado)
 - [ ] Manual (integrado)
 - [ ] Devocionais
 - [ ] Diretório de Membros
@@ -100,6 +101,9 @@ plano-implementacao-mobile/
 - [ ] Missões
 - [ ] EBD
 - [ ] Pedidos de Oração
+- [ ] Governança (visualização de conselhos)
+- [ ] Meus Dízimos e Ofertas
+- [ ] Minhas Despesas (solicitação de reembolso)
 - [ ] Perfil
 
 ### Área Administrativa
@@ -107,6 +111,9 @@ plano-implementacao-mobile/
 - [ ] Gestão de Membros
 - [ ] Governança (Conselhos)
 - [ ] Tesouraria
+  - [ ] Resumo financeiro
+  - [ ] Aprovação de dízimos pendentes
+  - [ ] Aprovação de despesas pendentes
 - [ ] Missões
 - [ ] EBD (Classes)
 - [ ] Eventos

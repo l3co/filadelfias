@@ -471,6 +471,111 @@ Response: [{
 
 ---
 
+## Dízimos e Ofertas
+
+| Método | Endpoint | Descrição | Auth |
+|--------|----------|-----------|------|
+| GET | `/tithe/records/my?tenant_id={id}` | Meus registros de dízimo | ✅ |
+| POST | `/tithe/records?tenant_id={id}` | Submeter dízimo/oferta | ✅ |
+| GET | `/tithe/records/pending?tenant_id={id}` | Dízimos pendentes | ✅ Tesoureiro |
+| POST | `/tithe/records/{id}/approve?tenant_id={id}` | Aprovar/rejeitar | ✅ Tesoureiro |
+
+### Detalhes
+
+```typescript
+// GET /tithe/records/my?tenant_id={id}
+Response: [{
+  id: string,
+  member_id: string,
+  amount: number,
+  type: "DIZIMO" | "OFERTA",
+  date: string,
+  notes?: string,
+  status: "PENDING" | "APPROVED" | "REJECTED",
+  rejection_reason?: string,
+  created_at: string
+}]
+
+// POST /tithe/records?tenant_id={id}
+Request: {
+  amount: number,
+  type: "DIZIMO" | "OFERTA",
+  date: string,
+  notes?: string
+}
+
+// POST /tithe/records/{id}/approve?tenant_id={id}
+Request: {
+  status: "APPROVED" | "REJECTED",
+  rejection_reason?: string  // obrigatório se REJECTED
+}
+```
+
+---
+
+## Solicitação de Despesas/Reembolso
+
+> **Permissão**: Apenas oficiais (Pastor, Presbítero, Diácono) e membros com funções específicas podem solicitar.
+
+| Método | Endpoint | Descrição | Auth |
+|--------|----------|-----------|------|
+| GET | `/expense/requests/my?tenant_id={id}` | Minhas solicitações | ✅ |
+| POST | `/expense/requests?tenant_id={id}` | Submeter solicitação | ✅ Oficiais/Funções |
+| DELETE | `/expense/requests/{id}?tenant_id={id}` | Excluir (se pendente) | ✅ |
+| GET | `/expense/requests/pending?tenant_id={id}` | Solicitações pendentes | ✅ Tesoureiro |
+| POST | `/expense/requests/{id}/approve?tenant_id={id}` | Aprovar/rejeitar | ✅ Tesoureiro |
+
+### Detalhes
+
+```typescript
+// Categorias de despesa
+type ExpenseCategory = 
+  | "MATERIAL"      // Material (escritório, didático)
+  | "CLEANING"      // Material de Limpeza
+  | "TRANSPORT"     // Transporte / Combustível
+  | "FOOD"          // Alimentação (eventos)
+  | "MAINTENANCE"   // Manutenção
+  | "UTILITIES"     // Contas (água, luz, internet)
+  | "OTHER";        // Outros
+
+// GET /expense/requests/my?tenant_id={id}
+Response: [{
+  id: string,
+  member_id: string,
+  member_name?: string,
+  amount: number,
+  category: ExpenseCategory,
+  description: string,
+  expense_date: string,
+  notes?: string,
+  status: "PENDING" | "APPROVED" | "REJECTED",
+  rejection_reason?: string,
+  created_at: string
+}]
+
+// POST /expense/requests?tenant_id={id}
+Request: {
+  amount: number,
+  category: ExpenseCategory,
+  description: string,
+  expense_date: string,
+  notes?: string
+}
+
+// POST /expense/requests/{id}/approve?tenant_id={id}
+Request: {
+  status: "APPROVED" | "REJECTED",
+  rejection_reason?: string  // obrigatório se REJECTED
+}
+
+// Quem pode solicitar reembolso:
+// Oficiais: PASTOR, PRESBITERO, DIACONO
+// Funções: TESOUREIRO, SECRETARIO, PROFESSOR_EBD, LIDER_LOUVOR,
+//          LIDER_JOVENS, LIDER_MULHERES, LIDER_HOMENS, LIDER_CRIANCAS
+```
+
+---
+
 ## Governança
 
 | Método | Endpoint | Descrição | Auth |

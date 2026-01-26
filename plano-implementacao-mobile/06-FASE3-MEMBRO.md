@@ -756,6 +756,404 @@ Seguem o mesmo padrão dos componentes acima, consultando seus respectivos servi
 
 ---
 
+### 8. Meus Dízimos e Ofertas
+
+```tsx
+// app/(member)/tithes.tsx
+import { View, Text, FlatList, Pressable, Modal, TextInput } from 'react-native';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Wallet, Plus, Clock, CheckCircle, XCircle, Upload } from 'lucide-react-native';
+import { Header } from '@/components/layout/Header';
+import { Button } from '@/components/ui/Button';
+import { LoadingScreen } from '@/components/ui/LoadingScreen';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { useAuthStore } from '@/stores/authStore';
+import { titheService, TitheRecord } from '@/services/tithe';
+import { formatCurrency, formatDate } from '@/lib/utils';
+import { colors } from '@/constants/colors';
+import { toast } from '@/lib/toast';
+
+const STATUS_CONFIG = {
+  PENDING: { icon: Clock, color: colors.amber[500], label: 'Pendente', bg: 'bg-amber-50' },
+  APPROVED: { icon: CheckCircle, color: colors.green[500], label: 'Aprovado', bg: 'bg-green-50' },
+  REJECTED: { icon: XCircle, color: colors.red[500], label: 'Rejeitado', bg: 'bg-red-50' },
+};
+
+export default function TithesScreen() {
+  const queryClient = useQueryClient();
+  const { getCurrentTenant } = useAuthStore();
+  const tenant = getCurrentTenant();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    amount: '',
+    type: 'DIZIMO' as 'DIZIMO' | 'OFERTA',
+    notes: '',
+  });
+
+  const { data: records, isLoading } = useQuery({
+    queryKey: ['my-tithes', tenant?.id],
+    queryFn: () => titheService.getMyRecords(tenant?.id || ''),
+    enabled: !!tenant?.id,
+  });
+
+  const submitMutation = useMutation({
+    mutationFn: (data: typeof formData) => 
+      titheService.submit(tenant?.id || '', {
+        amount: parseFloat(data.amount),
+        type: data.type,
+        notes: data.notes,
+        date: new Date().toISOString().split('T')[0],
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-tithes', tenant?.id] });
+      setIsModalOpen(false);
+      setFormData({ amount: '', type: 'DIZIMO', notes: '' });
+      toast.success('Registro enviado para aprovação!');
+    },
+    onError: () => toast.error('Erro ao enviar registro'),
+  });
+
+  if (isLoading) {
+    return <LoadingScreen message="Carregando registros..." />;
+  }
+
+  const renderRecord = ({ item }: { item: TitheRecord }) => {
+    const status = STATUS_CONFIG[item.status];
+    const StatusIcon = status.icon;
+    
+    return (
+      <View className="bg-white rounded-2xl p-4 mb-3 border border-slate-100">
+        <View className="flex-row items-center justify-between">
+          <View className="flex-row items-center">
+            <View className={`h-10 w-10 rounded-xl ${status.bg} items-center justify-center`}>
+              <StatusIcon size={20} color={status.color} />
+            </View>
+            <View className="ml-3">
+              <Text className="font-semibold text-slate-900">
+                {item.type === 'DIZIMO' ? 'Dízimo' : 'Oferta'}
+              </Text>
+              <Text className="text-xs text-slate-500">{formatDate(item.date)}</Text>
+            </View>
+          </View>
+          <View className="items-end">
+            <Text className="font-bold text-lg text-emerald-600">
+              {formatCurrency(item.amount)}
+            </Text>
+            <Text className={`text-xs ${status.color === colors.amber[500] ? 'text-amber-600' : status.color === colors.green[500] ? 'text-green-600' : 'text-red-600'}`}>
+              {status.label}
+            </Text>
+          </View>
+        </View>
+        {item.rejection_reason && (
+          <Text className="text-sm text-red-600 mt-2 bg-red-50 p-2 rounded-lg">
+            Motivo: {item.rejection_reason}
+          </Text>
+        )}
+      </View>
+    );
+  };
+
+  return (
+    <View className="flex-1 bg-slate-50">
+      <Header 
+        title="Meus Dízimos" 
+        rightAction={
+          <Pressable 
+            onPress={() => setIsModalOpen(true)}
+            className="h-9 w-9 rounded-xl bg-emerald-100 items-center justify-center"
+          >
+            <Plus size={20} color={colors.primary[600]} />
+          </Pressable>
+        }
+      />
+
+      {records?.length === 0 ? (
+        <EmptyState
+          icon={Wallet}
+          title="Nenhum registro"
+          description="Registre seus dízimos e ofertas para acompanhamento."
+          action={
+            <Button onPress={() => setIsModalOpen(true)}>
+              Novo Registro
+            </Button>
+          }
+        />
+      ) : (
+        <FlatList
+          data={records}
+          renderItem={renderRecord}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={{ padding: 16 }}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
+
+      {/* Modal de Novo Registro - similar ao web */}
+    </View>
+  );
+}
+```
+
+---
+
+### 9. Minhas Despesas (Solicitação de Reembolso)
+
+> **Nota**: Esta tela só aparece para membros com permissão (`canSubmitExpenses`).
+> Oficiais: Pastor, Presbítero, Diácono
+> Funções: Tesoureiro, Secretário, Professor EBD, Líderes de ministérios
+
+```tsx
+// app/(member)/expenses.tsx
+import { View, Text, FlatList, Pressable, Modal, TextInput } from 'react-native';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Receipt, Plus, Clock, CheckCircle, XCircle, Trash2 } from 'lucide-react-native';
+import { Header } from '@/components/layout/Header';
+import { Button } from '@/components/ui/Button';
+import { Select } from '@/components/ui/Select';
+import { LoadingScreen } from '@/components/ui/LoadingScreen';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { useAuthStore } from '@/stores/authStore';
+import { expenseService, ExpenseRequest } from '@/services/expense';
+import { formatCurrency, formatDate } from '@/lib/utils';
+import { colors } from '@/constants/colors';
+import { toast } from '@/lib/toast';
+
+const EXPENSE_CATEGORIES = [
+  { value: 'MATERIAL', label: 'Material (escritório, didático)' },
+  { value: 'CLEANING', label: 'Material de Limpeza' },
+  { value: 'TRANSPORT', label: 'Transporte / Combustível' },
+  { value: 'FOOD', label: 'Alimentação (eventos)' },
+  { value: 'MAINTENANCE', label: 'Manutenção' },
+  { value: 'UTILITIES', label: 'Contas (água, luz, internet)' },
+  { value: 'OTHER', label: 'Outros' },
+];
+
+const STATUS_CONFIG = {
+  PENDING: { icon: Clock, color: colors.amber[500], label: 'Pendente', bg: 'bg-amber-50' },
+  APPROVED: { icon: CheckCircle, color: colors.green[500], label: 'Aprovado', bg: 'bg-green-50' },
+  REJECTED: { icon: XCircle, color: colors.red[500], label: 'Rejeitado', bg: 'bg-red-50' },
+};
+
+export default function ExpensesScreen() {
+  const queryClient = useQueryClient();
+  const { getCurrentTenant } = useAuthStore();
+  const tenant = getCurrentTenant();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    amount: '',
+    category: 'MATERIAL',
+    description: '',
+    notes: '',
+  });
+
+  const { data: requests, isLoading } = useQuery({
+    queryKey: ['my-expenses', tenant?.id],
+    queryFn: () => expenseService.getMyRequests(tenant?.id || ''),
+    enabled: !!tenant?.id,
+  });
+
+  const submitMutation = useMutation({
+    mutationFn: (data: typeof formData) => 
+      expenseService.submit(tenant?.id || '', {
+        amount: parseFloat(data.amount),
+        category: data.category,
+        description: data.description,
+        notes: data.notes,
+        expense_date: new Date().toISOString().split('T')[0],
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-expenses', tenant?.id] });
+      setIsModalOpen(false);
+      setFormData({ amount: '', category: 'MATERIAL', description: '', notes: '' });
+      toast.success('Solicitação enviada para aprovação!');
+    },
+    onError: () => toast.error('Erro ao enviar solicitação'),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => expenseService.delete(tenant?.id || '', id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-expenses', tenant?.id] });
+      toast.success('Solicitação excluída');
+    },
+  });
+
+  if (isLoading) {
+    return <LoadingScreen message="Carregando solicitações..." />;
+  }
+
+  const renderRequest = ({ item }: { item: ExpenseRequest }) => {
+    const status = STATUS_CONFIG[item.status];
+    const StatusIcon = status.icon;
+    const categoryLabel = EXPENSE_CATEGORIES.find(c => c.value === item.category)?.label || item.category;
+    
+    return (
+      <View className="bg-white rounded-2xl p-4 mb-3 border border-slate-100">
+        <View className="flex-row items-start justify-between">
+          <View className="flex-row items-start flex-1">
+            <View className={`h-10 w-10 rounded-xl ${status.bg} items-center justify-center`}>
+              <StatusIcon size={20} color={status.color} />
+            </View>
+            <View className="ml-3 flex-1">
+              <Text className="font-semibold text-slate-900" numberOfLines={1}>
+                {item.description}
+              </Text>
+              <Text className="text-xs text-slate-500">{categoryLabel}</Text>
+              <Text className="text-xs text-slate-400">{formatDate(item.expense_date)}</Text>
+            </View>
+          </View>
+          <View className="items-end">
+            <Text className="font-bold text-lg text-red-600">
+              -{formatCurrency(item.amount)}
+            </Text>
+            <Text className={`text-xs ${status.color === colors.amber[500] ? 'text-amber-600' : status.color === colors.green[500] ? 'text-green-600' : 'text-red-600'}`}>
+              {status.label}
+            </Text>
+          </View>
+        </View>
+        
+        {item.status === 'PENDING' && (
+          <Pressable
+            onPress={() => deleteMutation.mutate(item.id)}
+            className="flex-row items-center justify-center mt-3 py-2 bg-red-50 rounded-xl"
+          >
+            <Trash2 size={16} color={colors.red[500]} />
+            <Text className="text-red-600 font-medium ml-2">Excluir</Text>
+          </Pressable>
+        )}
+        
+        {item.rejection_reason && (
+          <Text className="text-sm text-red-600 mt-2 bg-red-50 p-2 rounded-lg">
+            Motivo: {item.rejection_reason}
+          </Text>
+        )}
+      </View>
+    );
+  };
+
+  return (
+    <View className="flex-1 bg-slate-50">
+      <Header 
+        title="Minhas Despesas" 
+        rightAction={
+          <Pressable 
+            onPress={() => setIsModalOpen(true)}
+            className="h-9 w-9 rounded-xl bg-orange-100 items-center justify-center"
+          >
+            <Plus size={20} color={colors.orange[600]} />
+          </Pressable>
+        }
+      />
+
+      {requests?.length === 0 ? (
+        <EmptyState
+          icon={Receipt}
+          title="Nenhuma solicitação"
+          description="Solicite reembolso de despesas realizadas para a igreja."
+          action={
+            <Button onPress={() => setIsModalOpen(true)}>
+              Nova Solicitação
+            </Button>
+          }
+        />
+      ) : (
+        <FlatList
+          data={requests}
+          renderItem={renderRequest}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={{ padding: 16 }}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
+
+      {/* Modal de Nova Solicitação - similar ao web */}
+    </View>
+  );
+}
+```
+
+---
+
+### 10. Governança (Visualização de Conselhos)
+
+```tsx
+// app/(member)/governance.tsx
+import { View, Text, FlatList } from 'react-native';
+import { useQuery } from '@tanstack/react-query';
+import { Gavel, Users, Calendar } from 'lucide-react-native';
+import { Header } from '@/components/layout/Header';
+import { LoadingScreen } from '@/components/ui/LoadingScreen';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { useAuthStore } from '@/stores/authStore';
+import { governanceService, Council } from '@/services/governance';
+import { colors } from '@/constants/colors';
+
+export default function GovernanceScreen() {
+  const { getCurrentTenant } = useAuthStore();
+  const tenant = getCurrentTenant();
+
+  const { data: councils, isLoading } = useQuery({
+    queryKey: ['councils', tenant?.id],
+    queryFn: () => governanceService.getCouncils(tenant?.id || ''),
+    enabled: !!tenant?.id,
+  });
+
+  if (isLoading) {
+    return <LoadingScreen message="Carregando conselhos..." />;
+  }
+
+  const renderCouncil = ({ item }: { item: Council }) => (
+    <View className="bg-white rounded-2xl p-4 mb-3 border border-slate-100">
+      <View className="flex-row items-center">
+        <View className="h-12 w-12 rounded-xl bg-indigo-50 items-center justify-center">
+          <Gavel size={24} color={colors.indigo[600]} />
+        </View>
+        <View className="ml-3 flex-1">
+          <Text className="font-semibold text-slate-900 text-base">{item.name}</Text>
+          <View className="flex-row items-center mt-1">
+            <Users size={14} color={colors.slate[400]} />
+            <Text className="text-sm text-slate-500 ml-1">
+              {item.members_count || 0} membros
+            </Text>
+          </View>
+        </View>
+      </View>
+      {item.description && (
+        <Text className="text-slate-600 mt-3" numberOfLines={2}>
+          {item.description}
+        </Text>
+      )}
+    </View>
+  );
+
+  return (
+    <View className="flex-1 bg-slate-50">
+      <Header title="Governança" showProfile />
+
+      {councils?.length === 0 ? (
+        <EmptyState
+          icon={Gavel}
+          title="Nenhum conselho"
+          description="Os conselhos da igreja aparecerão aqui."
+        />
+      ) : (
+        <FlatList
+          data={councils}
+          renderItem={renderCouncil}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={{ padding: 16 }}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
+    </View>
+  );
+}
+```
+
+---
+
 ## Services Necessários
 
 Copiar de `apps/web/src/services/`:
@@ -765,6 +1163,9 @@ Copiar de `apps/web/src/services/`:
 - `events.ts`
 - `missions.ts`
 - `ebd.ts`
+- `tithe.ts` ← **NOVO**
+- `expense.ts` ← **NOVO**
+- `governance.ts`
 
 **Ajuste necessário em todos:**
 ```typescript
@@ -773,6 +1174,41 @@ import { api } from '../lib/api';
 
 // Depois (mobile)
 import { api } from '@/services/api';
+```
+
+---
+
+## Controle de Permissões
+
+O mobile deve implementar o mesmo controle de permissões do web:
+
+```typescript
+// src/hooks/usePermissions.ts
+export function usePermissions() {
+  const { currentMember } = useAuthStore();
+  
+  const functions = currentMember?.functions || [];
+  const office = currentMember?.office;
+  
+  // Quem pode solicitar reembolso
+  const EXPENSE_ALLOWED_FUNCTIONS = [
+    'TESOUREIRO', 'SECRETARIO', 'PROFESSOR_EBD', 'LIDER_LOUVOR',
+    'LIDER_JOVENS', 'LIDER_MULHERES', 'LIDER_HOMENS', 'LIDER_CRIANCAS'
+  ];
+  const EXPENSE_ALLOWED_OFFICES = ['PASTOR', 'PRESBITERO', 'DIACONO'];
+  
+  const canSubmitExpenses = 
+    EXPENSE_ALLOWED_OFFICES.includes(office || '') ||
+    functions.some(fn => EXPENSE_ALLOWED_FUNCTIONS.includes(fn));
+  
+  const isTreasurer = functions.includes('TESOUREIRO');
+  
+  return {
+    canSubmitExpenses,
+    isTreasurer,
+    // ... outras permissões
+  };
+}
 ```
 
 ---

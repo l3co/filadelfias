@@ -8,6 +8,7 @@ Funcionalidade: Permissões por Ofício Eclesiástico
   @rbac @integration @needs-backend
   Cenário: Pastor tem acesso total
     Dado que estou logado como Pastor
+    E que acesso o modo administração
     Então devo ver menu "Membros"
     E devo ver menu "Governança"
     E devo ver menu "Tesouraria"
@@ -18,6 +19,7 @@ Funcionalidade: Permissões por Ofício Eclesiástico
   @rbac @integration @needs-backend
   Cenário: Presbítero tem acesso de governança
     Dado que estou logado como Presbítero
+    E que acesso o modo administração
     Então devo ver menu "Membros"
     E devo ver menu "Governança"
     E devo ver menu "Tesouraria"
@@ -28,6 +30,7 @@ Funcionalidade: Permissões por Ofício Eclesiástico
   @rbac @integration @needs-backend
   Cenário: Diácono tem acesso limitado
     Dado que estou logado como Diácono
+    E que acesso o modo administração
     Então devo ver menu "Membros"
     E devo ver menu "Tesouraria"
     Mas NÃO devo ver menu "Governança"
@@ -36,10 +39,10 @@ Funcionalidade: Permissões por Ofício Eclesiástico
   @rbac @integration @needs-backend
   Cenário: Membro comum só vê área de membro
     Dado que estou logado como Membro
-    Então devo ser redirecionado para "/membro"
+    Então devo ser redirecionado para "/member"
 
   @rbac @integration @needs-backend
   Cenário: Tentativa de acesso não autorizado
     Dado que estou logado como Membro
-    Quando tento acessar "/app/governance"
-    Então devo ser redirecionado para "/membro" ou ver mensagem de acesso negado
+    Quando tento acessar "/admin/governance"
+    Então devo ser redirecionado para "/member" ou ver mensagem de acesso negado

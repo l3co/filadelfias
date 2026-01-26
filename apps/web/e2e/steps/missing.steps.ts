@@ -81,17 +81,17 @@ Then('o membro deve aparecer na lista', async ({ page }) => {
 
 // Steps with escaped parentheses - exact syntax required by bddgen
 Given('que estou na página de EBD \\(membro)', async ({ page }) => {
-    await page.goto('/membro/ebd');
+    await page.goto('/member/education');
     await page.waitForLoadState('networkidle');
 });
 
 Given('que estou na página de Devocionais \\(admin)', async ({ page }) => {
-    await page.goto('/app/devocionais');
+    await page.goto('/admin/devotionals');
     await page.waitForLoadState('networkidle');
 });
 
 Given('que estou na página de Eventos \\(admin)', async ({ page }) => {
-    await page.goto('/app/eventos');
+    await page.goto('/admin/events');
     await page.waitForLoadState('networkidle');
 });
 

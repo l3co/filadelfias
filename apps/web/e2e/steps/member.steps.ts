@@ -14,32 +14,32 @@ const { Given, When, Then } = createBdd();
 // ============================================================================
 
 Given('que estou na página de Devocionais', async ({ page }) => {
-    await page.goto('/membro/devocionais');
+    await page.goto('/member/devotionals');
     await page.waitForLoadState('networkidle');
 });
 
 Given('que estou na página de Devocionais (admin)', async ({ page }) => {
-    await page.goto('/app/devocionais');
+    await page.goto('/admin/devotionals');
     await page.waitForLoadState('networkidle');
 });
 
 Given('que estou na página de Pedidos de Oração', async ({ page }) => {
-    await page.goto('/membro/oracao');
+    await page.goto('/member/prayer');
     await page.waitForLoadState('networkidle');
 });
 
 Given('que estou na página de Eventos', async ({ page }) => {
-    await page.goto('/membro/eventos');
+    await page.goto('/member/events');
     await page.waitForLoadState('networkidle');
 });
 
 Given('que estou na página de Eventos (admin)', async ({ page }) => {
-    await page.goto('/app/eventos');
+    await page.goto('/admin/events');
     await page.waitForLoadState('networkidle');
 });
 
 Given('que estou na página de EBD (membro)', async ({ page }) => {
-    await page.goto('/membro/ebd');
+    await page.goto('/member/education');
     await page.waitForLoadState('networkidle');
 });
 

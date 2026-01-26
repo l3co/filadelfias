@@ -122,7 +122,7 @@ When('clico em card {string}', async ({ page }, cardTitle: string) => {
 // ============================================================================
 
 Then('devo estar na área de membro', async ({ page }) => {
-    await expect(page).toHaveURL(/\/membro/, { timeout: 5000 });
+    await expect(page).toHaveURL(/\/member/, { timeout: 5000 });
 });
 
 Then('devo ver o dashboard de membros', async ({ page }) => {
@@ -152,10 +152,10 @@ Then('devo ser redirecionado para {string} ou ver mensagem de acesso negado', as
     await page.waitForTimeout(1000); // Wait for potential redirect
 
     const currentUrl = page.url();
-    // Accept redirect to /membro, /app, /login, or the specified path
+    // Accept redirect to /member, /admin, /login, or the specified path
     const isRedirected = currentUrl.includes(path) || 
-                         currentUrl.includes('/membro') || 
-                         currentUrl.includes('/app') ||
+                         currentUrl.includes('/member') || 
+                         currentUrl.includes('/admin') ||
                          currentUrl.includes('/login');
 
     if (isRedirected) {

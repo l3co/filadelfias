@@ -20,7 +20,7 @@ Funcionalidade: Login de usuário
     Quando preencho o email "admin@igreja.com"
     E preencho a senha "MinhaS3nh@Segura"
     E clico no botão "Entrar"
-    Então devo ser redirecionado para "/app"
+    Então devo ser redirecionado para "/member"
 
   @smoke
   Cenário: Verificar validação de campos

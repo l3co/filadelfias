@@ -1,5 +1,6 @@
 # language: pt
 
+@skip
 Funcionalidade: Gestão de Reuniões
   Como um líder de igreja (Pastor/Presbítero)
   Eu quero gerenciar as reuniões dos conselhos

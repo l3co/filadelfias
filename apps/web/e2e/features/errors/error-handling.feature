@@ -17,8 +17,8 @@ Funcionalidade: Tratamento de Erros
   @error-handling @integration @needs-backend
   Cenário: Acesso não autorizado
     Dado que estou logado como Membro
-    Quando tento acessar "/app/financial"
-    Então devo ser redirecionado para "/membro" ou ver mensagem de acesso negado
+    Quando tento acessar "/admin/treasury"
+    Então devo ser redirecionado para "/member" ou ver mensagem de acesso negado
 
   @error-handling @integration @needs-backend
   Cenário: Sessão expirada

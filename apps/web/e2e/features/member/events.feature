@@ -27,5 +27,5 @@ Funcionalidade: Eventos
   @integration @needs-backend
   Cenário: Administrador cria evento
     Dado que estou logado como administrador
-    Quando navego para "/app/events"
+    Quando navego para "/admin/events"
     Então devo ver a página de eventos admin

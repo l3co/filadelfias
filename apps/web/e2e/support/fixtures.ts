@@ -132,6 +132,88 @@ export const testFinancial = {
         value: '350,00',
         description: 'Conta de luz - Janeiro',
     },
+    accounts: {
+        bank: {
+            name: 'Banco do Brasil',
+            type: 'BANK',
+            balance: 10000.00,
+        },
+        cash: {
+            name: 'Caixa Geral',
+            type: 'CASH',
+            balance: 500.00,
+        },
+    },
+    categories: {
+        tithe: {
+            name: 'Dízimos',
+            type: 'INCOME',
+        },
+        offering: {
+            name: 'Ofertas',
+            type: 'INCOME',
+        },
+        utilities: {
+            name: 'Contas de Consumo',
+            type: 'EXPENSE',
+        },
+    },
+    transactions: [
+        { description: 'Dízimo Janeiro', amount: 500, type: 'CREDIT', date: '2026-01-05' },
+        { description: 'Oferta Culto', amount: 150, type: 'CREDIT', date: '2026-01-07' },
+        { description: 'Conta de Luz', amount: 200, type: 'DEBIT', date: '2026-01-10' },
+        { description: 'Dízimo Janeiro', amount: 800, type: 'CREDIT', date: '2026-01-12' },
+        { description: 'Oferta Missões', amount: 300, type: 'CREDIT', date: '2026-01-14' },
+        { description: 'Material Limpeza', amount: 50, type: 'DEBIT', date: '2026-01-15' },
+        { description: 'Dízimo Janeiro', amount: 1200, type: 'CREDIT', date: '2026-01-18' },
+        { description: 'Conta de Água', amount: 80, type: 'DEBIT', date: '2026-01-20' },
+        { description: 'Oferta Especial', amount: 500, type: 'CREDIT', date: '2026-01-22' },
+        { description: 'Manutenção', amount: 350, type: 'DEBIT', date: '2026-01-24' },
+        { description: 'Dízimo Janeiro', amount: 600, type: 'CREDIT', date: '2026-01-25' },
+        { description: 'Internet', amount: 120, type: 'DEBIT', date: '2026-01-26' },
+    ],
+} as const;
+
+/**
+ * Tithe/Offering test data.
+ */
+export const testTithe = {
+    records: {
+        pending: {
+            amount: 500.00,
+            type: 'DIZIMO',
+            date: '2026-01-15',
+            notes: 'Dízimo de janeiro',
+            status: 'PENDING',
+        },
+        approved: {
+            amount: 300.00,
+            type: 'OFERTA',
+            date: '2026-01-10',
+            notes: 'Oferta missionária',
+            status: 'APPROVED',
+        },
+        rejected: {
+            amount: 100.00,
+            type: 'OFERTA',
+            date: '2026-01-05',
+            notes: 'Oferta especial',
+            status: 'REJECTED',
+            rejectionReason: 'Comprovante ilegível',
+        },
+    },
+    newTithe: {
+        amount: '1000',
+        type: 'Dízimo',
+        date: '2026-01-20',
+        notes: 'Dízimo referente ao mês de janeiro',
+    },
+    newOffering: {
+        amount: '250',
+        type: 'Oferta',
+        date: '2026-01-22',
+        notes: 'Oferta para missões',
+    },
 } as const;
 
 /**

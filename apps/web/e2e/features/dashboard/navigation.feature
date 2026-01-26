@@ -8,6 +8,6 @@ Funcionalidade: Navegação na área administrativa
   @integration @needs-backend
   Cenário: Visualizar dashboard
     Dado que estou logado como administrador
-    Então devo ser redirecionado para "/app"
-    E devo ver o nome da minha igreja
+    E que acesso o modo administração
+    Então devo ver o nome da minha igreja
     E devo ver menu lateral com todos os módulos

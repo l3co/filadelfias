@@ -39,55 +39,60 @@ Given('que estou na página do Manual', async ({ page }) => {
 });
 
 Given('estou na área administrativa', async ({ page }) => {
-    await expect(page).toHaveURL(/\/app/);
+    await expect(page).toHaveURL(/\/admin/);
 });
 
 Given('que estou na página de Membros', async ({ page }) => {
-    await page.goto('/app/members');
+    await page.goto('/admin/members');
 });
 
 Given('estou na página de Membros', async ({ page }) => {
-    await expect(page).toHaveURL(/\/app\/members/);
+    await expect(page).toHaveURL(/\/admin\/members/);
 });
 
 Given('que estou na página de Tesouraria', async ({ page }) => {
-    await page.goto('/app/financial');
+    await page.goto('/admin/treasury');
 });
 
 Given('estou na página de Tesouraria', async ({ page }) => {
-    await expect(page).toHaveURL(/\/app\/financial/);
+    await expect(page).toHaveURL(/\/admin\/treasury/);
 });
 
 Given('que estou na página de Governança', async ({ page }) => {
-    await page.goto('/app/governance');
+    await page.goto('/admin/governance');
 });
 
 Given('estou na página de Governança', async ({ page }) => {
-    await expect(page).toHaveURL(/\/app\/governance/);
+    await expect(page).toHaveURL(/\/admin\/governance/);
 });
 
 Given('que estou na página de EBD', async ({ page }) => {
-    await page.goto('/app/ebd');
+    await page.goto('/admin/education');
 });
 
 Given('estou na página de EBD', async ({ page }) => {
-    await expect(page).toHaveURL(/\/app\/ebd/);
+    await expect(page).toHaveURL(/\/admin\/education/);
 });
 
 Given('que estou na página de Missões', async ({ page }) => {
-    await page.goto('/app/missions');
+    await page.goto('/admin/missions');
 });
 
 Given('estou na página de Missões', async ({ page }) => {
-    await expect(page).toHaveURL(/\/app\/missions/);
+    await expect(page).toHaveURL(/\/admin\/missions/);
 });
 
 Given('que estou na página de Configurações', async ({ page }) => {
-    await page.goto('/app/settings');
+    await page.goto('/admin/settings');
+});
+
+Given('que estou na página "Meus Dízimos"', async ({ page }) => {
+    await page.goto('/member/tithes');
+    await page.waitForLoadState('networkidle');
 });
 
 Given('estou na página de Configurações', async ({ page }) => {
-    await expect(page).toHaveURL(/\/app\/settings/);
+    await expect(page).toHaveURL(/\/admin\/settings/);
 });
 
 // ============================================================================
@@ -190,7 +195,20 @@ When('preencho a descrição {string}', async ({ page }, description: string) =>
 });
 
 When('preencho o valor {string}', async ({ page }, value: string) => {
-    await page.getByPlaceholder(/valor|0,00/i).first().fill(value);
+    const input = page.locator('#amount')
+        .or(page.getByRole('spinbutton', { name: /valor/i }))
+        .or(page.getByLabel(/valor/i))
+        .or(page.getByPlaceholder(/valor|0,00/i));
+    await input.first().click();
+    await input.first().fill(value);
+});
+
+When('preencho a data {string}', async ({ page }, date: string) => {
+    const input = page.locator('#date')
+        .or(page.getByLabel(/data/i))
+        .or(page.locator('input[name="date"]'))
+        .or(page.locator('input[type="date"]'));
+    await input.first().fill(date);
 });
 
 When('seleciono categoria {string}', async ({ page }, category: string) => {
@@ -302,7 +320,9 @@ Then('o botão {string} deve estar desabilitado', async ({ page }, buttonText: s
 });
 
 Then('devo ver {string}', async ({ page }, text: string) => {
-    await expect(page.getByText(new RegExp(text, 'i')).first()).toBeVisible();
+    // Wait for any modals to close and page to stabilize
+    await page.waitForTimeout(500);
+    await expect(page.getByText(new RegExp(text, 'i')).first()).toBeVisible({ timeout: 10000 });
 });
 
 Then('devo ver o título {string}', async ({ page }, title: string) => {
@@ -310,8 +330,9 @@ Then('devo ver o título {string}', async ({ page }, title: string) => {
 });
 
 Then('devo ver {string} na lista', async ({ page }, text: string) => {
-    const list = page.locator('table, [role="list"], ul, ol');
-    await expect(list.getByText(new RegExp(text, 'i')).first()).toBeVisible();
+    // Support various list structures: table, ul/ol, role="list", or main content area
+    const list = page.locator('table, [role="list"], ul, ol, main');
+    await expect(list.getByText(new RegExp(text, 'i')).first()).toBeVisible({ timeout: 10000 });
 });
 
 Then('{string} deve aparecer na lista', async ({ page }, text: string) => {

@@ -20,7 +20,7 @@ Given('que estou logado como Pastor', async ({ page }) => {
     await page.getByRole('button', { name: /entrar/i }).click();
 
     try {
-        await expect(page).toHaveURL(/\/app/, { timeout: 10000 });
+        await expect(page).toHaveURL(/\/member/, { timeout: 10000 });
     } catch {
         throw new Error('Login as Pastor failed - backend may not be running or test user does not exist.');
     }
@@ -33,7 +33,7 @@ Given('que estou logado como Presbítero', async ({ page }) => {
     await page.getByRole('button', { name: /entrar/i }).click();
 
     try {
-        await expect(page).toHaveURL(/\/app/, { timeout: 10000 });
+        await expect(page).toHaveURL(/\/member/, { timeout: 10000 });
     } catch {
         throw new Error('Login as Presbítero failed - backend may not be running or test user does not exist.');
     }
@@ -46,7 +46,7 @@ Given('que estou logado como Diácono', async ({ page }) => {
     await page.getByRole('button', { name: /entrar/i }).click();
 
     try {
-        await expect(page).toHaveURL(/\/app/, { timeout: 10000 });
+        await expect(page).toHaveURL(/\/member/, { timeout: 10000 });
     } catch {
         throw new Error('Login as Diácono failed - backend may not be running or test user does not exist.');
     }
@@ -59,7 +59,7 @@ Given('que estou logado como Membro', async ({ page }) => {
     await page.getByRole('button', { name: /entrar/i }).click();
 
     try {
-        await page.waitForURL(/\/(app|membro)/, { timeout: 10000 });
+        await page.waitForURL(/\/member/, { timeout: 10000 });
     } catch {
         throw new Error('Login as Membro failed - backend may not be running or test user does not exist.');
     }
@@ -82,7 +82,7 @@ Given('que estou logado como membro com função {string}', async ({ page }, fun
     await page.getByRole('button', { name: /entrar/i }).click();
 
     try {
-        await expect(page).toHaveURL(/\/app/, { timeout: 10000 });
+        await expect(page).toHaveURL(/\/member/, { timeout: 10000 });
     } catch {
         throw new Error(`Login as ${functionName} failed - backend may not be running or test user does not exist.`);
     }
@@ -97,7 +97,7 @@ Given('que estou logado como Diácono com função {string}', async ({ page }) =
     await page.getByRole('button', { name: /entrar/i }).click();
 
     try {
-        await expect(page).toHaveURL(/\/app/, { timeout: 10000 });
+        await expect(page).toHaveURL(/\/member/, { timeout: 10000 });
     } catch {
         throw new Error('Login failed - backend may not be running or test user does not exist.');
     }
@@ -113,12 +113,12 @@ Then('devo ver menu {string}', async ({ page }, menuItem: string) => {
 });
 
 Then('devo poder criar novos membros', async ({ page }) => {
-    await page.goto('/app/members');
+    await page.goto('/admin/members');
     await expect(page.getByRole('button', { name: /novo|adicionar|criar/i })).toBeVisible();
 });
 
 Then('devo poder excluir membros', async ({ page }) => {
-    await page.goto('/app/members');
+    await page.goto('/admin/members');
     // Check if delete button/action exists
     const deleteButton = page.getByRole('button', { name: /excluir|remover|delete/i });
     await expect(deleteButton.first()).toBeVisible().catch(async () => {
@@ -128,12 +128,12 @@ Then('devo poder excluir membros', async ({ page }) => {
 });
 
 Then('devo poder criar membros', async ({ page }) => {
-    await page.goto('/app/members');
+    await page.goto('/admin/members');
     await expect(page.getByRole('button', { name: /novo|adicionar|criar/i })).toBeVisible();
 });
 
 Then('NÃO devo poder excluir membros', async ({ page }) => {
-    await page.goto('/app/members');
+    await page.goto('/admin/members');
     const deleteButton = page.getByRole('button', { name: /excluir|remover|delete/i });
 
     await expect(deleteButton).not.toBeVisible().catch(() => {
@@ -173,29 +173,29 @@ Then('NÃO devo ter acesso a {string}', async ({ page }, path: string) => {
 // ============================================================================
 
 Then('devo poder criar transações', async ({ page }) => {
-    await page.goto('/app/financial');
+    await page.goto('/admin/treasury');
     await expect(page.getByRole('button', { name: /nova|adicionar|criar/i })).toBeVisible();
 });
 
 Then('devo poder gerar relatórios financeiros', async ({ page }) => {
-    await page.goto('/app/financial');
+    await page.goto('/admin/treasury');
     await expect(page.getByRole('button', { name: /relatório|report/i })
         .or(page.getByText(/relatório/i)))
         .toBeVisible();
 });
 
 Then('devo poder visualizar saldo das contas', async ({ page }) => {
-    await page.goto('/app/financial');
+    await page.goto('/admin/treasury');
     await expect(page.getByText(/saldo|balance/i)).toBeVisible();
 });
 
 Then('devo poder criar atas de reunião', async ({ page }) => {
-    await page.goto('/app/governance');
+    await page.goto('/admin/governance');
     await expect(page.getByRole('button', { name: /nova|adicionar|criar/i })).toBeVisible();
 });
 
 Then('devo poder gerenciar documentos', async ({ page }) => {
-    await page.goto('/app/governance');
+    await page.goto('/admin/governance');
     await expect(page.getByText(/documento|ata|minutes/i)).toBeVisible();
 });
 
@@ -209,7 +209,7 @@ Given('que minha sessão expirou', async ({ page }) => {
 });
 
 When('tento realizar uma ação', async ({ page }) => {
-    await page.goto('/app/members');
+    await page.goto('/admin/members');
 });
 
 Given('que o backend está indisponível', async ({ page }) => {

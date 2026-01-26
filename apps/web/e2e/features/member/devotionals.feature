@@ -17,7 +17,7 @@ Funcionalidade: Devocionais
   @integration @needs-backend
   Cenário: Administrador cria devocional
     Dado que estou logado como administrador
-    Quando navego para "/app/devotionals"
+    Quando navego para "/admin/devotionals"
     Então devo ver a página de devocionais admin
 
   @integration @needs-backend

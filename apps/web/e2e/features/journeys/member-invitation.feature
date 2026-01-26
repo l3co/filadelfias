@@ -21,5 +21,5 @@ Funcionalidade: Convite e acesso de membro
   @journey @integration @needs-backend
   Cenário: Membro não tem acesso à área administrativa
     Dado que estou logado como Membro
-    Quando tento acessar "/app/financial"
-    Então devo ser redirecionado para "/membro" ou ver mensagem de acesso negado
+    Quando tento acessar "/admin/treasury"
+    Então devo ser redirecionado para "/member" ou ver mensagem de acesso negado

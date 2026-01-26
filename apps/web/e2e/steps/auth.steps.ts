@@ -18,17 +18,15 @@ const { Given, When, Then } = createBdd();
 Given('que estou logado como administrador', async ({ page }) => {
     await page.goto('/login');
 
-    // Fill login form using the actual HTML structure (input id="email" and id="password")
     await page.locator('#email').fill(testUsers.admin.email);
     await page.locator('#password').fill(testUsers.admin.password);
     await page.getByRole('button', { name: /entrar/i }).click();
 
-    // Wait for redirect to dashboard - may fail if no backend or user doesn't exist
+    // All users now go to /member after login
     try {
-        await expect(page).toHaveURL(/\/app/, { timeout: 10000 });
+        await expect(page).toHaveURL(/\/member/, { timeout: 10000 });
     } catch {
-        // If login fails, skip this test scenario
-        throw new Error('Login failed - backend may not be running or test user does not exist. This is expected in some environments.');
+        throw new Error('Login failed - backend may not be running or test user does not exist.');
     }
 });
 
@@ -39,11 +37,29 @@ Given('que estou logado como membro', async ({ page }) => {
     await page.getByRole('button', { name: /entrar/i }).click();
 
     try {
-        // Members may be redirected to /membro or /app depending on their role
-        await page.waitForURL(/\/(app|membro)/, { timeout: 10000 });
+        await page.waitForURL(/\/member/, { timeout: 10000 });
     } catch {
         throw new Error('Login failed - backend may not be running or test user does not exist.');
     }
+});
+
+Given('que estou logado como tesoureiro', async ({ page }) => {
+    await page.goto('/login');
+    await page.locator('#email').fill(testUsers.tesoureiro.email);
+    await page.locator('#password').fill(testUsers.tesoureiro.password);
+    await page.getByRole('button', { name: /entrar/i }).click();
+
+    try {
+        await page.waitForURL(/\/member/, { timeout: 10000 });
+    } catch {
+        throw new Error('Login failed - backend may not be running or test user does not exist.');
+    }
+});
+
+Given('que acesso o modo administração', async ({ page }) => {
+    // Click on the admin access card/link
+    await page.getByRole('link', { name: /administração|admin/i }).click();
+    await page.waitForURL(/\/admin/, { timeout: 10000 });
 });
 
 // ============================================================================

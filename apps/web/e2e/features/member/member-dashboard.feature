@@ -10,7 +10,7 @@ Funcionalidade: Dashboard do Membro
 
   @integration @needs-backend
   Cenário: Visualizar dashboard de membro
-    Então devo ser redirecionado para "/membro"
+    Então devo ser redirecionado para "/member"
     E devo ver card "Bíblia Online"
     E devo ver card "Devocionais"
     E devo ver card "Pedidos de Oração"
@@ -28,14 +28,14 @@ Funcionalidade: Dashboard do Membro
   @integration @needs-backend
   Cenário: Navegar para Bíblia Online
     Quando clico em card "Bíblia"
-    Então devo ser redirecionado para "/membro/biblia"
+    Então devo ser redirecionado para "/member/bible"
 
   @integration @needs-backend
   Cenário: Navegar para Devocionais
     Quando clico em card "Devocionais"
-    Então devo ser redirecionado para "/membro/devocionais"
+    Então devo ser redirecionado para "/member/devotionals"
 
   @integration @needs-backend
   Cenário: Navegar para Pedidos de Oração
     Quando clico em card "Pedidos de Oração"
-    Então devo ser redirecionado para "/membro/oracao"
+    Então devo ser redirecionado para "/member/prayer"

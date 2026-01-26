@@ -1,22 +1,30 @@
 import { Tabs } from 'expo-router';
+import { Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Home, Heart, BookOpen, MessageCircle, User } from 'lucide-react-native';
 import { ProtectedRoute } from '@/components/layout/ProtectedRoute';
-import { colors } from '@/constants/colors';
 
 export default function MemberLayout() {
+    const insets = useSafeAreaInsets();
+    
+    // Calcula a altura da tab bar considerando a área segura inferior
+    const tabBarHeight = 56 + Math.max(insets.bottom, 8);
+    const tabBarPaddingBottom = Math.max(insets.bottom, 8);
+
     return (
         <ProtectedRoute>
             <Tabs
                 screenOptions={{
                     headerShown: false,
-                    tabBarActiveTintColor: colors.primary[600],
-                    tabBarInactiveTintColor: colors.slate[400],
+                    tabBarActiveTintColor: '#10b981',
+                    tabBarInactiveTintColor: '#94a3b8',
                     tabBarStyle: {
+                        backgroundColor: '#ffffff',
                         borderTopWidth: 1,
-                        borderTopColor: colors.slate[100],
+                        borderTopColor: '#f1f5f9',
                         paddingTop: 8,
-                        paddingBottom: 8,
-                        height: 60,
+                        paddingBottom: tabBarPaddingBottom,
+                        height: tabBarHeight,
                     },
                     tabBarLabelStyle: {
                         fontSize: 11,
@@ -59,6 +67,12 @@ export default function MemberLayout() {
                         tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
                     }}
                 />
+                {/* Telas ocultas da tab bar - acessíveis via navegação */}
+                <Tabs.Screen name="directory" options={{ href: null }} />
+                <Tabs.Screen name="ebd" options={{ href: null }} />
+                <Tabs.Screen name="events" options={{ href: null }} />
+                <Tabs.Screen name="missions" options={{ href: null }} />
+                <Tabs.Screen name="tithes" options={{ href: null }} />
             </Tabs>
         </ProtectedRoute>
     );

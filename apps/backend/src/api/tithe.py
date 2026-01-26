@@ -9,8 +9,12 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from src.api.auth import get_current_user
 from src.infra.repositories.member_repository import member_repository
-from src.middleware.permissions import require_view_financial
-from src.modules.financial.repository import transaction_category_repository, transaction_repository
+from src.middleware.permissions import require_treasurer, require_view_financial
+from src.modules.financial.repository import (
+    financial_account_repository,
+    transaction_category_repository,
+    transaction_repository,
+)
 from src.modules.tithe.repository import tithe_record_repository
 from src.modules.tithe.schemas import (
     TitheRecordApprove,
@@ -171,11 +175,11 @@ async def approve_tithe_record(
     record_id: str,
     data: TitheRecordApprove,
     tenant_id: str = Query(..., description="ID of the tenant"),
-    auth_context: dict = Depends(require_view_financial),
+    auth_context: dict = Depends(require_treasurer),
 ):
     """
     Approve or reject a tithe record.
-    Requires: Tesoureiro or leadership (financial:view permission).
+    Requires: TESOUREIRO function (only treasurer can approve/reject).
     When approved, creates a transaction linked to the member.
     """
     record = await tithe_record_repository.get(tenant_id, record_id)
@@ -192,14 +196,26 @@ async def approve_tithe_record(
         category_name = "Dízimos" if record.get("type") == "DIZIMO" else "Ofertas"
         category = next((c for c in categories if c.get("name") == category_name), None)
 
+        # Get default account (first available)
+        accounts = await financial_account_repository.get_all(tenant_id)
+        default_account = accounts[0] if accounts else None
+        if not default_account:
+            raise HTTPException(
+                status_code=400, detail="Nenhuma conta financeira cadastrada. Cadastre uma conta antes de aprovar."
+            )
+
+        # Get member name for description
+        member = await member_repository.get(tenant_id, record.get("member_id"))
+        member_name = member.get("full_name") if member else "Membro"
+
         transaction = await transaction_repository.create_transaction(
             tenant_id=tenant_id,
-            account_id=None,
+            account_id=default_account.get("id"),
             category_id=category.get("id") if category else None,
             amount=record.get("amount"),
             transaction_type="CREDIT",
             transaction_date=record.get("date"),
-            description=f"{category_name} - {record.get('member_id')}",
+            description=f"{category_name} - {member_name}",
             member_id=record.get("member_id"),
         )
 

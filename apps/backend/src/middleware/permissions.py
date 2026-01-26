@@ -246,3 +246,40 @@ class RequireAuthenticated:
 
 
 require_authenticated = RequireAuthenticated()
+
+
+class RequireTreasurer:
+    """
+    Dependency que exige que o usuário seja Tesoureiro.
+    Apenas tesoureiros podem aprovar/rejeitar dízimos e ofertas.
+    """
+
+    async def __call__(
+        self,
+        tenant_id: str = Query(..., description="ID of the tenant/church"),
+        current_user: dict = Depends(get_current_user),
+    ) -> dict:
+        user_id = current_user["id"]
+
+        member = await member_repository.get_by_user_id(tenant_id, user_id)
+        membership = await membership_repository.get_by_user_and_tenant(user_id, tenant_id)
+
+        # Check if user has TESOUREIRO function
+        functions = member.get("functions", []) if member else []
+        is_treasurer = "TESOUREIRO" in functions
+
+        if not is_treasurer:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Apenas o tesoureiro pode aprovar ou rejeitar registros de dízimos e ofertas",
+            )
+
+        return {
+            "user": current_user,
+            "user_id": user_id,
+            "member": member,
+            "membership": membership,
+        }
+
+
+require_treasurer = RequireTreasurer()

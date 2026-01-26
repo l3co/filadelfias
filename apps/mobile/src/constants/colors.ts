@@ -39,8 +39,8 @@ export const colors = {
 
     // Gradientes (para usar com LinearGradient)
     gradients: {
-        primary: ['#059669', '#0d9488'],
-        premium: ['#059669', '#047857'],
-        dark: ['#1e293b', '#0f172a'],
+        primary: ['#059669', '#0d9488'] as const,
+        premium: ['#059669', '#047857'] as const,
+        dark: ['#1e293b', '#0f172a'] as const,
     },
 };

@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Outlet, Link, useLocation, Navigate } from 'react-router-dom';
-import { Menu, Home, Users, Calendar, LogOut, Gavel, Wallet, Globe, BookOpen, Bell, Search, ChevronRight, X, Settings } from 'lucide-react';
+import { Menu, Home, Users, Calendar, LogOut, Gavel, Wallet, Globe, BookOpen, Bell, Search, ChevronRight, X, Settings, UserCircle } from 'lucide-react';
 import { useCurrentUser, useLogout } from '../../hooks/useAuth';
 import { usePermissions } from '../../hooks/usePermissions';
 import { PermissionBadge } from '../PermissionGate';
@@ -156,6 +156,13 @@ export function DashboardLayout() {
                             <p className="text-sm font-semibold text-gray-900 truncate">{user?.name}</p>
                             <PermissionBadge />
                         </div>
+                    </Link>
+                    <Link
+                        to="/member"
+                        className="group flex w-full items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700 rounded-xl transition-colors border border-indigo-100 hover:border-indigo-200 mb-2"
+                    >
+                        <UserCircle className="h-4 w-4" />
+                        Voltar para Membro
                     </Link>
                     <button
                         onClick={() => logout.mutate()}

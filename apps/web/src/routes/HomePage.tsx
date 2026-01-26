@@ -1,7 +1,9 @@
-import { useCurrentUser } from '../hooks/useAuth';
+import { useCurrentUser, useCurrentTenant } from '../hooks/useAuth';
 import { useFormattedStats } from '../hooks/useDashboardStats';
+import { useMembers } from '../features/members/hooks/useMembers';
+import { useEvents } from '../features/events/hooks/useEvents';
 import { Link } from 'react-router-dom';
-import { Users, Wallet, GraduationCap, Gavel, Globe, Calendar, TrendingUp, ArrowRight, Sparkles } from 'lucide-react';
+import { Users, Wallet, GraduationCap, Gavel, Globe, Calendar, TrendingUp, ArrowRight, Sparkles, UserPlus } from 'lucide-react';
 import { Skeleton } from '../components/ui/skeleton';
 
 const quickActions = [
@@ -15,9 +17,46 @@ const quickActions = [
 
 export default function HomePage() {
     const { data: user } = useCurrentUser();
+    const tenant = useCurrentTenant();
     const dashboardStats = useFormattedStats();
+    const { data: members } = useMembers(tenant?.id);
+    const { data: events } = useEvents(tenant?.id);
     const firstName = user?.name?.split(' ')[0] || 'Usuário';
     const tenantName = user?.memberships?.[0]?.tenant?.name || 'Minha Igreja';
+
+    // Membros recentes (últimos 5 cadastrados)
+    const recentMembers = members
+        ?.filter(m => m.created_at)
+        .sort((a, b) => new Date(b.created_at!).getTime() - new Date(a.created_at!).getTime())
+        .slice(0, 3) || [];
+
+    // Próximos eventos (ordenados por data, apenas futuros)
+    const upcomingEvents = events
+        ?.filter(e => new Date(e.start_date) >= new Date())
+        .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())
+        .slice(0, 3) || [];
+
+    const formatRelativeTime = (dateStr: string) => {
+        const date = new Date(dateStr);
+        const now = new Date();
+        const diffMs = now.getTime() - date.getTime();
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+
+        if (diffMins < 60) return `Há ${diffMins} min`;
+        if (diffHours < 24) return `Há ${diffHours}h`;
+        if (diffDays < 7) return `Há ${diffDays} dias`;
+        return date.toLocaleDateString('pt-BR');
+    };
+
+    const formatEventDate = (dateStr: string) => {
+        const date = new Date(dateStr);
+        const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+        const dayName = days[date.getDay()];
+        const time = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        return { dayName, time };
+    };
 
     const getGreeting = () => {
         const hour = new Date().getHours();
@@ -172,48 +211,58 @@ export default function HomePage() {
                 </div>
             </div>
 
-            {/* Recent Activity Placeholder */}
+            {/* Recent Activity & Upcoming Events */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                    <h3 className="text-lg font-semibold text-[#002333] mb-4">Atividade Recente</h3>
+                    <h3 className="text-lg font-semibold text-[#002333] mb-4">Membros Recentes</h3>
                     <div className="space-y-4">
-                        {[1, 2, 3].map((i) => (
-                            <div key={i} className="flex items-center gap-4 py-3 border-b border-gray-50 last:border-0">
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-100 to-teal-100 flex items-center justify-center text-green-600">
-                                    <Users size={18} />
+                        {recentMembers.length > 0 ? (
+                            recentMembers.map((member) => (
+                                <div key={member.id} className="flex items-center gap-4 py-3 border-b border-gray-50 last:border-0">
+                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-100 to-teal-100 flex items-center justify-center text-green-600">
+                                        <UserPlus size={18} />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-sm font-medium text-gray-900">{member.full_name}</p>
+                                        <p className="text-xs text-gray-500">{formatRelativeTime(member.created_at!)}</p>
+                                    </div>
                                 </div>
-                                <div className="flex-1">
-                                    <p className="text-sm font-medium text-gray-900">Novo membro cadastrado</p>
-                                    <p className="text-xs text-gray-500">Há 2 horas</p>
-                                </div>
-                            </div>
-                        ))}
+                            ))
+                        ) : (
+                            <p className="text-sm text-gray-500 text-center py-4">Nenhum membro cadastrado recentemente</p>
+                        )}
                     </div>
-                    <button className="mt-4 w-full text-center text-sm text-green-600 hover:text-green-700 font-medium py-2 rounded-lg hover:bg-green-50 transition-colors">
-                        Ver todas as atividades
-                    </button>
+                    <Link 
+                        to="/app/members"
+                        className="mt-4 w-full inline-flex items-center justify-center text-sm text-green-600 hover:text-green-700 font-medium py-2 rounded-lg hover:bg-green-50 transition-colors"
+                    >
+                        Ver todos os membros
+                    </Link>
                 </div>
 
                 <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                     <h3 className="text-lg font-semibold text-[#002333] mb-4">Próximos Eventos</h3>
                     <div className="space-y-4">
-                        {[
-                            { name: 'Culto de Domingo', date: 'Dom, 10:00', type: 'Culto' },
-                            { name: 'Reunião do Conselho', date: 'Qua, 19:30', type: 'Reunião' },
-                            { name: 'EBD - Classes', date: 'Dom, 09:00', type: 'Educação' },
-                        ].map((event, i) => (
-                            <div key={i} className="flex items-center gap-4 py-3 border-b border-gray-50 last:border-0">
-                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-50 to-teal-50 flex flex-col items-center justify-center">
-                                    <span className="text-xs font-bold text-green-700">{event.date.split(',')[0]}</span>
-                                    <span className="text-[10px] text-gray-500">{event.date.split(', ')[1]}</span>
-                                </div>
-                                <div className="flex-1">
-                                    <p className="text-sm font-medium text-gray-900">{event.name}</p>
-                                    <p className="text-xs text-gray-500">{event.type}</p>
-                                </div>
-                                <ArrowRight size={16} className="text-gray-400" />
-                            </div>
-                        ))}
+                        {upcomingEvents.length > 0 ? (
+                            upcomingEvents.map((event) => {
+                                const { dayName, time } = formatEventDate(event.start_date);
+                                return (
+                                    <div key={event.id} className="flex items-center gap-4 py-3 border-b border-gray-50 last:border-0">
+                                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-50 to-teal-50 flex flex-col items-center justify-center">
+                                            <span className="text-xs font-bold text-green-700">{dayName}</span>
+                                            <span className="text-[10px] text-gray-500">{time}</span>
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="text-sm font-medium text-gray-900">{event.title}</p>
+                                            <p className="text-xs text-gray-500">{event.category || 'Evento'}</p>
+                                        </div>
+                                        <ArrowRight size={16} className="text-gray-400" />
+                                    </div>
+                                );
+                            })
+                        ) : (
+                            <p className="text-sm text-gray-500 text-center py-4">Nenhum evento agendado</p>
+                        )}
                     </div>
                     <Link 
                         to="/app/events"

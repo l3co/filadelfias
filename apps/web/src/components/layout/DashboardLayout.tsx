@@ -15,14 +15,14 @@ interface NavItem {
 }
 
 const allNavigation: NavItem[] = [
-    { name: 'Dashboard', href: '/app', icon: Home },
-    { name: 'Membros', href: '/app/members', icon: Users, resource: 'members' },
-    { name: 'Governança', href: '/app/governance', icon: Gavel, resource: 'governance' },
-    { name: 'Tesouraria', href: '/app/financial', icon: Wallet, resource: 'financial' },
-    { name: 'Missões', href: '/app/missions', icon: Globe, resource: 'missions' },
-    { name: 'EBD', href: '/app/ebd', icon: BookOpen, resource: 'ebd' },
-    { name: 'Eventos', href: '/app/events', icon: Calendar, resource: 'events' },
-    { name: 'Configurações', href: '/app/settings', icon: Settings, resource: 'settings' },
+    { name: 'Dashboard', href: '/admin', icon: Home },
+    { name: 'Membros', href: '/admin/members', icon: Users, resource: 'members' },
+    { name: 'Governança', href: '/admin/governance', icon: Gavel, resource: 'governance' },
+    { name: 'Tesouraria', href: '/admin/treasury', icon: Wallet, resource: 'financial' },
+    { name: 'Missões', href: '/admin/missions', icon: Globe, resource: 'missions' },
+    { name: 'EBD', href: '/admin/education', icon: BookOpen, resource: 'ebd' },
+    { name: 'Eventos', href: '/admin/events', icon: Calendar, resource: 'events' },
+    { name: 'Configurações', href: '/admin/settings', icon: Settings, resource: 'settings' },
 ];
 
 export function DashboardLayout() {
@@ -78,7 +78,7 @@ export function DashboardLayout() {
             >
                 {/* Logo Header */}
                 <div className="flex h-16 items-center justify-between px-6 border-b border-gray-100">
-                    <Link to="/app" className="flex items-center gap-2">
+                    <Link to="/admin" className="flex items-center gap-2">
                         <h1 className="text-xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-green-700 to-teal-600">
                             Filadélfias
                         </h1>
@@ -94,7 +94,7 @@ export function DashboardLayout() {
                 {/* Tenant Selector - Links to Settings */}
                 <div className="px-4 py-4 border-b border-gray-100">
                     <Link
-                        to="/app/settings"
+                        to="/admin/settings"
                         className="w-full flex items-center justify-between px-3 py-2.5 bg-gradient-to-r from-green-50 to-teal-50 hover:from-green-100 hover:to-teal-100 rounded-xl transition-colors group"
                     >
                         <div className="flex items-center gap-3">
@@ -146,7 +146,7 @@ export function DashboardLayout() {
                 {/* User Profile & Logout - Always visible at bottom */}
                 <div className="flex-shrink-0 border-t border-gray-100 p-4 bg-white">
                     <Link
-                        to="/app/profile"
+                        to="/admin/profile"
                         className="flex items-center gap-3 px-3 py-3 rounded-xl bg-gray-50 mb-3 hover:bg-gray-100 transition-colors"
                     >
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-100 to-teal-100 flex items-center justify-center text-green-700 font-bold shadow-sm">

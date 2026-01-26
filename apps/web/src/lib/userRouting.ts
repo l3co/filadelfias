@@ -63,19 +63,21 @@ export function getMemberExperience(
 export function getExperienceRoute(experience: UserExperience): string {
   switch (experience) {
     case 'admin':
-      return '/app';
+      return '/admin';
     case 'teacher':
-      return '/portal-professor';
+      return '/member/education';
     case 'member':
     default:
-      return '/membro';
+      return '/member';
   }
 }
 
 /**
  * Determina a rota de destino após login
+ * Todos os usuários vão para /member primeiro, com opção de acessar admin via card
  */
-export function getPostLoginRoute(user: User | null | undefined): string {
-  const experience = getUserExperience(user);
-  return getExperienceRoute(experience);
+export function getPostLoginRoute(): string {
+  // Sempre redireciona para área de membro
+  // Admins verão o AdminAccessCard na home para acessar o painel admin
+  return '/member';
 }

@@ -44,6 +44,7 @@ const MemberDevotionalsPage = lazy(() => import('./routes/member/MemberDevotiona
 const MemberPrayerPage = lazy(() => import('./routes/member/MemberPrayerPage').then(m => ({ default: m.MemberPrayerPage })));
 const MemberEBDPage = lazy(() => import('./routes/member/MemberEBDPage').then(m => ({ default: m.MemberEBDPage })));
 const MemberGovernancePage = lazy(() => import('./routes/member/MemberGovernancePage').then(m => ({ default: m.MemberGovernancePage })));
+const MyTithesPage = lazy(() => import('./routes/tithe/MyTithesPage').then(m => ({ default: m.MyTithesPage })));
 
 // Lazy loaded pages - Shared
 const ProfilePage = lazy(() => import('./routes/profile/ProfilePage').then(m => ({ default: m.ProfilePage })));
@@ -80,9 +81,9 @@ function App() {
           }
         />
 
-        {/* Área Administrativa Protegida */}
+        {/* Admin Dashboard */}
         <Route
-          path="/app"
+          path="/admin"
           element={
             <ProtectedRoute>
               <DashboardLayout />
@@ -92,19 +93,23 @@ function App() {
           <Route index element={<HomePage />} />
           <Route path="members" element={<MembersPage />} />
           <Route path="governance" element={<CouncilsPage />} />
-          <Route path="financial" element={<TreasuryPage />} />
+          <Route path="treasury" element={<TreasuryPage />} />
           <Route path="missions" element={<MissionsPage />} />
-          <Route path="ebd" element={<EBDClassesPage />} />
-          <Route path="ebd/:classId" element={<EBDClassDetailPage />} />
+          <Route path="education" element={<EBDClassesPage />} />
+          <Route path="education/:classId" element={<EBDClassDetailPage />} />
           <Route path="events" element={<EventsPage />} />
           <Route path="devotionals" element={<DevotionalsPage />} />
           <Route path="settings" element={<ChurchSettingsPage />} />
           <Route path="profile" element={<ProfilePage />} />
         </Route>
 
-        {/* Portal do Membro (Nova UX) */}
+        {/* Legacy redirects for /app/* */}
+        <Route path="/app" element={<Navigate to="/admin" replace />} />
+        <Route path="/app/*" element={<Navigate to="/admin" replace />} />
+
+        {/* Member Portal */}
         <Route
-          path="/membro"
+          path="/member"
           element={
             <ProtectedRoute>
               <MemberLayout />
@@ -112,18 +117,23 @@ function App() {
           }
         >
           <Route index element={<MemberHomePage />} />
-          <Route path="diretorio" element={<MemberDirectoryPage />} />
-          <Route path="eventos" element={<MemberEventsPage />} />
-          <Route path="missoes" element={<MemberMissionsPage />} />
-          <Route path="biblia" element={<BiblePage />} />
-          <Route path="hinario" element={<HymnalPage />} />
+          <Route path="directory" element={<MemberDirectoryPage />} />
+          <Route path="events" element={<MemberEventsPage />} />
+          <Route path="missions" element={<MemberMissionsPage />} />
+          <Route path="bible" element={<BiblePage />} />
+          <Route path="hymnal" element={<HymnalPage />} />
           <Route path="manual" element={<ManualPage />} />
-          <Route path="ebd" element={<MemberEBDPage />} />
-          <Route path="oracao" element={<MemberPrayerPage />} />
-          <Route path="devocionais" element={<MemberDevotionalsPage />} />
-          <Route path="governanca" element={<MemberGovernancePage />} />
-          <Route path="perfil" element={<ProfilePage />} />
+          <Route path="education" element={<MemberEBDPage />} />
+          <Route path="prayer" element={<MemberPrayerPage />} />
+          <Route path="devotionals" element={<MemberDevotionalsPage />} />
+          <Route path="governance" element={<MemberGovernancePage />} />
+          <Route path="tithes" element={<MyTithesPage />} />
+          <Route path="profile" element={<ProfilePage />} />
         </Route>
+
+        {/* Legacy redirects for /membro/* */}
+        <Route path="/membro" element={<Navigate to="/member" replace />} />
+        <Route path="/membro/*" element={<Navigate to="/member" replace />} />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />

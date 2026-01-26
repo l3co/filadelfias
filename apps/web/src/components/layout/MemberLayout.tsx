@@ -1,7 +1,7 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { 
   Bell, LogOut, Menu, User, ChevronDown, Home, X,
-  BookOpen, BookMarked, Music, Users, Calendar, Globe, GraduationCap, Heart, MessageCircle, Gavel
+  BookOpen, BookMarked, Music, Users, Calendar, Globe, GraduationCap, Heart, MessageCircle, Gavel, Wallet
 } from 'lucide-react';
 import { useCurrentUser, useLogout, useCurrentTenant } from '../../hooks/useAuth';
 import { Button } from '../ui/button';
@@ -16,17 +16,18 @@ import { useState } from 'react';
 import { cn } from '../../lib/utils';
 
 const navItems = [
-  { href: '/membro', label: 'Início', icon: Home },
-  { href: '/membro/biblia', label: 'Bíblia', icon: BookOpen },
-  { href: '/membro/hinario', label: 'Hinário', icon: Music },
-  { href: '/membro/manual', label: 'Manual', icon: BookMarked },
-  { href: '/membro/devocionais', label: 'Devocionais', icon: Heart },
-  { href: '/membro/diretorio', label: 'Membros', icon: Users },
-  { href: '/membro/governanca', label: 'Governança', icon: Gavel },
-  { href: '/membro/eventos', label: 'Eventos', icon: Calendar },
-  { href: '/membro/missoes', label: 'Missões', icon: Globe },
-  { href: '/membro/ebd', label: 'EBD', icon: GraduationCap },
-  { href: '/membro/oracao', label: 'Oração', icon: MessageCircle },
+  { href: '/member', label: 'Início', icon: Home },
+  { href: '/member/bible', label: 'Bíblia', icon: BookOpen },
+  { href: '/member/hymnal', label: 'Hinário', icon: Music },
+  { href: '/member/manual', label: 'Manual', icon: BookMarked },
+  { href: '/member/devotionals', label: 'Devocionais', icon: Heart },
+  { href: '/member/directory', label: 'Membros', icon: Users },
+  { href: '/member/governance', label: 'Governança', icon: Gavel },
+  { href: '/member/events', label: 'Eventos', icon: Calendar },
+  { href: '/member/missions', label: 'Missões', icon: Globe },
+  { href: '/member/education', label: 'EBD', icon: GraduationCap },
+  { href: '/member/prayer', label: 'Oração', icon: MessageCircle },
+  { href: '/member/tithes', label: 'Dízimos', icon: Wallet },
 ];
 
 // Gera acrônimo do nome da igreja (ex: "Igreja Presbiteriana Filadélfia" -> "IPF")
@@ -67,7 +68,7 @@ export function MemberLayout() {
               <Menu className="h-5 w-5 text-slate-600" />
             </button>
             
-            <Link to="/membro" className="flex items-center gap-3 group">
+            <Link to="/member" className="flex items-center gap-3 group">
               <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/25 group-hover:shadow-emerald-500/40 transition-shadow">
                 <span className="text-white font-bold text-sm tracking-tight">
                   {churchAcronym.slice(0, 2)}
@@ -138,7 +139,7 @@ export function MemberLayout() {
                   <p className="text-xs text-slate-500">{user?.email}</p>
                 </div>
                 <DropdownMenuItem asChild className="cursor-pointer">
-                  <Link to="/membro/perfil" className="flex items-center">
+                  <Link to="/member/profile" className="flex items-center">
                     <User className="mr-2 h-4 w-4" />
                     Meu Perfil
                   </Link>

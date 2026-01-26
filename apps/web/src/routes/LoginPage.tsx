@@ -17,11 +17,8 @@ export default function LoginPage() {
         e.preventDefault();
 
         login(formData, {
-            onSuccess: async () => {
-                // Buscar dados do usuário para determinar rota
-                const { authService } = await import('../services/auth');
-                const user = await authService.getCurrentUser();
-                const route = getPostLoginRoute(user);
+            onSuccess: () => {
+                const route = getPostLoginRoute();
                 navigate(route);
             },
         });

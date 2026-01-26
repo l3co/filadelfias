@@ -44,7 +44,7 @@ describe('TransactionForm Component', () => {
         expect(screen.getByText('Nova Receita')).toBeInTheDocument();
     });
 
-    it('should filter categories based on transaction type (INCOME)', () => {
+    it('should filter categories based on transaction type (INCOME)', async () => {
         render(
             <TransactionForm
                 isOpen={true}
@@ -55,7 +55,16 @@ describe('TransactionForm Component', () => {
                 accounts={mockAccounts}
             />
         );
-        expect(screen.getByText('Dízimos')).toBeInTheDocument();
+        
+        // Find and click the category combobox button (second "Selecione ou crie..." button)
+        const comboboxButtons = screen.getAllByRole('button', { name: /selecione ou crie/i });
+        const categoryButton = comboboxButtons[1]; // Second one is category
+        fireEvent.click(categoryButton);
+        
+        // Now the dropdown should be open and show filtered categories
+        await waitFor(() => {
+            expect(screen.getByText('Dízimos')).toBeInTheDocument();
+        });
         expect(screen.queryByText('Aluguel')).not.toBeInTheDocument();
     });
 
@@ -71,23 +80,42 @@ describe('TransactionForm Component', () => {
             />
         );
 
+        // Fill description
         fireEvent.change(screen.getByLabelText('Descrição'), { target: { value: 'Oferta Teste' } });
+        
+        // Fill amount
         fireEvent.change(screen.getByLabelText('Valor (R$)'), { target: { value: '150.50' } });
-        fireEvent.change(screen.getByLabelText('Conta'), { target: { value: '1' } });
-        fireEvent.change(screen.getByLabelText('Categoria'), { target: { value: 'c1' } });
+        
+        // Select account via combobox
+        const comboboxButtons = screen.getAllByRole('button', { name: /selecione ou crie/i });
+        fireEvent.click(comboboxButtons[0]); // First is account
+        await waitFor(() => {
+            expect(screen.getByText('Conta Principal')).toBeInTheDocument();
+        });
+        fireEvent.click(screen.getByText('Conta Principal'));
+        
+        // Select category via combobox
+        fireEvent.click(comboboxButtons[1]); // Second is category
+        await waitFor(() => {
+            expect(screen.getByText('Dízimos')).toBeInTheDocument();
+        });
+        fireEvent.click(screen.getByText('Dízimos'));
 
+        // Submit form
         const submitButton = screen.getByRole('button', { name: /salvar lançamento/i });
         fireEvent.click(submitButton);
 
         await waitFor(() => {
-            expect(mockOnSubmit).toHaveBeenCalledWith({
-                description: 'Oferta Teste',
-                amount: 150.5,
-                account_id: '1',
-                category_id: 'c1',
-                type: 'CREDIT',
-                date: expect.any(String)
-            });
+            expect(mockOnSubmit).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    description: 'Oferta Teste',
+                    amount: 150.5,
+                    account_id: '1',
+                    category_id: 'c1',
+                    type: 'CREDIT',
+                }),
+                expect.any(Function)
+            );
         });
     });
 });

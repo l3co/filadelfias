@@ -8,9 +8,12 @@ import {
   Globe, 
   GraduationCap, 
   MessageCircle,
-  Gavel
+  Gavel,
+  Wallet,
+  Receipt
 } from 'lucide-react';
 import { useCurrentUser, useCurrentTenant, useCurrentMembership } from '../../hooks/useAuth';
+import { usePermissions } from '../../hooks/usePermissions';
 import { WelcomeBanner } from '../../components/WelcomeBanner';
 import { HomeCard, HomeCardGrid } from '../../components/HomeCard';
 import { SocialMediaCard } from '../../components/SocialMediaCard';
@@ -20,6 +23,7 @@ export function MemberHomePage() {
   const { data: user } = useCurrentUser();
   const tenant = useCurrentTenant();
   const membership = useCurrentMembership();
+  const { canSubmitExpenses } = usePermissions();
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -111,6 +115,24 @@ export function MemberHomePage() {
           href="/member/prayer"
           color="pink"
         />
+        
+        <HomeCard
+          icon={Wallet}
+          title="Meus Dízimos"
+          description="Registre seus dízimos e ofertas"
+          href="/member/tithes"
+          color="green"
+        />
+        
+        {canSubmitExpenses && (
+          <HomeCard
+            icon={Receipt}
+            title="Minhas Despesas"
+            description="Solicite reembolso de despesas"
+            href="/member/expenses"
+            color="orange"
+          />
+        )}
       </HomeCardGrid>
 
       {/* Social Media Links */}

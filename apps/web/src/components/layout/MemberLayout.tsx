@@ -1,9 +1,10 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { 
   Bell, LogOut, Menu, User, ChevronDown, Home, X,
-  BookOpen, BookMarked, Music, Users, Calendar, Globe, GraduationCap, Heart, MessageCircle, Gavel, Wallet
+  BookOpen, BookMarked, Music, Users, Calendar, Globe, GraduationCap, Heart, MessageCircle, Gavel, Wallet, Receipt
 } from 'lucide-react';
 import { useCurrentUser, useLogout, useCurrentTenant } from '../../hooks/useAuth';
+import { usePermissions } from '../../hooks/usePermissions';
 import { Button } from '../ui/button';
 import {
   DropdownMenu,
@@ -15,7 +16,7 @@ import {
 import { useState } from 'react';
 import { cn } from '../../lib/utils';
 
-const navItems = [
+const baseNavItems = [
   { href: '/member', label: 'Início', icon: Home },
   { href: '/member/bible', label: 'Bíblia', icon: BookOpen },
   { href: '/member/hymnal', label: 'Hinário', icon: Music },
@@ -29,6 +30,8 @@ const navItems = [
   { href: '/member/prayer', label: 'Oração', icon: MessageCircle },
   { href: '/member/tithes', label: 'Dízimos', icon: Wallet },
 ];
+
+const expenseNavItem = { href: '/member/expenses', label: 'Despesas', icon: Receipt };
 
 // Gera acrônimo do nome da igreja (ex: "Igreja Presbiteriana Filadélfia" -> "IPF")
 function getChurchAcronym(name?: string): string {
@@ -47,12 +50,18 @@ export function MemberLayout() {
   const logout = useLogout();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { canSubmitExpenses } = usePermissions();
 
   const handleLogout = () => {
     logout.mutate();
   };
 
   const churchAcronym = getChurchAcronym(tenant?.name);
+  
+  // Build nav items dynamically based on permissions
+  const navItems = canSubmitExpenses 
+    ? [...baseNavItems, expenseNavItem] 
+    : baseNavItems;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50/30">

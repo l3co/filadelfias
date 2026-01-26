@@ -16,6 +16,7 @@ from src.api.churches import router as churches_router
 from src.api.devotionals import router as devotionals_router
 from src.api.ebd import router as ebd_router
 from src.api.events import router as events_router
+from src.api.expense import router as expense_router
 from src.api.financial import router as financial_router
 from src.api.governance import router as governance_router
 from src.api.hymnal import router as hymnal_router
@@ -140,6 +141,7 @@ app.include_router(devotionals_router)
 app.include_router(manual_router)
 app.include_router(metadata_router)
 app.include_router(tithe_router)
+app.include_router(expense_router)
 
 
 @app.get("/health", tags=["Health"])

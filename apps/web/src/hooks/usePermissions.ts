@@ -35,6 +35,8 @@ interface UsePermissionsReturn {
   // Verificações de ofício
   isLeader: boolean;
   isOfficer: boolean;
+  isTreasurer: boolean;
+  canSubmitExpenses: boolean;
   office: EcclesiasticalOffice | null;
   
   // Atalhos comuns
@@ -101,6 +103,20 @@ export function usePermissions(): UsePermissionsReturn {
   const office = currentMember?.office as EcclesiasticalOffice | null;
   const isLeader = isLeadership(office ?? undefined);
   const isOfficer = isOrdainedOfficer(office ?? undefined);
+  
+  // Verificação de função específica (tesoureiro)
+  const functions = currentMember?.functions || [];
+  const isTreasurer = functions.includes('TESOUREIRO');
+  
+  // Verificação de quem pode solicitar reembolso de despesas
+  const EXPENSE_ALLOWED_FUNCTIONS = [
+    'TESOUREIRO', 'SECRETARIO', 'PROFESSOR_EBD', 'LIDER_LOUVOR',
+    'LIDER_JOVENS', 'LIDER_MULHERES', 'LIDER_HOMENS', 'LIDER_CRIANCAS'
+  ];
+  const EXPENSE_ALLOWED_OFFICES = ['PASTOR', 'PRESBITERO', 'DIACONO'];
+  const canSubmitExpenses = 
+    EXPENSE_ALLOWED_OFFICES.includes(office || '') ||
+    functions.some(fn => EXPENSE_ALLOWED_FUNCTIONS.includes(fn));
 
   // Atalhos de permissão comuns
   const canViewMembers = can('members', 'view');
@@ -128,6 +144,8 @@ export function usePermissions(): UsePermissionsReturn {
     
     isLeader,
     isOfficer,
+    isTreasurer,
+    canSubmitExpenses,
     office,
     
     canViewMembers,

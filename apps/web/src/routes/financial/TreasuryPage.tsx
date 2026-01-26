@@ -9,8 +9,10 @@ import { TransactionList } from '../../features/financial/components/Transaction
 import { TransactionForm } from '../../features/financial/components/TransactionForm';
 import { CsvImportDialog } from '../../features/financial/components/CsvImportDialog';
 import { PendingTithesList } from '../../features/tithe/components/PendingTithesList';
+import { PendingExpensesList } from '../../features/expense/components/PendingExpensesList';
+import { usePendingExpenses, useExpenseMutations } from '../../features/expense/hooks/useExpense';
 import { Button } from '../../components/ui/button';
-import { PermissionGate, AccessDenied } from '../../components/PermissionGate';
+import { AccessDenied } from '../../components/PermissionGate';
 import { PlusCircle, MinusCircle, Wallet, FileText, CreditCard, ChevronRight, Upload } from 'lucide-react';
 import { PageHeaderWithIcon } from '../../components/PageHeader';
 import { EmptyState } from '../../components/EmptyState';
@@ -35,10 +37,13 @@ export function TreasuryPage() {
         setMonth,
         setYear,
     } = useFinancialData(tenant?.id);
-    const { canViewFinancial } = usePermissions();
+    const { canViewFinancial, isTreasurer } = usePermissions();
 
     const { data: pendingTithes, isLoading: tithesLoading } = usePendingTitheRecords(tenant?.id);
     const { approveRecord } = useTitheMutations(tenant?.id);
+
+    const { data: pendingExpenses, isLoading: expensesLoading } = usePendingExpenses(tenant?.id);
+    const { approveExpense } = useExpenseMutations(tenant?.id);
 
     const { data: members } = useQuery({
         queryKey: ['members', tenant?.id],
@@ -88,7 +93,7 @@ export function TreasuryPage() {
                 title="Tesouraria"
                 description="Gestão financeira inteligente e transparente"
                 actions={
-                    <PermissionGate resource="financial" action="create">
+                    isTreasurer ? (
                         <div className="flex gap-3">
                             <Button 
                                 variant="outline" 
@@ -111,85 +116,99 @@ export function TreasuryPage() {
                                 Nova Despesa
                             </Button>
                         </div>
-                    </PermissionGate>
+                    ) : null
                 }
             />
 
             {/* Dashboard Cards */}
             <BalanceSummary totalBalance={totalBalance} isLoading={isLoading} transactions={transactions} />
 
-            {/* Pending Tithes */}
-            {(pendingTithes?.length ?? 0) > 0 && (
+            {/* Pending Tithes - Only visible to treasurer */}
+            {isTreasurer && (pendingTithes?.length ?? 0) > 0 && (
                 <PendingTithesList
                     records={pendingTithes || []}
                     isLoading={tithesLoading}
                     onApprove={(recordId) => approveRecord.mutate({ recordId, data: { status: 'APPROVED' } })}
                     onReject={(recordId, reason) => approveRecord.mutate({ recordId, data: { status: 'REJECTED', rejection_reason: reason } })}
                     isApproving={approveRecord.isPending}
+                    canApprove={isTreasurer}
                 />
             )}
 
-            {/* Main Content */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Transaction History */}
-                <div className="lg:col-span-2">
-                    <TransactionList 
-                        transactions={transactions} 
-                        isLoading={isLoading}
-                        filters={filters}
-                        onNextPage={nextPage}
-                        onPrevPage={prevPage}
-                        onMonthChange={setMonth}
-                        onYearChange={setYear}
-                    />
-                </div>
+            {/* Pending Expenses - Only visible to treasurer */}
+            {isTreasurer && (pendingExpenses?.length ?? 0) > 0 && (
+                <PendingExpensesList
+                    records={pendingExpenses || []}
+                    isLoading={expensesLoading}
+                    onApprove={(recordId) => approveExpense.mutate({ recordId, data: { status: 'APPROVED' } })}
+                    onReject={(recordId, reason) => approveExpense.mutate({ recordId, data: { status: 'REJECTED', rejection_reason: reason } })}
+                    isApproving={approveExpense.isPending}
+                />
+            )}
 
-                {/* Side Panel */}
-                <div className="space-y-6">
-                    {/* Relatório Card */}
-                    <div className="relative bg-gradient-to-br from-[#002333] via-green-900 to-[#002333] rounded-2xl p-6 text-white overflow-hidden shadow-lg">
-                        <div className="absolute top-0 right-0 w-24 h-24 bg-green-500/10 rounded-full blur-2xl" />
-                        <div className="relative">
+            {/* Transaction History and Side Panel - Only visible to treasurer */}
+            {isTreasurer && (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Transaction History */}
+                    <div className="lg:col-span-2">
+                        <TransactionList 
+                            transactions={transactions} 
+                            isLoading={isLoading}
+                            filters={filters}
+                            onNextPage={nextPage}
+                            onPrevPage={prevPage}
+                            onMonthChange={setMonth}
+                            onYearChange={setYear}
+                        />
+                    </div>
+
+                    {/* Side Panel */}
+                    <div className="space-y-6">
+                        {/* Relatório Card */}
+                        <div className="relative bg-gradient-to-br from-[#002333] via-green-900 to-[#002333] rounded-2xl p-6 text-white overflow-hidden shadow-lg">
+                            <div className="absolute top-0 right-0 w-24 h-24 bg-green-500/10 rounded-full blur-2xl" />
+                            <div className="relative">
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="p-2 rounded-xl bg-white/10 backdrop-blur-sm">
+                                        <FileText className="h-5 w-5 text-green-300" />
+                                    </div>
+                                    <h3 className="font-semibold text-lg">Relatório Mensal</h3>
+                                </div>
+                                <p className="text-green-100/80 text-sm mb-4">
+                                    Gere relatórios financeiros detalhados.
+                                </p>
+                                <button className="w-full flex items-center justify-between px-4 py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-xl text-sm font-medium transition-colors group">
+                                    Visualizar Relatório
+                                    <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Contas Ativas */}
+                        <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
                             <div className="flex items-center gap-3 mb-4">
-                                <div className="p-2 rounded-xl bg-white/10 backdrop-blur-sm">
-                                    <FileText className="h-5 w-5 text-green-300" />
+                                <div className="p-2 rounded-xl bg-gradient-to-br from-green-50 to-teal-50">
+                                    <CreditCard className="h-5 w-5 text-green-600" />
                                 </div>
-                                <h3 className="font-semibold text-lg">Relatório Mensal</h3>
+                                <h3 className="font-semibold text-[#002333]">Contas Ativas</h3>
                             </div>
-                            <p className="text-green-100/80 text-sm mb-4">
-                                Gere relatórios financeiros detalhados.
-                            </p>
-                            <button className="w-full flex items-center justify-between px-4 py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-xl text-sm font-medium transition-colors group">
-                                Visualizar Relatório
-                                <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Contas Ativas */}
-                    <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2 rounded-xl bg-gradient-to-br from-green-50 to-teal-50">
-                                <CreditCard className="h-5 w-5 text-green-600" />
+                            <div className="space-y-3">
+                                {accounts?.map(acc => (
+                                    <div key={acc.id} className="flex justify-between items-center py-2 border-b border-gray-50 last:border-0">
+                                        <span className="text-sm text-gray-600 truncate max-w-[150px]">{acc.name}</span>
+                                        <span className="text-sm font-semibold text-[#002333]">
+                                            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(acc.balance)}
+                                        </span>
+                                    </div>
+                                ))}
+                                {(!accounts || accounts.length === 0) && (
+                                    <p className="text-sm text-gray-400 text-center py-4">Nenhuma conta cadastrada</p>
+                                )}
                             </div>
-                            <h3 className="font-semibold text-[#002333]">Contas Ativas</h3>
-                        </div>
-                        <div className="space-y-3">
-                            {accounts?.map(acc => (
-                                <div key={acc.id} className="flex justify-between items-center py-2 border-b border-gray-50 last:border-0">
-                                    <span className="text-sm text-gray-600 truncate max-w-[150px]">{acc.name}</span>
-                                    <span className="text-sm font-semibold text-[#002333]">
-                                        {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(acc.balance)}
-                                    </span>
-                                </div>
-                            ))}
-                            {(!accounts || accounts.length === 0) && (
-                                <p className="text-sm text-gray-400 text-center py-4">Nenhuma conta cadastrada</p>
-                            )}
                         </div>
                     </div>
                 </div>
-            </div>
+            )}
 
             {/* Transaction Modal Form */}
             <TransactionForm

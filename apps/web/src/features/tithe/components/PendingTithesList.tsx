@@ -10,6 +10,7 @@ interface PendingTithesListProps {
     onApprove: (recordId: string) => void;
     onReject: (recordId: string, reason: string) => void;
     isApproving?: boolean;
+    canApprove?: boolean; // Only treasurer can approve/reject
 }
 
 function formatCurrency(value: number) {
@@ -25,7 +26,8 @@ export function PendingTithesList({
     isLoading,
     onApprove,
     onReject,
-    isApproving
+    isApproving,
+    canApprove = false
 }: PendingTithesListProps) {
     const [rejectingId, setRejectingId] = useState<string | null>(null);
     const [rejectReason, setRejectReason] = useState('');
@@ -110,55 +112,57 @@ export function PendingTithesList({
                                 </div>
                             </div>
 
-                            {rejectingId === record.id ? (
-                                <div className="mt-4 space-y-2">
-                                    <textarea
-                                        value={rejectReason}
-                                        onChange={(e) => setRejectReason(e.target.value)}
-                                        placeholder="Motivo da rejeição (opcional)"
-                                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-                                        rows={2}
-                                    />
-                                    <div className="flex gap-2 justify-end">
+                            {canApprove && (
+                                rejectingId === record.id ? (
+                                    <div className="mt-4 space-y-2">
+                                        <textarea
+                                            value={rejectReason}
+                                            onChange={(e) => setRejectReason(e.target.value)}
+                                            placeholder="Motivo da rejeição (opcional)"
+                                            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                                            rows={2}
+                                        />
+                                        <div className="flex gap-2 justify-end">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => setRejectingId(null)}
+                                            >
+                                                Cancelar
+                                            </Button>
+                                            <Button
+                                                variant="destructive"
+                                                size="sm"
+                                                onClick={() => handleReject(record.id)}
+                                                disabled={isApproving}
+                                            >
+                                                Confirmar Rejeição
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="mt-4 flex gap-2 justify-end">
                                         <Button
                                             variant="outline"
                                             size="sm"
-                                            onClick={() => setRejectingId(null)}
+                                            onClick={() => setRejectingId(record.id)}
+                                            disabled={isApproving}
+                                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
                                         >
-                                            Cancelar
+                                            <XCircle className="h-4 w-4 mr-1" />
+                                            Rejeitar
                                         </Button>
                                         <Button
-                                            variant="destructive"
                                             size="sm"
-                                            onClick={() => handleReject(record.id)}
+                                            onClick={() => onApprove(record.id)}
                                             disabled={isApproving}
+                                            className="bg-green-600 hover:bg-green-700 text-white"
                                         >
-                                            Confirmar Rejeição
+                                            <CheckCircle2 className="h-4 w-4 mr-1" />
+                                            Aprovar
                                         </Button>
                                     </div>
-                                </div>
-                            ) : (
-                                <div className="mt-4 flex gap-2 justify-end">
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => setRejectingId(record.id)}
-                                        disabled={isApproving}
-                                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                    >
-                                        <XCircle className="h-4 w-4 mr-1" />
-                                        Rejeitar
-                                    </Button>
-                                    <Button
-                                        size="sm"
-                                        onClick={() => onApprove(record.id)}
-                                        disabled={isApproving}
-                                        className="bg-green-600 hover:bg-green-700 text-white"
-                                    >
-                                        <CheckCircle2 className="h-4 w-4 mr-1" />
-                                        Aprovar
-                                    </Button>
-                                </div>
+                                )
                             )}
                         </div>
                     ))}

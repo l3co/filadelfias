@@ -1,17 +1,17 @@
 import { View, Text, FlatList, Pressable, RefreshControl } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
-import { Heart, Calendar, ChevronRight } from 'lucide-react-native';
-import { Header } from '@/components/layout/Header';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Heart, Calendar, ChevronRight, ChevronLeft } from 'lucide-react-native';
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useAuthStore } from '@/stores/authStore';
 import { devotionalsService, Devotional } from '@/services/devotionals';
 import { formatDate } from '@/lib/utils';
-import { colors } from '@/constants/colors';
 
 export default function DevotionalsScreen() {
     const router = useRouter();
+    const insets = useSafeAreaInsets();
     const { getCurrentTenant } = useAuthStore();
     const tenant = getCurrentTenant();
 
@@ -27,35 +27,60 @@ export default function DevotionalsScreen() {
 
     const renderDevotional = ({ item }: { item: Devotional }) => (
         <Pressable
-            onPress={() => router.push(`/(member)/devotionals/${item.id}`)}
-            className="bg-white rounded-2xl p-4 mb-3 border border-slate-100 active:scale-[0.98]"
+            onPress={() => router.push(`/(member)/devotionals/${item.id}` as any)}
+            style={{
+                backgroundColor: '#ffffff',
+                borderRadius: 16,
+                padding: 16,
+                marginBottom: 12,
+                flexDirection: 'row',
+                alignItems: 'flex-start',
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.04,
+                shadowRadius: 8,
+                elevation: 2,
+            }}
         >
-            <View className="flex-row items-start">
-                <View className="h-12 w-12 rounded-xl bg-red-50 items-center justify-center">
-                    <Heart size={24} color={colors.error} />
-                </View>
-                <View className="ml-3 flex-1">
-                    <Text className="font-semibold text-slate-900 text-base" numberOfLines={2}>
-                        {item.title}
-                    </Text>
-                    <Text className="text-sm text-emerald-600 mt-1">
-                        {item.verse_reference}
-                    </Text>
-                    <View className="flex-row items-center mt-2">
-                        <Calendar size={14} color={colors.slate[400]} />
-                        <Text className="text-xs text-slate-400 ml-1">
-                            {formatDate(item.date)}
-                        </Text>
-                    </View>
-                </View>
-                <ChevronRight size={20} color={colors.slate[300]} />
+            <View style={{ 
+                height: 48, 
+                width: 48, 
+                borderRadius: 12, 
+                backgroundColor: '#fef2f2', 
+                alignItems: 'center', 
+                justifyContent: 'center' 
+            }}>
+                <Heart size={24} color="#ef4444" />
             </View>
+            <View style={{ marginLeft: 12, flex: 1 }}>
+                <Text style={{ fontWeight: '600', color: '#0f172a', fontSize: 15 }} numberOfLines={2}>
+                    {item.title}
+                </Text>
+                <Text style={{ fontSize: 14, color: '#10b981', marginTop: 4 }}>
+                    {item.verse_reference}
+                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
+                    <Calendar size={14} color="#94a3b8" />
+                    <Text style={{ fontSize: 12, color: '#94a3b8', marginLeft: 4 }}>
+                        {formatDate(item.date)}
+                    </Text>
+                </View>
+            </View>
+            <ChevronRight size={20} color="#cbd5e1" />
         </Pressable>
     );
 
     return (
-        <View className="flex-1 bg-slate-50">
-            <Header title="Devocionais" showNotifications showProfile />
+        <View style={{ flex: 1, backgroundColor: '#f8fafc', paddingTop: insets.top }}>
+            {/* Header Premium */}
+            <View style={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: 16 }}>
+                <Text style={{ fontSize: 28, fontWeight: '700', color: '#0f172a', letterSpacing: -0.5 }}>
+                    Devocionais
+                </Text>
+                <Text style={{ color: '#64748b', marginTop: 4 }}>
+                    Reflexões diárias para sua vida espiritual
+                </Text>
+            </View>
 
             {devotionals?.length === 0 ? (
                 <EmptyState
@@ -68,13 +93,13 @@ export default function DevotionalsScreen() {
                     data={devotionals}
                     renderItem={renderDevotional}
                     keyExtractor={(item) => item.id}
-                    contentContainerStyle={{ padding: 16 }}
+                    contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
                     showsVerticalScrollIndicator={false}
                     refreshControl={
                         <RefreshControl
                             refreshing={isRefetching}
                             onRefresh={refetch}
-                            tintColor={colors.primary[600]}
+                            tintColor="#10b981"
                         />
                     }
                 />

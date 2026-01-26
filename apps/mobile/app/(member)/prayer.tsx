@@ -1,24 +1,26 @@
-import { View, Text, FlatList, Pressable, Modal, TextInput } from 'react-native';
+import { View, Text, FlatList, Pressable, Modal, TextInput, StatusBar, Platform } from 'react-native';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MessageCircle, Plus, Heart, X, Send } from 'lucide-react-native';
-import { Header } from '@/components/layout/Header';
 import { Button } from '@/components/ui/Button';
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useAuthStore } from '@/stores/authStore';
 import { prayerService, PrayerRequest } from '@/services/prayer';
 import { formatDate } from '@/lib/utils';
-import { colors } from '@/constants/colors';
 import { toast } from '@/lib/toast';
 
 export default function PrayerScreen() {
     const queryClient = useQueryClient();
+    const insets = useSafeAreaInsets();
     const { getCurrentTenant } = useAuthStore();
     const tenant = getCurrentTenant();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [newRequest, setNewRequest] = useState('');
     const [isAnonymous, setIsAnonymous] = useState(false);
+
+    const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 0 : 0;
 
     const { data: requests, isLoading } = useQuery({
         queryKey: ['prayer', tenant?.id],
@@ -50,30 +52,55 @@ export default function PrayerScreen() {
     }
 
     const renderRequest = ({ item }: { item: PrayerRequest }) => (
-        <View className="bg-white rounded-2xl p-4 mb-3 border border-slate-100">
-            <View className="flex-row items-start">
-                <View className="h-10 w-10 rounded-full bg-pink-50 items-center justify-center">
+        <View style={{
+            backgroundColor: '#ffffff',
+            borderRadius: 16,
+            padding: 16,
+            marginBottom: 12,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.04,
+            shadowRadius: 8,
+            elevation: 2,
+        }}>
+            <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
+                <View style={{ 
+                    height: 40, 
+                    width: 40, 
+                    borderRadius: 20, 
+                    backgroundColor: '#fdf2f8', 
+                    alignItems: 'center', 
+                    justifyContent: 'center' 
+                }}>
                     <MessageCircle size={20} color="#ec4899" />
                 </View>
-                <View className="ml-3 flex-1">
-                    <Text className="text-sm text-slate-500">
+                <View style={{ marginLeft: 12, flex: 1 }}>
+                    <Text style={{ fontSize: 14, color: '#64748b' }}>
                         {item.is_anonymous ? 'Anônimo' : item.author_name}
                     </Text>
-                    <Text className="text-slate-800 mt-1">{item.content}</Text>
-                    <Text className="text-xs text-slate-400 mt-2">{formatDate(item.created_at)}</Text>
+                    <Text style={{ color: '#1e293b', marginTop: 4, lineHeight: 22 }}>{item.content}</Text>
+                    <Text style={{ fontSize: 12, color: '#94a3b8', marginTop: 8 }}>{formatDate(item.created_at)}</Text>
                 </View>
             </View>
 
             <Pressable
                 onPress={() => prayMutation.mutate(item.id)}
-                className="flex-row items-center justify-center mt-3 py-2 bg-pink-50 rounded-xl"
+                style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginTop: 12,
+                    paddingVertical: 10,
+                    backgroundColor: '#fdf2f8',
+                    borderRadius: 12,
+                }}
             >
                 <Heart
                     size={18}
                     color="#ec4899"
                     fill={item.prayed_by_me ? '#ec4899' : 'transparent'}
                 />
-                <Text className="text-pink-600 font-medium ml-2">
+                <Text style={{ color: '#db2777', fontWeight: '500', marginLeft: 8 }}>
                     {item.prayer_count} {item.prayer_count === 1 ? 'oração' : 'orações'}
                 </Text>
             </Pressable>
@@ -81,18 +108,38 @@ export default function PrayerScreen() {
     );
 
     return (
-        <View className="flex-1 bg-slate-50">
-            <Header
-                title="Pedidos de Oração"
-                rightAction={
-                    <Pressable
-                        onPress={() => setIsModalOpen(true)}
-                        className="h-9 w-9 rounded-xl bg-emerald-100 items-center justify-center"
-                    >
-                        <Plus size={20} color={colors.primary[600]} />
-                    </Pressable>
-                }
-            />
+        <View style={{ flex: 1, backgroundColor: '#f8fafc', paddingTop: insets.top }}>
+            {/* Header Premium */}
+            <View style={{ 
+                flexDirection: 'row', 
+                alignItems: 'center', 
+                justifyContent: 'space-between',
+                paddingHorizontal: 20, 
+                paddingTop: 16, 
+                paddingBottom: 16 
+            }}>
+                <View>
+                    <Text style={{ fontSize: 28, fontWeight: '700', color: '#0f172a', letterSpacing: -0.5 }}>
+                        Pedidos de Oração
+                    </Text>
+                    <Text style={{ color: '#64748b', marginTop: 4 }}>
+                        Ore pelos irmãos da igreja
+                    </Text>
+                </View>
+                <Pressable
+                    onPress={() => setIsModalOpen(true)}
+                    style={{
+                        height: 44,
+                        width: 44,
+                        borderRadius: 12,
+                        backgroundColor: '#ecfdf5',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}
+                >
+                    <Plus size={22} color="#10b981" />
+                </Pressable>
+            </View>
 
             {requests?.length === 0 ? (
                 <EmptyState
@@ -110,7 +157,7 @@ export default function PrayerScreen() {
                     data={requests}
                     renderItem={renderRequest}
                     keyExtractor={(item) => item.id}
-                    contentContainerStyle={{ padding: 16 }}
+                    contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
                     showsVerticalScrollIndicator={false}
                 />
             )}
@@ -122,42 +169,69 @@ export default function PrayerScreen() {
                 presentationStyle="pageSheet"
                 onRequestClose={() => setIsModalOpen(false)}
             >
-                <View className="flex-1 bg-white">
-                    <View className="flex-row items-center justify-between p-4 border-b border-slate-100">
-                        <Pressable onPress={() => setIsModalOpen(false)}>
-                            <X size={24} color={colors.slate[600]} />
+                <View style={{ 
+                    flex: 1, 
+                    backgroundColor: '#ffffff',
+                    paddingTop: Platform.OS === 'android' ? statusBarHeight + 16 : insets.top + 8,
+                }}>
+                    <View style={{ 
+                        flexDirection: 'row', 
+                        alignItems: 'center', 
+                        justifyContent: 'space-between', 
+                        paddingHorizontal: 16, 
+                        paddingBottom: 16,
+                        borderBottomWidth: 1,
+                        borderBottomColor: '#f1f5f9',
+                    }}>
+                        <Pressable onPress={() => setIsModalOpen(false)} style={{ padding: 8 }}>
+                            <X size={24} color="#64748b" />
                         </Pressable>
-                        <Text className="text-lg font-bold text-slate-900">Novo Pedido</Text>
+                        <Text style={{ fontSize: 18, fontWeight: '700', color: '#0f172a' }}>Novo Pedido</Text>
                         <Pressable
                             onPress={() => createMutation.mutate(newRequest)}
                             disabled={!newRequest.trim() || createMutation.isPending}
+                            style={{ padding: 8 }}
                         >
-                            <Send size={24} color={newRequest.trim() ? colors.primary[600] : colors.slate[300]} />
+                            <Send size={24} color={newRequest.trim() ? '#10b981' : '#cbd5e1'} />
                         </Pressable>
                     </View>
 
-                    <View className="p-4 flex-1">
+                    <View style={{ padding: 20, flex: 1 }}>
                         <TextInput
                             placeholder="Compartilhe seu pedido de oração..."
                             value={newRequest}
                             onChangeText={setNewRequest}
                             multiline
                             numberOfLines={6}
-                            className="text-lg text-slate-800 leading-7"
-                            placeholderTextColor={colors.slate[400]}
+                            style={{ fontSize: 16, color: '#1e293b', lineHeight: 24 }}
+                            placeholderTextColor="#94a3b8"
                             textAlignVertical="top"
                         />
                     </View>
 
-                    <View className="p-4 border-t border-slate-100">
+                    <View style={{ 
+                        padding: 20, 
+                        borderTopWidth: 1, 
+                        borderTopColor: '#f1f5f9',
+                        paddingBottom: insets.bottom > 0 ? insets.bottom : 20,
+                    }}>
                         <Pressable
                             onPress={() => setIsAnonymous(!isAnonymous)}
-                            className="flex-row items-center"
+                            style={{ flexDirection: 'row', alignItems: 'center' }}
                         >
-                            <View className={`h-5 w-5 rounded border-2 items-center justify-center ${isAnonymous ? 'bg-emerald-500 border-emerald-500' : 'border-slate-300'}`}>
-                                {isAnonymous && <Text className="text-white text-xs">✓</Text>}
+                            <View style={{
+                                height: 22,
+                                width: 22,
+                                borderRadius: 4,
+                                borderWidth: 2,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backgroundColor: isAnonymous ? '#10b981' : 'transparent',
+                                borderColor: isAnonymous ? '#10b981' : '#cbd5e1',
+                            }}>
+                                {isAnonymous && <Text style={{ color: '#ffffff', fontSize: 12 }}>✓</Text>}
                             </View>
-                            <Text className="ml-2 text-slate-700">Enviar anonimamente</Text>
+                            <Text style={{ marginLeft: 10, color: '#475569' }}>Enviar anonimamente</Text>
                         </Pressable>
                     </View>
                 </View>

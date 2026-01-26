@@ -1,14 +1,16 @@
-import { View, Text, FlatList } from 'react-native';
+import { View, Text, FlatList, Pressable } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import { Calendar, MapPin, Clock } from 'lucide-react-native';
-import { Header } from '@/components/layout/Header';
+import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Calendar, MapPin, Clock, ChevronLeft } from 'lucide-react-native';
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useAuthStore } from '@/stores/authStore';
 import { eventsService, Event } from '@/services/events';
-import { colors } from '@/constants/colors';
 
 export default function EventsScreen() {
+    const router = useRouter();
+    const insets = useSafeAreaInsets();
     const { getCurrentTenant } = useAuthStore();
     const tenant = getCurrentTenant();
 
@@ -23,39 +25,57 @@ export default function EventsScreen() {
     }
 
     const renderEvent = ({ item }: { item: Event }) => (
-        <View className="bg-white rounded-2xl p-4 mb-3 border border-slate-100">
-            <View className="flex-row">
+        <View style={{
+            backgroundColor: '#ffffff',
+            borderRadius: 16,
+            padding: 16,
+            marginBottom: 12,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.04,
+            shadowRadius: 8,
+            elevation: 2,
+        }}>
+            <View style={{ flexDirection: 'row' }}>
                 {/* Data Box */}
-                <View className="h-16 w-16 rounded-xl bg-orange-50 items-center justify-center mr-4">
-                    <Text className="text-2xl font-bold text-orange-600">
+                <View style={{ 
+                    height: 64, 
+                    width: 64, 
+                    borderRadius: 12, 
+                    backgroundColor: '#fff7ed', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    marginRight: 16,
+                }}>
+                    <Text style={{ fontSize: 24, fontWeight: '700', color: '#f97316' }}>
                         {new Date(item.date).getDate()}
                     </Text>
-                    <Text className="text-xs text-orange-500 uppercase">
+                    <Text style={{ fontSize: 11, color: '#fb923c', textTransform: 'uppercase' }}>
                         {new Date(item.date).toLocaleDateString('pt-BR', { month: 'short' })}
                     </Text>
                 </View>
 
-                <View className="flex-1">
-                    <Text className="font-semibold text-slate-900 text-base">{item.title}</Text>
+                <View style={{ flex: 1 }}>
+                    <Text style={{ fontWeight: '600', color: '#0f172a', fontSize: 15 }}>{item.title}</Text>
 
                     {item.time && (
-                        <View className="flex-row items-center mt-2">
-                            <Clock size={14} color={colors.slate[400]} />
-                            <Text className="text-sm text-slate-500 ml-1">{item.time}</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
+                            <Clock size={14} color="#94a3b8" />
+                            <Text style={{ fontSize: 14, color: '#64748b', marginLeft: 6 }}>{item.time}</Text>
                         </View>
                     )}
 
                     {item.location && (
-                        <View className="flex-row items-center mt-1">
-                            <MapPin size={14} color={colors.slate[400]} />
-                            <Text className="text-sm text-slate-500 ml-1">{item.location}</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
+                            <MapPin size={14} color="#94a3b8" />
+                            <Text style={{ fontSize: 14, color: '#64748b', marginLeft: 6 }}>{item.location}</Text>
                         </View>
                     )}
                 </View>
             </View>
 
             {item.description && (
-                <Text className="text-slate-600 mt-3" numberOfLines={2}>
+                <Text style={{ color: '#475569', marginTop: 12, lineHeight: 20 }} numberOfLines={2}>
                     {item.description}
                 </Text>
             )}
@@ -63,8 +83,27 @@ export default function EventsScreen() {
     );
 
     return (
-        <View className="flex-1 bg-slate-50">
-            <Header title="Eventos" showBack showProfile />
+        <View style={{ flex: 1, backgroundColor: '#f8fafc', paddingTop: insets.top }}>
+            {/* Header Premium */}
+            <View style={{ 
+                flexDirection: 'row', 
+                alignItems: 'center', 
+                paddingHorizontal: 16, 
+                paddingTop: 16, 
+                paddingBottom: 16 
+            }}>
+                <Pressable onPress={() => router.back()} style={{ padding: 8, marginLeft: -8 }}>
+                    <ChevronLeft size={24} color="#475569" />
+                </Pressable>
+                <View style={{ marginLeft: 8 }}>
+                    <Text style={{ fontSize: 24, fontWeight: '700', color: '#0f172a' }}>
+                        Eventos
+                    </Text>
+                    <Text style={{ color: '#64748b', marginTop: 2 }}>
+                        Próximas atividades da igreja
+                    </Text>
+                </View>
+            </View>
 
             {events?.length === 0 ? (
                 <EmptyState
@@ -77,7 +116,7 @@ export default function EventsScreen() {
                     data={events}
                     renderItem={renderEvent}
                     keyExtractor={(item) => item.id}
-                    contentContainerStyle={{ padding: 16 }}
+                    contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
                     showsVerticalScrollIndicator={false}
                 />
             )}

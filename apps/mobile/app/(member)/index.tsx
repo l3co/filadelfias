@@ -7,9 +7,18 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuthStore } from '@/stores/authStore';
-import { HomeCard } from '@/components/ui/HomeCard';
 import { Avatar } from '@/components/ui/Avatar';
-import { colors } from '@/constants/colors';
+
+const FEATURE_COLORS: Record<string, { bg: string; icon: string }> = {
+    blue: { bg: '#eff6ff', icon: '#3b82f6' },
+    purple: { bg: '#f5f3ff', icon: '#8b5cf6' },
+    red: { bg: '#fef2f2', icon: '#ef4444' },
+    emerald: { bg: '#ecfdf5', icon: '#10b981' },
+    orange: { bg: '#fff7ed', icon: '#f97316' },
+    indigo: { bg: '#eef2ff', icon: '#6366f1' },
+    yellow: { bg: '#fefce8', icon: '#eab308' },
+    pink: { bg: '#fdf2f8', icon: '#ec4899' },
+};
 
 export default function MemberHomeScreen() {
     const router = useRouter();
@@ -18,17 +27,16 @@ export default function MemberHomeScreen() {
     const tenant = getCurrentTenant();
 
     const features = [
-        { icon: BookOpen, title: 'Bíblia Online', description: 'Leia a Palavra de Deus', href: '/(member)/bible', color: 'blue' as const },
-        { icon: BookMarked, title: 'Manual IPB', description: 'Princípios da nossa fé', href: '/(public)/manual', color: 'purple' as const },
-        { icon: Heart, title: 'Devocionais', description: 'Reflexões diárias', href: '/(member)/devotionals', color: 'red' as const },
-        { icon: Users, title: 'Membros', description: 'Diretório da igreja', href: '/(member)/directory', color: 'emerald' as const },
-        { icon: Calendar, title: 'Eventos', description: 'Próximas atividades', href: '/(member)/events', color: 'orange' as const },
-        { icon: Globe, title: 'Missões', description: 'Nossos missionários', href: '/(member)/missions', color: 'indigo' as const },
-        { icon: GraduationCap, title: 'EBD', description: 'Sua turma e estudos', href: '/(member)/ebd', color: 'yellow' as const },
-        { icon: MessageCircle, title: 'Oração', description: 'Pedidos de oração', href: '/(member)/prayer', color: 'pink' as const },
+        { icon: BookOpen, title: 'Bíblia Online', description: 'Leia a Palavra de Deus', href: '/(member)/bible', color: 'blue' },
+        { icon: BookMarked, title: 'Manual IPB', description: 'Princípios da nossa fé', href: '/(public)/manual', color: 'purple' },
+        { icon: Heart, title: 'Devocionais', description: 'Reflexões diárias', href: '/(member)/devotionals', color: 'red' },
+        { icon: Users, title: 'Membros', description: 'Diretório da igreja', href: '/(member)/directory', color: 'emerald' },
+        { icon: Calendar, title: 'Eventos', description: 'Próximas atividades', href: '/(member)/events', color: 'orange' },
+        { icon: Globe, title: 'Missões', description: 'Nossos missionários', href: '/(member)/missions', color: 'indigo' },
+        { icon: GraduationCap, title: 'EBD', description: 'Sua turma e estudos', href: '/(member)/ebd', color: 'yellow' },
+        { icon: MessageCircle, title: 'Oração', description: 'Pedidos de oração', href: '/(member)/prayer', color: 'pink' },
     ];
 
-    // Acrônimo da igreja
     const churchAcronym = tenant?.name
         ?.split(' ')
         .filter(word => word.length > 2 && word[0] === word[0].toUpperCase())
@@ -37,30 +45,50 @@ export default function MemberHomeScreen() {
         .slice(0, 3) || 'IP';
 
     return (
-        <View className="flex-1 bg-slate-50">
+        <View style={{ flex: 1, backgroundColor: '#f8fafc' }}>
             {/* Header Premium */}
             <LinearGradient
-                colors={colors.gradients.primary}
-                className="px-4 pb-6 rounded-b-3xl"
-                style={{ paddingTop: insets.top + 12 }}
+                colors={['#059669', '#10b981']}
+                style={{ 
+                    paddingHorizontal: 20, 
+                    paddingBottom: 32, 
+                    paddingTop: insets.top + 16,
+                    borderBottomLeftRadius: 24,
+                    borderBottomRightRadius: 24,
+                }}
             >
-                <View className="flex-row items-center justify-between mb-4">
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
                     {/* Logo da Igreja */}
-                    <View className="flex-row items-center">
-                        <View className="h-10 w-10 rounded-xl bg-white/20 items-center justify-center">
-                            <Text className="text-white font-bold text-sm">{churchAcronym}</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <View style={{ 
+                            height: 44, 
+                            width: 44, 
+                            borderRadius: 12, 
+                            backgroundColor: 'rgba(255,255,255,0.2)', 
+                            alignItems: 'center', 
+                            justifyContent: 'center' 
+                        }}>
+                            <Text style={{ color: '#ffffff', fontWeight: '700', fontSize: 14 }}>{churchAcronym}</Text>
                         </View>
-                        <View className="ml-3">
-                            <Text className="text-white/80 text-xs">Portal do Membro</Text>
-                            <Text className="text-white font-semibold">{tenant?.name}</Text>
+                        <View style={{ marginLeft: 12 }}>
+                            <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 12 }}>Portal do Membro</Text>
+                            <Text style={{ color: '#ffffff', fontWeight: '600', fontSize: 15 }}>{tenant?.name}</Text>
                         </View>
                     </View>
 
                     {/* Notificações e Avatar */}
-                    <View className="flex-row items-center gap-2">
-                        <Pressable className="p-2 relative">
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                        <Pressable style={{ padding: 8, position: 'relative' }}>
                             <Bell size={22} color="white" />
-                            <View className="absolute top-1 right-1 h-2 w-2 rounded-full bg-amber-400" />
+                            <View style={{ 
+                                position: 'absolute', 
+                                top: 6, 
+                                right: 6, 
+                                height: 8, 
+                                width: 8, 
+                                borderRadius: 4, 
+                                backgroundColor: '#fbbf24' 
+                            }} />
                         </Pressable>
                         <Pressable onPress={() => router.push('/(member)/profile')}>
                             <Avatar name={user?.name} size="md" />
@@ -69,12 +97,12 @@ export default function MemberHomeScreen() {
                 </View>
 
                 {/* Boas-vindas */}
-                <View className="mt-2">
-                    <Text className="text-white/80 text-sm">Olá,</Text>
-                    <Text className="text-white text-2xl font-bold">
+                <View>
+                    <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 14 }}>Olá,</Text>
+                    <Text style={{ color: '#ffffff', fontSize: 26, fontWeight: '700' }}>
                         {user?.name?.split(' ')[0]}! 👋
                     </Text>
-                    <Text className="text-white/70 mt-1">
+                    <Text style={{ color: 'rgba(255,255,255,0.7)', marginTop: 4 }}>
                         O que você gostaria de fazer hoje?
                     </Text>
                 </View>
@@ -82,16 +110,51 @@ export default function MemberHomeScreen() {
 
             {/* Grid de Cards */}
             <ScrollView
-                className="flex-1 px-4 -mt-4"
+                style={{ flex: 1, marginTop: -16 }}
+                contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom: 24 }}
             >
-                <View className="flex-row flex-wrap justify-between">
-                    {features.map((feature) => (
-                        <View key={feature.href} className="w-[48%] mb-3">
-                            <HomeCard {...feature} />
-                        </View>
-                    ))}
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+                    {features.map((feature) => {
+                        const colors = FEATURE_COLORS[feature.color];
+                        const Icon = feature.icon;
+                        return (
+                            <Pressable
+                                key={feature.href}
+                                onPress={() => router.push(feature.href as any)}
+                                style={{
+                                    width: '48%',
+                                    backgroundColor: '#ffffff',
+                                    borderRadius: 16,
+                                    padding: 16,
+                                    marginBottom: 12,
+                                    shadowColor: '#000',
+                                    shadowOffset: { width: 0, height: 2 },
+                                    shadowOpacity: 0.04,
+                                    shadowRadius: 8,
+                                    elevation: 2,
+                                }}
+                            >
+                                <View style={{ 
+                                    backgroundColor: colors.bg, 
+                                    width: 44, 
+                                    height: 44, 
+                                    borderRadius: 12, 
+                                    alignItems: 'center', 
+                                    justifyContent: 'center',
+                                    marginBottom: 12,
+                                }}>
+                                    <Icon size={22} color={colors.icon} />
+                                </View>
+                                <Text style={{ fontSize: 15, fontWeight: '600', color: '#0f172a' }}>
+                                    {feature.title}
+                                </Text>
+                                <Text style={{ fontSize: 13, color: '#64748b', marginTop: 2 }}>
+                                    {feature.description}
+                                </Text>
+                            </Pressable>
+                        );
+                    })}
                 </View>
             </ScrollView>
         </View>

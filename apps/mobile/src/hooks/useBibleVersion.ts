@@ -1,21 +1,21 @@
 import { useState, useEffect } from 'react';
-import { MMKV } from 'react-native-mmkv';
+import * as SecureStore from 'expo-secure-store';
 
-const storage = new MMKV();
 const VERSION_KEY = 'bible_version';
 
 export function useBibleVersion() {
     const [version, setVersionState] = useState<string>('nvi');
 
     useEffect(() => {
-        const saved = storage.getString(VERSION_KEY);
-        if (saved) {
-            setVersionState(saved);
-        }
+        SecureStore.getItemAsync(VERSION_KEY).then((saved) => {
+            if (saved) {
+                setVersionState(saved);
+            }
+        });
     }, []);
 
     const setVersion = (v: string) => {
-        storage.set(VERSION_KEY, v);
+        SecureStore.setItemAsync(VERSION_KEY, v);
         setVersionState(v);
     };
 

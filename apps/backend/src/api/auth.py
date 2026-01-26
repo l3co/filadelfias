@@ -7,6 +7,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from src.domain.schemas import Token, UserCreate, UserResponse
 from src.infra.repositories import membership_repository, tenant_repository, user_repository
+from src.infra.repositories.member_repository import member_repository
 from src.infra.security import create_access_token, decode_access_token, verify_password
 from src.middleware.rate_limiter import limiter
 from src.services.deletion_service import delete_user_data
@@ -106,7 +107,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         token: JWT access token
 
     Returns:
-        dict: Current user data
+        dict: Current user data with member_id if linked
 
     Raises:
         HTTPException: If token is invalid or user not found
@@ -129,6 +130,19 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 
     if user is None:
         raise credentials_exception
+
+    # Try to find member_id from user's memberships
+    memberships = await membership_repository.get_user_memberships(user_id)
+    if memberships:
+        # Get the first active membership's tenant and find member by user_id
+        for membership in memberships:
+            if membership.get("status") == "ACTIVE":
+                tenant_id = membership.get("tenant_id")
+                if tenant_id:
+                    member = await member_repository.get_by_user_id(tenant_id, user_id)
+                    if member:
+                        user["member_id"] = member.get("id")
+                        break
 
     return user
 

@@ -27,6 +27,7 @@ from src.api.metadata import router as metadata_router
 from src.api.mission import router as mission_router
 from src.api.prayer import router as prayer_router
 from src.api.tenants import router as tenants_router
+from src.api.tithe import router as tithe_router
 from src.config import settings
 from src.middleware import LoggingMiddleware
 from src.middleware.rate_limiter import limiter
@@ -138,6 +139,7 @@ app.include_router(prayer_router)
 app.include_router(devotionals_router)
 app.include_router(manual_router)
 app.include_router(metadata_router)
+app.include_router(tithe_router)
 
 
 @app.get("/health", tags=["Health"])

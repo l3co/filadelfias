@@ -257,17 +257,118 @@ async def seed_test_data():
     )
     print(f"  ✓ EBD Class created: {ebd_class['name']}")
 
-    # 9. Create sample Financial Account
-    from src.modules.financial.repository import financial_account_repository
-
-    print("  Creating sample financial account...")
-    account = await financial_account_repository.create_account(
-        tenant_id=tenant["id"],
-        name="Conta Corrente",
-        type="BANK",
-        balance=1000.0,
+    # 9. Create sample Financial Accounts, Categories and Transactions
+    from src.modules.financial.repository import (
+        financial_account_repository,
+        transaction_category_repository,
+        transaction_repository,
     )
-    print(f"  ✓ Financial Account created: {account['name']}")
+
+    print("  Creating sample financial accounts...")
+    account_bank = await financial_account_repository.create_account(
+        tenant_id=tenant["id"],
+        name="Banco do Brasil",
+        type="BANK",
+        balance=10000.0,
+    )
+    print(f"  ✓ Financial Account created: {account_bank['name']}")
+
+    account_cash = await financial_account_repository.create_account(
+        tenant_id=tenant["id"],
+        name="Caixa Geral",
+        type="CASH",
+        balance=500.0,
+    )
+    print(f"  ✓ Financial Account created: {account_cash['name']}")
+
+    print("  Creating sample financial categories...")
+    cat_tithe = await transaction_category_repository.create_category(
+        tenant_id=tenant["id"],
+        name="Dízimos",
+        type="INCOME",
+    )
+    print(f"  ✓ Category created: {cat_tithe['name']}")
+
+    cat_offering = await transaction_category_repository.create_category(
+        tenant_id=tenant["id"],
+        name="Ofertas",
+        type="INCOME",
+    )
+    print(f"  ✓ Category created: {cat_offering['name']}")
+
+    cat_utilities = await transaction_category_repository.create_category(
+        tenant_id=tenant["id"],
+        name="Contas de Consumo",
+        type="EXPENSE",
+    )
+    print(f"  ✓ Category created: {cat_utilities['name']}")
+
+    print("  Creating sample transactions (12+ for pagination test)...")
+    from datetime import date
+
+    transactions_data = [
+        {"description": "Dízimo Janeiro", "amount": 500, "type": "CREDIT", "date": date(2026, 1, 5)},
+        {"description": "Oferta Culto", "amount": 150, "type": "CREDIT", "date": date(2026, 1, 7)},
+        {"description": "Conta de Luz", "amount": 200, "type": "DEBIT", "date": date(2026, 1, 10)},
+        {"description": "Dízimo Janeiro", "amount": 800, "type": "CREDIT", "date": date(2026, 1, 12)},
+        {"description": "Oferta Missões", "amount": 300, "type": "CREDIT", "date": date(2026, 1, 14)},
+        {"description": "Material Limpeza", "amount": 50, "type": "DEBIT", "date": date(2026, 1, 15)},
+        {"description": "Dízimo Janeiro", "amount": 1200, "type": "CREDIT", "date": date(2026, 1, 18)},
+        {"description": "Conta de Água", "amount": 80, "type": "DEBIT", "date": date(2026, 1, 20)},
+        {"description": "Oferta Especial", "amount": 500, "type": "CREDIT", "date": date(2026, 1, 22)},
+        {"description": "Manutenção", "amount": 350, "type": "DEBIT", "date": date(2026, 1, 24)},
+        {"description": "Dízimo Janeiro", "amount": 600, "type": "CREDIT", "date": date(2026, 1, 25)},
+        {"description": "Internet", "amount": 120, "type": "DEBIT", "date": date(2026, 1, 26)},
+    ]
+    for tx in transactions_data:
+        cat_id = (
+            cat_tithe["id"]
+            if "Dízimo" in tx["description"]
+            else (cat_offering["id"] if "Oferta" in tx["description"] else cat_utilities["id"])
+        )
+        await transaction_repository.create_transaction(
+            tenant_id=tenant["id"],
+            account_id=account_bank["id"],
+            category_id=cat_id,
+            description=tx["description"],
+            amount=tx["amount"],
+            transaction_type=tx["type"],
+            transaction_date=tx["date"],
+        )
+    print(f"  ✓ {len(transactions_data)} transactions created")
+
+    # 9b. Create sample Tithe Records (pending for treasurer approval)
+    from src.modules.tithe.repository import tithe_record_repository
+
+    print("  Creating sample tithe records...")
+    # Get member_id for the member user
+    member_records = await member_repository.get_all(tenant["id"])
+    member_with_user = next((m for m in member_records if m.get("user_id") == member_user["id"]), None)
+
+    if member_with_user:
+        # Create pending tithe record
+        tithe_pending = await tithe_record_repository.create(
+            tenant_id=tenant["id"],
+            member_id=member_with_user["id"],
+            amount=500.0,
+            type="DIZIMO",
+            date=date(2026, 1, 15),
+            notes="Dízimo de janeiro - aguardando aprovação",
+        )
+        print(f"  ✓ Tithe record created (PENDING): R$ {tithe_pending['amount']}")
+
+        # Create another pending offering
+        tithe_pending2 = await tithe_record_repository.create(
+            tenant_id=tenant["id"],
+            member_id=member_with_user["id"],
+            amount=200.0,
+            type="OFERTA",
+            date=date(2026, 1, 20),
+            notes="Oferta missionária",
+        )
+        print(f"  ✓ Tithe record created (PENDING): R$ {tithe_pending2['amount']}")
+    else:
+        print("  ⚠ Could not create tithe records - member not found")
 
     # 10. Create sample Governance Council
     from src.modules.governance.repository import council_repository

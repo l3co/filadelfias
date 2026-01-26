@@ -84,8 +84,53 @@ class TransactionRepository:
         collection.document(doc_id).set(data)
         return data
 
-    async def get_all(self, tenant_id: str) -> List[dict]:
-        return [doc.to_dict() for doc in self._get_collection(str(tenant_id)).stream()]
+    def _parse_date(self, doc_date) -> datetime:
+        """Parse date from various formats to datetime."""
+        if doc_date is None:
+            return None
+        if isinstance(doc_date, datetime):
+            return doc_date
+        if isinstance(doc_date, date):
+            return datetime.combine(doc_date, datetime.min.time())
+        if isinstance(doc_date, str):
+            try:
+                return datetime.fromisoformat(doc_date.replace("Z", "+00:00"))
+            except ValueError:
+                try:
+                    return datetime.strptime(doc_date, "%Y-%m-%d")
+                except ValueError:
+                    return None
+        return None
+
+    async def get_all(
+        self, tenant_id: str, month: int = None, year: int = None, page: int = 1, page_size: int = 10
+    ) -> List[dict]:
+        docs = [doc.to_dict() for doc in self._get_collection(str(tenant_id)).stream()]
+
+        # Filtrar por mês/ano se especificado
+        if month is not None or year is not None:
+            filtered = []
+            for doc in docs:
+                doc_date = self._parse_date(doc.get("date"))
+                if doc_date:
+                    if month is not None and doc_date.month != month:
+                        continue
+                    if year is not None and doc_date.year != year:
+                        continue
+                    filtered.append(doc)
+            docs = filtered
+
+        # Ordenar por data decrescente (mais recentes primeiro)
+        def get_sort_key(x):
+            d = self._parse_date(x.get("date")) or self._parse_date(x.get("created_at"))
+            return d if d else datetime.min
+
+        sorted_docs = sorted(docs, key=get_sort_key, reverse=True)
+
+        # Paginação
+        start = (page - 1) * page_size
+        end = start + page_size
+        return sorted_docs[start:end]
 
 
 financial_account_repository = FinancialAccountRepository()

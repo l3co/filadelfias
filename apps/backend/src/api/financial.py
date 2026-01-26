@@ -1,6 +1,10 @@
-from typing import List
+import csv
+import io
+from datetime import date, datetime
+from typing import List, Optional
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, File, Query, UploadFile
+from fastapi.responses import StreamingResponse
 
 from src.middleware.permissions import (
     require_create_financial,
@@ -110,10 +114,157 @@ async def create_transaction(
 @router.get("/transactions", response_model=List[TransactionResponse])
 async def list_transactions(
     tenant_id: str = Query(..., description="ID of the tenant"),
+    month: Optional[int] = Query(None, ge=1, le=12, description="Filter by month (1-12)"),
+    year: Optional[int] = Query(None, description="Filter by year"),
+    page: int = Query(1, ge=1, description="Page number"),
+    page_size: int = Query(10, ge=1, le=100, description="Items per page"),
     auth_context: dict = Depends(require_view_financial),
 ):
     """
-    List all transactions.
+    List transactions with optional month/year filter and pagination.
     Requires: financial:view permission.
     """
-    return await transaction_repository.get_all(tenant_id)
+    return await transaction_repository.get_all(tenant_id, month=month, year=year, page=page, page_size=page_size)
+
+
+@router.get("/transactions/csv/template")
+async def download_csv_template(
+    tenant_id: str = Query(..., description="ID of the tenant"),
+    auth_context: dict = Depends(require_view_financial),
+):
+    """
+    Download CSV template for importing transactions.
+    Includes headers and example rows with available accounts and categories.
+    """
+    accounts = await financial_account_repository.get_all(tenant_id)
+    categories = await transaction_category_repository.get_all(tenant_id)
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+
+    writer.writerow(["data", "tipo", "descricao", "valor", "conta", "categoria"])
+
+    income_categories = [c["name"] for c in categories if c.get("type") == "INCOME"]
+    expense_categories = [c["name"] for c in categories if c.get("type") == "EXPENSE"]
+    account_names = [a["name"] for a in accounts]
+
+    if account_names and income_categories:
+        writer.writerow(
+            [
+                date.today().strftime("%Y-%m-%d"),
+                "RECEITA",
+                "Exemplo: Oferta de Domingo",
+                "150.00",
+                account_names[0] if account_names else "Caixa Geral",
+                income_categories[0] if income_categories else "Ofertas",
+            ]
+        )
+
+    if account_names and expense_categories:
+        writer.writerow(
+            [
+                date.today().strftime("%Y-%m-%d"),
+                "DESPESA",
+                "Exemplo: Conta de Luz",
+                "350.00",
+                account_names[0] if account_names else "Caixa Geral",
+                expense_categories[0] if expense_categories else "Energia Elétrica",
+            ]
+        )
+
+    writer.writerow([])
+    writer.writerow(["# CONTAS DISPONÍVEIS:"] + account_names)
+    writer.writerow(["# CATEGORIAS DE RECEITA:"] + income_categories)
+    writer.writerow(["# CATEGORIAS DE DESPESA:"] + expense_categories)
+
+    output.seek(0)
+
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": f"attachment; filename=transacoes_template_{date.today().strftime('%Y%m%d')}.csv"
+        },
+    )
+
+
+@router.post("/transactions/csv/import")
+async def import_csv_transactions(
+    tenant_id: str = Query(..., description="ID of the tenant"),
+    file: UploadFile = File(...),
+    auth_context: dict = Depends(require_create_financial),
+):
+    """
+    Import transactions from CSV file.
+    Expected columns: data, tipo, descricao, valor, conta, categoria
+    """
+    accounts = await financial_account_repository.get_all(tenant_id)
+    categories = await transaction_category_repository.get_all(tenant_id)
+
+    account_map = {a["name"].lower(): a["id"] for a in accounts}
+    category_map = {c["name"].lower(): c["id"] for c in categories}
+
+    content = await file.read()
+    decoded = content.decode("utf-8-sig")
+    reader = csv.DictReader(io.StringIO(decoded))
+
+    created = []
+    errors = []
+    row_num = 1
+
+    for row in reader:
+        row_num += 1
+
+        if row.get("data", "").startswith("#"):
+            continue
+
+        try:
+            tx_date_str = row.get("data", "").strip()
+            tx_type = row.get("tipo", "").strip().upper()
+            description = row.get("descricao", "").strip()
+            amount_str = row.get("valor", "").strip().replace(",", ".")
+            account_name = row.get("conta", "").strip().lower()
+            category_name = row.get("categoria", "").strip().lower()
+
+            if not all([tx_date_str, tx_type, description, amount_str, account_name]):
+                errors.append({"row": row_num, "error": "Campos obrigatórios faltando"})
+                continue
+
+            tx_date = datetime.strptime(tx_date_str, "%Y-%m-%d").date()
+            amount = float(amount_str)
+
+            if tx_type not in ["RECEITA", "DESPESA", "CREDIT", "DEBIT"]:
+                errors.append({"row": row_num, "error": f"Tipo inválido: {tx_type}"})
+                continue
+
+            transaction_type = "CREDIT" if tx_type in ["RECEITA", "CREDIT"] else "DEBIT"
+
+            account_id = account_map.get(account_name)
+            if not account_id:
+                errors.append({"row": row_num, "error": f"Conta não encontrada: {account_name}"})
+                continue
+
+            category_id = category_map.get(category_name) if category_name else None
+
+            tx = await transaction_repository.create_transaction(
+                tenant_id=tenant_id,
+                account_id=account_id,
+                category_id=category_id,
+                amount=amount,
+                transaction_type=transaction_type,
+                transaction_date=tx_date,
+                description=description,
+            )
+            created.append(tx)
+
+        except ValueError as e:
+            errors.append({"row": row_num, "error": str(e)})
+        except Exception as e:
+            errors.append({"row": row_num, "error": f"Erro inesperado: {str(e)}"})
+
+    return {
+        "success": True,
+        "imported": len(created),
+        "errors": errors,
+        "message": f"{len(created)} transações importadas com sucesso" + (f", {len(errors)} erros" if errors else ""),
+    }

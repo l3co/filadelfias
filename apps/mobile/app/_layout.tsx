@@ -38,6 +38,14 @@ export default function RootLayout() {
             } else {
                 router.replace("/(member)");
             }
+        } else if (isAuthenticated && inPublicGroup && segments[1] === undefined) {
+            // Autenticado na home pública - redirecionar para área de membros
+            const role = user?.memberships?.[0]?.role;
+            if (role === "ADMIN" || role === "OWNER") {
+                router.replace("/(admin)");
+            } else {
+                router.replace("/(member)");
+            }
         }
     }, [isAuthenticated, isLoading, segments]);
 

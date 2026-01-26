@@ -9,7 +9,8 @@ import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { BibleReaderControls } from '@/components/features/BibleReaderControls';
 import { ChapterSelector } from '@/components/features/ChapterSelector';
 import { VerseActionMenu } from '@/components/features/VerseActionMenu';
-import { bibleService } from '@/services/bible';
+import { bibleService, BibleChapter } from '@/services/bible';
+import { offlineService } from '@/services/offline';
 import { useBibleSettings } from '@/hooks/useBibleSettings';
 import { useTTS } from '@/hooks/useTTS';
 import { colors } from '@/constants/colors';
@@ -32,7 +33,21 @@ export default function BibleChapterScreen() {
 
     const { data, isLoading } = useQuery({
         queryKey: ['bible', 'chapter', book, chapter, settings.version],
-        queryFn: () => bibleService.getChapter(book, parseInt(chapter), settings.version),
+        queryFn: async (): Promise<BibleChapter> => {
+            // Primeiro tenta buscar offline
+            const offlineData = await offlineService.getBibleChapterOffline(book, parseInt(chapter), settings.version);
+            if (offlineData) {
+                // Adiciona navegação para offline (simplificada)
+                const chapterNum = parseInt(chapter);
+                return {
+                    ...offlineData,
+                    previous_chapter: chapterNum > 1 ? { book, chapter: chapterNum - 1 } : undefined,
+                    next_chapter: { book, chapter: chapterNum + 1 },
+                };
+            }
+            // Se não tiver offline, busca da API
+            return bibleService.getChapter(book, parseInt(chapter), settings.version);
+        },
         enabled: !!book && !!chapter,
     });
 

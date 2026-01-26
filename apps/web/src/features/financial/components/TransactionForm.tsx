@@ -1,41 +1,114 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { X } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "../../../components/ui/card";
+import { CreatableCombobox, type ComboboxOption } from "../../../components/ui/creatable-combobox";
 import type { CreateTransactionDTO, FinancialAccount, TransactionCategory } from "../../../services/financial";
+import type { Member } from "../../../types/members.types";
 
 interface TransactionFormProps {
     isOpen: boolean;
     onClose: () => void;
-    onSubmit: (data: CreateTransactionDTO) => void;
+    onSubmit: (data: CreateTransactionDTO, resetForm: () => void) => void;
+    onCreateAccount?: (name: string) => Promise<ComboboxOption>;
+    onCreateCategory?: (name: string, type: string) => Promise<ComboboxOption>;
     isLoading?: boolean;
     initialType?: 'CREDIT' | 'DEBIT';
     accounts?: FinancialAccount[];
     categories?: TransactionCategory[];
+    members?: Member[];
 }
 
 export function TransactionForm({
     isOpen,
     onClose,
     onSubmit,
+    onCreateAccount,
+    onCreateCategory,
     isLoading,
     initialType = 'CREDIT',
     accounts,
-    categories
+    categories,
+    members
 }: TransactionFormProps) {
-    const { register, handleSubmit, reset } = useForm<CreateTransactionDTO>();
+    const { register, handleSubmit, reset, setValue } = useForm<CreateTransactionDTO>();
+    const [selectedAccountId, setSelectedAccountId] = useState<string>('');
+    const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
+    const [selectedMemberId, setSelectedMemberId] = useState<string>('');
 
     if (!isOpen) return null;
+
+    const accountOptions: ComboboxOption[] = accounts?.map(acc => ({
+        value: acc.id,
+        label: acc.name
+    })) || [];
+
+    const categoryType = initialType === 'CREDIT' ? 'INCOME' : 'EXPENSE';
+    const categoryOptions: ComboboxOption[] = categories
+        ?.filter(c => c.type === categoryType)
+        .map(cat => ({
+            value: cat.id,
+            label: cat.name
+        })) || [];
+
+    const memberOptions: ComboboxOption[] = members?.map(m => ({
+        value: m.id,
+        label: m.full_name
+    })) || [];
 
     const onFormSubmit = (data: CreateTransactionDTO) => {
         onSubmit({
             ...data,
-            amount: Number(data.amount), // Ensure number
+            account_id: selectedAccountId,
+            category_id: selectedCategoryId,
+            member_id: selectedMemberId || undefined,
+            amount: Number(data.amount),
             type: initialType,
             date: new Date().toISOString().split('T')[0]
-        });
+        }, resetForm);
+    };
+
+    const resetForm = () => {
         reset();
+        setSelectedAccountId('');
+        setSelectedCategoryId('');
+        setSelectedMemberId('');
+    };
+
+    const handleMemberChange = (value: string) => {
+        setSelectedMemberId(value);
+    };
+
+    const handleAccountChange = (value: string) => {
+        setSelectedAccountId(value);
+        setValue('account_id', value);
+    };
+
+    const handleCreateAccount = async (name: string): Promise<ComboboxOption> => {
+        if (onCreateAccount) {
+            const newOption = await onCreateAccount(name);
+            setSelectedAccountId(newOption.value);
+            setValue('account_id', newOption.value);
+            return newOption;
+        }
+        return { value: '', label: '' };
+    };
+
+    const handleCategoryChange = (value: string) => {
+        setSelectedCategoryId(value);
+        setValue('category_id', value);
+    };
+
+    const handleCreateCategory = async (name: string): Promise<ComboboxOption> => {
+        if (onCreateCategory) {
+            const newOption = await onCreateCategory(name, categoryType);
+            setSelectedCategoryId(newOption.value);
+            setValue('category_id', newOption.value);
+            return newOption;
+        }
+        return { value: '', label: '' };
     };
 
     const isCredit = initialType === 'CREDIT';
@@ -59,7 +132,7 @@ export function TransactionForm({
                             <Input
                                 id="description"
                                 {...register('description', { required: true })}
-                                placeholder="Ex: Oferta de Domingo"
+                                placeholder={isCredit ? "Ex: Oferta de Domingo" : "Ex: Conta de Luz"}
                                 autoFocus
                             />
                         </div>
@@ -77,35 +150,49 @@ export function TransactionForm({
                             </div>
                             <div className="space-y-2">
                                 <label htmlFor="account_id" className="text-sm font-medium text-gray-700">Conta</label>
-                                <select
-                                    id="account_id"
-                                    {...register('account_id', { required: true })}
-                                    className="flex h-10 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-                                >
-                                    <option value="">Selecione...</option>
-                                    {accounts?.map((acc) => (
-                                        <option key={acc.id} value={acc.id}>{acc.name}</option>
-                                    ))}
-                                </select>
+                                <CreatableCombobox
+                                    options={accountOptions}
+                                    value={selectedAccountId}
+                                    onChange={handleAccountChange}
+                                    onCreateNew={onCreateAccount ? handleCreateAccount : undefined}
+                                    placeholder="Selecione ou crie..."
+                                    searchPlaceholder="Buscar conta..."
+                                    emptyMessage="Nenhuma conta encontrada."
+                                    createMessage="Criar conta"
+                                />
                             </div>
                         </div>
 
                         <div className="space-y-2">
                             <label htmlFor="category_id" className="text-sm font-medium text-gray-700">Categoria</label>
-                            <select
-                                id="category_id"
-                                {...register('category_id', { required: true })}
-                                className="flex h-10 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-                            >
-                                <option value="">Selecione...</option>
-                                {categories?.filter((c) =>
-                                    (isCredit && c.type === 'INCOME') ||
-                                    (!isCredit && c.type === 'EXPENSE')
-                                ).map((cat) => (
-                                    <option key={cat.id} value={cat.id}>{cat.name}</option>
-                                ))}
-                            </select>
+                            <CreatableCombobox
+                                options={categoryOptions}
+                                value={selectedCategoryId}
+                                onChange={handleCategoryChange}
+                                onCreateNew={onCreateCategory ? handleCreateCategory : undefined}
+                                placeholder="Selecione ou crie..."
+                                searchPlaceholder="Buscar categoria..."
+                                emptyMessage="Nenhuma categoria encontrada."
+                                createMessage="Criar categoria"
+                            />
                         </div>
+
+                        {/* Campo opcional de membro - apenas para receitas */}
+                        {isCredit && members && members.length > 0 && (
+                            <div className="space-y-2">
+                                <label htmlFor="member_id" className="text-sm font-medium text-gray-700">
+                                    Membro <span className="text-gray-400 font-normal">(opcional)</span>
+                                </label>
+                                <CreatableCombobox
+                                    options={memberOptions}
+                                    value={selectedMemberId}
+                                    onChange={handleMemberChange}
+                                    placeholder="Vincular a um membro..."
+                                    searchPlaceholder="Buscar membro..."
+                                    emptyMessage="Nenhum membro encontrado."
+                                />
+                            </div>
+                        )}
 
                         <div className="flex justify-end gap-3 pt-4">
                             <Button type="button" variant="outline" onClick={onClose}>

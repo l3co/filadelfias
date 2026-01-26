@@ -38,6 +38,7 @@ export interface CreateAccountDTO {
 export interface CreateTransactionDTO {
     account_id: string;
     category_id: string;
+    member_id?: string;
     amount: number;
     type: string;
     description: string;
@@ -73,9 +74,18 @@ export const financialService = {
         return data;
     },
 
-    listTransactions: async (tenantId: string) => {
+    listTransactions: async (
+        tenantId: string, 
+        options?: { month?: number; year?: number; page?: number; pageSize?: number }
+    ) => {
         const { data } = await api.get<Transaction[]>('/financial/transactions', {
-            params: { tenant_id: tenantId }
+            params: { 
+                tenant_id: tenantId,
+                month: options?.month,
+                year: options?.year,
+                page: options?.page || 1,
+                page_size: options?.pageSize || 10
+            }
         });
         return data;
     },
@@ -83,6 +93,39 @@ export const financialService = {
     createTransaction: async (tenantId: string, transaction: CreateTransactionDTO) => {
         const { data } = await api.post<Transaction>('/financial/transactions', transaction, {
             params: { tenant_id: tenantId }
+        });
+        return data;
+    },
+
+    downloadCsvTemplate: async (tenantId: string) => {
+        const response = await api.get('/financial/transactions/csv/template', {
+            params: { tenant_id: tenantId },
+            responseType: 'blob'
+        });
+        
+        const blob = new Blob([response.data], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `transacoes_template_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+    },
+
+    importCsv: async (tenantId: string, file: File) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        const { data } = await api.post<{
+            success: boolean;
+            imported: number;
+            errors: Array<{ row: number; error: string }>;
+            message: string;
+        }>('/financial/transactions/csv/import', formData, {
+            params: { tenant_id: tenantId },
+            headers: { 'Content-Type': 'multipart/form-data' }
         });
         return data;
     }

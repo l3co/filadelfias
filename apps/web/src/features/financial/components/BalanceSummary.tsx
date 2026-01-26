@@ -1,13 +1,24 @@
 import { ArrowUpCircle, ArrowDownCircle, Wallet, TrendingUp } from "lucide-react";
+import type { Transaction } from "../../../services/financial";
 
 interface BalanceSummaryProps {
     totalBalance: number;
     isLoading?: boolean;
+    transactions?: Transaction[];
 }
 
-export function BalanceSummary({ totalBalance, isLoading }: BalanceSummaryProps) {
+export function BalanceSummary({ totalBalance, isLoading, transactions }: BalanceSummaryProps) {
     const formatBRL = (value: number) =>
         new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+
+    // Calcular receitas e despesas do mês a partir das transações
+    const monthlyIncome = transactions
+        ?.filter(t => t.type === 'CREDIT')
+        .reduce((sum, t) => sum + t.amount, 0) || 0;
+    
+    const monthlyExpenses = transactions
+        ?.filter(t => t.type === 'DEBIT')
+        .reduce((sum, t) => sum + t.amount, 0) || 0;
 
     if (isLoading) {
         return (
@@ -34,8 +45,7 @@ export function BalanceSummary({ totalBalance, isLoading }: BalanceSummaryProps)
                     <div className="text-3xl font-bold">{formatBRL(totalBalance)}</div>
                     <div className="mt-3 flex items-center gap-1.5 text-sm">
                         <TrendingUp className="h-4 w-4 text-green-400" />
-                        <span className="text-green-300 font-medium">+2.5%</span>
-                        <span className="text-green-100/60">vs. mês anterior</span>
+                        <span className="text-green-100/60">Saldo consolidado</span>
                     </div>
                 </div>
             </div>
@@ -48,8 +58,8 @@ export function BalanceSummary({ totalBalance, isLoading }: BalanceSummaryProps)
                         <ArrowUpCircle className="h-5 w-5 text-green-600" />
                     </div>
                 </div>
-                <div className="text-2xl font-bold text-[#002333]">{formatBRL(12500.00)}</div>
-                <p className="text-sm text-gray-500 mt-2">Dízimos e Ofertas</p>
+                <div className="text-2xl font-bold text-[#002333]">{formatBRL(monthlyIncome)}</div>
+                <p className="text-sm text-gray-500 mt-2">Total de receitas do mês</p>
             </div>
 
             {/* Despesas */}
@@ -60,8 +70,8 @@ export function BalanceSummary({ totalBalance, isLoading }: BalanceSummaryProps)
                         <ArrowDownCircle className="h-5 w-5 text-red-500" />
                     </div>
                 </div>
-                <div className="text-2xl font-bold text-[#002333]">{formatBRL(4320.00)}</div>
-                <p className="text-sm text-gray-500 mt-2">Operacional e Missões</p>
+                <div className="text-2xl font-bold text-[#002333]">{formatBRL(monthlyExpenses)}</div>
+                <p className="text-sm text-gray-500 mt-2">Total de despesas do mês</p>
             </div>
         </div>
     );

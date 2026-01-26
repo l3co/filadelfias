@@ -1,7 +1,8 @@
 import { View, Text, FlatList, Pressable } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
-import { Header } from '@/components/layout/Header';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Download, ChevronLeft } from 'lucide-react-native';
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { bibleService, BibleBook } from '@/services/bible';
 import { useBibleVersion } from '@/hooks/useBibleVersion';
@@ -9,6 +10,7 @@ import { VersionSelector } from '@/components/features/VersionSelector';
 
 export default function BibleBooksScreen() {
     const router = useRouter();
+    const insets = useSafeAreaInsets();
     const { version, setVersion } = useBibleVersion();
 
     const { data: books, isLoading } = useQuery({
@@ -26,16 +28,59 @@ export default function BibleBooksScreen() {
     const renderBook = ({ item }: { item: BibleBook }) => (
         <Pressable
             onPress={() => router.push(`/(public)/bible/${item.abbrev}/1`)}
-            className="flex-1 bg-white rounded-xl p-3 m-1 border border-slate-100 active:bg-slate-50"
+            style={{
+                flex: 1,
+                backgroundColor: '#ffffff',
+                borderRadius: 12,
+                padding: 12,
+                margin: 4,
+                borderWidth: 1,
+                borderColor: '#f1f5f9',
+            }}
         >
-            <Text className="font-medium text-slate-800">{item.name}</Text>
-            <Text className="text-xs text-slate-400">{item.chapters_count} cap.</Text>
+            <Text style={{ fontWeight: '500', color: '#1e293b' }}>{item.name}</Text>
+            <Text style={{ fontSize: 12, color: '#94a3b8' }}>{item.chapters_count} cap.</Text>
         </Pressable>
     );
 
     return (
-        <View className="flex-1 bg-slate-50">
-            <Header title="Bíblia Sagrada" showBack />
+        <View style={{ flex: 1, backgroundColor: '#f8fafc', paddingTop: insets.top }}>
+            {/* Header Premium */}
+            <View style={{ 
+                flexDirection: 'row', 
+                alignItems: 'center', 
+                justifyContent: 'space-between',
+                paddingHorizontal: 16, 
+                paddingTop: 16, 
+                paddingBottom: 12,
+            }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Pressable onPress={() => router.back()} style={{ padding: 8, marginLeft: -8 }}>
+                        <ChevronLeft size={24} color="#475569" />
+                    </Pressable>
+                    <Text style={{ fontSize: 24, fontWeight: '700', color: '#0f172a', marginLeft: 8 }}>
+                        Bíblia Sagrada
+                    </Text>
+                </View>
+                
+                {/* Botão de Download Offline */}
+                <Pressable 
+                    onPress={() => router.push('/(public)/downloads')}
+                    style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        backgroundColor: '#ecfdf5',
+                        paddingHorizontal: 12,
+                        paddingVertical: 8,
+                        borderRadius: 10,
+                    }}
+                >
+                    <Download size={18} color="#10b981" />
+                    <Text style={{ color: '#10b981', fontWeight: '600', fontSize: 13, marginLeft: 6 }}>
+                        Offline
+                    </Text>
+                </Pressable>
+            </View>
 
             {/* Seletor de Versão */}
             <VersionSelector
@@ -49,8 +94,15 @@ export default function BibleBooksScreen() {
                     { title: 'Novo Testamento', data: newTestament },
                 ]}
                 renderItem={({ item: section }) => (
-                    <View className="px-3">
-                        <Text className="text-sm font-semibold text-slate-500 uppercase tracking-wide py-3">
+                    <View style={{ paddingHorizontal: 12 }}>
+                        <Text style={{ 
+                            fontSize: 13, 
+                            fontWeight: '600', 
+                            color: '#64748b', 
+                            textTransform: 'uppercase', 
+                            letterSpacing: 0.5,
+                            paddingVertical: 12,
+                        }}>
                             {section.title}
                         </Text>
                         <FlatList
@@ -64,6 +116,7 @@ export default function BibleBooksScreen() {
                 )}
                 keyExtractor={(item) => item.title}
                 showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: 24 }}
             />
         </View>
     );

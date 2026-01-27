@@ -12,7 +12,6 @@ import {
   memberResponseSchema,
   memberListResponseSchema,
   tenantResponseSchema,
-  membershipResponseSchema,
   metadataResponseSchema,
   memberStatusEnum,
   ecclesiasticalOfficeEnum,

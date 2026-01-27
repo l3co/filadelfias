@@ -16,6 +16,7 @@ vi.mock('../../lib/api', () => ({
 
 import { api } from '../../lib/api';
 import { membersService } from '../members';
+import type { MemberCreateData } from '../../types/members.types';
 
 const mockMember = {
   id: '123e4567-e89b-12d3-a456-426614174000',
@@ -84,7 +85,7 @@ describe('membersService', () => {
         office: 'MEMBRO',
       };
 
-      const result = await membersService.createMember(tenantId, memberData as any);
+      const result = await membersService.createMember(tenantId, memberData as MemberCreateData);
 
       expect(api.post).toHaveBeenCalledWith(`/tenants/${tenantId}/members`, memberData);
       expect(result).toEqual(mockMember);
@@ -102,7 +103,7 @@ describe('membersService', () => {
       const memberData = { full_name: 'Jo' }; // Too short
 
       await expect(
-        membersService.createMember('tenant-123', memberData as any)
+        membersService.createMember('tenant-123', memberData as Partial<MemberCreateData>)
       ).rejects.toEqual(validationError);
     });
   });

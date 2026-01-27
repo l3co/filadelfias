@@ -110,7 +110,7 @@ export function PublicLayout() {
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-8">
+                    <div className="grid grid-cols-3 gap-8">
                         <div>
                             <h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wider">Recursos</h3>
                             <ul className="space-y-2 text-sm text-gray-500">
@@ -124,6 +124,13 @@ export function PublicLayout() {
                             <ul className="space-y-2 text-sm text-gray-500">
                                 <li><Link to="/login" className="hover:text-green-700">Login</Link></li>
                                 <li><Link to="/onboarding" className="hover:text-green-700">Cadastrar Igreja</Link></li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wider">Legal</h3>
+                            <ul className="space-y-2 text-sm text-gray-500">
+                                <li><Link to="/terms" className="hover:text-green-700">Termos de Uso</Link></li>
+                                <li><Link to="/privacy" className="hover:text-green-700">Política de Privacidade</Link></li>
                             </ul>
                         </div>
                     </div>

@@ -1,0 +1,85 @@
+# Prayer Request Flow
+# Tests creating and viewing prayer requests
+
+appId: com.filadelfias.app
+tags:
+  - regression
+  - member
+  - prayer
+
+env:
+  MEMBER_EMAIL: member@test.com
+  MEMBER_PASSWORD: Test123!@#
+
+---
+
+# Login as member
+- launchApp:
+    clearState: true
+
+- assertVisible:
+    text: "Entrar"
+
+- tapOn:
+    text: "Email"
+- inputText: ${MEMBER_EMAIL}
+
+- tapOn:
+    text: "Senha"
+- inputText: ${MEMBER_PASSWORD}
+
+- tapOn:
+    text: "Entrar"
+
+# Wait for dashboard
+- extendedWaitUntil:
+    visible:
+      text: "Início"
+    timeout: 10000
+
+# Navigate to Prayer Requests
+- tapOn:
+    text: "Pedidos de Oração"
+    optional: true
+
+- extendedWaitUntil:
+    visible:
+      text: "Pedidos de Oração"
+    timeout: 5000
+
+# Tap add button
+- tapOn:
+    id: "add-prayer-button"
+    optional: true
+
+# Fill prayer request form
+- tapOn:
+    text: "Título"
+    optional: true
+- inputText: "Oração pela família"
+
+- tapOn:
+    text: "Descrição"
+    optional: true
+- inputText: "Peço orações pela saúde da minha família"
+
+# Select category
+- tapOn:
+    text: "Categoria"
+    optional: true
+- tapOn:
+    text: "Família"
+    optional: true
+
+# Submit
+- tapOn:
+    text: "Enviar"
+    optional: true
+
+# Verify success
+- extendedWaitUntil:
+    visible:
+      text: "Oração pela família"
+    timeout: 5000
+
+- takeScreenshot: prayer_request_created

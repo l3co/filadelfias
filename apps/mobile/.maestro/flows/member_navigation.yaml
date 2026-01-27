@@ -1,0 +1,82 @@
+# Member Navigation Flow
+# Tests navigation for regular member (non-admin) user
+
+appId: com.filadelfias.app
+tags:
+  - regression
+  - navigation
+  - member
+
+env:
+  MEMBER_EMAIL: member@test.com
+  MEMBER_PASSWORD: Test123!@#
+
+---
+
+# Launch and login as member
+- launchApp:
+    clearState: true
+
+- assertVisible:
+    text: "Entrar"
+
+- tapOn:
+    text: "Email"
+- inputText: ${MEMBER_EMAIL}
+
+- tapOn:
+    text: "Senha"
+- inputText: ${MEMBER_PASSWORD}
+
+- tapOn:
+    text: "Entrar"
+
+# Wait for member dashboard
+- extendedWaitUntil:
+    visible:
+      text: "Início"
+    timeout: 10000
+
+- takeScreenshot: member_dashboard
+
+# Navigate to Prayer Requests
+- tapOn:
+    text: "Pedidos de Oração"
+    optional: true
+
+- extendedWaitUntil:
+    visible:
+      text: "Pedidos de Oração"
+    timeout: 5000
+
+- takeScreenshot: member_prayer_requests
+
+# Go back
+- back
+
+# Navigate to Events
+- tapOn:
+    text: "Eventos"
+    optional: true
+
+- extendedWaitUntil:
+    visible:
+      text: "Eventos"
+    timeout: 5000
+
+- takeScreenshot: member_events
+
+# Go back
+- back
+
+# Navigate to Devotionals
+- tapOn:
+    text: "Devocionais"
+    optional: true
+
+- extendedWaitUntil:
+    visible:
+      text: "Devocionais"
+    timeout: 5000
+
+- takeScreenshot: member_devotionals

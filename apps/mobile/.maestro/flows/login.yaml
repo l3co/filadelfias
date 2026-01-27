@@ -1,0 +1,46 @@
+# Login Flow - Smoke Test
+# Tests the complete login flow for admin user
+
+appId: com.filadelfias.app
+tags:
+  - smoke
+  - critical
+  - auth
+
+---
+
+# Launch the app
+- launchApp:
+    clearState: true
+
+# Wait for login screen to load
+- assertVisible:
+    text: "Entrar"
+    optional: false
+
+# Enter email
+- tapOn:
+    text: "Email"
+- inputText: ${TEST_EMAIL}
+
+# Enter password
+- tapOn:
+    text: "Senha"
+- inputText: ${TEST_PASSWORD}
+
+# Tap login button
+- tapOn:
+    text: "Entrar"
+
+# Wait for navigation to complete
+- extendedWaitUntil:
+    visible:
+      text: "Dashboard"
+    timeout: 10000
+
+# Verify we're on the dashboard
+- assertVisible:
+    text: "Dashboard"
+
+# Take screenshot for documentation
+- takeScreenshot: login_success

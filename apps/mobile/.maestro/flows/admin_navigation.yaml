@@ -1,0 +1,94 @@
+# Admin Navigation Flow
+# Tests navigation through admin dashboard sections
+
+appId: com.filadelfias.app
+tags:
+  - smoke
+  - critical
+  - navigation
+
+---
+
+# Launch and login first
+- launchApp:
+    clearState: true
+
+- assertVisible:
+    text: "Entrar"
+
+- tapOn:
+    text: "Email"
+- inputText: ${TEST_EMAIL}
+
+- tapOn:
+    text: "Senha"
+- inputText: ${TEST_PASSWORD}
+
+- tapOn:
+    text: "Entrar"
+
+# Wait for dashboard
+- extendedWaitUntil:
+    visible:
+      text: "Dashboard"
+    timeout: 10000
+
+# Navigate to Members section
+- tapOn:
+    text: "Membros"
+    optional: true
+
+- extendedWaitUntil:
+    visible:
+      text: "Membros"
+    timeout: 5000
+
+- takeScreenshot: admin_members
+
+# Go back to dashboard
+- back
+
+# Navigate to Financial section
+- tapOn:
+    text: "Financeiro"
+    optional: true
+
+- extendedWaitUntil:
+    visible:
+      text: "Financeiro"
+    timeout: 5000
+
+- takeScreenshot: admin_financial
+
+# Go back
+- back
+
+# Navigate to EBD section
+- tapOn:
+    text: "EBD"
+    optional: true
+
+- extendedWaitUntil:
+    visible:
+      text: "EBD"
+    timeout: 5000
+
+- takeScreenshot: admin_ebd
+
+# Test logout
+- back
+- tapOn:
+    id: "menu-button"
+    optional: true
+
+- tapOn:
+    text: "Sair"
+    optional: true
+
+# Verify we're back on login
+- extendedWaitUntil:
+    visible:
+      text: "Entrar"
+    timeout: 5000
+
+- takeScreenshot: admin_logout_success

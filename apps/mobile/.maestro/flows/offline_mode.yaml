@@ -1,0 +1,62 @@
+# Offline Mode Flow
+# Tests app behavior when offline
+
+appId: com.filadelfias.app
+tags:
+  - regression
+  - offline
+  - resilience
+
+---
+
+# First, login while online
+- launchApp:
+    clearState: true
+
+- assertVisible:
+    text: "Entrar"
+
+- tapOn:
+    text: "Email"
+- inputText: ${TEST_EMAIL}
+
+- tapOn:
+    text: "Senha"
+- inputText: ${TEST_PASSWORD}
+
+- tapOn:
+    text: "Entrar"
+
+# Wait for dashboard to load
+- extendedWaitUntil:
+    visible:
+      text: "Dashboard"
+    timeout: 10000
+
+- takeScreenshot: online_dashboard
+
+# Toggle airplane mode (simulates offline)
+- toggleAirplaneMode
+
+# Try to navigate - should show cached data or offline message
+- tapOn:
+    text: "Membros"
+    optional: true
+
+# Should show offline indicator or cached data
+- assertVisible:
+    text: "Sem conexão"
+    optional: true
+
+- takeScreenshot: offline_mode
+
+# Toggle airplane mode back
+- toggleAirplaneMode
+
+# Wait for reconnection
+- extendedWaitUntil:
+    visible:
+      text: "Membros"
+    timeout: 10000
+
+- takeScreenshot: back_online

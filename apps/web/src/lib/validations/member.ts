@@ -87,7 +87,7 @@ export const memberSchema = z.object({
   
   // Ecclesiastical data
   status: z
-    .enum(['COMUNGANTE', 'NAO_COMUNGANTE', 'PROCESSO', 'DISCIPLINA', 'AFASTADO', 'TRANSFERIDO'])
+    .enum(['COMUNGANTE', 'NAO_COMUNGANTE', 'PROCESSO', 'DISCIPLINA', 'AFASTADO', 'TRANSFERIDO', 'FALECIDO'])
     .default('COMUNGANTE'),
   
   office: z

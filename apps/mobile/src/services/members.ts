@@ -5,6 +5,8 @@ export interface Member {
     full_name: string;
     email?: string;
     phone?: string;
+    office?: string; // Valores vêm da API via /metadata
+    functions?: string[]; // Funções eclesiásticas
 }
 
 export const membersService = {

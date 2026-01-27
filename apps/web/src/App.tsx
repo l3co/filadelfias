@@ -22,6 +22,8 @@ const HymnalPage = lazy(() => import('./routes/hymnal/HymnalPage').then(m => ({ 
 const HymnalReaderPage = lazy(() => import('./routes/hymnal/HymnalReaderPage').then(m => ({ default: m.HymnalReaderPage })));
 const ManualPage = lazy(() => import('./routes/manual/ManualPage').then(m => ({ default: m.ManualPage })));
 const ManualReaderPage = lazy(() => import('./routes/manual/ManualReaderPage').then(m => ({ default: m.ManualReaderPage })));
+const TermsPage = lazy(() => import('./routes/TermsPage').then(m => ({ default: m.TermsPage })));
+const PrivacyPage = lazy(() => import('./routes/PrivacyPage').then(m => ({ default: m.PrivacyPage })));
 
 // Lazy loaded pages - Admin Dashboard
 const HomePage = lazy(() => import('./routes/HomePage'));
@@ -64,6 +66,8 @@ function App() {
           <Route path="/hymnal/:number" element={<HymnalReaderPage />} />
           <Route path="/manual" element={<ManualPage />} />
           <Route path="/manual/*" element={<ManualReaderPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
         </Route>
 
         {/* Autenticação (Sem Layout Específico) */}

@@ -276,6 +276,39 @@ export function LandingPage() {
                     </div>
                 </div>
             </section>
+
+            {/* Footer */}
+            <footer className="bg-[#002333] text-white py-12">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+                        <div className="text-center md:text-left">
+                            <h3 className="text-xl font-bold mb-2">Filadélfias</h3>
+                            <p className="text-gray-400 text-sm">
+                                Plataforma gratuita e open source para igrejas presbiterianas.
+                            </p>
+                        </div>
+                        
+                        <div className="flex flex-wrap justify-center gap-6 text-sm">
+                            <Link to="/terms" className="text-gray-400 hover:text-white transition-colors">
+                                Termos de Uso
+                            </Link>
+                            <Link to="/privacy" className="text-gray-400 hover:text-white transition-colors">
+                                Política de Privacidade
+                            </Link>
+                            <a 
+                                href="mailto:contato@filadelfias.app" 
+                                className="text-gray-400 hover:text-white transition-colors"
+                            >
+                                Contato
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-500 text-sm">
+                        © {new Date().getFullYear()} Projeto Filadélfia. Soli Deo Gloria.
+                    </div>
+                </div>
+            </footer>
         </div>
     );
 }

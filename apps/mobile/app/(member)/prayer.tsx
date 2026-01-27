@@ -1,14 +1,16 @@
-import { View, Text, FlatList, Pressable, TextInput, Keyboard, KeyboardAvoidingView, Platform, Animated } from 'react-native';
-import { useState, useRef, useEffect } from 'react';
+import { View, Text, FlatList, Pressable, TextInput, Keyboard, KeyboardAvoidingView, Platform, Animated, ScrollView, RefreshControl } from 'react-native';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { useFocusEffect } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { MessageCircle, Plus, Heart, Send, Clock, User, X } from 'lucide-react-native';
+import { MessageCircle, Plus, Heart, Send, Clock, User, X, Trash2 } from 'lucide-react-native';
 import { Button } from '@/components/ui/Button';
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useAuthStore } from '@/stores/authStore';
 import { prayerService, PrayerRequest } from '@/services/prayer';
 import { toast } from '@/lib/toast';
+import { logger } from '@/lib/logger';
 
 const CATEGORY_LABELS: Record<string, { label: string; bg: string; text: string }> = {
     health: { label: 'Saúde', bg: '#fef2f2', text: '#b91c1c' },
@@ -34,11 +36,12 @@ const formatRelativeDate = (dateStr: string) => {
 export default function PrayerScreen() {
     const queryClient = useQueryClient();
     const insets = useSafeAreaInsets();
-    const { getCurrentTenant } = useAuthStore();
+    const { getCurrentTenant, user } = useAuthStore();
     const tenant = getCurrentTenant();
     const [showInput, setShowInput] = useState(false);
     const [newRequest, setNewRequest] = useState('');
     const [isAnonymous, setIsAnonymous] = useState(false);
+    const [category, setCategory] = useState('other');
     const inputRef = useRef<TextInput>(null);
     const keyboardHeight = useRef(new Animated.Value(0)).current;
 
@@ -73,20 +76,33 @@ export default function PrayerScreen() {
         };
     }, [insets.bottom]);
 
-    const { data: requests, isLoading } = useQuery({
+    const { data: requests, isLoading, refetch, isRefetching } = useQuery({
         queryKey: ['prayer', tenant?.id],
         queryFn: () => prayerService.getAll(tenant?.id || ''),
         enabled: !!tenant?.id,
+        refetchOnWindowFocus: true,
     });
+
+    const onRefresh = useCallback(() => {
+        refetch();
+    }, [refetch]);
+
+    // Refetch when screen comes into focus
+    useFocusEffect(
+        useCallback(() => {
+            refetch();
+        }, [refetch])
+    );
 
     const createMutation = useMutation({
         mutationFn: (content: string) =>
-            prayerService.create(tenant?.id || '', { content, is_anonymous: isAnonymous }),
+            prayerService.create(tenant?.id || '', { content, is_anonymous: isAnonymous, category }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['prayer', tenant?.id] });
             setShowInput(false);
             setNewRequest('');
             setIsAnonymous(false);
+            setCategory('other');
             Keyboard.dismiss();
             toast.success('Pedido enviado!');
         },
@@ -117,12 +133,36 @@ export default function PrayerScreen() {
         },
     });
 
+    const deleteMutation = useMutation({
+        mutationFn: (requestId: string) => prayerService.delete(tenant?.id || '', requestId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['prayer', tenant?.id] });
+            toast.success('Pedido removido');
+        },
+        onError: () => toast.error('Erro ao remover pedido'),
+    });
+
+    const handleDelete = (requestId: string) => {
+        deleteMutation.mutate(requestId);
+    };
+
     if (isLoading) {
         return <LoadingScreen message="Carregando pedidos..." />;
     }
 
     const renderRequest = ({ item }: { item: PrayerRequest }) => {
-        const category = CATEGORY_LABELS[(item as any).category] || CATEGORY_LABELS.other;
+        const category = CATEGORY_LABELS[item.category] || CATEGORY_LABELS.other;
+        const isMyRequest = item.member_id === user?.id;
+        const hasPrayed = user?.id ? item.prayed_by?.includes(user.id) : false;
+        
+        logger.debug({ module: 'PrayerScreen', method: 'renderRequest' }, 'Checking ownership', { 
+            requestId: item.id,
+            member_id: item.member_id, 
+            userId: user?.id, 
+            isMyRequest,
+            hasPrayed,
+            prayed_by: item.prayed_by
+        });
         
         return (
             <View style={{
@@ -180,7 +220,7 @@ export default function PrayerScreen() {
                     {item.content}
                 </Text>
 
-                {/* Footer com contador e botão */}
+                {/* Footer com contador e botões */}
                 <View style={{ 
                     flexDirection: 'row', 
                     alignItems: 'center', 
@@ -193,34 +233,53 @@ export default function PrayerScreen() {
                         {item.prayer_count} {item.prayer_count === 1 ? 'pessoa orou' : 'pessoas oraram'}
                     </Text>
                     
-                    <Pressable
-                        onPress={() => prayMutation.mutate(item.id)}
-                        disabled={item.prayed_by_me}
-                        style={{
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            paddingHorizontal: 14,
-                            paddingVertical: 8,
-                            backgroundColor: item.prayed_by_me ? '#10b981' : '#ffffff',
-                            borderRadius: 10,
-                            borderWidth: 1,
-                            borderColor: item.prayed_by_me ? '#10b981' : '#e2e8f0',
-                        }}
-                    >
-                        <Heart
-                            size={16}
-                            color={item.prayed_by_me ? '#ffffff' : '#64748b'}
-                            fill={item.prayed_by_me ? '#ffffff' : 'transparent'}
-                        />
-                        <Text style={{ 
-                            fontSize: 13, 
-                            fontWeight: '500', 
-                            marginLeft: 6,
-                            color: item.prayed_by_me ? '#ffffff' : '#374151',
-                        }}>
-                            {item.prayed_by_me ? 'Orei!' : 'Orar'}
-                        </Text>
-                    </Pressable>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                        {isMyRequest && (
+                            <Pressable
+                                onPress={() => handleDelete(item.id)}
+                                disabled={deleteMutation.isPending}
+                                style={{
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    paddingHorizontal: 12,
+                                    paddingVertical: 8,
+                                    backgroundColor: '#fef2f2',
+                                    borderRadius: 10,
+                                }}
+                            >
+                                <Trash2 size={16} color="#ef4444" />
+                            </Pressable>
+                        )}
+                        
+                        <Pressable
+                            onPress={() => prayMutation.mutate(item.id)}
+                            disabled={hasPrayed}
+                            style={{
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                paddingHorizontal: 14,
+                                paddingVertical: 8,
+                                backgroundColor: hasPrayed ? '#10b981' : '#ffffff',
+                                borderRadius: 10,
+                                borderWidth: 1,
+                                borderColor: hasPrayed ? '#10b981' : '#e2e8f0',
+                            }}
+                        >
+                            <Heart
+                                size={16}
+                                color={hasPrayed ? '#ffffff' : '#64748b'}
+                                fill={hasPrayed ? '#ffffff' : 'transparent'}
+                            />
+                            <Text style={{ 
+                                fontSize: 13, 
+                                fontWeight: '500', 
+                                marginLeft: 6,
+                                color: hasPrayed ? '#ffffff' : '#374151',
+                            }}>
+                                {hasPrayed ? 'Orei!' : 'Orar'}
+                            </Text>
+                        </Pressable>
+                    </View>
                 </View>
             </View>
         );
@@ -294,6 +353,14 @@ export default function PrayerScreen() {
                     keyExtractor={(item) => item.id}
                     contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: showInput ? 140 : 24 }}
                     showsVerticalScrollIndicator={false}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={isRefetching}
+                            onRefresh={onRefresh}
+                            colors={['#10b981']}
+                            tintColor="#10b981"
+                        />
+                    }
                 />
             )}
 
@@ -331,8 +398,47 @@ export default function PrayerScreen() {
                         shadowRadius: 12,
                         elevation: 20,
                     }}>
-                        {/* Header com opções */}
-                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                        {/* Header com fechar */}
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                            <Text style={{ fontSize: 14, fontWeight: '600', color: '#374151' }}>Novo pedido de oração</Text>
+                            <Pressable onPress={handleCloseInput} style={{ padding: 4 }}>
+                                <X size={20} color="#94a3b8" />
+                            </Pressable>
+                        </View>
+
+                        {/* Seletor de categoria */}
+                        <ScrollView 
+                            horizontal 
+                            showsHorizontalScrollIndicator={false}
+                            style={{ marginBottom: 10 }}
+                            contentContainerStyle={{ gap: 6 }}
+                        >
+                            {Object.entries(CATEGORY_LABELS).map(([key, { label, bg, text }]) => (
+                                <Pressable
+                                    key={key}
+                                    onPress={() => setCategory(key)}
+                                    style={{
+                                        paddingHorizontal: 12,
+                                        paddingVertical: 6,
+                                        borderRadius: 14,
+                                        backgroundColor: category === key ? bg : '#f1f5f9',
+                                        borderWidth: category === key ? 1 : 0,
+                                        borderColor: text,
+                                    }}
+                                >
+                                    <Text style={{ 
+                                        fontSize: 12, 
+                                        fontWeight: '500', 
+                                        color: category === key ? text : '#94a3b8' 
+                                    }}>
+                                        {label}
+                                    </Text>
+                                </Pressable>
+                            ))}
+                        </ScrollView>
+
+                        {/* Checkbox anônimo */}
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
                             <Pressable
                                 onPress={() => setIsAnonymous(!isAnonymous)}
                                 style={{ flexDirection: 'row', alignItems: 'center' }}
@@ -349,11 +455,7 @@ export default function PrayerScreen() {
                                 }}>
                                     {isAnonymous && <Text style={{ color: '#ffffff', fontSize: 10 }}>✓</Text>}
                                 </View>
-                                <Text style={{ marginLeft: 8, color: '#64748b', fontSize: 13 }}>Anônimo</Text>
-                            </Pressable>
-                            
-                            <Pressable onPress={handleCloseInput} style={{ padding: 4 }}>
-                                <X size={20} color="#94a3b8" />
+                                <Text style={{ marginLeft: 8, color: '#64748b', fontSize: 13 }}>Publicar anonimamente</Text>
                             </Pressable>
                         </View>
 

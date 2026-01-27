@@ -4,6 +4,7 @@ import { Globe, MapPin, Calendar } from 'lucide-react-native';
 import { Header } from '@/components/layout/Header';
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { ListCard } from '@/components/ui/ListCard';
 import { Avatar } from '@/components/ui/Avatar';
 import { useAuthStore } from '@/stores/authStore';
 import { missionsService, Missionary } from '@/services/missions';
@@ -25,7 +26,7 @@ export default function MissionsScreen() {
     }
 
     const renderMissionary = ({ item }: { item: Missionary }) => (
-        <View className="bg-white rounded-2xl p-4 mb-3 border border-slate-100">
+        <ListCard>
             <View className="flex-row items-start">
                 {item.photo_url ? (
                     <Image
@@ -65,7 +66,7 @@ export default function MissionsScreen() {
                     {item.description}
                 </Text>
             )}
-        </View>
+        </ListCard>
     );
 
     return (

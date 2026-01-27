@@ -5,6 +5,7 @@ import { Search, Mail, Phone, Users, Filter } from 'lucide-react-native';
 import { Header } from '@/components/layout/Header';
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { ListCard } from '@/components/ui/ListCard';
 import { useAuthStore } from '@/stores/authStore';
 import { membersService, Member } from '@/services/members';
 import { useOfficeOptions, useEnumLabelsMap } from '@/hooks/useMetadata';
@@ -64,16 +65,7 @@ export default function DirectoryScreen() {
         const officeLabel = officeLabelsMap[item.office || 'MEMBRO'] || 'Membro';
         
         return (
-            <View 
-                className="bg-white rounded-2xl p-4 mb-3 border border-slate-100"
-                style={{
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.04,
-                    shadowRadius: 8,
-                    elevation: 2,
-                }}
-            >
+            <ListCard>
                 <View className="flex-row items-start">
                     <View 
                         style={{ 
@@ -124,7 +116,7 @@ export default function DirectoryScreen() {
                         )}
                     </View>
                 )}
-            </View>
+            </ListCard>
         );
     };
 

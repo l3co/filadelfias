@@ -5,6 +5,7 @@ import { GraduationCap, Users, Clock, MapPin, ChevronRight, BookOpen } from 'luc
 import { Header } from '@/components/layout/Header';
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { ListCard } from '@/components/ui/ListCard';
 import { useAuthStore } from '@/stores/authStore';
 import { ebdService, EBDClass } from '@/services/ebd';
 import { colors } from '@/constants/colors';
@@ -33,10 +34,7 @@ export default function EBDScreen() {
     }
 
     const renderClass = ({ item }: { item: EBDClass }) => (
-        <Pressable
-            onPress={() => router.push(`/(member)/ebd/${item.id}`)}
-            className="bg-white rounded-2xl p-4 mb-3 border border-slate-100 active:scale-[0.98]"
-        >
+        <ListCard onPress={() => router.push(`/(member)/ebd/${item.id}`)}>
             <View className="flex-row items-start">
                 <View className="h-12 w-12 rounded-xl bg-yellow-50 items-center justify-center">
                     <GraduationCap size={24} color="#eab308" />
@@ -60,7 +58,7 @@ export default function EBDScreen() {
 
                 <ChevronRight size={20} color={colors.slate[300]} />
             </View>
-        </Pressable>
+        </ListCard>
     );
 
     return (

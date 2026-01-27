@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Calendar, MapPin, Clock, ChevronLeft } from 'lucide-react-native';
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { ListCard } from '@/components/ui/ListCard';
 import { useAuthStore } from '@/stores/authStore';
 import { eventsService, Event } from '@/services/events';
 
@@ -25,17 +26,7 @@ export default function EventsScreen() {
     }
 
     const renderEvent = ({ item }: { item: Event }) => (
-        <View style={{
-            backgroundColor: '#ffffff',
-            borderRadius: 16,
-            padding: 16,
-            marginBottom: 12,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.04,
-            shadowRadius: 8,
-            elevation: 2,
-        }}>
+        <ListCard>
             <View style={{ flexDirection: 'row' }}>
                 {/* Data Box */}
                 <View style={{ 
@@ -79,7 +70,7 @@ export default function EventsScreen() {
                     {item.description}
                 </Text>
             )}
-        </View>
+        </ListCard>
     );
 
     return (

@@ -8,17 +8,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuthStore } from '@/stores/authStore';
 import { Avatar } from '@/components/ui/Avatar';
-
-const FEATURE_COLORS: Record<string, { bg: string; icon: string }> = {
-    blue: { bg: '#eff6ff', icon: '#3b82f6' },
-    purple: { bg: '#f5f3ff', icon: '#8b5cf6' },
-    red: { bg: '#fef2f2', icon: '#ef4444' },
-    emerald: { bg: '#ecfdf5', icon: '#10b981' },
-    orange: { bg: '#fff7ed', icon: '#f97316' },
-    indigo: { bg: '#eef2ff', icon: '#6366f1' },
-    yellow: { bg: '#fefce8', icon: '#eab308' },
-    pink: { bg: '#fdf2f8', icon: '#ec4899' },
-};
+import { FEATURE_COLORS, FeatureColor } from '@/constants/theme';
 
 export default function MemberHomeScreen() {
     const router = useRouter();
@@ -26,7 +16,7 @@ export default function MemberHomeScreen() {
     const { user, getCurrentTenant } = useAuthStore();
     const tenant = getCurrentTenant();
 
-    const features = [
+    const features: { icon: typeof BookOpen; title: string; description: string; href: string; color: FeatureColor }[] = [
         { icon: BookOpen, title: 'Bíblia Online', description: 'Leia a Palavra de Deus', href: '/(member)/bible', color: 'blue' },
         { icon: Music, title: 'Hinário', description: 'Novo Cântico', href: '/(member)/hymnal', color: 'purple' },
         { icon: Heart, title: 'Devocionais', description: 'Reflexões diárias', href: '/(member)/devotionals', color: 'red' },

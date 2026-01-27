@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Heart, Calendar, ChevronRight, ChevronLeft } from 'lucide-react-native';
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { ListCard } from '@/components/ui/ListCard';
 import { useAuthStore } from '@/stores/authStore';
 import { devotionalsService, Devotional } from '@/services/devotionals';
 import { formatDate } from '@/lib/utils';
@@ -26,21 +27,9 @@ export default function DevotionalsScreen() {
     }
 
     const renderDevotional = ({ item }: { item: Devotional }) => (
-        <Pressable
+        <ListCard
             onPress={() => router.push(`/(member)/devotionals/${item.id}` as any)}
-            style={{
-                backgroundColor: '#ffffff',
-                borderRadius: 16,
-                padding: 16,
-                marginBottom: 12,
-                flexDirection: 'row',
-                alignItems: 'flex-start',
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.04,
-                shadowRadius: 8,
-                elevation: 2,
-            }}
+            style={{ flexDirection: 'row', alignItems: 'flex-start' }}
         >
             <View style={{ 
                 height: 48, 
@@ -67,7 +56,7 @@ export default function DevotionalsScreen() {
                 </View>
             </View>
             <ChevronRight size={20} color="#cbd5e1" />
-        </Pressable>
+        </ListCard>
     );
 
     return (

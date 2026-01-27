@@ -328,6 +328,98 @@ Em desenvolvimento, os dados do React Query podem ser inspecionados via Flipper 
 
 ---
 
+## 🏗️ Padrões de Desenvolvimento
+
+### Componentes UI
+
+Use os componentes padronizados em `src/components/ui/`:
+
+```tsx
+// ListCard - Para cards de listagem
+import { ListCard } from '@/components/ui/ListCard';
+
+<ListCard onPress={() => {}}>
+    <Text>Conteúdo do card</Text>
+</ListCard>
+
+// Header - Com variantes (default, transparent, gradient)
+import { Header } from '@/components/layout/Header';
+
+<Header 
+    title="Título" 
+    subtitle="Subtítulo opcional"
+    showBack 
+    showProfile 
+    variant="gradient"  // 'default' | 'transparent' | 'gradient'
+    large              // Título grande (28px)
+/>
+```
+
+### Constantes de Tema
+
+Cores e estilos centralizados em `src/constants/theme.ts`:
+
+```tsx
+import { FEATURE_COLORS, CATEGORY_COLORS, COMMON_STYLES } from '@/constants/theme';
+
+// Cores de features (blue, purple, red, emerald, orange, indigo, yellow, pink)
+const color = FEATURE_COLORS.blue; // { bg, icon, gradient }
+
+// Cores de categorias (health, family, work, spiritual, other)
+const category = CATEGORY_COLORS.health; // { bg, text, label }
+```
+
+### React Query
+
+Use as query keys padronizadas:
+
+```tsx
+import { queryKeys } from '@/lib/queryClient';
+
+// Em vez de strings soltas
+useQuery({
+    queryKey: queryKeys.prayer(tenantId),
+    queryFn: () => prayerService.getAll(tenantId),
+});
+```
+
+### Tipos
+
+Tipos centralizados em `src/types/`:
+
+```tsx
+import { Member, PrayerRequest, Event } from '@/types';
+```
+
+### Acessibilidade
+
+Sempre adicione labels de acessibilidade em elementos interativos:
+
+```tsx
+<Pressable
+    onPress={handlePress}
+    accessibilityLabel="Descrição da ação"
+    accessibilityRole="button"
+    accessibilityState={{ disabled: isDisabled }}
+>
+    <Icon />
+</Pressable>
+```
+
+### Estrutura de Features
+
+Para features complexas, organize em pasta própria:
+
+```
+src/components/features/prayer/
+├── index.ts                 # Exports
+├── PrayerRequestCard.tsx    # Componente principal
+├── CreatePrayerInput.tsx    # Componente de criação
+└── useKeyboardAnimation.ts  # Hook específico
+```
+
+---
+
 ## 📚 Documentação Relacionada
 
 - [README Principal](../../README.md)

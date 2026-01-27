@@ -5,7 +5,7 @@ import { Lock, Eye, EyeOff, AlertTriangle } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { changePasswordSchema, type ChangePasswordFormData } from '@/lib/validations/auth';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { api } from '@/services/api';
@@ -13,21 +13,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { colors } from '@/constants/colors';
 import { toast } from '@/lib/toast';
 
-const schema = z.object({
-    currentPassword: z.string().min(1, 'Senha atual é obrigatória'),
-    newPassword: z.string()
-        .min(8, 'Senha deve ter pelo menos 8 caracteres')
-        .regex(/[A-Z]/, 'Deve conter pelo menos uma letra maiúscula')
-        .regex(/[a-z]/, 'Deve conter pelo menos uma letra minúscula')
-        .regex(/\d/, 'Deve conter pelo menos um número')
-        .regex(/[!@#$%^&*]/, 'Deve conter pelo menos um caractere especial'),
-    confirmPassword: z.string(),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-    message: 'Senhas não conferem',
-    path: ['confirmPassword'],
-});
-
-type ChangePasswordForm = z.infer<typeof schema>;
+type ChangePasswordForm = ChangePasswordFormData;
 
 export default function ChangePasswordScreen() {
     const router = useRouter();
@@ -37,7 +23,7 @@ export default function ChangePasswordScreen() {
     const { checkAuth, isAdmin } = useAuthStore();
 
     const { control, handleSubmit, formState: { errors } } = useForm<ChangePasswordForm>({
-        resolver: zodResolver(schema),
+        resolver: zodResolver(changePasswordSchema),
     });
 
     const onSubmit = async (data: ChangePasswordForm) => {

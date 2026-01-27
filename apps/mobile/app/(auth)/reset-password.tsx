@@ -5,27 +5,14 @@ import { Lock, Eye, EyeOff, CheckCircle } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { resetPasswordSchema, type ResetPasswordFormData } from '@/lib/validations/auth';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { api } from '@/services/api';
 import { colors } from '@/constants/colors';
 import { toast } from '@/lib/toast';
 
-const schema = z.object({
-    password: z.string()
-        .min(8, 'Senha deve ter pelo menos 8 caracteres')
-        .regex(/[A-Z]/, 'Deve conter pelo menos uma letra maiúscula')
-        .regex(/[a-z]/, 'Deve conter pelo menos uma letra minúscula')
-        .regex(/\d/, 'Deve conter pelo menos um número')
-        .regex(/[!@#$%^&*]/, 'Deve conter pelo menos um caractere especial'),
-    confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-    message: 'Senhas não conferem',
-    path: ['confirmPassword'],
-});
-
-type ResetPasswordForm = z.infer<typeof schema>;
+type ResetPasswordForm = ResetPasswordFormData;
 
 export default function ResetPasswordScreen() {
     const router = useRouter();
@@ -36,7 +23,7 @@ export default function ResetPasswordScreen() {
     const [showPassword, setShowPassword] = useState(false);
 
     const { control, handleSubmit, formState: { errors } } = useForm<ResetPasswordForm>({
-        resolver: zodResolver(schema),
+        resolver: zodResolver(resetPasswordSchema),
     });
 
     const onSubmit = async (data: ResetPasswordForm) => {

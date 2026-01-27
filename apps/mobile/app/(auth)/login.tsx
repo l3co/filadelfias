@@ -6,19 +6,14 @@ import { Mail, Lock, Eye, EyeOff } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { loginSchema, type LoginFormData } from '@/lib/validations/auth';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { useAuthStore } from '@/stores/authStore';
 import { colors } from '@/constants/colors';
 import { toast } from '@/lib/toast';
 
-const loginSchema = z.object({
-    email: z.string().email('Email inválido'),
-    password: z.string().min(1, 'Senha é obrigatória'),
-});
-
-type LoginForm = z.infer<typeof loginSchema>;
+type LoginForm = LoginFormData;
 
 export default function LoginScreen() {
     const router = useRouter();

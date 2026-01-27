@@ -6,17 +6,13 @@ import { Mail, ArrowLeft, CheckCircle } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { forgotPasswordSchema, type ForgotPasswordFormData } from '@/lib/validations/auth';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { api } from '@/services/api';
 import { colors } from '@/constants/colors';
 
-const schema = z.object({
-    email: z.string().email('Email inválido'),
-});
-
-type ForgotPasswordForm = z.infer<typeof schema>;
+type ForgotPasswordForm = ForgotPasswordFormData;
 
 export default function ForgotPasswordScreen() {
     const router = useRouter();
@@ -25,7 +21,7 @@ export default function ForgotPasswordScreen() {
     const [isSuccess, setIsSuccess] = useState(false);
 
     const { control, handleSubmit, formState: { errors } } = useForm<ForgotPasswordForm>({
-        resolver: zodResolver(schema),
+        resolver: zodResolver(forgotPasswordSchema),
     });
 
     const onSubmit = async (data: ForgotPasswordForm) => {

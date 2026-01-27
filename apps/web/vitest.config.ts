@@ -12,9 +12,29 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: ['./src/test/setup.ts'],
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
     exclude: ['node_modules', 'e2e'],
+    // Use projects for different test environments
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: 'unit',
+          include: ['src/lib/validations/**/*.test.ts'],
+          environment: 'node',
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: 'components',
+          include: ['src/**/*.test.{ts,tsx}'],
+          exclude: ['src/lib/validations/**/*.test.ts', 'node_modules', 'e2e'],
+          environment: 'jsdom',
+          setupFiles: ['./src/test/setup.ts'],
+        },
+      },
+    ],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],

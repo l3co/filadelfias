@@ -8,49 +8,68 @@ Este documento orienta desenvolvedores que desejam contribuir com o projeto.
 
 ### Backend (Python)
 - Python 3.11+
-- Poetry (gerenciador de dependências)
-- Docker e Docker Compose
-- PostgreSQL 15+ (via Docker ou local)
+- Poetry 1.8+ (gerenciador de dependências)
+- Docker (para Firestore Emulator)
 
-### Frontend (Web/Mobile)
+### Frontend Web
 - Node.js 20+
-- pnpm (gerenciador de pacotes)
-- Expo CLI (para mobile)
+- npm
+
+### Mobile
+- Node.js 20+
+- npm
+- Expo CLI (`npm install -g expo-cli`)
+- Expo Go no celular (para testes)
 
 ---
 
 ## 🛠️ Setup Local
 
 ### 1. Clone o repositório
+
 ```bash
-git clone https://github.com/seu-usuario/filadelfias.git
+git clone https://github.com/l3co/filadelfias.git
 cd filadelfias
 ```
 
 ### 2. Backend
+
 ```bash
 cd apps/backend
 poetry install
 cp .env.example .env
 # Edite .env com suas configurações
-docker-compose up -d db  # Sobe apenas o Postgres
-poetry run alembic upgrade head  # Aplica migrações
+
+# Opção A: Com Firestore Emulator (recomendado para dev)
+docker run -d -p 8080:8080 mtlynch/firestore-emulator
+FIRESTORE_EMULATOR_HOST=localhost:8080 PROJECT_ID=filadelfias-dev poetry run uvicorn src.main:app --reload
+
+# Opção B: Com Firebase real
+export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
 poetry run uvicorn src.main:app --reload
 ```
 
+**API disponível em:** http://localhost:8000/docs
+
 ### 3. Web
+
 ```bash
 cd apps/web
-pnpm install
-cp .env.example .env.local
-pnpm dev
+npm install
+cp .env.example .env
+npm run dev
 ```
 
+**App disponível em:** http://localhost:5173
+
 ### 4. Mobile
+
 ```bash
 cd apps/mobile
-pnpm install
-pnpm start  # ou: expo start
+npm install
+cp .env.example .env
+npm start
+# Escaneie o QR code com Expo Go
 ```
 
 ---
@@ -58,86 +77,187 @@ pnpm start  # ou: expo start
 ## 📁 Convenções de Código
 
 ### Python (Backend)
-- **Formatador**: Black (linha máxima 88)
-- **Linter**: Ruff
-- **Tipos**: Tipagem obrigatória em funções públicas
-- **Docstrings**: Estilo Google, em inglês
-- **Async**: Todo endpoint deve ser `async def`
+
+| Ferramenta | Configuração |
+|------------|--------------|
+| **Formatador** | Black (linha máxima 120) |
+| **Linter** | Ruff |
+| **Tipos** | Tipagem obrigatória em funções públicas |
+| **Async** | Todo endpoint deve ser `async def` |
+
+```bash
+# Formatar código
+poetry run black src/
+
+# Verificar lint
+poetry run ruff check src/
+```
 
 ### TypeScript (Web/Mobile)
-- **Formatador**: Prettier
-- **Linter**: ESLint (config compartilhada em `packages/config`)
-- **Componentes**: Functional components com hooks
-- **Estilos**: TailwindCSS (Web) / NativeWind (Mobile)
+
+| Ferramenta | Configuração |
+|------------|--------------|
+| **Linter** | ESLint |
+| **Componentes** | Functional components com hooks |
+| **Estilos Web** | TailwindCSS + shadcn/ui |
+| **Estilos Mobile** | NativeWind (TailwindCSS para RN) |
+
+```bash
+# Verificar lint
+npm run lint
+```
 
 ---
 
 ## 🌿 Git Flow
 
 ### Branches
-- `main`: Produção (protegida, requer PR aprovado)
-- `develop`: Desenvolvimento contínuo
-- `feature/XXX`: Novas funcionalidades
-- `fix/XXX`: Correções de bugs
-- `refactor/XXX`: Refatorações
+
+| Branch | Descrição |
+|--------|-----------|
+| `main` | Produção (protegida, requer PR) |
+| `feature/XXX` | Novas funcionalidades |
+| `fix/XXX` | Correções de bugs |
+| `refactor/XXX` | Refatorações |
+| `docs/XXX` | Documentação |
 
 ### Commits (Conventional Commits)
-```
-feat: adiciona leitor da Bíblia offline
-fix: corrige crash ao salvar nota
-refactor: extrai hook useAuth
-docs: atualiza README com instruções de deploy
-test: adiciona testes para votação
-chore: atualiza dependências
+
+```bash
+# Formato
+<tipo>(<escopo>): <descrição>
+
+# Exemplos
+feat(mobile): add prayer screen with categories
+fix(backend): correct tithe approval logic
+refactor(web): extract useMetadata hook
+docs: update README with new features
+test(e2e): add member directory tests
+chore: update dependencies
 ```
 
+**Tipos válidos:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `style`, `perf`
+
 ### Pull Requests
-1. Sempre baseie sua branch em `develop`.
-2. Escreva descrição clara do que foi feito.
-3. Vincule issues relacionadas.
-4. Aguarde review de pelo menos 1 maintainer.
-5. Squash and merge ao integrar.
+
+1. Crie uma branch a partir de `main`
+2. Faça commits atômicos com mensagens claras
+3. Abra PR com descrição do que foi feito
+4. Vincule issues relacionadas (se houver)
+5. Aguarde review
+6. Squash and merge ao integrar
 
 ---
 
 ## 🧪 Testes
 
 ### Backend
+
 ```bash
 cd apps/backend
+
+# Testes unitários
 poetry run pytest
-poetry run pytest --cov=src  # Com cobertura
+
+# Com cobertura
+poetry run pytest --cov=src
+
+# Testes específicos
+poetry run pytest tests/test_auth.py -v
 ```
 
 ### Web
+
 ```bash
 cd apps/web
-pnpm test
-pnpm test:e2e  # Playwright
+
+# Testes unitários (Vitest)
+npm test
+
+# Testes E2E (Playwright + Cucumber)
+npm run test:e2e
+
+# Modo interativo
+npm run test:e2e:ui
+
+# Apenas smoke tests
+npm run test:e2e:smoke
 ```
+
+---
+
+## 📡 Dados de Desenvolvimento
+
+### Popular banco com dados de teste
+
+```bash
+cd apps/backend
+
+# Dados para desenvolvimento
+poetry run python -m src.scripts.seed_dev_data
+
+# Dados para E2E
+poetry run seed-e2e
+```
+
+**Credenciais de teste:**
+- Email: `l3co@outlook.com`
+- Senha: `mudar@123`
+
+---
+
+## � Sistema de Metadados
+
+O backend é a **fonte única de verdade** para enums do sistema:
+
+```bash
+# Endpoint
+GET /metadata
+
+# Retorna
+{
+  "enums": {
+    "ecclesiastical_offices": [
+      { "value": "PASTOR", "label": "Pastor" },
+      { "value": "PRESBITERO", "label": "Presbítero" },
+      ...
+    ]
+  }
+}
+```
+
+**No frontend, use os hooks:**
+- Web: `src/hooks/useMetadata.ts`
+- Mobile: `src/hooks/useMetadata.ts`
+
+**NÃO duplique enums no frontend!**
 
 ---
 
 ## 📝 Documentação
 
-- **Arquitetura**: `docs/architecture.md`
-- **Módulos**: `docs/modules.md`
-- **ERD**: `docs/entity-relationship.md`
-- **Glossário**: `docs/glossary.md`
-- **API**: Gerada automaticamente via Swagger (`/docs`)
+| Documento | Descrição |
+|-----------|-----------|
+| `docs/architecture.md` | Arquitetura do sistema |
+| `docs/modules.md` | Módulos e endpoints |
+| `docs/entity-relationship.md` | Modelo de dados |
+| `docs/glossary.md` | Termos do domínio |
+| `docs/tech-stack.md` | Stack tecnológica |
+| `/docs` (API) | Swagger gerado automaticamente |
 
 ---
 
 ## ⚖️ Código de Conduta
 
 Este é um projeto a serviço da Igreja. Esperamos:
-- Respeito mútuo
-- Comunicação clara e construtiva
-- Foco no propósito: servir, não competir
-- Humildade para aprender e ensinar
+
+- **Respeito mútuo** - Trate todos com dignidade
+- **Comunicação clara** - Seja direto e construtivo
+- **Foco no propósito** - Servir, não competir
+- **Humildade** - Esteja aberto a aprender e ensinar
 
 ---
 
 ## 📧 Contato
 
-Dúvidas ou sugestões? Abra uma issue ou entre em contato via [email do projeto].
+Dúvidas ou sugestões? Abra uma issue no GitHub.

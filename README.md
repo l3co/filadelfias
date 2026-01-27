@@ -4,75 +4,120 @@
 
 ## 🎯 Visão Geral
 
-Filadelfias é uma plataforma completa para gestão de igrejas, desenvolvida seguindo princípios de **Clean Architecture**, **Domain-Driven Design (DDD)** e **Software Craftsmanship**.
+Filadelfias é uma plataforma completa para gestão de igrejas presbiterianas, desenvolvida seguindo princípios de **Clean Architecture** e **Domain-Driven Design (DDD)**. O sistema oferece funcionalidades para gestão de membros, pedidos de oração, dízimos, EBD, missões, eventos e muito mais.
 
 ### Stack Tecnológica
 
-- **Backend**: FastAPI + SQLAlchemy + PostgreSQL
-- **Frontend Web**: React + Vite + TypeScript + TailwindCSS
-- **Frontend Mobile**: React Native + Expo (em desenvolvimento)
-- **Infraestrutura**: Docker + Docker Compose + DigitalOcean
+| Camada | Tecnologias |
+|--------|-------------|
+| **Backend** | Python 3.11+, FastAPI, Firestore (NoSQL), Firebase Admin SDK |
+| **Web** | React 19, Vite, TypeScript, TailwindCSS, shadcn/ui, TanStack Query |
+| **Mobile** | React Native 0.81, Expo 54, NativeWind, Zustand |
+| **Infra** | Firebase Hosting, Google Cloud Run, GitHub Actions |
+
+---
 
 ## 🚀 Quick Start
 
 ### Pré-requisitos
 
-- Docker e Docker Compose
-- Node.js 20+ (para desenvolvimento local)
-- Python 3.11+ (para desenvolvimento local)
+- **Docker** e Docker Compose
+- **Node.js 20+** (para web e mobile)
+- **Python 3.11+** e **Poetry** (para backend)
+- **Expo CLI** (para mobile)
 
-### Rodando o Projeto
+### 1. Clone o repositório
 
 ```bash
-# Clone o repositório
-git clone https://github.com/seu-usuario/filadelfias.git
+git clone https://github.com/l3co/filadelfias.git
 cd filadelfias
-
-# Suba os containers
-docker compose up -d --build
-
-# Acesse a aplicação
-# Web: http://localhost:5173
-# API: http://localhost:8000
-# API Docs: http://localhost:8000/docs
 ```
+
+### 2. Backend
+
+```bash
+cd apps/backend
+poetry install
+cp .env.example .env
+# Edite .env com suas credenciais Firebase
+
+# Opção A: Com Firestore Emulator
+docker run -d -p 8080:8080 mtlynch/firestore-emulator
+FIRESTORE_EMULATOR_HOST=localhost:8080 poetry run uvicorn src.main:app --reload
+
+# Opção B: Com Firebase real (configure GOOGLE_APPLICATION_CREDENTIALS)
+poetry run uvicorn src.main:app --reload
+```
+
+### 3. Web
+
+```bash
+cd apps/web
+npm install
+cp .env.example .env
+npm run dev
+# Acesse http://localhost:5173
+```
+
+### 4. Mobile
+
+```bash
+cd apps/mobile
+npm install
+cp .env.example .env
+npm start
+# Escaneie o QR code com Expo Go
+```
+
+---
 
 ## 📁 Estrutura do Projeto
 
 ```
 filadelfias/
 ├── apps/
-│   ├── backend/          # FastAPI + SQLAlchemy
-│   ├── web/              # React + Vite
-│   └── mobile/           # React Native + Expo (futuro)
+│   ├── backend/          # API FastAPI + Firestore
+│   ├── web/              # React + Vite + TailwindCSS
+│   └── mobile/           # React Native + Expo
 ├── packages/
-│   └── contracts/        # Schemas compartilhados (Zod)
+│   └── contracts/        # Schemas Zod compartilhados
 ├── docs/                 # Documentação técnica
-├── plan/                 # Planos de implementação
-└── docker-compose.yml    # Orquestração de containers
+├── plans/                # Planos de implementação por fase
+└── docker-compose.yml    # Orquestração local
 ```
 
-## ✅ Status de Implementação
+---
 
-### Plano 1: Fundamentos e MVP Core ✅ COMPLETO
+## ✅ Funcionalidades Implementadas
 
-- [x] Setup do ambiente (Monorepo, Docker, CI/CD)
-- [x] Backend FastAPI com Clean Architecture
-- [x] Modelos de banco (Users, Tenants, Memberships)
-- [x] Autenticação JWT completa
-- [x] Frontend React com React Router + TanStack Query
-- [x] Telas de Login e Registro
-- [x] Proteção de rotas
-- [x] Integração Backend ↔ Frontend
+### Plataforma
+- [x] Autenticação JWT (login, registro, refresh token)
+- [x] Multi-tenancy (usuário pode pertencer a múltiplas igrejas)
+- [x] RBAC com permissões por ofício eclesiástico
+- [x] Sistema de metadados centralizado (enums via API)
 
-### Próximos Passos (Plano 2)
+### Conteúdo
+- [x] Bíblia Online (múltiplas versões, offline no mobile)
+- [x] Hinário Novo Cântico (busca, categorias, offline)
+- [x] Manual da IPB (navegação por artigos)
+- [x] Devocionais
 
-- [ ] Cadastro e perfil de membros
-- [ ] Pedidos de oração
-- [ ] Registros de visitação
-- [ ] Escalas de ministérios
-- [ ] Calendário de eventos
-- [ ] Geolocalização de igrejas
+### Comunidade
+- [x] Diretório de membros com filtros por ofício
+- [x] Pedidos de oração (criar, orar, categorias)
+- [x] Eventos e calendário
+- [x] Missões e missionários
+
+### Financeiro
+- [x] Registro de dízimos e ofertas
+- [x] Aprovação de registros (admin)
+- [x] Resumo mensal/anual
+
+### Educação
+- [x] EBD - Classes e turmas
+- [x] Lições e frequência
+
+---
 
 ## 🏗️ Arquitetura
 
@@ -80,64 +125,135 @@ filadelfias/
 
 ```
 src/
-├── api/           # Controllers (FastAPI routers)
-├── application/   # Use Cases (orquestração)
-├── domain/        # Entidades e regras de negócio
-└── infra/         # Repositories e adapters
+├── api/           # Routers FastAPI (Controllers)
+├── application/   # Use Cases
+├── domain/        # Entidades, Enums, Value Objects
+├── infra/         # Repositories (Firestore)
+├── modules/       # Módulos de domínio (prayer, tithe, ebd...)
+├── services/      # Serviços externos (Bible API, etc)
+└── lib/           # Utilitários (permissions, etc)
 ```
 
-### Frontend (Feature-Based)
+### Web (Feature-Based)
 
 ```
 src/
-├── components/    # Componentes reutilizáveis
-├── hooks/         # React Query hooks
-├── routes/        # Páginas
+├── components/    # UI components (shadcn/ui)
+├── features/      # Módulos por feature
+├── hooks/         # Custom hooks (useMetadata, etc)
+├── routes/        # Páginas (React Router)
 ├── services/      # API clients (Axios)
-└── lib/           # Utilitários
+└── types/         # TypeScript types
 ```
 
-## 🔐 Autenticação
+### Mobile (Expo Router)
 
-- **JWT** para autenticação stateless
-- **Bcrypt** para hash de senhas
-- **OAuth2 Password Flow** para login
-- Suporte a **multi-tenancy** (usuário pode pertencer a múltiplas igrejas)
+```
+app/
+├── (auth)/        # Telas de autenticação
+├── (member)/      # Área do membro logado
+├── (public)/      # Área pública (Bíblia, Hinário)
+└── (admin)/       # Área administrativa
+src/
+├── components/    # UI components
+├── hooks/         # Custom hooks
+├── services/      # API clients
+├── stores/        # Zustand stores
+└── constants/     # Cores, configurações
+```
+
+---
+
+## 🔐 Sistema de Permissões
+
+O backend é a **fonte única de verdade** para ofícios e funções eclesiásticas:
+
+| Ofício | Permissões |
+|--------|------------|
+| **Pastor** | Todas as permissões |
+| **Presbítero** | Gestão de membros, assembleias, votações |
+| **Diácono** | Gestão financeira, assistência social |
+| **Membro** | Visualização, pedidos de oração, dízimos |
+
+Os enums são consumidos via `GET /metadata` e hooks `useMetadata()` no frontend.
+
+---
 
 ## 📚 Documentação
 
-- [Arquitetura](./docs/architecture.md)
-- [Módulos](./docs/modules.md)
-- [Modelo de Dados](./docs/entity-relationship.md)
-- [Glossário](./docs/glossary.md)
-- [Guia de Contribuição](./docs/contributing.md)
+| Documento | Descrição |
+|-----------|-----------|
+| [Arquitetura](./docs/architecture.md) | Visão geral e diagramas |
+| [Módulos](./docs/modules.md) | Endpoints e responsabilidades |
+| [Modelo de Dados](./docs/entity-relationship.md) | ERD e coleções Firestore |
+| [Stack Tecnológica](./docs/tech-stack.md) | Lista de tecnologias |
+| [Glossário](./docs/glossary.md) | Termos do domínio eclesiástico |
+| [Guia de Contribuição](./docs/contributing.md) | Setup e convenções |
+| [Variáveis de Ambiente](./docs/ENVIRONMENT_VARIABLES.md) | Configurações |
+
+---
 
 ## 🧪 Testes
 
 ```bash
-# Backend
+# Backend - Testes unitários
 cd apps/backend
 poetry run pytest
+poetry run pytest --cov=src  # Com cobertura
 
-# Frontend
+# Web - Testes unitários
 cd apps/web
 npm test
+
+# Web - Testes E2E (Playwright + Cucumber)
+npm run test:e2e
+npm run test:e2e:ui  # Modo interativo
 ```
 
-## 📝 Commits
+---
 
-Seguimos **Conventional Commits**:
+## 🌐 Ambientes
 
-- `feat:` Nova funcionalidade
-- `fix:` Correção de bug
-- `docs:` Documentação
-- `refactor:` Refatoração
-- `test:` Testes
-- `chore:` Tarefas de manutenção
+| Ambiente | Web | API | API Docs |
+|----------|-----|-----|----------|
+| **Produção** | [filadelfias-6a116.web.app](https://filadelfias-6a116.web.app) | [Cloud Run](https://filadelfias-api-332378056596.southamerica-east1.run.app) | [Swagger](https://filadelfias-api-332378056596.southamerica-east1.run.app/docs) |
+| **Local** | localhost:5173 | localhost:8000 | localhost:8000/docs |
+
+---
+
+## 📝 Convenções
+
+### Commits (Conventional Commits)
+
+```
+feat(mobile): add prayer screen with categories
+fix(backend): correct tithe approval logic
+docs: update README with new features
+refactor(web): extract useMetadata hook
+test(e2e): add member directory tests
+chore: update dependencies
+```
+
+### Branches
+
+- `main` - Produção (protegida)
+- `feature/XXX` - Novas funcionalidades
+- `fix/XXX` - Correções
+- `refactor/XXX` - Refatorações
+
+---
 
 ## 👥 Contribuindo
 
-Veja [CONTRIBUTING.md](./docs/contributing.md) para detalhes sobre como contribuir.
+1. Fork o repositório
+2. Crie uma branch (`git checkout -b feature/nova-funcionalidade`)
+3. Faça commit das mudanças (`git commit -m 'feat: adiciona nova funcionalidade'`)
+4. Push para a branch (`git push origin feature/nova-funcionalidade`)
+5. Abra um Pull Request
+
+Veja [CONTRIBUTING.md](./docs/contributing.md) para detalhes.
+
+---
 
 ## 📄 Licença
 

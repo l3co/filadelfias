@@ -1,73 +1,303 @@
-# React + TypeScript + Vite
+# Filadelfias Web
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplicação web para a plataforma Filadelfias, construída com **React**, **Vite** e **TailwindCSS**.
 
-Currently, two official plugins are available:
+## 🚀 Setup Local
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Pré-requisitos
 
-## React Compiler
+- Node.js 20+
+- npm
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Instalação
 
-## Expanding the ESLint configuration
+```bash
+# Instalar dependências
+npm install
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+# Copiar arquivo de ambiente
+cp .env.example .env
+# Edite .env com a URL da API
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Iniciar servidor de desenvolvimento
+npm run dev
+# Acesse http://localhost:5173
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 📁 Estrutura do Projeto
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
 ```
+web/
+├── src/
+│   ├── components/         # Componentes reutilizáveis
+│   │   ├── ui/             # shadcn/ui components (Button, Dialog, etc)
+│   │   └── layout/         # Header, Sidebar, Layout
+│   ├── features/           # Módulos por feature
+│   │   ├── auth/           # Login, Register
+│   │   ├── members/        # Gestão de membros
+│   │   ├── prayer/         # Pedidos de oração
+│   │   ├── tithe/          # Dízimos
+│   │   └── ...
+│   ├── hooks/              # Custom hooks
+│   │   ├── useAuth.ts      # Autenticação
+│   │   ├── useMetadata.ts  # Enums da API
+│   │   └── ...
+│   ├── routes/             # Páginas (React Router)
+│   │   ├── auth/           # /login, /register
+│   │   ├── member/         # /member/*
+│   │   ├── admin/          # /admin/*
+│   │   └── public/         # /bible, /hymnal
+│   ├── services/           # API clients (Axios)
+│   │   ├── api.ts          # Axios instance
+│   │   ├── auth.service.ts
+│   │   ├── members.service.ts
+│   │   └── ...
+│   ├── types/              # TypeScript types
+│   ├── lib/                # Utilitários
+│   │   └── utils.ts        # cn(), formatDate(), etc
+│   ├── constants/          # Constantes
+│   ├── App.tsx             # Router e providers
+│   └── main.tsx            # Entry point
+├── e2e/                    # Testes E2E (Playwright + Cucumber)
+│   ├── features/           # Arquivos .feature (Gherkin)
+│   ├── steps/              # Step definitions
+│   └── fixtures/           # Page Objects
+├── public/                 # Assets estáticos
+├── index.html
+├── vite.config.ts
+├── tailwind.config.js
+└── package.json
+```
+
+---
+
+## 🎨 Stack Tecnológica
+
+| Tecnologia | Versão | Uso |
+|------------|--------|-----|
+| **React** | 19 | Biblioteca UI |
+| **TypeScript** | 5.9 | Tipagem estática |
+| **Vite** | 7 | Build tool |
+| **TailwindCSS** | 4 | Estilização utility-first |
+| **shadcn/ui** | - | Componentes acessíveis (Radix) |
+| **TanStack Query** | 5 | Server state management |
+| **React Router** | 7 | Roteamento |
+| **React Hook Form** | 7 | Formulários |
+| **Zod** | 4 | Validação de schemas |
+| **Axios** | 1.13 | HTTP client |
+| **Playwright** | 1.52 | Testes E2E |
+| **Vitest** | 3 | Testes unitários |
+
+---
+
+## 🔐 Autenticação
+
+O app usa **JWT** armazenado no **localStorage**:
+
+```typescript
+// src/services/auth.service.ts
+export const authService = {
+    login: async (email: string, password: string) => {
+        const response = await api.post('/auth/login', { username: email, password });
+        localStorage.setItem('access_token', response.data.access_token);
+        return response.data;
+    },
+    
+    logout: () => {
+        localStorage.removeItem('access_token');
+    },
+};
+```
+
+---
+
+## 📡 Consumindo Dados da API
+
+### Hook useMetadata
+
+O app consome enums (ofícios, status, etc) da API via `useMetadata`:
+
+```typescript
+// src/hooks/useMetadata.ts
+export function useOfficeOptions() {
+    const { data } = useMetadata();
+    return data?.enums.ecclesiastical_offices ?? [];
+}
+
+// Uso em componentes
+const offices = useOfficeOptions();
+// [{ value: 'PASTOR', label: 'Pastor' }, { value: 'PRESBITERO', label: 'Presbítero' }, ...]
+```
+
+### React Query
+
+```typescript
+// Exemplo de uso
+const { data: members, isLoading } = useQuery({
+    queryKey: ['members', tenantId],
+    queryFn: () => membersService.getAll(tenantId),
+    enabled: !!tenantId,
+});
+```
+
+---
+
+## 🧪 Testes
+
+### Testes Unitários (Vitest)
+
+```bash
+# Rodar testes
+npm test
+
+# Modo watch
+npm test -- --watch
+
+# Com cobertura
+npm test -- --coverage
+```
+
+### Testes E2E (Playwright + Cucumber)
+
+O projeto usa **BDD** com Gherkin para testes E2E:
+
+```gherkin
+# e2e/features/login.feature
+Feature: Login
+  Scenario: Login com credenciais válidas
+    Given estou na página de login
+    When preencho o email "user@test.com"
+    And preencho a senha "password123"
+    And clico em "Entrar"
+    Then devo ser redirecionado para a home
+```
+
+```bash
+# Rodar todos os testes E2E
+npm run test:e2e
+
+# Modo interativo (UI)
+npm run test:e2e:ui
+
+# Apenas testes @smoke
+npm run test:e2e:smoke
+
+# Ver relatório
+npm run test:e2e:report
+```
+
+---
+
+## 🎨 Componentes UI (shadcn/ui)
+
+Usamos **shadcn/ui** para componentes acessíveis:
+
+```tsx
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+
+<Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <DialogContent>
+        <DialogHeader>Título</DialogHeader>
+        <Input placeholder="Digite aqui..." />
+        <Button onClick={handleSubmit}>Salvar</Button>
+    </DialogContent>
+</Dialog>
+```
+
+---
+
+## 🧰 Comandos Úteis
+
+```bash
+# Desenvolvimento
+npm run dev
+
+# Build para produção
+npm run build
+
+# Preview do build
+npm run preview
+
+# Lint
+npm run lint
+
+# Testes unitários
+npm test
+
+# Testes E2E
+npm run test:e2e
+```
+
+---
+
+## 🌐 Variáveis de Ambiente
+
+Crie um arquivo `.env` na raiz:
+
+```env
+VITE_API_URL=http://localhost:8000
+```
+
+Para produção:
+
+```env
+VITE_API_URL=https://filadelfias-api-332378056596.southamerica-east1.run.app
+```
+
+---
+
+## 🐳 Deploy
+
+O frontend é deployado automaticamente via GitHub Actions para **Firebase Hosting**:
+
+1. Push para `main` dispara o workflow
+2. Build com Vite
+3. Deploy para Firebase Hosting (CDN global)
+
+### Deploy Manual
+
+```bash
+# Build
+npm run build
+
+# Deploy para Firebase
+firebase deploy --only hosting
+```
+
+---
+
+## 📱 Funcionalidades
+
+### Área Pública
+- Bíblia Online
+- Hinário
+- Manual IPB
+
+### Área do Membro
+- Dashboard
+- Diretório de membros
+- Pedidos de oração
+- Dízimos e ofertas
+- Eventos
+- Missões
+- EBD
+- Devocionais
+
+### Área Admin
+- Gestão de membros
+- Aprovação de dízimos
+- Gestão financeira
+- Configurações da igreja
+
+---
+
+## 📚 Documentação Relacionada
+
+- [README Principal](../../README.md)
+- [Arquitetura](../../docs/architecture.md)
+- [Backend README](../backend/README.md)
+- [Mobile README](../mobile/README.md)

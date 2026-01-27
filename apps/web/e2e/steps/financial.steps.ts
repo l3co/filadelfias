@@ -81,52 +81,58 @@ Then('devo ver opção de exportar PDF', async ({ page }) => {
 // ============================================================================
 
 When('clico no botão de mês anterior', async ({ page }) => {
-    // Find the month navigation section and click the left arrow
-    const monthSection = page.locator('text=/Movimentações do Mês/i').locator('..').locator('..');
-    const prevButton = monthSection.locator('button').first();
+    const prevButton = page.getByTestId('prev-month-button');
+    await expect(prevButton).toBeVisible();
     await prevButton.click();
 });
 
 When('clico no botão de próximo mês', async ({ page }) => {
-    // Find the month navigation section and click the right arrow
-    const monthSection = page.locator('text=/Movimentações do Mês/i').locator('..').locator('..');
-    const nextButton = monthSection.locator('button').last();
+    const nextButton = page.getByTestId('next-month-button');
+    await expect(nextButton).toBeVisible();
     await nextButton.click();
 });
 
 Then('devo ver as movimentações do mês anterior', async ({ page }) => {
     await page.waitForTimeout(500);
-    const monthLabel = page.locator('text=/Janeiro|Fevereiro|Março|Abril|Maio|Junho|Julho|Agosto|Setembro|Outubro|Novembro|Dezembro/');
-    await expect(monthLabel.first()).toBeVisible();
+    const monthLabel = page.getByTestId('current-month-display');
+    await expect(monthLabel).toBeVisible();
+    // Validate text contains a valid month name
+    const text = await monthLabel.innerText();
+    expect(text).toMatch(/Janeiro|Fevereiro|Março|Abril|Maio|Junho|Julho|Agosto|Setembro|Outubro|Novembro|Dezembro/);
 });
 
 Then('devo ver as movimentações do mês atual', async ({ page }) => {
     await page.waitForTimeout(500);
-    const monthLabel = page.locator('text=/Janeiro|Fevereiro|Março|Abril|Maio|Junho|Julho|Agosto|Setembro|Outubro|Novembro|Dezembro/');
-    await expect(monthLabel.first()).toBeVisible();
+    const monthLabel = page.getByTestId('current-month-display');
+    await expect(monthLabel).toBeVisible();
+    // Validate text contains a valid month name
+    const text = await monthLabel.innerText();
+    expect(text).toMatch(/Janeiro|Fevereiro|Março|Abril|Maio|Junho|Julho|Agosto|Setembro|Outubro|Novembro|Dezembro/);
 });
 
 Then('devo ver o mês anterior no seletor', async ({ page }) => {
-    const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
-                    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+    const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+        'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
     const currentMonth = new Date().getMonth(); // 0-indexed
     const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
     const expectedMonth = months[prevMonth];
-    
+
     await page.waitForTimeout(500);
-    const monthLabel = page.getByText(new RegExp(expectedMonth, 'i'));
-    await expect(monthLabel.first()).toBeVisible();
+    const monthLabel = page.getByTestId('current-month-display');
+    await expect(monthLabel).toBeVisible();
+    await expect(monthLabel).toContainText(expectedMonth);
 });
 
 Then('devo ver o mês atual no seletor', async ({ page }) => {
-    const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
-                    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+    const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+        'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
     const currentMonth = new Date().getMonth(); // 0-indexed
     const expectedMonth = months[currentMonth];
-    
+
     await page.waitForTimeout(500);
-    const monthLabel = page.getByText(new RegExp(expectedMonth, 'i'));
-    await expect(monthLabel.first()).toBeVisible();
+    const monthLabel = page.getByTestId('current-month-display');
+    await expect(monthLabel).toBeVisible();
+    await expect(monthLabel).toContainText(expectedMonth);
 });
 
 // ============================================================================

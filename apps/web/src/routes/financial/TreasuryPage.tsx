@@ -37,7 +37,7 @@ export function TreasuryPage() {
         setMonth,
         setYear,
     } = useFinancialData(tenant?.id);
-    const { canViewFinancial, isTreasurer } = usePermissions();
+    const { canViewFinancial, canManageFinancial, isTreasurer } = usePermissions();
 
     const { data: pendingTithes, isLoading: tithesLoading } = usePendingTitheRecords(tenant?.id);
     const { approveRecord } = useTitheMutations(tenant?.id);
@@ -85,6 +85,8 @@ export function TreasuryPage() {
         return <AccessDenied resource="financial" />;
     }
 
+    const showTreasuryControls = isTreasurer || canManageFinancial;
+
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
             <PageHeaderWithIcon
@@ -93,11 +95,11 @@ export function TreasuryPage() {
                 title="Tesouraria"
                 description="Gestão financeira inteligente e transparente"
                 actions={
-                    isTreasurer ? (
+                    showTreasuryControls ? (
                         <div className="flex gap-3">
-                            <Button 
-                                variant="outline" 
-                                onClick={() => setIsCsvDialogOpen(true)} 
+                            <Button
+                                variant="outline"
+                                onClick={() => setIsCsvDialogOpen(true)}
                                 className="gap-2"
                             >
                                 <Upload className="h-4 w-4" />
@@ -124,19 +126,19 @@ export function TreasuryPage() {
             <BalanceSummary totalBalance={totalBalance} isLoading={isLoading} transactions={transactions} />
 
             {/* Pending Tithes - Only visible to treasurer */}
-            {isTreasurer && (pendingTithes?.length ?? 0) > 0 && (
+            {showTreasuryControls && (pendingTithes?.length ?? 0) > 0 && (
                 <PendingTithesList
                     records={pendingTithes || []}
                     isLoading={tithesLoading}
                     onApprove={(recordId) => approveRecord.mutate({ recordId, data: { status: 'APPROVED' } })}
                     onReject={(recordId, reason) => approveRecord.mutate({ recordId, data: { status: 'REJECTED', rejection_reason: reason } })}
                     isApproving={approveRecord.isPending}
-                    canApprove={isTreasurer}
+                    canApprove={showTreasuryControls}
                 />
             )}
 
             {/* Pending Expenses - Only visible to treasurer */}
-            {isTreasurer && (pendingExpenses?.length ?? 0) > 0 && (
+            {showTreasuryControls && (pendingExpenses?.length ?? 0) > 0 && (
                 <PendingExpensesList
                     records={pendingExpenses || []}
                     isLoading={expensesLoading}
@@ -147,12 +149,12 @@ export function TreasuryPage() {
             )}
 
             {/* Transaction History and Side Panel - Only visible to treasurer */}
-            {isTreasurer && (
+            {showTreasuryControls && (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Transaction History */}
                     <div className="lg:col-span-2">
-                        <TransactionList 
-                            transactions={transactions} 
+                        <TransactionList
+                            transactions={transactions}
                             isLoading={isLoading}
                             filters={filters}
                             onNextPage={nextPage}

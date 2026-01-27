@@ -18,8 +18,8 @@ interface TransactionListProps {
     onYearChange?: (year: number) => void;
 }
 
-export function TransactionList({ 
-    transactions, 
+export function TransactionList({
+    transactions,
     isLoading,
     filters,
     onNextPage,
@@ -72,13 +72,13 @@ export function TransactionList({
                         <h3 className="font-semibold text-gray-800">Movimentações do Mês</h3>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handlePrevMonth}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handlePrevMonth} data-testid="prev-month-button">
                             <ChevronLeft className="h-4 w-4" />
                         </Button>
-                        <span className="text-sm font-medium min-w-[120px] text-center">
+                        <span className="text-sm font-medium min-w-[120px] text-center" data-testid="current-month-display">
                             {MONTHS[currentMonth - 1]} {currentYear}
                         </span>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleNextMonth}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleNextMonth} data-testid="next-month-button">
                             <ChevronRight className="h-4 w-4" />
                         </Button>
                     </div>
@@ -103,13 +103,13 @@ export function TransactionList({
                     <h3 className="font-semibold text-gray-800">Movimentações do Mês</h3>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handlePrevMonth}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handlePrevMonth} data-testid="prev-month-button">
                         <ChevronLeft className="h-4 w-4" />
                     </Button>
-                    <span className="text-sm font-medium min-w-[120px] text-center">
+                    <span className="text-sm font-medium min-w-[120px] text-center" data-testid="current-month-display">
                         {MONTHS[currentMonth - 1]} {currentYear}
                     </span>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleNextMonth}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleNextMonth} data-testid="next-month-button">
                         <ChevronRight className="h-4 w-4" />
                     </Button>
                 </div>
@@ -154,18 +154,18 @@ export function TransactionList({
             <div className="px-6 py-3 border-t border-gray-100 bg-gray-50/50 flex justify-between items-center">
                 <span className="text-sm text-gray-500">Página {currentPage}</span>
                 <div className="flex gap-2">
-                    <Button 
-                        variant="outline" 
-                        size="sm" 
+                    <Button
+                        variant="outline"
+                        size="sm"
                         onClick={onPrevPage}
                         disabled={currentPage === 1}
                     >
                         <ChevronLeft className="h-4 w-4 mr-1" />
                         Anterior
                     </Button>
-                    <Button 
-                        variant="outline" 
-                        size="sm" 
+                    <Button
+                        variant="outline"
+                        size="sm"
                         onClick={onNextPage}
                         disabled={transactions.length < 10}
                     >

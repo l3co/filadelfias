@@ -160,14 +160,19 @@ poetry run seed-e2e
 
 ## 🌐 Variáveis de Ambiente
 
-| Variável | Descrição | Exemplo |
-|----------|-----------|---------|
-| `PROJECT_ID` | ID do projeto Firebase | `filadelfias-6a116` |
-| `GOOGLE_APPLICATION_CREDENTIALS` | Caminho para service account | `/path/to/creds.json` |
-| `FIRESTORE_EMULATOR_HOST` | Host do emulador (dev) | `localhost:8080` |
-| `JWT_SECRET_KEY` | Chave secreta para JWT | `sua-chave-secreta` |
-| `JWT_ALGORITHM` | Algoritmo JWT | `HS256` |
-| `BIBLE_API_TOKEN` | Token da API A Bíblia Digital | `token` |
+| Variável | Descrição | Padrão | Obrigatória |
+|----------|-----------|--------|-------------|
+| `DATABASE_URL` | URL de conexão PostgreSQL | `postgresql+asyncpg://postgres:postgres@localhost:5432/filadelfias` | ✅ |
+| `SECRET_KEY` | Chave secreta para JWT | `your-secret-key-change-in-production` | ✅ |
+| `ALGORITHM` | Algoritmo de criptografia JWT | `HS256` | ✅ |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | Tempo de expiração do token (minutos) | `30` | ✅ |
+| `DEBUG` | Modo debug | `False` | ❌ |
+| `CORS_ORIGINS_STR` | Origens CORS permitidas (separadas por vírgula) | `http://localhost:3000,http://localhost:5173` | ✅ |
+| `RESEND_API_KEY` | API key do Resend (envio de emails) | - | ✅ |
+| `EMAIL_FROM` | Email remetente | `Filadélfias <noreply@filadelfias.app>` | ✅ |
+| `FRONTEND_URL` | URL do frontend | `http://localhost:5173` | ✅ |
+
+> **⚠️ Segurança:** Em produção, sempre altere `SECRET_KEY` para um valor seguro gerado com `openssl rand -hex 32`
 
 ---
 

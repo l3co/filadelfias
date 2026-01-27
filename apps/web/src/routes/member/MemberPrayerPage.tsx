@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { MessageCircle, Plus, Heart, Clock, User, Send } from 'lucide-react';
+import { MessageCircle, Plus, Heart, Clock, User, Send, Trash2 } from 'lucide-react';
 import { PageHeaderWithIcon } from '../../components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
-import { useCurrentTenant } from '../../hooks/useAuth';
-import { usePrayerRequests, useCreatePrayerRequest, usePrayFor } from '../../features/prayer/hooks/usePrayer';
+import { useCurrentTenant, useCurrentUser } from '../../hooks/useAuth';
+import { usePrayerRequests, useCreatePrayerRequest, usePrayFor, useDeletePrayerRequest } from '../../features/prayer/hooks/usePrayer';
 
 const categoryLabels: Record<string, { label: string; color: string }> = {
   health: { label: 'Saúde', color: 'bg-red-100 text-red-700' },
@@ -16,9 +16,11 @@ const categoryLabels: Record<string, { label: string; color: string }> = {
 
 export function MemberPrayerPage() {
   const tenant = useCurrentTenant();
+  const { data: user } = useCurrentUser();
   const { data: prayerRequests, isLoading } = usePrayerRequests(tenant?.id);
   const createRequest = useCreatePrayerRequest(tenant?.id);
   const prayFor = usePrayFor(tenant?.id);
+  const deleteRequest = useDeletePrayerRequest(tenant?.id);
   
   const [showForm, setShowForm] = useState(false);
   const [newRequest, setNewRequest] = useState('');
@@ -32,6 +34,17 @@ export function MemberPrayerPage() {
         setPrayedFor(prev => new Set(prev).add(id));
       }
     });
+  };
+
+  const handleDelete = (id: string) => {
+    if (window.confirm('Tem certeza que deseja remover este pedido de oração?')) {
+      deleteRequest.mutate(id);
+    }
+  };
+
+  const isMyRequest = (memberId: string) => {
+    console.log('[Prayer] Checking ownership:', { memberId, userId: user?.id, match: user?.id === memberId });
+    return user?.id === memberId;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -183,16 +196,29 @@ export function MemberPrayerPage() {
                   <span className="text-sm text-gray-500">
                     {request.prayer_count} pessoas oraram
                   </span>
-                  <Button
-                    variant={prayedFor.has(request.id) ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => handlePray(request.id)}
-                    disabled={prayedFor.has(request.id) || prayFor.isPending}
-                    className="gap-2"
-                  >
-                    <Heart size={16} className={prayedFor.has(request.id) ? "fill-current" : ""} />
-                    {prayedFor.has(request.id) ? 'Orei!' : 'Orar'}
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    {isMyRequest(request.member_id) && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(request.id)}
+                        disabled={deleteRequest.isPending}
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 size={16} />
+                      </Button>
+                    )}
+                    <Button
+                      variant={prayedFor.has(request.id) ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => handlePray(request.id)}
+                      disabled={prayedFor.has(request.id) || prayFor.isPending}
+                      className="gap-2"
+                    >
+                      <Heart size={16} className={prayedFor.has(request.id) ? "fill-current" : ""} />
+                      {prayedFor.has(request.id) ? 'Orei!' : 'Orar'}
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>

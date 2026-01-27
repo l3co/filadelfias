@@ -9,6 +9,7 @@ export interface PrayerRequest {
     category: string;
     is_anonymous: boolean;
     prayer_count: number;
+    prayed_by: string[];
     created_at: string;
     updated_at: string;
 }

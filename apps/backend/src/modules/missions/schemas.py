@@ -5,10 +5,23 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 
+class CountryCreate(BaseModel):
+    code: str = Field(..., min_length=2, max_length=10)
+    name: str = Field(..., min_length=1)
+
+
+class CountryResponse(BaseModel):
+    id: str
+    code: str
+    name: str
+    tenant_id: str
+    created_at: datetime
+
+
 class MissionaryBase(BaseModel):
     name: str = Field(..., min_length=1)
     field_name: str
-    country_code: str = Field(..., min_length=2, max_length=2)
+    country_code: str = Field(..., min_length=2, max_length=10)
     state: Optional[str] = None
     city: Optional[str] = None
     latitude: Optional[float] = None

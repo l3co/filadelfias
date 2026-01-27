@@ -2,7 +2,7 @@ import { View, Text, ScrollView, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import {
     BookOpen, BookMarked, Heart, Users, Calendar,
-    Globe, GraduationCap, MessageCircle, Bell
+    Globe, GraduationCap, MessageCircle, Bell, Music
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -28,13 +28,14 @@ export default function MemberHomeScreen() {
 
     const features = [
         { icon: BookOpen, title: 'Bíblia Online', description: 'Leia a Palavra de Deus', href: '/(member)/bible', color: 'blue' },
-        { icon: BookMarked, title: 'Manual IPB', description: 'Princípios da nossa fé', href: '/(public)/manual', color: 'purple' },
+        { icon: Music, title: 'Hinário', description: 'Novo Cântico', href: '/(member)/hymnal', color: 'purple' },
         { icon: Heart, title: 'Devocionais', description: 'Reflexões diárias', href: '/(member)/devotionals', color: 'red' },
-        { icon: Users, title: 'Membros', description: 'Diretório da igreja', href: '/(member)/directory', color: 'emerald' },
-        { icon: Calendar, title: 'Eventos', description: 'Próximas atividades', href: '/(member)/events', color: 'orange' },
-        { icon: Globe, title: 'Missões', description: 'Nossos missionários', href: '/(member)/missions', color: 'indigo' },
-        { icon: GraduationCap, title: 'EBD', description: 'Sua turma e estudos', href: '/(member)/ebd', color: 'yellow' },
-        { icon: MessageCircle, title: 'Oração', description: 'Pedidos de oração', href: '/(member)/prayer', color: 'pink' },
+        { icon: BookMarked, title: 'Manual IPB', description: 'Princípios da nossa fé', href: '/(public)/manual', color: 'emerald' },
+        { icon: Users, title: 'Membros', description: 'Diretório da igreja', href: '/(member)/directory', color: 'orange' },
+        { icon: Calendar, title: 'Eventos', description: 'Próximas atividades', href: '/(member)/events', color: 'indigo' },
+        { icon: Globe, title: 'Missões', description: 'Nossos missionários', href: '/(member)/missions', color: 'yellow' },
+        { icon: GraduationCap, title: 'EBD', description: 'Sua turma e estudos', href: '/(member)/ebd', color: 'pink' },
+        { icon: MessageCircle, title: 'Oração', description: 'Pedidos de oração', href: '/(member)/prayer', color: 'emerald' },
     ];
 
     const churchAcronym = tenant?.name

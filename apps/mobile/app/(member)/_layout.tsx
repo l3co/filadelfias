@@ -1,7 +1,7 @@
 import { Tabs } from 'expo-router';
 import { Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Home, Heart, BookOpen, MessageCircle, User } from 'lucide-react-native';
+import { Home, Music, BookOpen, MessageCircle, User } from 'lucide-react-native';
 import { ProtectedRoute } from '@/components/layout/ProtectedRoute';
 
 export default function MemberLayout() {
@@ -40,10 +40,10 @@ export default function MemberLayout() {
                     }}
                 />
                 <Tabs.Screen
-                    name="devotionals"
+                    name="hymnal"
                     options={{
-                        title: 'Devocionais',
-                        tabBarIcon: ({ color, size }) => <Heart size={size} color={color} />,
+                        title: 'Hinário',
+                        tabBarIcon: ({ color, size }) => <Music size={size} color={color} />,
                     }}
                 />
                 <Tabs.Screen
@@ -68,6 +68,7 @@ export default function MemberLayout() {
                     }}
                 />
                 {/* Telas ocultas da tab bar - acessíveis via navegação */}
+                <Tabs.Screen name="devotionals" options={{ href: null }} />
                 <Tabs.Screen name="directory" options={{ href: null }} />
                 <Tabs.Screen name="ebd" options={{ href: null }} />
                 <Tabs.Screen name="events" options={{ href: null }} />

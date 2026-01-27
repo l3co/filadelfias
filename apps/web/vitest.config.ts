@@ -20,7 +20,12 @@ export default defineConfig({
         extends: true,
         test: {
           name: 'unit',
-          include: ['src/lib/validations/**/*.test.ts'],
+          // Tests that run in node environment (schemas, services, hooks without DOM)
+          include: [
+            'src/lib/validations/**/*.test.ts',
+            'src/hooks/__tests__/useMetadata.test.ts',
+            'src/services/__tests__/members.test.ts',
+          ],
           environment: 'node',
         },
       },
@@ -29,7 +34,13 @@ export default defineConfig({
         test: {
           name: 'components',
           include: ['src/**/*.test.{ts,tsx}'],
-          exclude: ['src/lib/validations/**/*.test.ts', 'node_modules', 'e2e'],
+          exclude: [
+            'src/lib/validations/**/*.test.ts',
+            'src/hooks/__tests__/useMetadata.test.ts',
+            'src/services/__tests__/members.test.ts',
+            'node_modules',
+            'e2e',
+          ],
           environment: 'jsdom',
           setupFiles: ['./src/test/setup.ts'],
         },

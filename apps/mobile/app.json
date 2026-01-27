@@ -42,6 +42,12 @@
     "experiments": {
       "typedRoutes": true
     },
-    "scheme": "filadelfias"
+    "scheme": "filadelfias",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "9ef406c7-ce8b-493a-a1ef-aec907c48e6c"
+      }
+    }
   }
 }

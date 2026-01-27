@@ -1,5 +1,18 @@
 import { api } from '../lib/api';
 
+export interface Country {
+    id: string;
+    code: string;
+    name: string;
+    tenant_id: string;
+    created_at: string;
+}
+
+export interface CreateCountryDTO {
+    code: string;
+    name: string;
+}
+
 export interface Missionary {
     id: string;
     tenant_id: string;
@@ -29,6 +42,22 @@ export interface CreateMissionaryDTO {
 }
 
 export const missionService = {
+    // Countries
+    listCountries: async (tenantId: string) => {
+        const { data } = await api.get<Country[]>('/missions/countries', {
+            params: { tenant_id: tenantId }
+        });
+        return data;
+    },
+
+    createCountry: async (tenantId: string, country: CreateCountryDTO) => {
+        const { data } = await api.post<Country>('/missions/countries', country, {
+            params: { tenant_id: tenantId }
+        });
+        return data;
+    },
+
+    // Missionaries
     listMissionaries: async (tenantId: string) => {
         const { data } = await api.get<Missionary[]>('/missions/missionaries', {
             params: { tenant_id: tenantId }

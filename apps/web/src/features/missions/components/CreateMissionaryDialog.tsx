@@ -1,3 +1,4 @@
+import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
@@ -8,7 +9,9 @@ import {
     DialogTitle,
     DialogFooter
 } from "../../../components/ui/dialog";
-import { useCreateMissionary } from '../hooks/useMissions';
+import { CreatableCombobox } from "../../../components/ui/creatable-combobox";
+import type { ComboboxOption } from "../../../components/ui/creatable-combobox";
+import { useCreateMissionary, useCountries, useCreateCountry } from '../hooks/useMissions';
 import type { CreateMissionaryDTO } from '../../../services/missions';
 
 type Props = {
@@ -17,59 +20,34 @@ type Props = {
     tenantId: string;
 }
 
-const COUNTRIES = [
-    { code: 'BR', name: 'Brasil' },
-    { code: 'US', name: 'Estados Unidos' },
-    { code: 'PT', name: 'Portugal' },
-    { code: 'ES', name: 'Espanha' },
-    { code: 'MX', name: 'México' },
-    { code: 'AR', name: 'Argentina' },
-    { code: 'CO', name: 'Colômbia' },
-    { code: 'PE', name: 'Peru' },
-    { code: 'CL', name: 'Chile' },
-    { code: 'VE', name: 'Venezuela' },
-    { code: 'EC', name: 'Equador' },
-    { code: 'BO', name: 'Bolívia' },
-    { code: 'PY', name: 'Paraguai' },
-    { code: 'UY', name: 'Uruguai' },
-    { code: 'MZ', name: 'Moçambique' },
-    { code: 'AO', name: 'Angola' },
-    { code: 'CV', name: 'Cabo Verde' },
-    { code: 'GW', name: 'Guiné-Bissau' },
-    { code: 'ST', name: 'São Tomé e Príncipe' },
-    { code: 'TL', name: 'Timor-Leste' },
-    { code: 'IN', name: 'Índia' },
-    { code: 'CN', name: 'China' },
-    { code: 'JP', name: 'Japão' },
-    { code: 'KR', name: 'Coreia do Sul' },
-    { code: 'PH', name: 'Filipinas' },
-    { code: 'ID', name: 'Indonésia' },
-    { code: 'ZA', name: 'África do Sul' },
-    { code: 'NG', name: 'Nigéria' },
-    { code: 'KE', name: 'Quênia' },
-    { code: 'ET', name: 'Etiópia' },
-    { code: 'EG', name: 'Egito' },
-    { code: 'MA', name: 'Marrocos' },
-    { code: 'IL', name: 'Israel' },
-    { code: 'TR', name: 'Turquia' },
-    { code: 'RU', name: 'Rússia' },
-    { code: 'DE', name: 'Alemanha' },
-    { code: 'FR', name: 'França' },
-    { code: 'IT', name: 'Itália' },
-    { code: 'GB', name: 'Reino Unido' },
-    { code: 'CA', name: 'Canadá' },
-    { code: 'AU', name: 'Austrália' },
-    { code: 'NZ', name: 'Nova Zelândia' },
-].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
-
 export function CreateMissionaryDialog({ isOpen, onClose, tenantId }: Props) {
-    const { register, handleSubmit, reset, formState: { errors } } = useForm<CreateMissionaryDTO>();
+    const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<CreateMissionaryDTO>();
     const createMissionary = useCreateMissionary(tenantId);
+    const { data: countries } = useCountries(tenantId);
+    const createCountry = useCreateCountry(tenantId);
+    const [selectedCountry, setSelectedCountry] = useState('');
+
+    const countryOptions: ComboboxOption[] = useMemo(() => {
+        if (!countries) return [];
+        return countries.map(c => ({ value: c.code, label: c.name }));
+    }, [countries]);
+
+    const handleCreateCountry = async (name: string): Promise<ComboboxOption> => {
+        const code = name.substring(0, 3).toUpperCase();
+        const result = await createCountry.mutateAsync({ code, name });
+        return { value: result.code, label: result.name };
+    };
+
+    const handleCountryChange = (value: string) => {
+        setSelectedCountry(value);
+        setValue('country_code', value);
+    };
 
     const onSubmit = (data: CreateMissionaryDTO) => {
         createMissionary.mutate(data, {
             onSuccess: () => {
                 reset();
+                setSelectedCountry('');
                 onClose();
             }
         });
@@ -94,17 +72,17 @@ export function CreateMissionaryDialog({ isOpen, onClose, tenantId }: Props) {
 
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-700">País</label>
-                        <select
-                            {...register('country_code', { required: 'País é obrigatório' })}
-                            className="flex h-10 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-                        >
-                            <option value="">Selecione um país...</option>
-                            {COUNTRIES.map(country => (
-                                <option key={country.code} value={country.code}>
-                                    {country.name} ({country.code})
-                                </option>
-                            ))}
-                        </select>
+                        <input type="hidden" {...register('country_code', { required: 'País é obrigatório' })} />
+                        <CreatableCombobox
+                            options={countryOptions}
+                            value={selectedCountry}
+                            onChange={handleCountryChange}
+                            onCreateNew={handleCreateCountry}
+                            placeholder="Digite para buscar ou criar..."
+                            searchPlaceholder="Buscar país..."
+                            emptyMessage="Nenhum país encontrado."
+                            createMessage="Criar país"
+                        />
                         {errors.country_code && <span className="text-xs text-red-500">{errors.country_code.message}</span>}
                     </div>
 

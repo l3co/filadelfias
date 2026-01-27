@@ -79,6 +79,7 @@ export function DashboardLayout() {
                 {/* Logo Header */}
                 <div className="flex h-16 items-center justify-between px-6 border-b border-gray-100">
                     <Link to="/admin" className="flex items-center gap-2">
+                        <img src="/logo.svg" alt="Logo" className="h-8 w-8" />
                         <h1 className="text-xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-green-700 to-teal-600">
                             Filadélfias
                         </h1>
@@ -202,7 +203,8 @@ export function DashboardLayout() {
                     </div>
 
                     {/* Center: Mobile Logo */}
-                    <div className="lg:hidden">
+                    <div className="lg:hidden flex items-center gap-2">
+                         <img src="/logo.svg" alt="Logo" className="h-6 w-6" />
                         <span className="font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-green-700 to-teal-600">
                             Filadélfias
                         </span>

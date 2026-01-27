@@ -34,7 +34,8 @@ export default function LoginPage() {
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-64 bg-gradient-to-r from-transparent via-green-500/5 to-transparent" />
                 
                 <div className="relative z-10 flex flex-col justify-center px-16 text-white">
-                    <Link to="/" className="mb-12">
+                    <Link to="/" className="flex items-center gap-3 mb-12">
+                        <img src="/logo.svg" alt="Logo" className="h-10 w-10" />
                         <h1 className="text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-teal-300">
                             Filadélfias
                         </h1>
@@ -59,7 +60,8 @@ export default function LoginPage() {
                 <div className="w-full max-w-md space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
                     {/* Mobile Logo */}
                     <div className="lg:hidden text-center mb-8">
-                        <Link to="/">
+                        <Link to="/" className="inline-flex items-center gap-2">
+                            <img src="/logo.svg" alt="Logo" className="h-8 w-8" />
                             <h1 className="text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-green-700 to-teal-600">
                                 Filadélfias
                             </h1>

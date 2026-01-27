@@ -47,7 +47,8 @@ export function OnboardingPage() {
                 <div className="absolute bottom-0 left-0 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl" />
                 
                 <div className="relative z-10 flex flex-col justify-center px-16 text-white">
-                    <Link to="/" className="mb-12">
+                    <Link to="/" className="flex items-center gap-3 mb-12">
+                        <img src="/logo.svg" alt="Logo" className="h-10 w-10" />
                         <h1 className="text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-teal-300">
                             Filadélfias
                         </h1>
@@ -94,7 +95,8 @@ export function OnboardingPage() {
                 <div className="w-full max-w-md space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
                     {/* Mobile Logo */}
                     <div className="lg:hidden text-center mb-8">
-                        <Link to="/">
+                        <Link to="/" className="inline-flex items-center gap-2">
+                            <img src="/logo.svg" alt="Logo" className="h-8 w-8" />
                             <h1 className="text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-green-700 to-teal-600">
                                 Filadélfias
                             </h1>

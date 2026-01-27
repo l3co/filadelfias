@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { 
+import {
   Bell, LogOut, Menu, User, ChevronDown, Home, X,
   BookOpen, BookMarked, Music, Users, Calendar, Globe, GraduationCap, Heart, MessageCircle, Gavel, Wallet, Receipt
 } from 'lucide-react';
@@ -57,10 +57,10 @@ export function MemberLayout() {
   };
 
   const churchAcronym = getChurchAcronym(tenant?.name);
-  
+
   // Build nav items dynamically based on permissions
-  const navItems = canSubmitExpenses 
-    ? [...baseNavItems, expenseNavItem] 
+  const navItems = canSubmitExpenses
+    ? [...baseNavItems, expenseNavItem]
     : baseNavItems;
 
   return (
@@ -76,12 +76,10 @@ export function MemberLayout() {
             >
               <Menu className="h-5 w-5 text-slate-600" />
             </button>
-            
+
             <Link to="/member" className="flex items-center gap-3 group">
               <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/25 group-hover:shadow-emerald-500/40 transition-shadow">
-                <span className="text-white font-bold text-sm tracking-tight">
-                  {churchAcronym.slice(0, 2)}
-                </span>
+                <img src="/logo.svg" alt="Logo" className="h-6 w-6 text-white" />
               </div>
               <div className="hidden sm:block">
                 <span className="font-bold text-lg bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
@@ -182,7 +180,7 @@ export function MemberLayout() {
         <div className="flex items-center justify-between p-4 border-b border-slate-100">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
-              <span className="text-white font-bold text-sm">{churchAcronym.slice(0, 2)}</span>
+              <img src="/logo.svg" alt="Logo" className="h-6 w-6 text-white" />
             </div>
             <div>
               <h2 className="font-bold text-slate-900">{churchAcronym}</h2>
@@ -196,7 +194,7 @@ export function MemberLayout() {
             <X className="h-5 w-5 text-slate-500" />
           </button>
         </div>
-        
+
         <nav className="p-4 space-y-1">
           {navItems.map((item) => {
             const isActive = location.pathname === item.href;
@@ -260,7 +258,7 @@ export function MemberLayout() {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
-                <span className="text-white font-bold text-[10px]">{churchAcronym.slice(0, 2)}</span>
+                <img src="/logo.svg" alt="Logo" className="h-4 w-4" />
               </div>
               <span className="text-sm font-medium text-slate-600">{tenant?.name}</span>
             </div>

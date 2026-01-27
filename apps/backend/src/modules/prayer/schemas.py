@@ -24,5 +24,6 @@ class PrayerRequestResponse(BaseModel):
     category: str
     is_anonymous: bool
     prayer_count: int
+    prayed_by: list[str] = []
     created_at: datetime
     updated_at: datetime

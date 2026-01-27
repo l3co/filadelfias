@@ -20,7 +20,8 @@ async def create_prayer_request(
     user = auth_context.get("user") or {}
     member = auth_context.get("member") or {}
 
-    member_id = member.get("id") or user.get("id") or "unknown"
+    # Always use user.id for member_id to ensure consistency with mobile auth
+    member_id = user.get("id") or "unknown"
     author_name = member.get("full_name") or user.get("name") or "Membro"
 
     return await prayer_request_repository.create(tenant_id, member_id, author_name, data)

@@ -95,7 +95,6 @@ export function ChapterSelector({
                         flexWrap: 'wrap', 
                         padding: 12,
                         backgroundColor: isDarkMode ? '#0f172a' : '#f8fafc',
-                        gap: 8,
                     }}>
                         {Array.from({ length: item.chapters_count }, (_, i) => i + 1).map((chapterNum) => {
                             const isCurrentChapter = isCurrentBook && currentChapter === chapterNum;
@@ -106,6 +105,7 @@ export function ChapterSelector({
                                     style={{
                                         width: 44,
                                         height: 44,
+                                        margin: 4,
                                         borderRadius: 10,
                                         alignItems: 'center',
                                         justifyContent: 'center',

@@ -7,6 +7,7 @@ export default function AdminLayout() {
             <Stack
                 screenOptions={{
                     headerShown: false,
+                    freezeOnBlur: false,
                 }}
             />
         </ProtectedRoute>

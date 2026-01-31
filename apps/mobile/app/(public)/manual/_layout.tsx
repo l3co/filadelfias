@@ -5,6 +5,7 @@ export default function ManualLayout() {
         <Stack
             screenOptions={{
                 headerShown: false,
+                freezeOnBlur: false,
             }}
         />
     );

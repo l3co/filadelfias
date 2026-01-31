@@ -10,6 +10,7 @@ export default function PublicLayout() {
         <Tabs
             screenOptions={{
                 headerShown: false,
+                freezeOnBlur: false,
                 tabBarActiveTintColor: colors.primary[600],
                 tabBarInactiveTintColor: colors.slate[400],
                 tabBarStyle: {

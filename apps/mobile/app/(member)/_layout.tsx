@@ -16,6 +16,7 @@ export default function MemberLayout() {
             <Tabs
                 screenOptions={{
                     headerShown: false,
+                    freezeOnBlur: false,
                     tabBarActiveTintColor: '#10b981',
                     tabBarInactiveTintColor: '#94a3b8',
                     tabBarStyle: {

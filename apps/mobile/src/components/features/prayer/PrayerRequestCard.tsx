@@ -90,7 +90,7 @@ export const PrayerRequestCard = memo(function PrayerRequestCard({
                     {item.prayer_count} {item.prayer_count === 1 ? 'pessoa orou' : 'pessoas oraram'}
                 </Text>
                 
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     {isMyRequest && (
                         <Pressable
                             onPress={onDelete}

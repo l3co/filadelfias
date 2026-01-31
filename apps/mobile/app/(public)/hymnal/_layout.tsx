@@ -5,6 +5,7 @@ export default function HymnalLayout() {
         <Stack
             screenOptions={{
                 headerShown: false,
+                freezeOnBlur: false,
             }}
         />
     );

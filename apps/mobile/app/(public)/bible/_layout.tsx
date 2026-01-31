@@ -5,6 +5,7 @@ export default function BibleLayout() {
         <Stack
             screenOptions={{
                 headerShown: false,
+                freezeOnBlur: false,
             }}
         />
     );

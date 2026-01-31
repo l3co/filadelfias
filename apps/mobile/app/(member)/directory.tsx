@@ -144,7 +144,7 @@ export default function DirectoryScreen() {
                     <ScrollView 
                         horizontal 
                         showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={{ gap: 8 }}
+                        contentContainerStyle={{ }}
                     >
                         {officeFilters.map((filter) => {
                             const isActive = officeFilter === filter.value;
@@ -166,6 +166,7 @@ export default function DirectoryScreen() {
                                         backgroundColor: isActive ? theme.bg : '#f8fafc',
                                         borderWidth: isActive ? 1.5 : 1,
                                         borderColor: isActive ? theme.text + '40' : '#e2e8f0',
+                                        marginRight: 8,
                                     }}
                                 >
                                     <Text 

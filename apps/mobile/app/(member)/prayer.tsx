@@ -94,10 +94,6 @@ export default function PrayerScreen() {
         deleteMutation.mutate(requestId);
     };
 
-    if (isLoading) {
-        return <LoadingScreen message="Carregando pedidos..." />;
-    }
-
     const renderRequest = useCallback(({ item }: { item: PrayerRequest }) => {
         const isMyRequest = item.member_id === user?.id;
         const hasPrayed = user?.id ? item.prayed_by?.includes(user.id) : false;
@@ -113,6 +109,10 @@ export default function PrayerScreen() {
             />
         );
     }, [user?.id, prayMutation, deleteMutation.isPending]);
+
+    if (isLoading) {
+        return <LoadingScreen message="Carregando pedidos..." />;
+    }
 
     return (
         <View style={{ flex: 1, backgroundColor: '#f8fafc', paddingTop: insets.top }}>

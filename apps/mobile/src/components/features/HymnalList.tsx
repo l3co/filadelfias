@@ -102,7 +102,7 @@ export function HymnalList({ topPadding = 0 }: HymnalListProps) {
                 <ScrollView 
                     horizontal 
                     showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={{ flexDirection: 'row', gap: 8 }}
+                    contentContainerStyle={{ flexDirection: 'row' }}
                 >
                     {categories.map((cat) => (
                         <Pressable
@@ -115,6 +115,7 @@ export function HymnalList({ topPadding = 0 }: HymnalListProps) {
                                 backgroundColor: category === cat.id ? '#8b5cf6' : '#ffffff',
                                 borderWidth: category === cat.id ? 0 : 1,
                                 borderColor: '#e2e8f0',
+                                marginRight: 8,
                             }}
                         >
                             <Text

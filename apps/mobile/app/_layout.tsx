@@ -60,7 +60,14 @@ export default function RootLayout() {
     return (
         <SafeAreaProvider>
             <QueryClientProvider client={queryClient}>
-                <Stack screenOptions={{ headerShown: false }} />
+                <Stack 
+                    screenOptions={{ 
+                        headerShown: false,
+                        // Workaround para bug do Fabric no Android
+                        // Desabilita o detach de telas inativas para evitar o erro addViewAt
+                        freezeOnBlur: false,
+                    }} 
+                />
             </QueryClientProvider>
         </SafeAreaProvider>
     );

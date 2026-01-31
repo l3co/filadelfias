@@ -82,7 +82,7 @@ export const CreatePrayerInput = forwardRef<TextInput, CreatePrayerInputProps>(
                         horizontal 
                         showsHorizontalScrollIndicator={false}
                         style={{ marginBottom: 10 }}
-                        contentContainerStyle={{ gap: 6 }}
+                        contentContainerStyle={{ }}
                     >
                         {Object.entries(CATEGORY_LABELS).map(([key, { label, bg, text }]) => (
                             <Pressable
@@ -93,6 +93,7 @@ export const CreatePrayerInput = forwardRef<TextInput, CreatePrayerInputProps>(
                                     paddingVertical: 6,
                                     borderRadius: 14,
                                     backgroundColor: category === key ? bg : '#f1f5f9',
+                                    marginRight: 6,
                                     borderWidth: category === key ? 1 : 0,
                                     borderColor: text,
                                 }}

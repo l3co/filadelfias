@@ -68,7 +68,7 @@ export default function MemberHomeScreen() {
                     </View>
 
                     {/* Notificações e Avatar */}
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                         <Pressable style={{ padding: 8, position: 'relative' }}>
                             <Bell size={22} color="white" />
                             <View style={{ 

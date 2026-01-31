@@ -81,7 +81,7 @@ export function Header({
                 </View>
 
                 {/* Right */}
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     {showNotifications && (
                         <Pressable 
                             accessibilityLabel="Notificações"

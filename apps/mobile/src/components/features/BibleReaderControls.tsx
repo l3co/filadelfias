@@ -1,8 +1,9 @@
 import { View, Text, Pressable, Modal, ScrollView, StatusBar, Platform } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Check } from 'lucide-react-native';
+import { Check, Minus, Plus, Moon, Sun } from 'lucide-react-native';
 import { bibleService } from '@/services/bible';
+import { colors } from '@/constants/colors';
 
 interface BibleReaderControlsProps {
     visible: boolean;
@@ -75,7 +76,7 @@ export function BibleReaderControls({
                     borderBottomColor: borderColor,
                 }}>
                     <Text style={{ fontSize: 20, fontWeight: '700', color: textColor }}>
-                        Selecionar Versão
+                        Configurações
                     </Text>
                     <Pressable 
                         onPress={onClose} 
@@ -90,8 +91,106 @@ export function BibleReaderControls({
                     </Pressable>
                 </View>
 
+                {/* Controles de Leitura */}
+                <View style={{ 
+                    paddingHorizontal: 20, 
+                    paddingVertical: 16,
+                    borderBottomWidth: 1,
+                    borderBottomColor: borderColor,
+                }}>
+                    {/* Tamanho da Fonte */}
+                    <View style={{ marginBottom: 16 }}>
+                        <Text style={{ fontSize: 14, fontWeight: '600', color: subtextColor, marginBottom: 12 }}>
+                            Tamanho da Fonte
+                        </Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                            <Pressable
+                                onPress={onFontDecrease}
+                                style={{
+                                    width: 44,
+                                    height: 44,
+                                    borderRadius: 22,
+                                    backgroundColor: isDarkMode ? '#334155' : '#f1f5f9',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    marginRight: 16,
+                                }}
+                            >
+                                <Minus size={20} color={textColor} />
+                            </Pressable>
+                            <Text style={{ fontSize: 18, fontWeight: '700', color: textColor, minWidth: 40, textAlign: 'center' }}>
+                                {fontSize}
+                            </Text>
+                            <Pressable
+                                onPress={onFontIncrease}
+                                style={{
+                                    width: 44,
+                                    height: 44,
+                                    borderRadius: 22,
+                                    backgroundColor: isDarkMode ? '#334155' : '#f1f5f9',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    marginLeft: 16,
+                                }}
+                            >
+                                <Plus size={20} color={textColor} />
+                            </Pressable>
+                        </View>
+                    </View>
+
+                    {/* Modo Escuro */}
+                    <Pressable
+                        onPress={onToggleDarkMode}
+                        style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            paddingVertical: 12,
+                        }}
+                    >
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            {isDarkMode ? (
+                                <Moon size={20} color={colors.primary[500]} />
+                            ) : (
+                                <Sun size={20} color="#f59e0b" />
+                            )}
+                            <Text style={{ fontSize: 16, color: textColor, marginLeft: 12 }}>
+                                Modo Escuro
+                            </Text>
+                        </View>
+                        <View style={{
+                            width: 50,
+                            height: 28,
+                            borderRadius: 14,
+                            backgroundColor: isDarkMode ? colors.primary[500] : '#e2e8f0',
+                            justifyContent: 'center',
+                            paddingHorizontal: 2,
+                        }}>
+                            <View style={{
+                                width: 24,
+                                height: 24,
+                                borderRadius: 12,
+                                backgroundColor: '#ffffff',
+                                alignSelf: isDarkMode ? 'flex-end' : 'flex-start',
+                            }} />
+                        </View>
+                    </Pressable>
+                </View>
+
+                {/* Título da seção de versões */}
+                <Text style={{ 
+                    fontSize: 14, 
+                    fontWeight: '600', 
+                    color: subtextColor, 
+                    paddingHorizontal: 20, 
+                    paddingTop: 16,
+                    paddingBottom: 8,
+                }}>
+                    Versão da Bíblia
+                </Text>
+
                 {/* Lista de versões */}
-                <ScrollView style={{ flex: 1, paddingHorizontal: 20, paddingTop: 16 }}>
+                <ScrollView style={{ flex: 1, paddingHorizontal: 20 }}>
                     {versions?.map((v) => {
                         const info = VERSION_INFO[v.id] || { name: v.name, description: v.description };
                         const isSelected = version === v.id;

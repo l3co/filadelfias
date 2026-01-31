@@ -31,6 +31,7 @@ class EcclesiasticalFunction(str, Enum):
     Secretario = "SECRETARIO"
     Evangelista = "EVANGELISTA"
     Missionario = "MISSIONARIO"
+    ProfessorEbd = "PROFESSOR_EBD"
 
 
 class Gender(str, Enum):

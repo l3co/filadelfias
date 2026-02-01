@@ -41,7 +41,7 @@ class EBDStudentRepository:
 
     async def create_student(self, tenant_id: str, class_id: str, **kwargs) -> dict:
         class_ref = self._get_class_ref(tenant_id, class_id)
-        
+
         # Verify class exists
         if not class_ref.get().exists:
             raise ValueError("Class not found")
@@ -56,7 +56,7 @@ class EBDStudentRepository:
 
     async def get_by_class(self, tenant_id: str, class_id: str) -> List[dict]:
         class_ref = self._get_class_ref(tenant_id, class_id)
-        
+
         # Verify class exists
         if not class_ref.get().exists:
             return []
@@ -83,7 +83,7 @@ class EBDStudentRepository:
 
     async def enroll_student(self, tenant_id: str, class_id: str, member_id: str, role: str = "STUDENT") -> dict:
         class_ref = self._get_class_ref(tenant_id, class_id)
-        
+
         # Verify class exists
         if not class_ref.get().exists:
             raise ValueError("Class not found")
@@ -103,7 +103,7 @@ class EBDStudentRepository:
 
     async def remove_student(self, tenant_id: str, class_id: str, student_id: str) -> bool:
         class_ref = self._get_class_ref(tenant_id, class_id)
-        
+
         # Verify class exists
         if not class_ref.get().exists:
             return False
@@ -173,7 +173,7 @@ class EBDLessonRepository:
 
     async def create_lesson(self, tenant_id: str, class_id: str, **kwargs) -> dict:
         class_ref = self._get_class_ref(tenant_id, class_id)
-        
+
         # Verify class exists
         if not class_ref.get().exists:
             raise ValueError("EBD Class not found")
@@ -204,11 +204,11 @@ class EBDLessonRepository:
 
     async def get_by_class(self, tenant_id: str, class_id: str) -> List[dict]:
         class_ref = self._get_class_ref(tenant_id, class_id)
-        
+
         # Verify class exists
         if not class_ref.get().exists:
             return []
-        
+
         return [doc.to_dict() for doc in class_ref.collection("lessons").stream()]
 
 
@@ -230,7 +230,7 @@ class EBDCommentRepository:
 
     async def create_comment(self, tenant_id: str, class_id: str, lesson_id: str, member_id: str, content: str, parent_id: str = None) -> dict:
         lesson_ref = self._get_lesson_ref(tenant_id, class_id, lesson_id)
-        
+
         # Verify lesson exists
         if not lesson_ref.get().exists:
             raise ValueError("Lesson not found")
@@ -251,17 +251,17 @@ class EBDCommentRepository:
 
     async def get_by_lesson(self, tenant_id: str, class_id: str, lesson_id: str) -> List[dict]:
         lesson_ref = self._get_lesson_ref(tenant_id, class_id, lesson_id)
-        
+
         # Verify lesson exists
         if not lesson_ref.get().exists:
             return []
-        
+
         comments = [doc.to_dict() for doc in lesson_ref.collection("comments").stream()]
         return sorted(comments, key=lambda x: x.get("created_at", datetime.min), reverse=False)
 
     async def delete_comment(self, tenant_id: str, class_id: str, lesson_id: str, comment_id: str) -> bool:
         lesson_ref = self._get_lesson_ref(tenant_id, class_id, lesson_id)
-        
+
         # Verify lesson exists
         if not lesson_ref.get().exists:
             return False

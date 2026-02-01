@@ -83,7 +83,7 @@ async def get_my_class(
         return None
 
     # Get lessons for this class
-    lessons = await ebd_lesson_repository.get_by_class(ebd_class["id"])
+    lessons = await ebd_lesson_repository.get_by_class(tenant_id, ebd_class["id"])
     ebd_class["lessons"] = lessons
 
     return ebd_class
@@ -102,6 +102,7 @@ async def enroll_student(
     Requires: Pastor, Presbítero, Diácono (ebd:create permission).
     """
     return await ebd_student_repository.enroll_student(
+        tenant_id=tenant_id,
         class_id=class_id,
         member_id=str(data.member_id),
     )
@@ -117,7 +118,7 @@ async def list_students(
     List students in a class.
     Requires: ebd:view permission.
     """
-    return await ebd_student_repository.get_by_class(class_id)
+    return await ebd_student_repository.get_by_class(tenant_id, class_id)
 
 
 @router.delete("/classes/{class_id}/students/{student_id}")
@@ -131,7 +132,7 @@ async def remove_student(
     Remove a student from a class.
     Requires: ebd:manage permission.
     """
-    await ebd_student_repository.remove_student(class_id, student_id)
+    await ebd_student_repository.remove_student(tenant_id, class_id, student_id)
     return {"message": "Student removed successfully"}
 
 
@@ -148,6 +149,7 @@ async def create_lesson(
     Requires: Pastor, Presbítero, Diácono (ebd:create permission).
     """
     return await ebd_lesson_repository.create_lesson(
+        tenant_id=tenant_id,
         class_id=class_id,
         title=data.topic,
         lesson_date=data.date,
@@ -166,7 +168,7 @@ async def list_lessons(
     List lessons for a class.
     Requires: ebd:view permission.
     """
-    return await ebd_lesson_repository.get_by_class(class_id)
+    return await ebd_lesson_repository.get_by_class(tenant_id, class_id)
 
 
 # Comments
@@ -175,6 +177,7 @@ async def create_comment(
     lesson_id: str,
     data: EBDCommentCreate,
     tenant_id: str = Query(..., description="ID of the tenant"),
+    class_id: str = Query(..., description="ID of the EBD class"),
     auth_context: dict = Depends(require_view_ebd),
 ):
     """
@@ -182,6 +185,8 @@ async def create_comment(
     Requires: ebd:view permission (any enrolled member can comment).
     """
     return await ebd_comment_repository.create_comment(
+        tenant_id=tenant_id,
+        class_id=class_id,
         lesson_id=lesson_id,
         member_id=str(data.member_id),
         content=data.content,
@@ -193,13 +198,14 @@ async def create_comment(
 async def list_comments(
     lesson_id: str,
     tenant_id: str = Query(..., description="ID of the tenant"),
+    class_id: str = Query(..., description="ID of the EBD class"),
     auth_context: dict = Depends(require_view_ebd),
 ):
     """
     List comments for a lesson.
     Requires: ebd:view permission.
     """
-    return await ebd_comment_repository.get_by_lesson(lesson_id)
+    return await ebd_comment_repository.get_by_lesson(tenant_id, class_id, lesson_id)
 
 
 @router.delete("/lessons/{lesson_id}/comments/{comment_id}")
@@ -207,11 +213,12 @@ async def delete_comment(
     lesson_id: str,
     comment_id: str,
     tenant_id: str = Query(..., description="ID of the tenant"),
+    class_id: str = Query(..., description="ID of the EBD class"),
     auth_context: dict = Depends(require_manage_ebd),
 ):
     """
     Delete a comment.
     Requires: ebd:manage permission.
     """
-    await ebd_comment_repository.delete_comment(lesson_id, comment_id)
+    await ebd_comment_repository.delete_comment(tenant_id, class_id, lesson_id, comment_id)
     return {"message": "Comment deleted successfully"}

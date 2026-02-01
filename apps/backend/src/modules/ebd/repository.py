@@ -35,28 +35,34 @@ class EBDStudentRepository:
     def db(self):
         return get_db()
 
-    async def create_student(self, class_id: str, **kwargs) -> dict:
-        # Find the class document to add student as subcollection
-        classes = self.db.collection_group("ebd_classes").where("id", "==", str(class_id)).limit(1).get()
-        if not classes:
+    def _get_class_ref(self, tenant_id: str, class_id: str):
+        """Get reference to a specific class document."""
+        return self.db.collection("tenants").document(str(tenant_id)).collection("ebd_classes").document(str(class_id))
+
+    async def create_student(self, tenant_id: str, class_id: str, **kwargs) -> dict:
+        class_ref = self._get_class_ref(tenant_id, class_id)
+        
+        # Verify class exists
+        if not class_ref.get().exists:
             raise ValueError("Class not found")
 
-        class_doc = classes[0]
         doc_id = str(uuid.uuid4())
 
         data = kwargs.copy()
         data.update({"id": doc_id, "class_id": str(class_id), "created_at": datetime.utcnow()})
 
-        class_doc.reference.collection("students").document(doc_id).set(data)
+        class_ref.collection("students").document(doc_id).set(data)
         return data
 
-    async def get_by_class(self, class_id: str) -> List[dict]:
-        classes = self.db.collection_group("ebd_classes").where("id", "==", str(class_id)).limit(1).get()
-        if not classes:
+    async def get_by_class(self, tenant_id: str, class_id: str) -> List[dict]:
+        class_ref = self._get_class_ref(tenant_id, class_id)
+        
+        # Verify class exists
+        if not class_ref.get().exists:
             return []
 
         results = []
-        for doc in classes[0].reference.collection("students").stream():
+        for doc in class_ref.collection("students").stream():
             data = doc.to_dict()
 
             # Map legacy/incorrect fields
@@ -75,12 +81,13 @@ class EBDStudentRepository:
 
         return results
 
-    async def enroll_student(self, class_id: str, member_id: str, role: str = "STUDENT") -> dict:
-        classes = self.db.collection_group("ebd_classes").where("id", "==", str(class_id)).limit(1).get()
-        if not classes:
+    async def enroll_student(self, tenant_id: str, class_id: str, member_id: str, role: str = "STUDENT") -> dict:
+        class_ref = self._get_class_ref(tenant_id, class_id)
+        
+        # Verify class exists
+        if not class_ref.get().exists:
             raise ValueError("Class not found")
 
-        class_doc = classes[0]
         doc_id = str(uuid.uuid4())
 
         data = {
@@ -91,16 +98,17 @@ class EBDStudentRepository:
             "enrolled_at": datetime.utcnow(),
         }
 
-        class_doc.reference.collection("students").document(doc_id).set(data)
+        class_ref.collection("students").document(doc_id).set(data)
         return data
 
-    async def remove_student(self, class_id: str, student_id: str) -> bool:
-        classes = self.db.collection_group("ebd_classes").where("id", "==", str(class_id)).limit(1).get()
-        if not classes:
+    async def remove_student(self, tenant_id: str, class_id: str, student_id: str) -> bool:
+        class_ref = self._get_class_ref(tenant_id, class_id)
+        
+        # Verify class exists
+        if not class_ref.get().exists:
             return False
 
-        class_doc = classes[0]
-        student_ref = class_doc.reference.collection("students").document(student_id)
+        student_ref = class_ref.collection("students").document(student_id)
         if student_ref.get().exists:
             student_ref.delete()
             return True
@@ -159,12 +167,17 @@ class EBDLessonRepository:
     def db(self):
         return get_db()
 
-    async def create_lesson(self, class_id: str, **kwargs) -> dict:
-        classes = self.db.collection_group("ebd_classes").where("id", "==", str(class_id)).limit(1).get()
-        if not classes:
+    def _get_class_ref(self, tenant_id: str, class_id: str):
+        """Get reference to a specific class document."""
+        return self.db.collection("tenants").document(str(tenant_id)).collection("ebd_classes").document(str(class_id))
+
+    async def create_lesson(self, tenant_id: str, class_id: str, **kwargs) -> dict:
+        class_ref = self._get_class_ref(tenant_id, class_id)
+        
+        # Verify class exists
+        if not class_ref.get().exists:
             raise ValueError("EBD Class not found")
 
-        class_doc = classes[0]
         doc_id = str(uuid.uuid4())
 
         data = kwargs.copy()
@@ -186,14 +199,17 @@ class EBDLessonRepository:
 
         data.update({"id": doc_id, "ebd_class_id": str(class_id), "created_at": datetime.utcnow()})
 
-        class_doc.reference.collection("lessons").document(doc_id).set(data)
+        class_ref.collection("lessons").document(doc_id).set(data)
         return data
 
-    async def get_by_class(self, class_id: str) -> List[dict]:
-        classes = self.db.collection_group("ebd_classes").where("id", "==", str(class_id)).limit(1).get()
-        if not classes:
+    async def get_by_class(self, tenant_id: str, class_id: str) -> List[dict]:
+        class_ref = self._get_class_ref(tenant_id, class_id)
+        
+        # Verify class exists
+        if not class_ref.get().exists:
             return []
-        return [doc.to_dict() for doc in classes[0].reference.collection("lessons").stream()]
+        
+        return [doc.to_dict() for doc in class_ref.collection("lessons").stream()]
 
 
 class EBDCommentRepository:
@@ -201,13 +217,24 @@ class EBDCommentRepository:
     def db(self):
         return get_db()
 
-    async def create_comment(self, lesson_id: str, member_id: str, content: str, parent_id: str = None) -> dict:
-        # Find the lesson to add comment as subcollection
-        lessons = self.db.collection_group("lessons").where("id", "==", str(lesson_id)).limit(1).get()
-        if not lessons:
+    def _get_lesson_ref(self, tenant_id: str, class_id: str, lesson_id: str):
+        """Get reference to a specific lesson document."""
+        return (
+            self.db.collection("tenants")
+            .document(str(tenant_id))
+            .collection("ebd_classes")
+            .document(str(class_id))
+            .collection("lessons")
+            .document(str(lesson_id))
+        )
+
+    async def create_comment(self, tenant_id: str, class_id: str, lesson_id: str, member_id: str, content: str, parent_id: str = None) -> dict:
+        lesson_ref = self._get_lesson_ref(tenant_id, class_id, lesson_id)
+        
+        # Verify lesson exists
+        if not lesson_ref.get().exists:
             raise ValueError("Lesson not found")
 
-        lesson_doc = lessons[0]
         doc_id = str(uuid.uuid4())
 
         data = {
@@ -219,22 +246,27 @@ class EBDCommentRepository:
             "created_at": datetime.utcnow(),
         }
 
-        lesson_doc.reference.collection("comments").document(doc_id).set(data)
+        lesson_ref.collection("comments").document(doc_id).set(data)
         return data
 
-    async def get_by_lesson(self, lesson_id: str) -> List[dict]:
-        lessons = self.db.collection_group("lessons").where("id", "==", str(lesson_id)).limit(1).get()
-        if not lessons:
+    async def get_by_lesson(self, tenant_id: str, class_id: str, lesson_id: str) -> List[dict]:
+        lesson_ref = self._get_lesson_ref(tenant_id, class_id, lesson_id)
+        
+        # Verify lesson exists
+        if not lesson_ref.get().exists:
             return []
-        comments = [doc.to_dict() for doc in lessons[0].reference.collection("comments").stream()]
+        
+        comments = [doc.to_dict() for doc in lesson_ref.collection("comments").stream()]
         return sorted(comments, key=lambda x: x.get("created_at", datetime.min), reverse=False)
 
-    async def delete_comment(self, lesson_id: str, comment_id: str) -> bool:
-        lessons = self.db.collection_group("lessons").where("id", "==", str(lesson_id)).limit(1).get()
-        if not lessons:
+    async def delete_comment(self, tenant_id: str, class_id: str, lesson_id: str, comment_id: str) -> bool:
+        lesson_ref = self._get_lesson_ref(tenant_id, class_id, lesson_id)
+        
+        # Verify lesson exists
+        if not lesson_ref.get().exists:
             return False
 
-        comment_ref = lessons[0].reference.collection("comments").document(comment_id)
+        comment_ref = lesson_ref.collection("comments").document(comment_id)
         if comment_ref.get().exists:
             comment_ref.delete()
             return True

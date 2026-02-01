@@ -3,8 +3,7 @@ Labels em pt-BR para todos os enums do sistema.
 Fonte única de verdade para internacionalização.
 """
 
-from .enums import (EcclesiasticalFunction, EcclesiasticalOffice, Gender,
-                    MaritalStatus, MemberStatus)
+from .enums import EcclesiasticalFunction, EcclesiasticalOffice, Gender, MaritalStatus, MemberStatus
 
 OFFICE_LABELS: dict[EcclesiasticalOffice, str] = {
     EcclesiasticalOffice.Membro: "Membro",

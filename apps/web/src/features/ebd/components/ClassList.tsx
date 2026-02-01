@@ -61,14 +61,14 @@ export function ClassList({ classes, isLoading }: ClassListProps) {
                         </div>
                     </CardContent>
                     <CardFooter className="grid grid-cols-2 gap-2">
-                        <Link 
-                            to={`/app/ebd/${c.id}?tab=students`}
+                        <Link
+                            to={`/admin/education/${c.id}?tab=students`}
                             className={buttonVariants({ variant: "outline", size: "sm", className: "w-full gap-2" })}
                         >
                             <GraduationCap size={14} /> Alunos
                         </Link>
-                        <Link 
-                            to={`/app/ebd/${c.id}?tab=lessons`}
+                        <Link
+                            to={`/admin/education/${c.id}?tab=lessons`}
                             className={buttonVariants({ variant: "outline", size: "sm", className: "w-full gap-2" })}
                         >
                             <BookOpen size={14} /> Lições

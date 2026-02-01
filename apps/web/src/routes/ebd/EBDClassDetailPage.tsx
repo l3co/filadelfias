@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, GraduationCap, BookOpen, Plus, Users, Calendar, MapPin, Trash2, ExternalLink } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -17,11 +17,22 @@ import { LessonComments } from '../../features/ebd/components/LessonComments';
 
 export function EBDClassDetailPage() {
     const { classId } = useParams<{ classId: string }>();
+    const [searchParams] = useSearchParams();
     const tenant = useCurrentTenant();
-    const [activeTab, setActiveTab] = useState<string>('students');
+    const [activeTab, setActiveTab] = useState<string>(() => {
+        return searchParams.get('tab') || 'students';
+    });
     const [isEnrollDialogOpen, setIsEnrollDialogOpen] = useState(false);
     const [isLessonDialogOpen, setIsLessonDialogOpen] = useState(false);
     const [expandedLessonId, setExpandedLessonId] = useState<string | null>(null);
+
+    // Atualizar tab quando a query string mudar
+    useEffect(() => {
+        const tab = searchParams.get('tab');
+        if (tab) {
+            setActiveTab(tab);
+        }
+    }, [searchParams]);
 
     const { data: classes } = useQuery({
         queryKey: ['ebd-classes', tenant?.id],

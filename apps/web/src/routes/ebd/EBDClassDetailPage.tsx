@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, Link, useSearchParams } from 'react-router-dom';
+import { useParams, Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, GraduationCap, BookOpen, Plus, Users, Calendar, MapPin, Trash2, ExternalLink } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -18,11 +18,16 @@ import { LessonComments } from '../../features/ebd/components/LessonComments';
 export function EBDClassDetailPage() {
     const { classId } = useParams<{ classId: string }>();
     const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
     const tenant = useCurrentTenant();
     const activeTab = searchParams.get('tab') || 'students';
     const [isEnrollDialogOpen, setIsEnrollDialogOpen] = useState(false);
     const [isLessonDialogOpen, setIsLessonDialogOpen] = useState(false);
     const [expandedLessonId, setExpandedLessonId] = useState<string | null>(null);
+
+    const handleTabChange = (value: string) => {
+        navigate(`/admin/education/${classId}?tab=${value}`, { replace: true });
+    };
 
     const { data: classes } = useQuery({
         queryKey: ['ebd-classes', tenant?.id],
@@ -113,7 +118,7 @@ export function EBDClassDetailPage() {
             </div>
 
             {/* Tabs */}
-            <Tabs value={activeTab}>
+            <Tabs value={activeTab} onValueChange={handleTabChange}>
                 <TabsList>
                     <TabsTrigger value="students" className="gap-2">
                         <GraduationCap size={16} /> Alunos ({students?.length || 0})

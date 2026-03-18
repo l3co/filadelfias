@@ -1,7 +1,7 @@
 """
 Seed script for E2E testing.
 
-This script populates the Firestore database with test data required
+This script populates the PostgreSQL database with test data required
 for running integration E2E tests.
 
 Usage:
@@ -18,9 +18,7 @@ import os
 os.environ.setdefault("ENVIRONMENT", "development")
 
 print("DEBUG: Script Start")
-print(f"DEBUG: FIRESTORE_EMULATOR_HOST={os.getenv('FIRESTORE_EMULATOR_HOST')}")
-print(f"DEBUG: PROJECT_ID={os.getenv('PROJECT_ID')}")
-print(f"DEBUG: GCLOUD_PROJECT={os.getenv('GCLOUD_PROJECT')}")
+print(f"DEBUG: DATABASE_URL={os.getenv('DATABASE_URL')}")
 
 # Defer imports to avoid early initialization
 from src.infra.repositories.member_repository import member_repository  # noqa: E402

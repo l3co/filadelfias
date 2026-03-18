@@ -1,39 +1,37 @@
 services:
-  # 1. Firestore Emulator
-  firestore-test:
-    image: mtlynch/firestore-emulator
+  postgres-test:
+    image: postgres:16-alpine
     environment:
-      - FIRESTORE_PROJECT_ID=filadelfias-test
-      - PORT=8080
+      - POSTGRES_DB=filadelfias
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
     ports:
-      - "8082:8080"
+      - "5434:5432"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d filadelfias"]
       interval: 2s
       timeout: 5s
       retries: 15
       start_period: 5s
 
-  # 2. Backend API (runs seed on startup)
+  # 1. Backend API (runs seed on startup)
   backend-test:
     build:
       context: ./apps/backend
       dockerfile: Dockerfile
     command: >
-      sh -c "poetry run python src/scripts/seed_e2e_data.py &&
+      sh -c "alembic upgrade head &&
+             poetry run python src/scripts/seed_e2e_data.py &&
              poetry run uvicorn src.main:app --host 0.0.0.0 --port 8000"
     environment:
-      - FIRESTORE_EMULATOR_HOST=firestore-test:8080
-      - PROJECT_ID=filadelfias-test
-      - GOOGLE_CLOUD_PROJECT=filadelfias-test
-      - GCLOUD_PROJECT=filadelfias-test
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres-test:5432/filadelfias
       - ENVIRONMENT=test
       - SECRET_KEY=test-secret-key-for-e2e
       - DEBUG=true
       - CORS_ORIGINS_STR=http://localhost:5173
       - PYTHONPATH=/app
     depends_on:
-      firestore-test:
+      postgres-test:
         condition: service_healthy
     ports:
       - "8000:8000"
@@ -44,7 +42,7 @@ services:
       retries: 15
       start_period: 3s
 
-  # 3. Frontend Web App
+  # 2. Frontend Web App
   web-test:
     build:
       context: ./apps/web

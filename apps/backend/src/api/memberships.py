@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from src.api.auth import get_current_user
 from src.domain.schemas import MembershipResponse, MembershipUpdateRole
-from src.infra.repositories import membership_repository
+from src.infra.repositories import membership_repository, tenant_repository
 from src.middleware.permissions import verify_permission
 
 router = APIRouter(tags=["Memberships"])
@@ -19,7 +19,18 @@ async def list_memberships(
     Used to manage system access roles.
     """
     await verify_permission(tenant_id, current_user, "settings", "manage")
-    return await membership_repository.get_tenant_memberships(tenant_id)
+    tenant = await tenant_repository.get(tenant_id)
+    memberships = await membership_repository.get_tenant_memberships(tenant_id)
+    return [
+        {
+            "id": membership["id"],
+            "tenant": tenant,
+            "role": membership["role"],
+            "status": membership["status"],
+            "joined_at": membership["joined_at"],
+        }
+        for membership in memberships
+    ]
 
 
 @router.put("/tenants/{tenant_id}/memberships/{user_id}/role", response_model=MembershipResponse)
@@ -45,4 +56,11 @@ async def update_membership_role(
 
     # Return updated
     updated = await membership_repository.get_by_user_and_tenant(user_id, tenant_id)
-    return updated
+    tenant = await tenant_repository.get(tenant_id)
+    return {
+        "id": updated["id"],
+        "tenant": tenant,
+        "role": updated["role"],
+        "status": updated["status"],
+        "joined_at": updated["joined_at"],
+    }

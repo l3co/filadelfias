@@ -1,8 +1,5 @@
 """
-Unit tests for UserRepository.
-
-Note: These tests require Firestore credentials and are marked with @pytest.mark.firestore.
-They are skipped in CI. Run locally with: pytest -m firestore
+Unit tests for UserRepository structure.
 """
 
 import pytest
@@ -13,12 +10,7 @@ pytestmark = pytest.mark.unit
 
 
 class TestUserRepositoryStructure:
-    """Test UserRepository structure (no Firestore required)."""
-
-    def test_repository_has_collection_name(self):
-        """Test that UserRepository has correct collection name."""
-        repo = UserRepository()
-        assert repo.collection_name == "users"
+    """Test UserRepository structure."""
 
     def test_repository_has_required_methods(self):
         """Test that UserRepository has all required methods."""

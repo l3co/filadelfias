@@ -202,7 +202,7 @@ async def change_password(
     Raises:
         HTTPException: If current password is incorrect
     """
-    from src.infra.security import hash_password
+    from src.infra.security import get_password_hash
 
     # Verify current password
     if not verify_password(current_password, current_user.get("password_hash", "")):
@@ -213,7 +213,7 @@ async def change_password(
         )
 
     # Update password
-    new_hash = hash_password(new_password)
+    new_hash = get_password_hash(new_password)
     await user_repository.update_password(current_user["id"], new_hash)
 
     log_info("Password changed successfully", user_id=current_user["id"])

@@ -1,0 +1,46 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: alembic-migrate
+  namespace: filadelfias
+spec:
+  ttlSecondsAfterFinished: 3600
+  backoffLimit: 0
+  template:
+    spec:
+      restartPolicy: Never
+      imagePullSecrets:
+        - name: ghcr-secret
+      containers:
+        - name: migration
+          image: ghcr.io/l3co/filadelfias-backend:latest
+          imagePullPolicy: Always
+          command:
+            - /bin/sh
+            - -c
+            - alembic upgrade head
+          envFrom:
+            - configMapRef:
+                name: filadelfias-config
+            - secretRef:
+                name: filadelfias-secret
+          env:
+            - name: DATABASE_URL
+              value: postgresql+asyncpg://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres:5432/filadelfias
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: password
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"

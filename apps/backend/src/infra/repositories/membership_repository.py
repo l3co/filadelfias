@@ -1,34 +1,60 @@
 """
-User Church Membership repository for Firestore.
+Membership repository backed by PostgreSQL.
 """
 
-from datetime import datetime
+from __future__ import annotations
+
+from datetime import datetime, timezone
 from typing import Optional
 
-from src.infra.firestore_repository import FirestoreRepository
+from sqlalchemy import select
+
+from src.infra.db.models import MembershipModel
+from src.infra.repositories.sqlalchemy_repository import SQLAlchemyRepository
 
 
-class MembershipRepository(FirestoreRepository):
-    """Repository for user_memberships collection."""
+class MembershipRepository(SQLAlchemyRepository):
+    fields = [
+        "id",
+        "user_id",
+        "tenant_id",
+        "role",
+        "status",
+        "joined_at",
+        "invited_by",
+        "created_at",
+        "updated_at",
+    ]
 
-    def __init__(self):
-        super().__init__("user_memberships")
+    async def get(self, membership_id: str) -> Optional[dict]:
+        async with self.session() as session:
+            membership = await session.get(MembershipModel, self._maybe_uuid(membership_id))
+            return self._to_dict(membership, self.fields) if membership else None
 
     async def get_by_user_and_tenant(self, user_id: str, tenant_id: str) -> Optional[dict]:
-        """Get membership by user and tenant."""
-        memberships = await self.query("user_id", "==", user_id)
-        for m in memberships:
-            if m.get("tenant_id") == tenant_id:
-                return m
-        return None
+        async with self.session() as session:
+            membership = await self._first(
+                session,
+                select(MembershipModel).where(
+                    MembershipModel.user_id == self._maybe_uuid(user_id),
+                    MembershipModel.tenant_id == self._maybe_uuid(tenant_id),
+                ),
+            )
+            return self._to_dict(membership, self.fields) if membership else None
 
     async def get_user_memberships(self, user_id: str) -> list[dict]:
-        """Get all memberships for a user."""
-        return await self.query("user_id", "==", user_id)
+        async with self.session() as session:
+            result = await session.execute(
+                select(MembershipModel).where(MembershipModel.user_id == self._maybe_uuid(user_id))
+            )
+            return [self._to_dict(item, self.fields) for item in result.scalars().all()]
 
     async def get_tenant_memberships(self, tenant_id: str) -> list[dict]:
-        """Get all memberships for a tenant."""
-        return await self.query("tenant_id", "==", tenant_id)
+        async with self.session() as session:
+            result = await session.execute(
+                select(MembershipModel).where(MembershipModel.tenant_id == self._maybe_uuid(tenant_id))
+            )
+            return [self._to_dict(item, self.fields) for item in result.scalars().all()]
 
     async def create_membership(
         self,
@@ -38,25 +64,63 @@ class MembershipRepository(FirestoreRepository):
         status: str = "ACTIVE",
         invited_by: Optional[str] = None,
     ) -> dict:
-        """Create a new user-church membership."""
-        data = {
-            "user_id": user_id,
-            "tenant_id": tenant_id,
-            "role": role,
-            "status": status,
-            "joined_at": datetime.utcnow(),
-            "invited_by": invited_by,
-        }
-        return await self.create(data)
+        async with self.session() as session:
+            membership = MembershipModel(
+                user_id=self._maybe_uuid(user_id),
+                tenant_id=self._maybe_uuid(tenant_id),
+                role=role,
+                status=status,
+                invited_by=invited_by,
+                joined_at=datetime.now(timezone.utc),
+            )
+            session.add(membership)
+            await session.commit()
+            await session.refresh(membership)
+            return self._to_dict(membership, self.fields)
 
     async def update_role(self, membership_id: str, role: str) -> Optional[dict]:
-        """Update membership role."""
-        return await self.update(membership_id, {"role": role})
+        async with self.session() as session:
+            membership = await session.get(MembershipModel, self._maybe_uuid(membership_id))
+            if not membership:
+                return None
+            membership.role = role
+            await session.commit()
+            await session.refresh(membership)
+            return self._to_dict(membership, self.fields)
 
     async def update_status(self, membership_id: str, status: str) -> Optional[dict]:
-        """Update membership status."""
-        return await self.update(membership_id, {"status": status})
+        async with self.session() as session:
+            membership = await session.get(MembershipModel, self._maybe_uuid(membership_id))
+            if not membership:
+                return None
+            membership.status = status
+            await session.commit()
+            await session.refresh(membership)
+            return self._to_dict(membership, self.fields)
+
+    async def delete_by_user_and_tenant(self, user_id: str, tenant_id: str) -> bool:
+        async with self.session() as session:
+            membership = await self._first(
+                session,
+                select(MembershipModel).where(
+                    MembershipModel.user_id == self._maybe_uuid(user_id),
+                    MembershipModel.tenant_id == self._maybe_uuid(tenant_id),
+                ),
+            )
+            if not membership:
+                return False
+            await session.delete(membership)
+            await session.commit()
+            return True
+
+    async def delete(self, membership_id: str) -> bool:
+        async with self.session() as session:
+            membership = await session.get(MembershipModel, self._maybe_uuid(membership_id))
+            if not membership:
+                return False
+            await session.delete(membership)
+            await session.commit()
+            return True
 
 
-# Singleton instance
 membership_repository = MembershipRepository()

@@ -1,275 +1,245 @@
 import logging
-import uuid
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from typing import List
 
-from src.infra.firebase import get_db
+from sqlalchemy import select
+
+from src.infra.db.models import EBDClassModel, EBDCommentModel, EBDLessonModel, EBDStudentModel
+from src.infra.repositories.sqlalchemy_repository import SQLAlchemyRepository
 
 logger = logging.getLogger(__name__)
 
 
-class EBDClassRepository:
-    @property
-    def db(self):
-        return get_db()
-
-    def _get_collection(self, tenant_id: str):
-        return self.db.collection("tenants").document(str(tenant_id)).collection("ebd_classes")
+class EBDClassRepository(SQLAlchemyRepository):
+    fields = ["id", "tenant_id", "name", "description", "min_age", "max_age", "location", "created_at", "updated_at"]
 
     async def create_class(self, tenant_id: str, **kwargs) -> dict:
-        collection = self._get_collection(tenant_id)
-        doc_id = str(uuid.uuid4())
-
-        data = kwargs.copy()
-        data.update({"id": doc_id, "tenant_id": str(tenant_id), "created_at": datetime.utcnow()})
-
-        collection.document(doc_id).set(data)
-        return data
+        async with self.session() as session:
+            ebd_class = EBDClassModel(tenant_id=self._maybe_uuid(tenant_id), **kwargs)
+            session.add(ebd_class)
+            await session.commit()
+            await session.refresh(ebd_class)
+            return self._to_dict(ebd_class, self.fields)
 
     async def get_all(self, tenant_id: str) -> List[dict]:
-        return [doc.to_dict() for doc in self._get_collection(str(tenant_id)).stream()]
+        async with self.session() as session:
+            result = await session.execute(
+                select(EBDClassModel)
+                .where(EBDClassModel.tenant_id == self._maybe_uuid(tenant_id))
+                .order_by(EBDClassModel.name.asc())
+            )
+            return [self._to_dict(item, self.fields) for item in result.scalars().all()]
 
 
-class EBDStudentRepository:
-    @property
-    def db(self):
-        return get_db()
-
-    def _get_class_ref(self, tenant_id: str, class_id: str):
-        """Get reference to a specific class document."""
-        return self.db.collection("tenants").document(str(tenant_id)).collection("ebd_classes").document(str(class_id))
+class EBDStudentRepository(SQLAlchemyRepository):
+    fields = ["id", "ebd_class_id", "member_id", "role", "enrolled_at", "created_at", "updated_at"]
 
     async def create_student(self, tenant_id: str, class_id: str, **kwargs) -> dict:
-        class_ref = self._get_class_ref(tenant_id, class_id)
+        async with self.session() as session:
+            ebd_class = await self._first(
+                session,
+                select(EBDClassModel).where(
+                    EBDClassModel.tenant_id == self._maybe_uuid(tenant_id),
+                    EBDClassModel.id == self._maybe_uuid(class_id),
+                ),
+            )
+            if not ebd_class:
+                raise ValueError("Class not found")
 
-        # Verify class exists
-        if not class_ref.get().exists:
-            raise ValueError("Class not found")
-
-        doc_id = str(uuid.uuid4())
-
-        data = kwargs.copy()
-        data.update({"id": doc_id, "class_id": str(class_id), "created_at": datetime.utcnow()})
-
-        class_ref.collection("students").document(doc_id).set(data)
-        return data
+            student = EBDStudentModel(
+                tenant_id=ebd_class.tenant_id,
+                ebd_class_id=ebd_class.id,
+                member_id=str(kwargs["member_id"]),
+                role=kwargs.get("role", "STUDENT"),
+                enrolled_at=kwargs.get("enrolled_at", datetime.now(timezone.utc)),
+            )
+            session.add(student)
+            await session.commit()
+            await session.refresh(student)
+            return self._to_dict(student, self.fields)
 
     async def get_by_class(self, tenant_id: str, class_id: str) -> List[dict]:
-        class_ref = self._get_class_ref(tenant_id, class_id)
-
-        # Verify class exists
-        if not class_ref.get().exists:
-            return []
-
-        results = []
-        for doc in class_ref.collection("students").stream():
-            data = doc.to_dict()
-
-            # Map legacy/incorrect fields
-            if "ebd_class_id" not in data and "class_id" in data:
-                data["ebd_class_id"] = data["class_id"]
-
-            if "enrolled_at" not in data and "created_at" in data:
-                data["enrolled_at"] = data["created_at"]
-
-            if "member_id" not in data:
-                # If member_id is missing but we have an ID and name, likely the ID is the member_id
-                # (based on legacy data pattern observed)
-                data["member_id"] = data.get("id")
-
-            results.append(data)
-
-        return results
+        async with self.session() as session:
+            result = await session.execute(
+                select(EBDStudentModel).where(
+                    EBDStudentModel.tenant_id == self._maybe_uuid(tenant_id),
+                    EBDStudentModel.ebd_class_id == self._maybe_uuid(class_id),
+                )
+            )
+            return [self._to_dict(item, self.fields) for item in result.scalars().all()]
 
     async def enroll_student(self, tenant_id: str, class_id: str, member_id: str, role: str = "STUDENT") -> dict:
-        class_ref = self._get_class_ref(tenant_id, class_id)
-
-        # Verify class exists
-        if not class_ref.get().exists:
-            raise ValueError("Class not found")
-
-        doc_id = str(uuid.uuid4())
-
-        data = {
-            "id": doc_id,
-            "ebd_class_id": str(class_id),
-            "member_id": str(member_id),
-            "role": role,
-            "enrolled_at": datetime.utcnow(),
-        }
-
-        class_ref.collection("students").document(doc_id).set(data)
-        return data
+        return await self.create_student(
+            tenant_id,
+            class_id,
+            member_id=member_id,
+            role=role,
+            enrolled_at=datetime.now(timezone.utc),
+        )
 
     async def remove_student(self, tenant_id: str, class_id: str, student_id: str) -> bool:
-        class_ref = self._get_class_ref(tenant_id, class_id)
-
-        # Verify class exists
-        if not class_ref.get().exists:
-            return False
-
-        student_ref = class_ref.collection("students").document(student_id)
-        if student_ref.get().exists:
-            student_ref.delete()
+        async with self.session() as session:
+            student = await self._first(
+                session,
+                select(EBDStudentModel).where(
+                    EBDStudentModel.tenant_id == self._maybe_uuid(tenant_id),
+                    EBDStudentModel.ebd_class_id == self._maybe_uuid(class_id),
+                    EBDStudentModel.id == self._maybe_uuid(student_id),
+                ),
+            )
+            if not student:
+                return False
+            await session.delete(student)
+            await session.commit()
             return True
-        return False
 
     async def get_class_by_member(self, tenant_id: str, member_id: str) -> dict | None:
-        """Find the EBD class where a member is enrolled."""
-        # Get all classes for tenant
-        classes = self.db.collection("tenants").document(str(tenant_id)).collection("ebd_classes").stream()
-
-        # We need to list them to iterate multiple times if needed or just count
-        classes_list = list(classes)
-
-        for class_doc in classes_list:
-            # Check if member is enrolled in this class
-            # Strategy 1: Check by member_id field (standard)
-            students_query = (
-                class_doc.reference.collection("students").where("member_id", "==", str(member_id)).limit(1).get()
+        async with self.session() as session:
+            enrollment = await self._first(
+                session,
+                select(EBDStudentModel).where(
+                    EBDStudentModel.tenant_id == self._maybe_uuid(tenant_id),
+                    EBDStudentModel.member_id == str(member_id),
+                ),
             )
+            if not enrollment:
+                return None
 
-            if students_query:
-                student_doc = students_query[0]
-            else:
-                # Strategy 2: Check by document ID or legacy fields
-                student_doc = None
-                all_students = class_doc.reference.collection("students").stream()
-                for doc in all_students:
-                    data = doc.to_dict()
-                    # Check explicit member_id or fallback to ID
-                    s_member_id = data.get("member_id") or data.get("id")
+            ebd_class = await self._first(
+                session,
+                select(EBDClassModel).where(
+                    EBDClassModel.tenant_id == self._maybe_uuid(tenant_id),
+                    EBDClassModel.id == enrollment.ebd_class_id,
+                ),
+            )
+            if not ebd_class:
+                return None
 
-                    if str(s_member_id) == str(member_id):
-                        student_doc = doc
-                        break
-
-            if student_doc:
-                class_data = class_doc.to_dict()
-                student_data = student_doc.to_dict()
-
-                # Fix missing fields in student_data for response consistency
-                if "member_id" not in student_data:
-                    student_data["member_id"] = student_data.get("id")
-                if "ebd_class_id" not in student_data and "class_id" in student_data:
-                    student_data["ebd_class_id"] = student_data["class_id"]
-                if "enrolled_at" not in student_data and "created_at" in student_data:
-                    student_data["enrolled_at"] = student_data["created_at"]
-
-                class_data["enrollment"] = student_data
-                return class_data
-
-        return None
+            class_data = EBDClassRepository._to_dict(ebd_class, EBDClassRepository.fields)
+            class_data["enrollment"] = self._to_dict(enrollment, self.fields)
+            return class_data
 
 
-class EBDLessonRepository:
-    @property
-    def db(self):
-        return get_db()
-
-    def _get_class_ref(self, tenant_id: str, class_id: str):
-        """Get reference to a specific class document."""
-        return self.db.collection("tenants").document(str(tenant_id)).collection("ebd_classes").document(str(class_id))
+class EBDLessonRepository(SQLAlchemyRepository):
+    fields = [
+        "id",
+        "ebd_class_id",
+        "date",
+        "topic",
+        "description",
+        "homework_url",
+        "bible_reference",
+        "created_at",
+        "updated_at",
+    ]
 
     async def create_lesson(self, tenant_id: str, class_id: str, **kwargs) -> dict:
-        class_ref = self._get_class_ref(tenant_id, class_id)
-
-        # Verify class exists
-        if not class_ref.get().exists:
-            raise ValueError("EBD Class not found")
-
-        doc_id = str(uuid.uuid4())
-
         data = kwargs.copy()
-
-        # Ensure date serialization
         if "date" in data and isinstance(data["date"], date) and not isinstance(data["date"], datetime):
-            data["date"] = datetime.combine(data["date"], datetime.min.time())
-
-        # Map specific fields if needed or handle generic
+            data["date"] = data["date"]
         if "lesson_date" in data:
             ld = data.pop("lesson_date")
-            if isinstance(ld, date) and not isinstance(ld, datetime):
-                data["date"] = datetime.combine(ld, datetime.min.time())
-            else:
-                data["date"] = ld
-
+            data["date"] = ld if isinstance(ld, date) else datetime.fromisoformat(str(ld)).date()
         if "title" in data:
             data["topic"] = data.pop("title")
 
-        data.update({"id": doc_id, "ebd_class_id": str(class_id), "created_at": datetime.utcnow()})
+        async with self.session() as session:
+            ebd_class = await self._first(
+                session,
+                select(EBDClassModel).where(
+                    EBDClassModel.tenant_id == self._maybe_uuid(tenant_id),
+                    EBDClassModel.id == self._maybe_uuid(class_id),
+                ),
+            )
+            if not ebd_class:
+                raise ValueError("EBD Class not found")
 
-        class_ref.collection("lessons").document(doc_id).set(data)
-        return data
+            lesson = EBDLessonModel(
+                tenant_id=ebd_class.tenant_id,
+                ebd_class_id=ebd_class.id,
+                date=data["date"],
+                topic=data["topic"],
+                description=data.get("description"),
+                homework_url=data.get("homework_url"),
+                bible_reference=data.get("bible_reference"),
+            )
+            session.add(lesson)
+            await session.commit()
+            await session.refresh(lesson)
+            return self._to_dict(lesson, self.fields)
 
     async def get_by_class(self, tenant_id: str, class_id: str) -> List[dict]:
-        class_ref = self._get_class_ref(tenant_id, class_id)
+        async with self.session() as session:
+            result = await session.execute(
+                select(EBDLessonModel).where(
+                    EBDLessonModel.tenant_id == self._maybe_uuid(tenant_id),
+                    EBDLessonModel.ebd_class_id == self._maybe_uuid(class_id),
+                )
+            )
+            return [self._to_dict(item, self.fields) for item in result.scalars().all()]
 
-        # Verify class exists
-        if not class_ref.get().exists:
-            return []
 
-        return [doc.to_dict() for doc in class_ref.collection("lessons").stream()]
+class EBDCommentRepository(SQLAlchemyRepository):
+    fields = ["id", "lesson_id", "member_id", "content", "parent_id", "created_at", "updated_at"]
 
+    async def create_comment(
+        self, tenant_id: str, class_id: str, lesson_id: str, member_id: str, content: str, parent_id: str = None
+    ) -> dict:
+        async with self.session() as session:
+            lesson = await self._first(
+                session,
+                select(EBDLessonModel).where(
+                    EBDLessonModel.tenant_id == self._maybe_uuid(tenant_id),
+                    EBDLessonModel.ebd_class_id == self._maybe_uuid(class_id),
+                    EBDLessonModel.id == self._maybe_uuid(lesson_id),
+                ),
+            )
+            if not lesson:
+                raise ValueError("Lesson not found")
 
-class EBDCommentRepository:
-    @property
-    def db(self):
-        return get_db()
-
-    def _get_lesson_ref(self, tenant_id: str, class_id: str, lesson_id: str):
-        """Get reference to a specific lesson document."""
-        return (
-            self.db.collection("tenants")
-            .document(str(tenant_id))
-            .collection("ebd_classes")
-            .document(str(class_id))
-            .collection("lessons")
-            .document(str(lesson_id))
-        )
-
-    async def create_comment(self, tenant_id: str, class_id: str, lesson_id: str, member_id: str, content: str, parent_id: str = None) -> dict:
-        lesson_ref = self._get_lesson_ref(tenant_id, class_id, lesson_id)
-
-        # Verify lesson exists
-        if not lesson_ref.get().exists:
-            raise ValueError("Lesson not found")
-
-        doc_id = str(uuid.uuid4())
-
-        data = {
-            "id": doc_id,
-            "lesson_id": str(lesson_id),
-            "member_id": str(member_id),
-            "content": content,
-            "parent_id": str(parent_id) if parent_id else None,
-            "created_at": datetime.utcnow(),
-        }
-
-        lesson_ref.collection("comments").document(doc_id).set(data)
-        return data
+            comment = EBDCommentModel(
+                tenant_id=self._maybe_uuid(tenant_id),
+                ebd_class_id=self._maybe_uuid(class_id),
+                lesson_id=lesson.id,
+                member_id=str(member_id),
+                content=content,
+                parent_id=self._maybe_uuid(parent_id) if parent_id else None,
+            )
+            session.add(comment)
+            await session.commit()
+            await session.refresh(comment)
+            return self._to_dict(comment, self.fields)
 
     async def get_by_lesson(self, tenant_id: str, class_id: str, lesson_id: str) -> List[dict]:
-        lesson_ref = self._get_lesson_ref(tenant_id, class_id, lesson_id)
-
-        # Verify lesson exists
-        if not lesson_ref.get().exists:
-            return []
-
-        comments = [doc.to_dict() for doc in lesson_ref.collection("comments").stream()]
-        return sorted(comments, key=lambda x: x.get("created_at", datetime.min), reverse=False)
+        async with self.session() as session:
+            result = await session.execute(
+                select(EBDCommentModel).where(
+                    EBDCommentModel.tenant_id == self._maybe_uuid(tenant_id),
+                    EBDCommentModel.ebd_class_id == self._maybe_uuid(class_id),
+                    EBDCommentModel.lesson_id == self._maybe_uuid(lesson_id),
+                )
+            )
+            comments = [self._to_dict(item, self.fields) for item in result.scalars().all()]
+            return sorted(comments, key=lambda x: x.get("created_at", ""))
 
     async def delete_comment(self, tenant_id: str, class_id: str, lesson_id: str, comment_id: str) -> bool:
-        lesson_ref = self._get_lesson_ref(tenant_id, class_id, lesson_id)
-
-        # Verify lesson exists
-        if not lesson_ref.get().exists:
-            return False
-
-        comment_ref = lesson_ref.collection("comments").document(comment_id)
-        if comment_ref.get().exists:
-            comment_ref.delete()
+        async with self.session() as session:
+            comment = await self._first(
+                session,
+                select(EBDCommentModel).where(
+                    EBDCommentModel.tenant_id == self._maybe_uuid(tenant_id),
+                    EBDCommentModel.ebd_class_id == self._maybe_uuid(class_id),
+                    EBDCommentModel.lesson_id == self._maybe_uuid(lesson_id),
+                    EBDCommentModel.id == self._maybe_uuid(comment_id),
+                ),
+            )
+            if not comment:
+                return False
+            await session.delete(comment)
+            await session.commit()
             return True
+        
+        
         return False
 
 

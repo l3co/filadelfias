@@ -1,89 +1,112 @@
 """
-User repository for Firestore.
+User repository backed by PostgreSQL.
 """
 
-from datetime import datetime
+from __future__ import annotations
+
+from datetime import datetime, timezone
 from typing import Optional
 
-from src.infra.firestore_repository import FirestoreRepository
+from sqlalchemy import select
+
+from src.infra.db.models import UserModel
+from src.infra.repositories.sqlalchemy_repository import SQLAlchemyRepository
 from src.infra.security import get_password_hash
 
 
-class UserRepository(FirestoreRepository):
-    """Repository for users collection."""
-
-    def __init__(self):
-        super().__init__("users")
+class UserRepository(SQLAlchemyRepository):
+    fields = [
+        "id",
+        "email",
+        "name",
+        "avatar_url",
+        "is_active",
+        "must_change_password",
+        "password_hash",
+        "password_reset_token",
+        "password_reset_expires",
+        "created_at",
+        "updated_at",
+    ]
 
     async def get_by_email(self, email: str) -> Optional[dict]:
-        """Get user by email."""
-        return await self.get_by_field("email", email)
+        async with self.session() as session:
+            user = await self._first(session, select(UserModel).where(UserModel.email == email))
+            return self._to_dict(user, self.fields) if user else None
 
     async def get_by_id(self, user_id: str) -> Optional[dict]:
-        """Get user by ID."""
-        return await self.get(user_id)
+        async with self.session() as session:
+            user = await session.get(UserModel, self._maybe_uuid(user_id))
+            return self._to_dict(user, self.fields) if user else None
 
     async def exists_by_email(self, email: str) -> bool:
-        """Check if user exists by email."""
-        user = await self.get_by_email(email)
-        return user is not None
+        return await self.get_by_email(email) is not None
 
     async def get_by_reset_token(self, token: str) -> Optional[dict]:
-        """Get user by password reset token."""
-        users = await self.query("password_reset_token", "==", token, limit=1)
-        if users and users[0].get("password_reset_expires"):
-            expires = users[0]["password_reset_expires"]
-            if isinstance(expires, datetime) and expires > datetime.utcnow():
-                return users[0]
-        return None
+        async with self.session() as session:
+            user = await self._first(session, select(UserModel).where(UserModel.password_reset_token == token))
+            if user and user.password_reset_expires and user.password_reset_expires > datetime.now(timezone.utc):
+                return self._to_dict(user, self.fields)
+            return None
 
     async def create_user(self, email: str, name: str, password: str, avatar_url: Optional[str] = None) -> dict:
-        """Create a new user with hashed password."""
-        data = {
-            "email": email,
-            "password_hash": get_password_hash(password),
-            "name": name,
-            "avatar_url": avatar_url,
-            "is_active": True,
-            "must_change_password": False,
-            "password_reset_token": None,
-            "password_reset_expires": None,
-            "memberships": [],
-        }
-        return await self.create(data)
+        async with self.session() as session:
+            user = UserModel(
+                email=email,
+                name=name,
+                password_hash=get_password_hash(password),
+                avatar_url=avatar_url,
+                is_active=True,
+                must_change_password=False,
+            )
+            session.add(user)
+            await session.commit()
+            await session.refresh(user)
+            return self._to_dict(user, self.fields)
 
     async def set_password_reset_token(self, user_id: str, token: str, expires: datetime) -> Optional[dict]:
-        """Set password reset token for user."""
-        return await self.update(
-            user_id,
-            {
-                "password_reset_token": token,
-                "password_reset_expires": expires,
-            },
-        )
+        async with self.session() as session:
+            user = await session.get(UserModel, self._maybe_uuid(user_id))
+            if not user:
+                return None
+            user.password_reset_token = token
+            user.password_reset_expires = expires
+            await session.commit()
+            await session.refresh(user)
+            return self._to_dict(user, self.fields)
 
     async def clear_password_reset_token(self, user_id: str) -> Optional[dict]:
-        """Clear password reset token."""
-        return await self.update(
-            user_id,
-            {
-                "password_reset_token": None,
-                "password_reset_expires": None,
-            },
-        )
+        async with self.session() as session:
+            user = await session.get(UserModel, self._maybe_uuid(user_id))
+            if not user:
+                return None
+            user.password_reset_token = None
+            user.password_reset_expires = None
+            await session.commit()
+            await session.refresh(user)
+            return self._to_dict(user, self.fields)
 
     async def update_password(self, user_id: str, password_hash: str) -> Optional[dict]:
-        """Update user password."""
-        return await self.update(
-            user_id,
-            {
-                "password_hash": password_hash,
-                "must_change_password": False,
-                "password_reset_token": None,
-                "password_reset_expires": None,
-            },
-        )
+        async with self.session() as session:
+            user = await session.get(UserModel, self._maybe_uuid(user_id))
+            if not user:
+                return None
+            user.password_hash = password_hash
+            user.must_change_password = False
+            user.password_reset_token = None
+            user.password_reset_expires = None
+            await session.commit()
+            await session.refresh(user)
+            return self._to_dict(user, self.fields)
+
+    async def delete(self, user_id: str) -> bool:
+        async with self.session() as session:
+            user = await session.get(UserModel, self._maybe_uuid(user_id))
+            if not user:
+                return False
+            await session.delete(user)
+            await session.commit()
+            return True
 
 
-# Singleton instance
 user_repository = UserRepository()

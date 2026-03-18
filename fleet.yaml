@@ -1,0 +1,4 @@
+defaultNamespace: filadelfias
+
+kustomize:
+  dir: k8s/homelab

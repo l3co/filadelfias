@@ -1,6 +1,6 @@
 # Filadelfias API - Backend
 
-API REST para a plataforma Filadelfias, construída com **FastAPI** e **Firestore**.
+API REST para a plataforma Filadelfias, construída com **FastAPI** e **PostgreSQL assíncrono**.
 
 ## 🚀 Setup Local
 
@@ -8,8 +8,7 @@ API REST para a plataforma Filadelfias, construída com **FastAPI** e **Firestor
 
 - Python 3.11+
 - Poetry 1.8+
-- Docker (para Firestore Emulator)
-- Credenciais Firebase (para produção)
+- Docker (para PostgreSQL local)
 
 ### Instalação
 
@@ -22,22 +21,21 @@ cp .env.example .env
 # Edite .env com suas configurações
 ```
 
-### Rodando com Firestore Emulator (Recomendado para dev)
+### Rodando com PostgreSQL local (Recomendado para dev)
 
 ```bash
-# 1. Inicie o emulador
-docker run -d -p 8080:8080 mtlynch/firestore-emulator
+# 1. Inicie o banco
+docker compose up -d postgres
 
 # 2. Rode o servidor
-FIRESTORE_EMULATOR_HOST=localhost:8080 PROJECT_ID=filadelfias-dev poetry run uvicorn src.main:app --reload
+DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/filadelfias poetry run uvicorn src.main:app --reload
 ```
 
-### Rodando com Firebase Real
+### Rodando com PostgreSQL remoto
 
 ```bash
-# Configure as credenciais
-export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
-export PROJECT_ID=filadelfias-6a116
+# Configure a conexão
+export DATABASE_URL=postgresql+asyncpg://user:password@host:5432/filadelfias
 
 # Rode o servidor
 poetry run uvicorn src.main:app --reload
@@ -58,8 +56,8 @@ src/
 ├── domain/           # Entidades e Regras de Negócio
 │   ├── enums.py      # EcclesiasticalOffice, MemberStatus, etc.
 │   └── labels.py     # Labels pt-BR para enums
-├── infra/            # Repositories (Firestore)
-│   ├── firestore/    # Implementações Firestore
+├── infra/            # Infraestrutura
+│   ├── db/           # SQLAlchemy, models e session
 │   └── repositories/ # Interfaces
 ├── lib/              # Utilitários
 │   └── permissions.py # RBAC por ofício eclesiástico
@@ -179,17 +177,17 @@ poetry run seed-e2e
 ## 📚 Documentação da API
 
 - **Local**: http://localhost:8000/docs (Swagger UI)
-- **Produção**: https://filadelfias-api-332378056596.southamerica-east1.run.app/docs
+- **Produção/Homelab**: URL definida no roteamento do cluster
 
 ---
 
 ## 🐳 Deploy
 
-O backend é deployado automaticamente via GitHub Actions para **Google Cloud Run**:
+O backend é empacotado em imagem e publicado no **GHCR**, com deploy via **Fleet** no homelab:
 
-1. Push para `main` dispara o workflow
+1. Push para `main` dispara os workflows de CI/build
 2. Build da imagem Docker
-3. Push para Container Registry
-4. Deploy no Cloud Run (auto-scaling)
+3. Push para o GHCR
+4. Reconciliação do deploy pelo Fleet no cluster
 
 Veja `.github/workflows/` para detalhes.

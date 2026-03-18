@@ -1,7 +1,7 @@
 """
 Seed script for development environment with rich, realistic data.
 
-This script populates the Firestore database with comprehensive test data
+This script populates the PostgreSQL database with comprehensive test data
 for the Igreja Presbiteriana Filadélfia, including:
 - 50-60 users with varied profiles
 - Members with different functions
@@ -27,8 +27,7 @@ from datetime import datetime, timedelta
 os.environ.setdefault("ENVIRONMENT", "development")
 
 print("🚀 Starting seed script for Igreja Presbiteriana Filadélfia")
-print(f"FIRESTORE_EMULATOR_HOST={os.getenv('FIRESTORE_EMULATOR_HOST')}")
-print(f"PROJECT_ID={os.getenv('PROJECT_ID')}")
+print(f"DATABASE_URL={os.getenv('DATABASE_URL')}")
 
 # Defer imports
 from src.infra.repositories.member_repository import member_repository  # noqa: E402
@@ -225,9 +224,37 @@ def generate_email(name: str) -> str:
     return f"{clean_name}@ipfiladelfia.org.br"
 
 
+def generate_unique_email(name: str, used_emails: set[str]) -> str:
+    """Generate a unique email within the current seed run."""
+    base_email = generate_email(name)
+    if base_email not in used_emails:
+        used_emails.add(base_email)
+        return base_email
+
+    local_part, domain = base_email.split("@", 1)
+    suffix = 2
+    while True:
+        candidate = f"{local_part}.{suffix}@{domain}"
+        if candidate not in used_emails:
+            used_emails.add(candidate)
+            return candidate
+        suffix += 1
+
+
 def generate_phone() -> str:
     """Generate random Brazilian phone."""
     return f"(11) 9{random.randint(1000, 9999)}-{random.randint(1000, 9999)}"
+
+
+def parse_age_group(age_group: str) -> tuple[int | None, int | None]:
+    """Convert labels like '3-4 anos' or '65+ anos' into min/max ages."""
+    normalized = age_group.replace(" anos", "")
+    if "+" in normalized:
+        return int(normalized.replace("+", "")), None
+    if "-" in normalized:
+        min_age, max_age = normalized.split("-", 1)
+        return int(min_age), int(max_age)
+    return None, None
 
 
 async def clean_existing_data():
@@ -309,13 +336,14 @@ async def create_members(tenant_id: str, count: int = 55):
 
     members = []
     users = []
+    used_emails: set[str] = set()
 
     for i in range(count):
         # Generate random name
         first_name = random.choice(FIRST_NAMES)
         last_name = random.choice(LAST_NAMES)
         full_name = f"{first_name} {last_name}"
-        email = generate_email(full_name)
+        email = generate_unique_email(full_name, used_emails)
 
         # Random data
         gender = random.choice(["M", "F"])
@@ -379,13 +407,16 @@ async def create_ebd_classes(tenant_id: str, members: list):
 
     classes = []
     for class_data in EBD_CLASSES:
+        min_age, max_age = parse_age_group(class_data["age_group"])
+
         # Create class
         ebd_class = await ebd_class_repository.create_class(
             tenant_id=tenant_id,
             name=class_data["name"],
             description=f"Classe de EBD para {class_data['age_group']}",
-            teacher=random.choice(members)["full_name"],
-            schedule="Domingo, 9:00",
+            min_age=min_age,
+            max_age=max_age,
+            location="Salas de EBD - Domingo, 9:00",
         )
         classes.append(ebd_class)
 
@@ -395,22 +426,20 @@ async def create_ebd_classes(tenant_id: str, members: list):
 
         for member in selected_members:
             await ebd_student_repository.create_student(
+                tenant_id=tenant_id,
                 class_id=ebd_class["id"],
-                name=member["full_name"],
-                birth_date=member.get("birth_date"),
-                parent_name=random.choice(members)["full_name"] if random.random() > 0.5 else None,
-                phone=member.get("phone"),
+                member_id=member["id"],
             )
 
         # Add 4 lessons (last month)
         for week in range(1, 5):
             lesson_date = datetime.now().date() - timedelta(days=(5 - week) * 7)
             await ebd_lesson_repository.create_lesson(
+                tenant_id=tenant_id,
                 class_id=ebd_class["id"],
                 date=lesson_date,
                 topic=f"Lição {week} - {random.choice(['Fé', 'Amor', 'Esperança', 'Graça', 'Salvação'])}",
-                teacher=ebd_class["teacher"],
-                attendance=random.randint(num_students - 3, num_students),
+                description="Aula gerada automaticamente pelo seed de desenvolvimento.",
             )
 
     print(f"  ✓ Created {len(classes)} EBD classes with students and lessons")

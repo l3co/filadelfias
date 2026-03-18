@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN pip install --no-cache-dir --upgrade pip "poetry==2.1.1"
 
 # Copy dependency files
-COPY pyproject.toml poetry.lock* ./
+COPY pyproject.toml poetry.lock* alembic.ini ./
 
 # Install dependencies (no virtualenv)
 RUN poetry config virtualenvs.create false \
@@ -22,9 +22,15 @@ RUN poetry config virtualenvs.create false \
 
 # Copy application code
 COPY src ./src
+COPY alembic ./alembic
+COPY entrypoint.sh ./entrypoint.sh
+
+RUN chmod +x /app/entrypoint.sh
 
 # Expose port
 EXPOSE 8000
 
+ENTRYPOINT ["/app/entrypoint.sh"]
+
 # Start command
-CMD ["sh", "-c", "uvicorn src.main:app --host 0.0.0.0 --port ${PORT:-8000} --proxy-headers --forwarded-allow-ips '*'"]
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--forwarded-allow-ips", "*"]

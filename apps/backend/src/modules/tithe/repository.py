@@ -2,112 +2,142 @@
 Repository for Tithe/Offering records.
 """
 
-import uuid
 from datetime import date, datetime
 from typing import List, Optional
 
-from src.infra.firebase import get_db
+from sqlalchemy import select
+
+from src.infra.db.models import TitheRecordModel
+from src.infra.repositories.sqlalchemy_repository import SQLAlchemyRepository
 
 
-class TitheRecordRepository:
-    @property
-    def db(self):
-        return get_db()
+class TitheRecordRepository(SQLAlchemyRepository):
+    fields = [
+        "id",
+        "tenant_id",
+        "member_id",
+        "amount",
+        "type",
+        "date",
+        "status",
+        "notes",
+        "attachment_url",
+        "rejection_reason",
+        "approved_by",
+        "approved_at",
+        "transaction_id",
+        "created_at",
+        "updated_at",
+    ]
 
-    def _get_collection(self, tenant_id: str):
-        return self.db.collection("tenants").document(str(tenant_id)).collection("tithe_records")
+    @staticmethod
+    def _normalize_date(value) -> date:
+        if isinstance(value, datetime):
+            return value.date()
+        if isinstance(value, date):
+            return value
+        if isinstance(value, str):
+            return date.fromisoformat(value)
+        raise ValueError("Invalid tithe date")
 
     async def create(self, tenant_id: str, member_id: str, **kwargs) -> dict:
         """Create a new tithe record."""
-        collection = self._get_collection(tenant_id)
-        doc_id = str(uuid.uuid4())
-
-        tithe_date = kwargs.get("date")
-        if isinstance(tithe_date, date) and not isinstance(tithe_date, datetime):
-            tithe_date = datetime.combine(tithe_date, datetime.min.time())
-
-        data = {
-            "id": doc_id,
-            "tenant_id": str(tenant_id),
-            "member_id": str(member_id),
-            "amount": float(kwargs.get("amount", 0)),
-            "type": kwargs.get("type", "DIZIMO"),
-            "date": tithe_date,
-            "status": "PENDING",
-            "notes": kwargs.get("notes"),
-            "attachment_url": kwargs.get("attachment_url"),
-            "rejection_reason": None,
-            "approved_by": None,
-            "approved_at": None,
-            "transaction_id": None,
-            "created_at": datetime.utcnow(),
-            "updated_at": None,
-        }
-
-        collection.document(doc_id).set(data)
-        return data
+        async with self.session() as session:
+            record = TitheRecordModel(
+                tenant_id=self._maybe_uuid(tenant_id),
+                member_id=str(member_id),
+                amount=float(kwargs.get("amount", 0)),
+                type=kwargs.get("type", "DIZIMO"),
+                date=self._normalize_date(kwargs.get("date")),
+                status="PENDING",
+                notes=kwargs.get("notes"),
+                attachment_url=kwargs.get("attachment_url"),
+            )
+            session.add(record)
+            await session.commit()
+            await session.refresh(record)
+            return self._to_dict(record, self.fields)
 
     async def get_by_id(self, tenant_id: str, record_id: str) -> Optional[dict]:
         """Get a tithe record by ID."""
-        doc = self._get_collection(tenant_id).document(str(record_id)).get()
-        return doc.to_dict() if doc.exists else None
+        async with self.session() as session:
+            record = await self._first(
+                session,
+                select(TitheRecordModel).where(
+                    TitheRecordModel.tenant_id == self._maybe_uuid(tenant_id),
+                    TitheRecordModel.id == self._maybe_uuid(record_id),
+                ),
+            )
+            return self._to_dict(record, self.fields) if record else None
+
+    async def get(self, tenant_id: str, record_id: str) -> Optional[dict]:
+        return await self.get_by_id(tenant_id, record_id)
 
     async def get_by_member(self, tenant_id: str, member_id: str, year: Optional[int] = None) -> List[dict]:
         """Get all tithe records for a member, optionally filtered by year."""
-        query = self._get_collection(tenant_id).where("member_id", "==", str(member_id))
-
-        records = [doc.to_dict() for doc in query.stream()]
-
-        if year:
-            records = [
-                r
-                for r in records
-                if r.get("date")
-                and (
-                    r["date"].year == year
-                    if isinstance(r["date"], datetime)
-                    else datetime.fromisoformat(str(r["date"])).year == year
+        async with self.session() as session:
+            result = await session.execute(
+                select(TitheRecordModel).where(
+                    TitheRecordModel.tenant_id == self._maybe_uuid(tenant_id),
+                    TitheRecordModel.member_id == str(member_id),
                 )
-            ]
+            )
+            records = [self._to_dict(item, self.fields) for item in result.scalars().all()]
 
-        return sorted(records, key=lambda x: x.get("date", datetime.min), reverse=True)
+        if year is not None:
+            records = [record for record in records if date.fromisoformat(record["date"]).year == year]
+
+        return sorted(records, key=lambda x: x.get("date", ""), reverse=True)
 
     async def get_pending(self, tenant_id: str) -> List[dict]:
         """Get all pending tithe records for approval."""
-        query = self._get_collection(tenant_id).where("status", "==", "PENDING")
-        records = [doc.to_dict() for doc in query.stream()]
-        return sorted(records, key=lambda x: x.get("created_at", datetime.min), reverse=True)
+        async with self.session() as session:
+            result = await session.execute(
+                select(TitheRecordModel).where(
+                    TitheRecordModel.tenant_id == self._maybe_uuid(tenant_id),
+                    TitheRecordModel.status == "PENDING",
+                )
+            )
+            records = [self._to_dict(item, self.fields) for item in result.scalars().all()]
+        return sorted(records, key=lambda x: x.get("created_at", ""), reverse=True)
 
     async def get_all(self, tenant_id: str, year: Optional[int] = None) -> List[dict]:
         """Get all tithe records, optionally filtered by year."""
-        records = [doc.to_dict() for doc in self._get_collection(tenant_id).stream()]
+        async with self.session() as session:
+            result = await session.execute(
+                select(TitheRecordModel).where(TitheRecordModel.tenant_id == self._maybe_uuid(tenant_id))
+            )
+            records = [self._to_dict(item, self.fields) for item in result.scalars().all()]
 
-        if year:
-            records = [
-                r
-                for r in records
-                if r.get("date")
-                and (
-                    r["date"].year == year
-                    if isinstance(r["date"], datetime)
-                    else datetime.fromisoformat(str(r["date"])).year == year
-                )
-            ]
+        if year is not None:
+            records = [record for record in records if date.fromisoformat(record["date"]).year == year]
 
-        return sorted(records, key=lambda x: x.get("date", datetime.min), reverse=True)
+        return sorted(records, key=lambda x: x.get("date", ""), reverse=True)
 
     async def update(self, tenant_id: str, record_id: str, data: dict) -> Optional[dict]:
         """Update a tithe record."""
-        doc_ref = self._get_collection(tenant_id).document(str(record_id))
-        doc = doc_ref.get()
+        async with self.session() as session:
+            record = await self._first(
+                session,
+                select(TitheRecordModel).where(
+                    TitheRecordModel.tenant_id == self._maybe_uuid(tenant_id),
+                    TitheRecordModel.id == self._maybe_uuid(record_id),
+                ),
+            )
+            if not record:
+                return None
 
-        if not doc.exists:
-            return None
+            payload = data.copy()
+            if "date" in payload and payload["date"] is not None:
+                payload["date"] = self._normalize_date(payload["date"])
 
-        data["updated_at"] = datetime.utcnow()
-        doc_ref.update(data)
+            for key, value in payload.items():
+                if hasattr(record, key):
+                    setattr(record, key, value)
 
-        return doc_ref.get().to_dict()
+            await session.commit()
+            await session.refresh(record)
+            return self._to_dict(record, self.fields)
 
     async def approve(
         self, tenant_id: str, record_id: str, approved_by: str, transaction_id: Optional[str] = None
@@ -141,18 +171,20 @@ class TitheRecordRepository:
 
     async def delete(self, tenant_id: str, record_id: str) -> bool:
         """Delete a tithe record (only if pending)."""
-        doc_ref = self._get_collection(tenant_id).document(str(record_id))
-        doc = doc_ref.get()
+        async with self.session() as session:
+            record = await self._first(
+                session,
+                select(TitheRecordModel).where(
+                    TitheRecordModel.tenant_id == self._maybe_uuid(tenant_id),
+                    TitheRecordModel.id == self._maybe_uuid(record_id),
+                ),
+            )
+            if not record or record.status != "PENDING":
+                return False
 
-        if not doc.exists:
-            return False
-
-        data = doc.to_dict()
-        if data.get("status") != "PENDING":
-            return False
-
-        doc_ref.delete()
-        return True
+            await session.delete(record)
+            await session.commit()
+            return True
 
     async def get_summary(self, tenant_id: str, member_id: str, year: int) -> dict:
         """Get summary of tithes for a member in a year."""

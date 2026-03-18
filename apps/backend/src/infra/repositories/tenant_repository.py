@@ -1,21 +1,49 @@
 """
-Tenant repository for Firestore.
+Tenant repository backed by PostgreSQL.
 """
+
+from __future__ import annotations
 
 from typing import Optional
 
-from src.infra.firestore_repository import FirestoreRepository
+from sqlalchemy import select
+
+from src.infra.db.models import TenantModel
+from src.infra.repositories.sqlalchemy_repository import SQLAlchemyRepository
 
 
-class TenantRepository(FirestoreRepository):
-    """Repository for tenants collection."""
+class TenantRepository(SQLAlchemyRepository):
+    fields = [
+        "id",
+        "name",
+        "slug",
+        "logo_url",
+        "street",
+        "number",
+        "complement",
+        "neighborhood",
+        "city",
+        "state",
+        "postal_code",
+        "country",
+        "phone",
+        "email",
+        "latitude",
+        "longitude",
+        "is_public",
+        "created_at",
+        "updated_at",
+    ]
 
-    def __init__(self):
-        super().__init__("tenants")
+    async def get(self, tenant_id: str) -> Optional[dict]:
+        async with self.session() as session:
+            tenant = await session.get(TenantModel, self._maybe_uuid(tenant_id))
+            return self._to_dict(tenant, self.fields) if tenant else None
 
     async def get_by_slug(self, slug: str) -> Optional[dict]:
-        """Get tenant by slug."""
-        return await self.get_by_field("slug", slug)
+        async with self.session() as session:
+            tenant = await self._first(session, select(TenantModel).where(TenantModel.slug == slug))
+            return self._to_dict(tenant, self.fields) if tenant else None
 
     async def create_tenant(
         self,
@@ -32,66 +60,46 @@ class TenantRepository(FirestoreRepository):
         phone: Optional[str] = None,
         email: Optional[str] = None,
     ) -> dict:
-        """Create a new tenant (church)."""
-        data = {
-            "name": name,
-            "slug": slug,
-            "logo_url": logo_url,
-            "street": street,
-            "number": number,
-            "complement": complement,
-            "neighborhood": neighborhood,
-            "city": city,
-            "state": state,
-            "postal_code": postal_code,
-            "country": "Brasil",
-            "phone": phone,
-            "email": email,
-            "latitude": None,
-            "longitude": None,
-            "is_public": True,
-            "config": {},
-        }
-        return await self.create(data)
+        async with self.session() as session:
+            tenant = TenantModel(
+                name=name,
+                slug=slug,
+                logo_url=logo_url,
+                street=street,
+                number=number,
+                complement=complement,
+                neighborhood=neighborhood,
+                city=city,
+                state=state,
+                postal_code=postal_code,
+                phone=phone,
+                email=email,
+            )
+            session.add(tenant)
+            await session.commit()
+            await session.refresh(tenant)
+            return self._to_dict(tenant, self.fields)
 
-    async def update_address(
-        self,
-        tenant_id: str,
-        street: Optional[str] = None,
-        number: Optional[str] = None,
-        complement: Optional[str] = None,
-        neighborhood: Optional[str] = None,
-        city: Optional[str] = None,
-        state: Optional[str] = None,
-        postal_code: Optional[str] = None,
-        latitude: Optional[float] = None,
-        longitude: Optional[float] = None,
-    ) -> Optional[dict]:
-        """Update tenant address."""
-        data = {}
-        if street is not None:
-            data["street"] = street
-        if number is not None:
-            data["number"] = number
-        if complement is not None:
-            data["complement"] = complement
-        if neighborhood is not None:
-            data["neighborhood"] = neighborhood
-        if city is not None:
-            data["city"] = city
-        if state is not None:
-            data["state"] = state
-        if postal_code is not None:
-            data["postal_code"] = postal_code
-        if latitude is not None:
-            data["latitude"] = latitude
-        if longitude is not None:
-            data["longitude"] = longitude
+    async def update(self, tenant_id: str, data: dict) -> Optional[dict]:
+        async with self.session() as session:
+            tenant = await session.get(TenantModel, self._maybe_uuid(tenant_id))
+            if not tenant:
+                return None
+            for key, value in data.items():
+                if hasattr(tenant, key):
+                    setattr(tenant, key, value)
+            await session.commit()
+            await session.refresh(tenant)
+            return self._to_dict(tenant, self.fields)
 
-        if data:
-            return await self.update(tenant_id, data)
-        return await self.get(tenant_id)
+    async def delete(self, tenant_id: str) -> bool:
+        async with self.session() as session:
+            tenant = await session.get(TenantModel, self._maybe_uuid(tenant_id))
+            if not tenant:
+                return False
+            await session.delete(tenant)
+            await session.commit()
+            return True
 
 
-# Singleton instance
 tenant_repository = TenantRepository()

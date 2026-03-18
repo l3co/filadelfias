@@ -1,13 +1,17 @@
 services:
-  firebase:
-    image: mtlynch/firestore-emulator
-    container_name: filadelfias_firebase
-    ports:
-      - "8080:8080"   # Firestore
+  postgres:
+    image: postgres:16-alpine
+    container_name: filadelfias_postgres
     environment:
-      - FIRESTORE_PROJECT_ID=filadelfias-dev
+      POSTGRES_DB: filadelfias
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080 || exit 1"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d filadelfias"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -18,19 +22,18 @@ services:
       context: ./apps/backend
       dockerfile: Dockerfile
     container_name: filadelfias_api
-    entrypoint: []
     command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
     ports:
       - "8000:8000"
     volumes:
       - ./apps/backend/src:/app/src
     environment:
-      FIRESTORE_EMULATOR_HOST: firebase:8080
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/filadelfias
       SECRET_KEY: dev-secret-key-change-in-production
       DEBUG: "true"
       CORS_ORIGINS_STR: http://localhost:5173,http://localhost:3000
     depends_on:
-      firebase:
+      postgres:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
@@ -48,7 +51,7 @@ services:
     volumes:
       - ./apps/backend/src:/app/src
     environment:
-      FIRESTORE_EMULATOR_HOST: firebase:8080
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/filadelfias
       SECRET_KEY: dev-secret-key-change-in-production
     depends_on:
       api:
@@ -71,5 +74,5 @@ services:
       - api
 
 volumes:
-  firebase_data:
+  postgres_data:
   web_node_modules:

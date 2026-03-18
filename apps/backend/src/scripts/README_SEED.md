@@ -1,6 +1,6 @@
 # Seed Script - Igreja Presbiteriana Filadélfia
 
-Este script popula o banco de dados Firestore com dados realistas para desenvolvimento e testes.
+Este script popula o banco de dados PostgreSQL com dados realistas para desenvolvimento e testes.
 
 ## O que é criado
 
@@ -18,24 +18,22 @@ Este script popula o banco de dados Firestore com dados realistas para desenvolv
 
 ## Como executar
 
-### Opção 1: Com Firestore Emulator Local (Desenvolvimento)
+### Opção 1: Com PostgreSQL Local (Desenvolvimento)
 
 ```bash
-# 1. Inicie o emulador do Firestore
-docker run -d -p 8080:8080 mtlynch/firestore-emulator
+# 1. Inicie o PostgreSQL
+docker compose up -d postgres
 
 # 2. Execute o seed
 cd apps/backend
-FIRESTORE_EMULATOR_HOST=localhost:8080 PROJECT_ID=filadelfias-dev poetry run python -m src.scripts.seed_dev_data
+DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/filadelfias poetry run python -m src.scripts.seed_dev_data
 ```
 
-### Opção 2: Com Firestore em Produção (Cuidado!)
+### Opção 2: Com PostgreSQL do homelab/produção
 
 ```bash
 cd apps/backend
-# Configure as credenciais do Google Cloud primeiro
-export GOOGLE_APPLICATION_CREDENTIALS=/path/to/credentials.json
-export PROJECT_ID=filadelfias-6a116
+export DATABASE_URL=postgresql+asyncpg://user:password@host:5432/filadelfias
 
 # Execute o seed
 poetry run python -m src.scripts.seed_dev_data

@@ -10,7 +10,7 @@ from datetime import date, datetime
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import Select, select
+from sqlalchemy import Select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.infra.db.session import async_session_factory

@@ -11,19 +11,28 @@ declare global {
     }
 }
 
+const isInvalidRuntimeUrl = (value: string): boolean => {
+    return value === '__API_URL__' || value.includes('seu-dominio');
+};
+
 // Runtime config (injected by docker-entrypoint.sh) or build-time env or fallback
-// Production API: Cloud Run (southamerica-east1)
 const getApiUrl = (): string => {
     // Check runtime config first (production)
     if (typeof window !== 'undefined' && window.__CONFIG__?.API_URL) {
         const runtimeUrl = window.__CONFIG__.API_URL;
-        // Ignore placeholder value
-        if (runtimeUrl !== '__API_URL__') {
+        // Ignore placeholder or unfinished hostnames
+        if (!isInvalidRuntimeUrl(runtimeUrl)) {
             return runtimeUrl;
         }
     }
-    // Fall back to build-time env or default
-    return import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+    const buildTimeUrl = import.meta.env.VITE_API_URL;
+    if (buildTimeUrl && !isInvalidRuntimeUrl(buildTimeUrl)) {
+        return buildTimeUrl;
+    }
+
+    // Prefer same-origin proxy in production-like environments.
+    return import.meta.env.DEV ? 'http://localhost:8000' : '/api';
 };
 
 const API_URL = getApiUrl();

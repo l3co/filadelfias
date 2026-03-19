@@ -27,8 +27,6 @@ spec:
             - secretRef:
                 name: filadelfias-secret
           env:
-            - name: DATABASE_URL
-              value: postgresql+asyncpg://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres:5432/filadelfias
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
@@ -39,6 +37,8 @@ spec:
                 secretKeyRef:
                   name: postgres-secret
                   key: password
+            - name: DATABASE_URL
+              value: postgresql+asyncpg://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres:5432/filadelfias
           readinessProbe:
             httpGet:
               path: /health

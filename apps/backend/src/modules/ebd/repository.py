@@ -238,9 +238,6 @@ class EBDCommentRepository(SQLAlchemyRepository):
             await session.delete(comment)
             await session.commit()
             return True
-        
-        
-        return False
 
 
 ebd_class_repository = EBDClassRepository()

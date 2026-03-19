@@ -20,11 +20,11 @@ export function HymnalPage() {
         );
     }
 
-    const filteredHymns = hymns?.filter(h =>
+    const filteredHymns = (Array.isArray(hymns) ? hymns : []).filter(h =>
         h.title.toLowerCase().includes(search.toLowerCase()) ||
         h.number.toString().includes(search) ||
-        h.author.toLowerCase().includes(search.toLowerCase())
-    ) || [];
+        (h.author || '').toLowerCase().includes(search.toLowerCase())
+    );
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 animate-in fade-in duration-500">

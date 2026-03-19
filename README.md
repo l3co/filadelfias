@@ -10,10 +10,10 @@ Filadelfias é uma plataforma completa para gestão de igrejas presbiterianas, d
 
 | Camada | Tecnologias |
 |--------|-------------|
-| **Backend** | Python 3.11+, FastAPI, Firestore (NoSQL), Firebase Admin SDK |
+| **Backend** | Python 3.11+, FastAPI, PostgreSQL, SQLAlchemy |
 | **Web** | React 19, Vite, TypeScript, TailwindCSS, shadcn/ui, TanStack Query |
 | **Mobile** | React Native 0.81, Expo 54, NativeWind, Zustand |
-| **Infra** | Firebase Hosting, Google Cloud Run, GitHub Actions |
+| **Infra** | Homelab K3s (Rancher), Cloudflare Zero Trust, GitHub Actions + Fleet |
 
 ---
 
@@ -39,13 +39,15 @@ cd filadelfias
 cd apps/backend
 poetry install
 cp .env.example .env
-# Edite .env com suas credenciais Firebase
+# Edite .env com as configurações do banco
 
-# Opção A: Com Firestore Emulator
-docker run -d -p 8080:8080 mtlynch/firestore-emulator
-FIRESTORE_EMULATOR_HOST=localhost:8080 poetry run uvicorn src.main:app --reload
+# Inicie PostgreSQL com Docker Compose
+docker-compose up -d postgres
 
-# Opção B: Com Firebase real (configure GOOGLE_APPLICATION_CREDENTIALS)
+# Execute migrações
+poetry run alembic upgrade head
+
+# Inicie o servidor
 poetry run uvicorn src.main:app --reload
 ```
 
@@ -76,13 +78,20 @@ npm start
 ```
 filadelfias/
 ├── apps/
-│   ├── backend/          # API FastAPI + Firestore
+│   ├── backend/          # API FastAPI + PostgreSQL
 │   ├── web/              # React + Vite + TailwindCSS
 │   └── mobile/           # React Native + Expo
 ├── packages/
 │   └── contracts/        # Schemas Zod compartilhados
 ├── docs/                 # Documentação técnica
-├── plans/                # Planos de implementação por fase
+│   ├── infrastructure/   # Homelab, K8s, deploy
+│   ├── architecture/     # Design de sistema
+│   └── development/      # Guias de desenvolvimento
+├── plans/                # Planejamento e retrospectivas
+│   ├── phases/           # Fases do projeto
+│   ├── features/         # Novas funcionalidades
+│   └── technical-debt/   # Débitos técnicos
+├── k8s/                  # Manifestos Kubernetes
 └── docker-compose.yml    # Orquestração local
 ```
 
@@ -216,7 +225,7 @@ npm run test:e2e:ui  # Modo interativo
 
 | Ambiente | Web | API | API Docs |
 |----------|-----|-----|----------|
-| **Produção** | [filadelfias-6a116.web.app](https://filadelfias-6a116.web.app) | [Cloud Run](https://filadelfias-api-332378056596.southamerica-east1.run.app) | [Swagger](https://filadelfias-api-332378056596.southamerica-east1.run.app/docs) |
+| **Produção** | [filadelfias.com](https://filadelfias.com) | [api.filadelfias.com](https://api.filadelfias.com) | [api.filadelfias.com/docs](https://api.filadelfias.com/docs) |
 | **Local** | localhost:5173 | localhost:8000 | localhost:8000/docs |
 
 ---

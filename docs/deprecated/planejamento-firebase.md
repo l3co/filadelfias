@@ -1,8 +1,14 @@
-# Planejamento de Migração para Firebase
+# ⚠️ DOCUMENTO DEPRECADO — Planejamento de Migração para Firebase
+
+> **AVISO:** Este documento está **OBSOLETO** desde Março/2026.  
+> O projeto **NÃO migrou para Firebase**. Estamos usando **Homelab K3s + PostgreSQL**.  
+> Consulte a documentação atual em `/docs/infrastructure/`.
+
+---
 
 **Projeto:** Filadélfias  
 **Data:** Janeiro 2026  
-**Status:** Planejamento  
+**Status:** ❌ Cancelado / Não implementado  
 
 ---
 

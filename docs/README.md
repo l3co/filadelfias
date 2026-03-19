@@ -23,8 +23,16 @@ Se você é novo no projeto, comece por aqui:
 |-----------|-----------|
 | [Arquitetura do Sistema](architecture.md) | Clean Architecture, diagramas, princípios |
 | [Módulos do Sistema](modules.md) | Endpoints e responsabilidades de cada módulo |
-| [Modelo de Dados](entity-relationship.md) | Coleções Firestore e relacionamentos |
+| [Modelo de Dados](entity-relationship.md) | Estrutura do banco PostgreSQL |
 | [Stack Tecnológica](tech-stack.md) | Tecnologias utilizadas (versões atualizadas) |
+
+### ☁️ Infraestrutura
+
+| Documento | Descrição |
+|-----------|-----------|
+| [Homelab](infrastructure/homelab.md) | Configuração do K3s, Cloudflare, GitOps |
+| [Kubernetes](infrastructure/kubernetes.md) | Manifestos, deployments, troubleshooting |
+| [CI/CD](infrastructure/ci-cd.md) | GitHub Actions, Fleet, pipeline de deploy |
 
 ### 👨‍💻 Desenvolvimento
 
@@ -55,9 +63,10 @@ Se você é novo no projeto, comece por aqui:
 
 | Documento | Descrição |
 |-----------|-----------|
-| [Planos de Implementação](../plans/) | Fases do projeto (1-6) |
-| [Planejamento Firebase](planejamento-firebase.md) | Migração para Firebase/GCP |
-| [Retrofit Mobile](../retrofitmobile.md) | Débitos técnicos do app mobile |
+| [Planos por Fase](../plans/phases/) | Implementação incremental do projeto |
+| [Features Planejadas](../plans/features/) | Novas funcionalidades em roadmap |
+| [Débitos Técnicos](../plans/technical-debt/) | Refatorações e melhorias necessárias |
+| [Retrospectivas](../plans/retrospectives/) | Análises e aprendizados |
 
 ---
 
@@ -67,9 +76,9 @@ Se você é novo no projeto, comece por aqui:
 
 | Serviço | URL |
 |---------|-----|
-| **Web App** | https://filadelfias-6a116.web.app |
-| **API** | https://filadelfias-api-332378056596.southamerica-east1.run.app |
-| **API Docs** | https://filadelfias-api-332378056596.southamerica-east1.run.app/docs |
+| **Web App** | https://filadelfias.com |
+| **API** | https://api.filadelfias.com |
+| **API Docs** | https://api.filadelfias.com/docs |
 
 ### Desenvolvimento Local
 
@@ -78,7 +87,7 @@ Se você é novo no projeto, comece por aqui:
 | **Web App** | http://localhost:5173 |
 | **API** | http://localhost:8000 |
 | **API Docs** | http://localhost:8000/docs |
-| **Firestore Emulator** | http://localhost:8080 |
+| **PostgreSQL** | localhost:5432 |
 
 ---
 
@@ -92,9 +101,10 @@ Se você é novo no projeto, comece por aqui:
 └────────┬────────┴────────┬────────┴────────────┬────────────┘
          │                 │                      │
          └─────────────────┼──────────────────────┘
-                           │ HTTPS/JSON
+                           │ HTTPS/JSON (Cloudflare)
                            ▼
 ┌─────────────────────────────────────────────────────────────┐
+│                  HOMELAB K3S CLUSTER                         │
 │                    BACKEND (FastAPI)                         │
 │  Clean Architecture: API → Application → Domain → Infra     │
 └─────────────────────────────────────────────────────────────┘
@@ -102,8 +112,8 @@ Se você é novo no projeto, comece por aqui:
          ┌─────────────────┼─────────────────┐
          ▼                 ▼                 ▼
 ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
-│    Firestore    │ │  Cloud Storage  │ │   Bible API     │
-│   (Database)    │ │    (Files)      │ │   (External)    │
+│   PostgreSQL    │ │  Local Storage  │ │   Bible API     │
+│   (Database)    │ │    (Future)     │ │   (External)    │
 └─────────────────┘ └─────────────────┘ └─────────────────┘
 ```
 
@@ -133,4 +143,4 @@ Os enums são centralizados no backend e consumidos via `GET /metadata`.
 
 ---
 
-**Última atualização:** Janeiro/2026
+**Última atualização:** Março/2026

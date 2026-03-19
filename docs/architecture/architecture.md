@@ -57,7 +57,7 @@ graph TD
     subgraph "Camada Externa"
         API[HTTP Controllers]
         DB[SQLAlchemy Repos]
-        S3[Storage Adapter]
+        Storage[Local/Cloud Storage]
     end
     
     subgraph "Camada de Aplicação"
@@ -74,17 +74,17 @@ graph TD
     UC --> E
     UC --> R
     DB -.-> R
-    S3 -.-> R
+    Storage -.-> R
 ```
 
 ### 2. Multi-Tenancy
 - **Isolamento Lógico**: Todas as queries filtram por `tenant_id`.
-- **Identificação**: Via subdomínio (`igreja.filadelfias.app`) ou header `X-Tenant-ID`.
+- **Identificação**: Via header `X-Tenant-ID` ou contexto de autenticação.
 - **Usuário Global**: O usuário existe independente de tenants.
 
 ### 3. Async First
 - Todos os endpoints são `async def`.
-- Drivers assíncronos: `google-cloud-firestore`, `aiohttp`.
+- Drivers assíncronos: `asyncpg`, `httpx`.
 
 ---
 
@@ -148,20 +148,20 @@ filadelfias/
 
 ---
 
-## 🌐 Infraestrutura (Firebase / Google Cloud)
+## 🌐 Infraestrutura (Homelab K3s)
 
-> **Nota sobre migração**: Em Janeiro/2026, migramos de DigitalOcean para Firebase/Google Cloud
-> por questões de **custo** e **simplicidade de configuração**. A plataforma tem atendido bem
-> às necessidades do projeto.
+> **Nota sobre infraestrutura**: Desde Março/2026, o projeto está hospedado em um **Homelab privado**
+> usando Kubernetes (K3s via Rancher) com Cloudflare Zero Trust para roteamento público.
+> Essa escolha oferece **controle total**, **custo baixo** ($0/mês) e aprendizado em infraestrutura.
 
 | Componente | Serviço | Configuração |
 |------------|---------|--------------|
-| Backend API | Cloud Run | Container Python (auto-scaling) |
-| Web | Firebase Hosting | Static Site (CDN global) |
-| Database | Firestore | NoSQL document database |
-| Storage | Cloud Storage | Bucket Firebase |
-| Auth | Firebase Admin SDK | JWT próprio |
-| CI/CD | GitHub Actions | Build → Test → Deploy |
+| Backend API | K3s Deployment | Container Python (1 replica) |
+| Web | K3s Deployment | Container Nginx (1 replica) |
+| Database | PostgreSQL 16 | StatefulSet com PVC 10Gi |
+| Proxy/CDN | Cloudflare Zero Trust | Tunnel + Cache rules |
+| Auth | JWT próprio (backend) | RS256 tokens |
+| CI/CD | GitHub Actions + Fleet | Build → Push GHCR → GitOps |
 
 ---
 
@@ -171,7 +171,6 @@ filadelfias/
 | API | Uso | Autenticação |
 |-----|-----|--------------|
 | A Bíblia Digital | Versões online da Bíblia | API Key |
-| Firebase/GCP | Firestore, Storage | Service Account |
 
 ### Notificações
 - **Push**: Expo Push Notifications (Mobile), Web Push API.

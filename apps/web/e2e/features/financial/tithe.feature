@@ -5,14 +5,14 @@ Funcionalidade: Gestão de Dízimos e Ofertas
   Eu quero registrar meus dízimos e ofertas
   Para manter o controle das minhas contribuições
 
-  @integration @needs-backend
+  @integration @needs-backend @critical
   Cenário: Membro visualiza página de dízimos
     Dado que estou logado como membro
     E que estou na página "Meus Dízimos"
     Então devo ver o título "Meus Dízimos e Ofertas"
     E devo ver botão "Novo Registro"
 
-  @integration @needs-backend
+  @integration @needs-backend @critical
   Cenário: Membro registra novo dízimo
     Dado que estou logado como membro
     E que estou na página "Meus Dízimos"

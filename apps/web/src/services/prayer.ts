@@ -5,6 +5,7 @@ export interface PrayerRequest {
     tenant_id: string;
     member_id: string;
     missionary_id?: string;
+    social_project_id?: string;
     author_name: string;
     content: string;
     category: string;
@@ -20,14 +21,16 @@ export interface CreatePrayerRequestDTO {
     category?: string;
     is_anonymous?: boolean;
     missionary_id?: string;
+    social_project_id?: string;
 }
 
 export const prayerService = {
-    listRequests: async (tenantId: string, options?: { missionaryId?: string }) => {
+    listRequests: async (tenantId: string, options?: { missionaryId?: string; socialProjectId?: string }) => {
         const { data } = await api.get<PrayerRequest[]>('/prayer/requests', {
             params: {
                 tenant_id: tenantId,
                 missionary_id: options?.missionaryId,
+                social_project_id: options?.socialProjectId,
             }
         });
         return data;

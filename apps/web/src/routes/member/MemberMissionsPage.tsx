@@ -32,11 +32,8 @@ export function MemberMissionsPage() {
   const createPrayerRequest = useCreatePrayerRequest(tenant?.id);
   const prayFor = usePrayFor(tenant?.id);
   const [expandedMissionaryId, setExpandedMissionaryId] = useState<string | null>(null);
+  const [expandedProjectId, setExpandedProjectId] = useState<string | null>(null);
   const [prayerDrafts, setPrayerDrafts] = useState<Record<string, string>>({});
-
-  if (isLoading || isLoadingProjects) {
-    return <LoadingOverlay message="Carregando missões e projetos sociais..." />;
-  }
 
   const prayersByMissionary = useMemo(() => {
     const groups: Record<string, typeof missionPrayerRequests> = {};
@@ -44,6 +41,16 @@ export function MemberMissionsPage() {
       if (!request.missionary_id) return;
       groups[request.missionary_id] ??= [];
       groups[request.missionary_id].push(request);
+    });
+    return groups;
+  }, [missionPrayerRequests]);
+
+  const prayersByProject = useMemo(() => {
+    const groups: Record<string, typeof missionPrayerRequests> = {};
+    (missionPrayerRequests ?? []).forEach((request) => {
+      if (!request.social_project_id) return;
+      groups[request.social_project_id] ??= [];
+      groups[request.social_project_id].push(request);
     });
     return groups;
   }, [missionPrayerRequests]);
@@ -67,9 +74,32 @@ export function MemberMissionsPage() {
     );
   };
 
+  const handleSubmitProjectPrayer = (projectId: string) => {
+    const content = prayerDrafts[projectId]?.trim();
+    if (!content) return;
+
+    createPrayerRequest.mutate(
+      {
+        content,
+        category: 'missions',
+        social_project_id: projectId,
+      },
+      {
+        onSuccess: () => {
+          setPrayerDrafts((current) => ({ ...current, [projectId]: '' }));
+          setExpandedProjectId(projectId);
+        },
+      },
+    );
+  };
+
   const missionaryCount = missionaries?.length ?? 0;
   const socialProjectCount = socialProjects?.length ?? 0;
   const prayerRequestCount = missionPrayerRequests?.length ?? 0;
+
+  if (isLoading || isLoadingProjects) {
+    return <LoadingOverlay message="Carregando missões e projetos sociais..." />;
+  }
 
   return (
     <div className="mx-auto max-w-6xl space-y-8">
@@ -306,6 +336,77 @@ export function MemberMissionsPage() {
                     </p>
                   )}
                 </div>
+
+                <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-rose-100 pt-4">
+                  <Button
+                    className="gap-2"
+                    onClick={() =>
+                      setExpandedProjectId((current) => (current === project.id ? null : project.id))
+                    }
+                    size="sm"
+                    variant="outline"
+                  >
+                    <Heart className="h-4 w-4" />
+                    Orar por este projeto
+                  </Button>
+                  <span className="text-xs text-gray-500">
+                    {(prayersByProject[project.id] ?? []).length} pedido(s) vinculado(s)
+                  </span>
+                </div>
+
+                {expandedProjectId === project.id && (
+                  <div className="mt-5 space-y-4 border-t border-rose-100 pt-4">
+                    <div className="rounded-xl bg-white p-4">
+                      <label className="mb-2 block text-sm font-medium text-rose-900">
+                        Compartilhar pedido de oração por {project.title}
+                      </label>
+                      <textarea
+                        className="min-h-[88px] w-full rounded-xl border border-rose-100 bg-white p-3 text-sm outline-none focus:border-rose-300"
+                        onChange={(event) =>
+                          setPrayerDrafts((current) => ({ ...current, [project.id]: event.target.value }))
+                        }
+                        placeholder="Ex: Ore por provisão, voluntários, sabedoria da coordenação e alcance das famílias atendidas."
+                        value={prayerDrafts[project.id] ?? ''}
+                      />
+                      <div className="mt-3 flex justify-end">
+                        <Button
+                          className="gap-2"
+                          isLoading={createPrayerRequest.isPending}
+                          onClick={() => handleSubmitProjectPrayer(project.id)}
+                          size="sm"
+                        >
+                          <Send className="h-4 w-4" />
+                          Publicar pedido
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      {(prayersByProject[project.id] ?? []).length === 0 ? (
+                        <p className="text-sm text-gray-500">Nenhum pedido de oração ligado a este projeto ainda.</p>
+                      ) : (
+                        (prayersByProject[project.id] ?? []).map((request) => (
+                          <div key={request.id} className="rounded-xl border border-rose-100 bg-white p-4">
+                            <div className="flex items-start justify-between gap-4">
+                              <div>
+                                <p className="text-sm font-medium text-gray-900">{request.author_name}</p>
+                                <p className="mt-1 text-sm text-gray-600">{request.content}</p>
+                              </div>
+                              <Button
+                                onClick={() => prayFor.mutate(request.id)}
+                                size="sm"
+                                variant="ghost"
+                              >
+                                <Heart className="h-4 w-4" />
+                                <span className="ml-2">{request.prayer_count}</span>
+                              </Button>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
               </article>
             ))}
           </div>

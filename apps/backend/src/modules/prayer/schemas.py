@@ -9,12 +9,14 @@ class PrayerRequestCreate(BaseModel):
     category: str = "other"  # health, family, work, spiritual, other
     is_anonymous: bool = False
     missionary_id: Optional[str] = None
+    social_project_id: Optional[str] = None
 
 
 class PrayerRequestUpdate(BaseModel):
     content: Optional[str] = None
     category: Optional[str] = None
     missionary_id: Optional[str] = None
+    social_project_id: Optional[str] = None
 
 
 class PrayerRequestResponse(BaseModel):
@@ -22,6 +24,7 @@ class PrayerRequestResponse(BaseModel):
     tenant_id: str
     member_id: str
     missionary_id: Optional[str] = None
+    social_project_id: Optional[str] = None
     author_name: str
     content: str
     category: str

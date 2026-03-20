@@ -31,10 +31,15 @@ async def create_prayer_request(
 async def list_prayer_requests(
     tenant_id: UUID = Query(..., description="ID of the tenant"),
     missionary_id: str | None = Query(None, description="Optional missionary filter"),
+    social_project_id: str | None = Query(None, description="Optional social project filter"),
     auth_context: dict = Depends(require_authenticated),
 ):
     """List all prayer requests for a tenant."""
-    return await prayer_request_repository.get_by_tenant(tenant_id, missionary_id=missionary_id)
+    return await prayer_request_repository.get_by_tenant(
+        tenant_id,
+        missionary_id=missionary_id,
+        social_project_id=social_project_id,
+    )
 
 
 @router.post("/requests/{request_id}/pray")

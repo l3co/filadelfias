@@ -5,7 +5,7 @@ Funcionalidade: Pedidos de Oração
   Eu quero compartilhar e orar por pedidos
   Para fortalecer nossa comunidade
 
-  @integration @needs-backend
+  @integration @needs-backend @critical
   Cenário: Criar pedido de oração
     Dado que estou logado como membro
     E que estou na página de Pedidos de Oração
@@ -21,7 +21,7 @@ Funcionalidade: Pedidos de Oração
     Quando clico em "Novo Pedido"
     Então devo ver o formulário de pedido de oração
 
-  @integration @needs-backend
+  @integration @needs-backend @critical
   Cenário: Orar por um pedido
     Dado que estou logado como membro
     E que estou na página de Pedidos de Oração

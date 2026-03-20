@@ -59,5 +59,5 @@ echo "════════════════════════�
 cd apps/web
 
 # Generate BDD files and run tests
-npx bddgen
+./scripts/bddgen.sh
 npx playwright test --config=playwright.config.ts "$@"

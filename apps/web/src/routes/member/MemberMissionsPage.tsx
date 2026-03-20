@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
-import { CalendarDays, Globe, HandHeart, Heart, MapPin, Newspaper, Send, Users2 } from 'lucide-react';
+import { BookOpenText, CalendarDays, Globe, HandHeart, Heart, MapPin, Newspaper, Send, Users2 } from 'lucide-react';
 import { useAuthTenant } from '../../contexts/AuthContext';
-import { useMissions, useSocialProjects } from '../../features/missions/hooks/useMissions';
+import { useCountries, useMissions, useSocialProjects } from '../../features/missions/hooks/useMissions';
 import { useCreatePrayerRequest, usePrayerRequests, usePrayFor } from '../../features/prayer/hooks/usePrayer';
 import { PageHeader } from '../../components/PageHeader';
 import { EmptyState } from '../../components/EmptyState';
@@ -26,14 +26,21 @@ const PROJECT_STATUS_COLORS: Record<string, string> = {
 
 export function MemberMissionsPage() {
   const tenant = useAuthTenant();
+  const { data: countries, isLoading: isLoadingCountries } = useCountries(tenant?.id);
   const { data: missionaries, isLoading } = useMissions(tenant?.id);
   const { data: socialProjects, isLoading: isLoadingProjects } = useSocialProjects(tenant?.id);
   const { data: missionPrayerRequests } = usePrayerRequests(tenant?.id);
   const createPrayerRequest = useCreatePrayerRequest(tenant?.id);
   const prayFor = usePrayFor(tenant?.id);
   const [expandedMissionaryId, setExpandedMissionaryId] = useState<string | null>(null);
+  const [profileMissionaryId, setProfileMissionaryId] = useState<string | null>(null);
   const [expandedProjectId, setExpandedProjectId] = useState<string | null>(null);
   const [prayerDrafts, setPrayerDrafts] = useState<Record<string, string>>({});
+
+  const countryNameByCode = useMemo(
+    () => Object.fromEntries((countries ?? []).map((country) => [country.code, country.name])),
+    [countries],
+  );
 
   const prayersByMissionary = useMemo(() => {
     const groups: Record<string, typeof missionPrayerRequests> = {};
@@ -97,7 +104,7 @@ export function MemberMissionsPage() {
   const socialProjectCount = socialProjects?.length ?? 0;
   const prayerRequestCount = missionPrayerRequests?.length ?? 0;
 
-  if (isLoading || isLoadingProjects) {
+  if (isLoading || isLoadingProjects || isLoadingCountries) {
     return <LoadingOverlay message="Carregando missões e projetos sociais..." />;
   }
 
@@ -187,6 +194,17 @@ export function MemberMissionsPage() {
                       <Button
                         className="gap-2"
                         onClick={() =>
+                          setProfileMissionaryId((current) => (current === missionary.id ? null : missionary.id))
+                        }
+                        size="sm"
+                        variant={profileMissionaryId === missionary.id ? 'default' : 'outline'}
+                      >
+                        <BookOpenText className="h-4 w-4" />
+                        {profileMissionaryId === missionary.id ? 'Ocultar perfil' : 'Ver perfil'}
+                      </Button>
+                      <Button
+                        className="gap-2"
+                        onClick={() =>
                           setExpandedMissionaryId((current) => (current === missionary.id ? null : missionary.id))
                         }
                         size="sm"
@@ -212,6 +230,56 @@ export function MemberMissionsPage() {
                     </div>
                   </div>
                 </div>
+
+                {profileMissionaryId === missionary.id && (
+                  <div className="mt-5 space-y-4 rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-white p-4">
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="rounded-xl bg-white p-4">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-indigo-600">Campo</p>
+                        <p className="mt-1 text-sm font-medium text-gray-900">{missionary.field_name}</p>
+                      </div>
+                      <div className="rounded-xl bg-white p-4">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-indigo-600">País</p>
+                        <p className="mt-1 text-sm font-medium text-gray-900">
+                          {countryNameByCode[missionary.country_code] || missionary.country_code}
+                        </p>
+                      </div>
+                      <div className="rounded-xl bg-white p-4">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-indigo-600">Localização</p>
+                        <p className="mt-1 text-sm font-medium text-gray-900">
+                          {[missionary.city, missionary.state].filter(Boolean).join(', ') || 'Não informada'}
+                        </p>
+                      </div>
+                      <div className="rounded-xl bg-white p-4">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-indigo-600">Pedidos vinculados</p>
+                        <p className="mt-1 text-sm font-medium text-gray-900">
+                          {(prayersByMissionary[missionary.id] ?? []).length} pedido(s) de oração
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="rounded-xl bg-white p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-indigo-600">Biografia</p>
+                      <p className="mt-2 text-sm leading-relaxed text-gray-600">
+                        {missionary.bio || 'Este missionário ainda não possui uma biografia detalhada cadastrada.'}
+                      </p>
+                    </div>
+
+                    {missionary.newsletter_url && (
+                      <div className="flex justify-start">
+                        <a
+                          className="inline-flex h-10 items-center justify-center rounded-xl bg-indigo-600 px-4 text-sm font-semibold text-white transition hover:bg-indigo-700"
+                          href={missionary.newsletter_url}
+                          rel="noreferrer"
+                          target="_blank"
+                        >
+                          <Newspaper className="mr-2 h-4 w-4" />
+                          Acompanhar newsletter
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {expandedMissionaryId === missionary.id && (
                   <div className="mt-5 space-y-4 border-t border-gray-100 pt-4">

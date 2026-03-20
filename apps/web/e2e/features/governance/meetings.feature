@@ -52,7 +52,7 @@ Funcionalidade: Gestão de Reuniões
     E devo ver a lista de presença vazia
     E devo ver opção para editar ata
 
-  @skip @integration @needs-backend
+  @integration @needs-backend
   Cenário: Registrar ata da reunião
     Dado que existe uma reunião agendada no conselho
     Quando eu abro o dialog de reuniões do conselho

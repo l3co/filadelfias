@@ -12,9 +12,10 @@ export default defineConfig({
   test: {
     globals: true,
     exclude: ['node_modules', 'e2e'],
+    setupFiles: ['./src/test/setup.ts'],
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json', 'html'],
+      reporter: ['text', 'json', 'html', 'lcov'],
       exclude: [
         'node_modules/',
         'src/test/',
@@ -23,6 +24,12 @@ export default defineConfig({
         '**/index.ts',
         'e2e/',
       ],
+      thresholds: {
+        lines: 30,
+        functions: 30,
+        branches: 30,
+        statements: 30,
+      },
     },
     // Use projects for different test environments
     projects: [
@@ -53,7 +60,6 @@ export default defineConfig({
             'e2e',
           ],
           environment: 'jsdom',
-          setupFiles: ['./src/test/setup.ts'],
           globals: true,
         },
       },

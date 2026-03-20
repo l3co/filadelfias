@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { manualService } from '@/services/manual';
 import { ArrowLeft, ChevronLeft, ChevronRight, Minus, Plus, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ROUTES } from '@/lib/routes';
 
 export function ManualReaderPage() {
     const { '*': articleId } = useParams();
@@ -37,7 +38,7 @@ export function ManualReaderPage() {
         return (
             <div className="max-w-3xl mx-auto p-8 text-center bg-white rounded-lg shadow mt-8">
                 <h2 className="text-xl font-bold text-red-600 mb-4">Artigo não encontrado</h2>
-                <Link to="/manual" className="text-green-700 hover:underline">Voltar para o índice</Link>
+                <Link to={ROUTES.PUBLIC.MANUAL} className="text-green-700 hover:underline">Voltar para o índice</Link>
             </div>
         );
     }
@@ -48,7 +49,7 @@ export function ManualReaderPage() {
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
                 <div className="flex items-center gap-3 mb-3">
                     <Link 
-                        to="/manual" 
+                        to={ROUTES.PUBLIC.MANUAL}
                         className="flex items-center gap-1 text-gray-500 hover:text-green-700 transition-colors shrink-0"
                         title="Voltar ao índice"
                     >
@@ -157,7 +158,7 @@ export function ManualReaderPage() {
             <div className="flex justify-between mt-8 sticky bottom-4 z-10">
                 {article.navigation.previous ? (
                     <Link
-                        to={`/manual/${article.navigation.previous.id}`}
+                        to={ROUTES.PUBLIC.MANUAL_ARTICLE(article.navigation.previous.id)}
                         className="flex items-center gap-2 bg-white text-green-700 font-medium hover:bg-green-50 hover:border-green-200 border border-gray-200 px-4 py-3 rounded-full shadow-lg transition-all hover:-translate-x-1"
                     >
                         <ChevronLeft size={20} />
@@ -167,7 +168,7 @@ export function ManualReaderPage() {
 
                 {article.navigation.next ? (
                     <Link
-                        to={`/manual/${article.navigation.next.id}`}
+                        to={ROUTES.PUBLIC.MANUAL_ARTICLE(article.navigation.next.id)}
                         className="flex items-center gap-2 bg-green-700 text-white font-medium hover:bg-green-800 px-6 py-3 rounded-full shadow-lg shadow-green-700/20 transition-all hover:translate-x-1"
                     >
                         <span className="text-sm">Art. {article.navigation.next.number}</span>

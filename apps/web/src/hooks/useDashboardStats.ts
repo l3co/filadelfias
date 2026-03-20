@@ -1,6 +1,7 @@
-import { useCurrentTenant } from './useAuth';
+import { useAuthTenant } from '../contexts/AuthContext';
 import { useMembers } from '../features/members/hooks/useMembers';
 import { useFinancialData } from '../features/financial/hooks/useFinancial';
+import { formatCurrencyBRL } from '../lib/formatters';
 
 interface DashboardStats {
   members: {
@@ -18,7 +19,7 @@ interface DashboardStats {
 }
 
 export function useDashboardStats(): DashboardStats {
-  const tenant = useCurrentTenant();
+  const tenant = useAuthTenant();
   const tenantId = tenant?.id || '';
 
   const { data: members, isLoading: membersLoading } = useMembers(tenantId);
@@ -88,19 +89,12 @@ function calculateMonthlyTotals(transactions: { date?: string; type?: string; am
 export function useFormattedStats() {
   const stats = useDashboardStats();
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(value);
-  };
-
   return {
     ...stats,
     formatted: {
-      balance: formatCurrency(stats.financial.balance),
-      incomeThisMonth: formatCurrency(stats.financial.incomeThisMonth),
-      expenseThisMonth: formatCurrency(stats.financial.expenseThisMonth),
+      balance: formatCurrencyBRL(stats.financial.balance),
+      incomeThisMonth: formatCurrencyBRL(stats.financial.incomeThisMonth),
+      expenseThisMonth: formatCurrencyBRL(stats.financial.expenseThisMonth),
     },
   };
 }

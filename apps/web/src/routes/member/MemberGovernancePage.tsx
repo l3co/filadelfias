@@ -1,5 +1,5 @@
 import { Gavel, Users, Landmark } from 'lucide-react';
-import { useCurrentTenant } from '../../hooks/useAuth';
+import { useAuthTenant } from '../../contexts/AuthContext';
 import { useGovernance } from '../../features/governance/hooks/useGovernance';
 import { useMembers } from '../../features/members/hooks/useMembers';
 import { Card, CardContent } from '../../components/ui/card';
@@ -93,7 +93,7 @@ function CouncilCard({ council, memberNames }: CouncilCardProps) {
 }
 
 export function MemberGovernancePage() {
-  const tenant = useCurrentTenant();
+  const tenant = useAuthTenant();
   const { data: councils, isLoading: isLoadingCouncils } = useGovernance(tenant?.id);
   const { data: members } = useMembers(tenant?.id);
 

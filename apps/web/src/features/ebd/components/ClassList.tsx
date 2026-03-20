@@ -4,6 +4,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../../../c
 import { Badge } from "../../../components/ui/badge";
 import { buttonVariants } from "../../../components/ui/button";
 import type { EBDClass } from '../../../services/ebd';
+import { ROUTES } from '../../../lib/routes';
 
 interface ClassListProps {
     classes?: EBDClass[];
@@ -62,13 +63,13 @@ export function ClassList({ classes, isLoading }: ClassListProps) {
                     </CardContent>
                     <CardFooter className="grid grid-cols-2 gap-2">
                         <Link
-                            to={`/admin/education/${c.id}?tab=students`}
+                            to={`${ROUTES.ADMIN.EDUCATION_CLASS(c.id)}?tab=students`}
                             className={buttonVariants({ variant: "outline", size: "sm", className: "w-full gap-2" })}
                         >
                             <GraduationCap size={14} /> Alunos
                         </Link>
                         <Link
-                            to={`/admin/education/${c.id}?tab=lessons`}
+                            to={`${ROUTES.ADMIN.EDUCATION_CLASS(c.id)}?tab=lessons`}
                             className={buttonVariants({ variant: "outline", size: "sm", className: "w-full gap-2" })}
                         >
                             <BookOpen size={14} /> Lições

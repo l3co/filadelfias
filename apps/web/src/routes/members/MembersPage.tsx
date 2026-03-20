@@ -1,16 +1,17 @@
-import { useState, useMemo } from 'react';
-import { Plus, Users, Search, X } from 'lucide-react';
+import { useState, useMemo, useCallback, useDeferredValue, startTransition } from 'react';
+import { Plus, Users } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useCurrentTenant } from '../../hooks/useAuth';
 import { useMembers } from '../../features/members/hooks/useMembers';
 import { MembersCards } from '../../features/members/components/MembersCards';
 import { MemberDialog } from '../../features/members/components/MemberDialog';
 import { InviteMemberDialog } from '../../features/members/components/InviteMemberDialog';
 import { InviteSuccessDialog } from '../../features/members/components/InviteSuccessDialog';
 import { Button } from '../../components/ui/button';
-import { Badge } from '../../components/ui/badge';
+import { SearchAndFilter } from '../../components/patterns/SearchAndFilter';
+import { PageHeaderWithIcon } from '../../components/PageHeader';
 import { api } from '../../lib/api';
 import type { Member } from '../../types';
+import { useAuthTenant } from '../../contexts/AuthContext';
 
 interface InviteResult {
     success: boolean;
@@ -27,7 +28,7 @@ const officeLabels: Record<string, string> = {
 };
 
 export function MembersPage() {
-    const tenant = useCurrentTenant();
+    const tenant = useAuthTenant();
     const queryClient = useQueryClient();
     const { data: members, isLoading } = useMembers(tenant?.id);
     const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -36,21 +37,24 @@ export function MembersPage() {
     const [inviteResult, setInviteResult] = useState<{ member: Member; result: InviteResult } | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [officeFilter, setOfficeFilter] = useState<string | null>(null);
+    const deferredSearchQuery = useDeferredValue(searchQuery);
+    const deferredOfficeFilter = useDeferredValue(officeFilter);
 
     const filteredMembers = useMemo(() => {
         if (!members) return [];
 
         return members.filter(member => {
-            const matchesSearch = searchQuery === '' ||
-                member.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                member.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                member.phone?.includes(searchQuery);
+            const normalizedSearch = deferredSearchQuery.trim().toLowerCase();
+            const matchesSearch = normalizedSearch === '' ||
+                member.full_name.toLowerCase().includes(normalizedSearch) ||
+                member.email?.toLowerCase().includes(normalizedSearch) ||
+                member.phone?.includes(deferredSearchQuery);
 
-            const matchesOffice = !officeFilter || member.office === officeFilter;
+            const matchesOffice = !deferredOfficeFilter || member.office === deferredOfficeFilter;
 
             return matchesSearch && matchesOffice;
         });
-    }, [members, searchQuery, officeFilter]);
+    }, [members, deferredSearchQuery, deferredOfficeFilter]);
 
     const officeCounts = useMemo(() => {
         if (!members) return {};
@@ -77,6 +81,49 @@ export function MembersPage() {
         }
     });
 
+    const handleCreateOpen = useCallback(() => {
+        setIsCreateOpen(true);
+    }, []);
+
+    const handleEditMember = useCallback((member: Member) => {
+        setEditingMember(member);
+    }, []);
+
+    const handleInviteMember = useCallback((member: Member) => {
+        setInviteMember(member);
+    }, []);
+
+    const handleMemberDialogClose = useCallback(() => {
+        setIsCreateOpen(false);
+        setEditingMember(null);
+    }, []);
+
+    const handleInviteDialogClose = useCallback(() => {
+        setInviteMember(null);
+    }, []);
+
+    const handleInviteSuccessClose = useCallback(() => {
+        setInviteResult(null);
+    }, []);
+
+    const handleSearchChange = useCallback((value: string) => {
+        startTransition(() => {
+            setSearchQuery(value);
+        });
+    }, []);
+
+    const handleClearSearch = useCallback(() => {
+        startTransition(() => {
+            setSearchQuery('');
+        });
+    }, []);
+
+    const handleOfficeFilterChange = useCallback((office: string | null) => {
+        startTransition(() => {
+            setOfficeFilter((current) => current === office ? null : office);
+        });
+    }, []);
+
     if (!tenant) {
         return (
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center">
@@ -92,96 +139,55 @@ export function MembersPage() {
     }
 
     const memberCount = members?.length || 0;
+    const officeFilters = useMemo(
+        () => [
+            { key: null, label: 'Todos', count: members?.length || 0 },
+            ...Object.entries(officeLabels).map(([key, label]) => ({
+                key,
+                label,
+                count: officeCounts[key],
+            })),
+        ],
+        [members?.length, officeCounts],
+    );
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-2xl bg-gradient-to-br from-green-50 to-teal-50">
-                        <Users className="h-6 w-6 text-green-600" />
-                    </div>
-                    <div>
-                        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#002333]">Membros</h1>
-                        <p className="text-gray-500 mt-0.5">
-                            {memberCount > 0 ? `${memberCount} membros em ${tenant.name}` : `Gerencie a membresia da ${tenant.name}`}
-                        </p>
-                    </div>
-                </div>
-                <Button onClick={() => setIsCreateOpen(true)} className="gap-2">
+            <PageHeaderWithIcon
+                icon={Users}
+                title="Membros"
+                description={
+                    memberCount > 0 ? `${memberCount} membros em ${tenant.name}` : `Gerencie a membresia da ${tenant.name}`
+                }
+                actions={
+                    <Button onClick={handleCreateOpen} className="gap-2">
                     <Plus className="h-4 w-4" />
                     Novo Membro
-                </Button>
-            </div>
+                    </Button>
+                }
+            />
 
-            {/* Search and Filters */}
-            <div className="flex flex-col gap-4">
-                <div className="flex flex-col sm:flex-row gap-3">
-                    <div className="relative flex-1">
-                        <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                        <input
-                            type="text"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="Buscar por nome, email, telefone..."
-                            className="w-full pl-11 pr-10 py-3 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all placeholder:text-gray-400"
-                        />
-                        {searchQuery && (
-                            <button
-                                onClick={() => setSearchQuery('')}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                            >
-                                <X size={16} />
-                            </button>
-                        )}
-                    </div>
-                </div>
+            <SearchAndFilter
+                searchValue={searchQuery}
+                onSearchChange={handleSearchChange}
+                onClearSearch={handleClearSearch}
+                searchPlaceholder="Buscar por nome, email, telefone..."
+                filters={officeFilters}
+                activeFilter={officeFilter}
+                onFilterChange={handleOfficeFilterChange}
+            />
 
-                {/* Office Filters */}
-                <div className="flex flex-wrap gap-2">
-                    <button
-                        onClick={() => setOfficeFilter(null)}
-                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${!officeFilter
-                                ? 'bg-green-600 text-white'
-                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                            }`}
-                    >
-                        Todos
-                        <Badge variant="secondary" className="ml-2 bg-white/20">{members?.length || 0}</Badge>
-                    </button>
-                    {Object.entries(officeLabels).map(([key, label]) => (
-                        <button
-                            key={key}
-                            onClick={() => setOfficeFilter(officeFilter === key ? null : key)}
-                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${officeFilter === key
-                                    ? 'bg-green-600 text-white'
-                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                }`}
-                        >
-                            {label}
-                            {officeCounts[key] && (
-                                <Badge variant="secondary" className="ml-2">{officeCounts[key]}</Badge>
-                            )}
-                        </button>
-                    ))}
-                </div>
-            </div>
-
-            {/* Cards */}
             <MembersCards
                 members={filteredMembers}
                 isLoading={isLoading}
-                onEditMember={(member) => setEditingMember(member)}
-                onInviteMember={(member) => setInviteMember(member)}
+                onEditMember={handleEditMember}
+                onInviteMember={handleInviteMember}
             />
 
             {/* Create/Edit Dialog (Unified) */}
             <MemberDialog
                 isOpen={isCreateOpen || !!editingMember}
-                onClose={() => {
-                    setIsCreateOpen(false);
-                    setEditingMember(null);
-                }}
+                onClose={handleMemberDialogClose}
                 tenantId={tenant.id}
                 member={editingMember}
             />
@@ -189,7 +195,7 @@ export function MembersPage() {
             {/* Invite Dialog (Confirm & Role Selection) */}
             <InviteMemberDialog
                 isOpen={!!inviteMember}
-                onClose={() => setInviteMember(null)}
+                onClose={handleInviteDialogClose}
                 member={inviteMember}
                 onInvite={(member, role) => inviteMutation.mutate({ member, role })}
                 isLoading={inviteMutation.isPending}
@@ -199,7 +205,7 @@ export function MembersPage() {
             {inviteResult && (
                 <InviteSuccessDialog
                     isOpen={!!inviteResult}
-                    onClose={() => setInviteResult(null)}
+                    onClose={handleInviteSuccessClose}
                     memberName={inviteResult.member.full_name}
                     memberEmail={inviteResult.member.email || ''}
                     temporaryPassword={inviteResult.result.temporary_password || ''}

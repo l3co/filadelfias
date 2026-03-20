@@ -7,10 +7,10 @@ import {
     DialogHeader,
     DialogTitle,
 } from "../../../components/ui/dialog";
-import { useCurrentTenant } from '../../../hooks/useAuth';
 import { useMembers } from '../../members/hooks/useMembers';
 import { useAddCouncilMember, useRemoveCouncilMember, useGovernance } from '../hooks/useGovernance';
 import type { Council } from '../../../services/governance';
+import { useAuthTenant } from '../../../contexts/AuthContext';
 
 interface Props {
     isOpen: boolean;
@@ -19,7 +19,7 @@ interface Props {
 }
 
 export function ManageMembersDialog({ isOpen, onClose, council }: Props) {
-    const tenant = useCurrentTenant();
+    const tenant = useAuthTenant();
     const { data: members } = useMembers(tenant?.id);
     const { data: councils } = useGovernance(tenant?.id);
     const addMember = useAddCouncilMember(tenant?.id);

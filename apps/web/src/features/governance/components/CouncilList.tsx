@@ -24,8 +24,8 @@ import {
 import { CardSkeleton } from "../../../components/LoadingState";
 import { EmptyState } from "../../../components/EmptyState";
 import type { Council } from '../../../services/governance';
-import { useCurrentTenant } from '../../../hooks/useAuth';
 import { useMembers } from '../../members/hooks/useMembers';
+import { useAuthTenant } from '../../../contexts/AuthContext';
 
 interface CouncilListProps {
     councils?: Council[];
@@ -35,7 +35,7 @@ interface CouncilListProps {
 }
 
 export const CouncilList = memo(function CouncilList({ councils, isLoading, onDelete, onEdit }: CouncilListProps) {
-    const tenant = useCurrentTenant();
+    const tenant = useAuthTenant();
     const { data: members } = useMembers(tenant?.id);
     const [selectedCouncil, setSelectedCouncil] = useState<Council | null>(null);
     const [showMeetings, setShowMeetings] = useState(false);

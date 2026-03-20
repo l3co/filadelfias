@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { ROUTES } from '../lib/routes';
 import { ArrowLeft } from 'lucide-react';
 
 export function TermsPage() {
@@ -6,7 +7,7 @@ export function TermsPage() {
         <div className="min-h-screen bg-gray-50">
             <div className="max-w-4xl mx-auto px-4 py-12 sm:py-16">
                 <Link 
-                    to="/" 
+                    to={ROUTES.PUBLIC.HOME} 
                     className="inline-flex items-center gap-2 text-green-700 hover:text-green-800 font-medium mb-8"
                 >
                     <ArrowLeft size={18} />

@@ -12,17 +12,16 @@ import {
   Wallet,
   Receipt
 } from 'lucide-react';
-import { useCurrentUser, useCurrentTenant, useCurrentMembership } from '../../hooks/useAuth';
 import { usePermissions } from '../../hooks/usePermissions';
 import { WelcomeBanner } from '../../components/WelcomeBanner';
 import { HomeCard, HomeCardGrid } from '../../components/HomeCard';
 import { SocialMediaCard } from '../../components/SocialMediaCard';
 import { AdminAccessCard } from '../../components/AdminAccessCard';
+import { useAuth } from '../../contexts/AuthContext';
+import { ROUTES } from '../../lib/routes';
 
 export function MemberHomePage() {
-  const { data: user } = useCurrentUser();
-  const tenant = useCurrentTenant();
-  const membership = useCurrentMembership();
+  const { user, tenant, membership } = useAuth();
   const { canSubmitExpenses } = usePermissions();
 
   return (
@@ -40,7 +39,7 @@ export function MemberHomePage() {
           icon={BookOpen}
           title="Bíblia Online"
           description="Leia e medite na Palavra de Deus"
-          href="/member/bible"
+          href={ROUTES.MEMBER.BIBLE}
           color="blue"
         />
         
@@ -48,7 +47,7 @@ export function MemberHomePage() {
           icon={Music}
           title="Hinário"
           description="Hinos da nossa tradição reformada"
-          href="/member/hymnal"
+          href={ROUTES.MEMBER.HYMNAL}
           color="yellow"
         />
         
@@ -56,7 +55,7 @@ export function MemberHomePage() {
           icon={BookMarked}
           title="Manual Presbiteriano"
           description="Consulte os princípios da nossa fé"
-          href="/member/manual"
+          href={ROUTES.MEMBER.MANUAL}
           color="purple"
         />
         
@@ -64,7 +63,7 @@ export function MemberHomePage() {
           icon={Heart}
           title="Devocionais"
           description="Reflexões diárias para sua vida espiritual"
-          href="/member/devotionals"
+          href={ROUTES.MEMBER.DEVOTIONALS}
           color="red"
         />
         
@@ -72,7 +71,7 @@ export function MemberHomePage() {
           icon={Users}
           title="Membros"
           description="Conheça os irmãos da nossa igreja"
-          href="/member/directory"
+          href={ROUTES.MEMBER.DIRECTORY}
           color="emerald"
         />
         
@@ -80,7 +79,7 @@ export function MemberHomePage() {
           icon={Gavel}
           title="Governança"
           description="Conheça os órgãos de liderança"
-          href="/member/governance"
+          href={ROUTES.MEMBER.GOVERNANCE}
           color="purple"
         />
         
@@ -88,7 +87,7 @@ export function MemberHomePage() {
           icon={Calendar}
           title="Eventos"
           description="Próximos eventos e atividades"
-          href="/member/events"
+          href={ROUTES.MEMBER.EVENTS}
           color="orange"
         />
         
@@ -96,7 +95,7 @@ export function MemberHomePage() {
           icon={Globe}
           title="Missões"
           description="Conheça nossos missionários"
-          href="/member/missions"
+          href={ROUTES.MEMBER.MISSIONS}
           color="indigo"
         />
         
@@ -104,7 +103,7 @@ export function MemberHomePage() {
           icon={GraduationCap}
           title="EBD"
           description="Sua turma e materiais de estudo"
-          href="/member/education"
+          href={ROUTES.MEMBER.EDUCATION}
           color="green"
         />
         
@@ -112,7 +111,7 @@ export function MemberHomePage() {
           icon={MessageCircle}
           title="Pedidos de Oração"
           description="Compartilhe e ore pelos irmãos"
-          href="/member/prayer"
+          href={ROUTES.MEMBER.PRAYER}
           color="pink"
         />
         
@@ -120,7 +119,7 @@ export function MemberHomePage() {
           icon={Wallet}
           title="Meus Dízimos"
           description="Registre seus dízimos e ofertas"
-          href="/member/tithes"
+          href={ROUTES.MEMBER.TITHES}
           color="green"
         />
         
@@ -129,7 +128,7 @@ export function MemberHomePage() {
             icon={Receipt}
             title="Minhas Despesas"
             description="Solicite reembolso de despesas"
-            href="/member/expenses"
+            href={ROUTES.MEMBER.EXPENSES}
             color="orange"
           />
         )}
@@ -137,7 +136,7 @@ export function MemberHomePage() {
 
       {/* Social Media Links */}
       <div className="mt-8">
-        <SocialMediaCard tenant={tenant} />
+        <SocialMediaCard tenant={tenant ?? undefined} />
       </div>
     </div>
   );

@@ -5,10 +5,11 @@
  */
 
 import { Navigate } from 'react-router-dom';
-import { useCurrentUser } from '../hooks/useAuth';
+import { useAuth } from '../contexts/AuthContext';
 import { usePermissions } from '../hooks/usePermissions';
 import { AccessDenied } from './PermissionGate';
 import type { Resource, Action } from '../lib/permissions';
+import { ROUTES } from '../lib/routes';
 
 interface ProtectedRouteWithPermissionProps {
   children: React.ReactNode;
@@ -26,7 +27,7 @@ export function ProtectedRouteWithPermission({
   action = 'view',
   redirectTo,
 }: ProtectedRouteWithPermissionProps) {
-  const { data: user, isLoading: isLoadingUser } = useCurrentUser();
+  const { user, isLoading: isLoadingUser } = useAuth();
   const { can, isLoading: isLoadingPermissions } = usePermissions();
 
   // Loading state
@@ -43,7 +44,7 @@ export function ProtectedRouteWithPermission({
 
   // Not authenticated - redirect to login
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to={ROUTES.AUTH.LOGIN} replace />;
   }
 
   // Authenticated but no permission

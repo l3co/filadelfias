@@ -3,7 +3,7 @@ import {
   Bell, LogOut, Menu, User, ChevronDown, Home, X,
   BookOpen, BookMarked, Music, Users, Calendar, Globe, GraduationCap, Heart, MessageCircle, Gavel, Wallet, Receipt
 } from 'lucide-react';
-import { useCurrentUser, useLogout, useCurrentTenant } from '../../hooks/useAuth';
+import { useLogout } from '../../hooks/useAuth';
 import { usePermissions } from '../../hooks/usePermissions';
 import { Button } from '../ui/button';
 import {
@@ -15,23 +15,25 @@ import {
 } from '../ui/dropdown-menu';
 import { useState } from 'react';
 import { cn } from '../../lib/utils';
+import { useAuth, useAuthTenant } from '../../contexts/AuthContext';
+import { ROUTES } from '../../lib/routes';
 
 const baseNavItems = [
-  { href: '/member', label: 'Início', icon: Home },
-  { href: '/member/bible', label: 'Bíblia', icon: BookOpen },
-  { href: '/member/hymnal', label: 'Hinário', icon: Music },
-  { href: '/member/manual', label: 'Manual', icon: BookMarked },
-  { href: '/member/devotionals', label: 'Devocionais', icon: Heart },
-  { href: '/member/directory', label: 'Membros', icon: Users },
-  { href: '/member/governance', label: 'Governança', icon: Gavel },
-  { href: '/member/events', label: 'Eventos', icon: Calendar },
-  { href: '/member/missions', label: 'Missões', icon: Globe },
-  { href: '/member/education', label: 'EBD', icon: GraduationCap },
-  { href: '/member/prayer', label: 'Oração', icon: MessageCircle },
-  { href: '/member/tithes', label: 'Dízimos', icon: Wallet },
+  { href: ROUTES.MEMBER.ROOT, label: 'Início', icon: Home },
+  { href: ROUTES.MEMBER.BIBLE, label: 'Bíblia', icon: BookOpen },
+  { href: ROUTES.MEMBER.HYMNAL, label: 'Hinário', icon: Music },
+  { href: ROUTES.MEMBER.MANUAL, label: 'Manual', icon: BookMarked },
+  { href: ROUTES.MEMBER.DEVOTIONALS, label: 'Devocionais', icon: Heart },
+  { href: ROUTES.MEMBER.DIRECTORY, label: 'Membros', icon: Users },
+  { href: ROUTES.MEMBER.GOVERNANCE, label: 'Governança', icon: Gavel },
+  { href: ROUTES.MEMBER.EVENTS, label: 'Eventos', icon: Calendar },
+  { href: ROUTES.MEMBER.MISSIONS, label: 'Missões', icon: Globe },
+  { href: ROUTES.MEMBER.EDUCATION, label: 'EBD', icon: GraduationCap },
+  { href: ROUTES.MEMBER.PRAYER, label: 'Oração', icon: MessageCircle },
+  { href: ROUTES.MEMBER.TITHES, label: 'Dízimos', icon: Wallet },
 ];
 
-const expenseNavItem = { href: '/member/expenses', label: 'Despesas', icon: Receipt };
+const expenseNavItem = { href: ROUTES.MEMBER.EXPENSES, label: 'Despesas', icon: Receipt };
 
 // Gera acrônimo do nome da igreja (ex: "Igreja Presbiteriana Filadélfia" -> "IPF")
 function getChurchAcronym(name?: string): string {
@@ -45,8 +47,8 @@ function getChurchAcronym(name?: string): string {
 }
 
 export function MemberLayout() {
-  const { data: user } = useCurrentUser();
-  const tenant = useCurrentTenant();
+  const { user } = useAuth();
+  const tenant = useAuthTenant();
   const logout = useLogout();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -77,7 +79,7 @@ export function MemberLayout() {
               <Menu className="h-5 w-5 text-slate-600" />
             </button>
 
-            <Link to="/member" className="flex items-center gap-3 group">
+            <Link to={ROUTES.MEMBER.ROOT} className="flex items-center gap-3 group">
               <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/25 group-hover:shadow-emerald-500/40 transition-shadow">
                 <img src="/logo.svg" alt="Logo" className="h-6 w-6 text-white" />
               </div>
@@ -146,7 +148,7 @@ export function MemberLayout() {
                   <p className="text-xs text-slate-500">{user?.email}</p>
                 </div>
                 <DropdownMenuItem asChild className="cursor-pointer">
-                  <Link to="/member/profile" className="flex items-center">
+                  <Link to={ROUTES.MEMBER.PROFILE} className="flex items-center">
                     <User className="mr-2 h-4 w-4" />
                     Meu Perfil
                   </Link>

@@ -16,6 +16,7 @@
  */
 
 import type { EcclesiasticalOffice, EcclesiasticalFunction, Member } from '../types';
+import { MODULE_ROUTES } from './routes';
 
 // ============================================================================
 // TIPOS DE PERMISSÃO
@@ -370,11 +371,11 @@ export const FUNCTION_LABELS: Record<EcclesiasticalFunction, string> = {
  * Recursos que cada módulo da aplicação requer
  */
 export const MODULE_RESOURCES: Record<string, Resource> = {
-  '/app/members': 'members',
-  '/app/governance': 'governance',
-  '/app/financial': 'financial',
-  '/app/ebd': 'ebd',
-  '/app/missions': 'missions',
-  '/app/events': 'events',
-  '/app/settings': 'settings',
+  [MODULE_ROUTES.members]: 'members',
+  [MODULE_ROUTES.governance]: 'governance',
+  [MODULE_ROUTES.financial]: 'financial',
+  [MODULE_ROUTES.ebd]: 'ebd',
+  [MODULE_ROUTES.missions]: 'missions',
+  [MODULE_ROUTES.events]: 'events',
+  [MODULE_ROUTES.settings]: 'settings',
 };

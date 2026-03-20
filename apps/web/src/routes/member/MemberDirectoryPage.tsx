@@ -1,6 +1,6 @@
 import { Users, Search, Filter, Phone, Mail } from 'lucide-react';
 import { useState, useMemo } from 'react';
-import { useCurrentTenant } from '../../hooks/useAuth';
+import { useAuthTenant } from '../../contexts/AuthContext';
 import { useMembers } from '../../features/members/hooks/useMembers';
 import { PageHeaderWithIcon } from '../../components/PageHeader';
 import { EmptyState } from '../../components/EmptyState';
@@ -24,7 +24,7 @@ const officeLabels: Record<string, { label: string; color: string; gradient: str
 };
 
 export function MemberDirectoryPage() {
-  const tenant = useCurrentTenant();
+  const tenant = useAuthTenant();
   const { data: members, isLoading } = useMembers(tenant?.id || '');
   const [search, setSearch] = useState('');
   const [officeFilter, setOfficeFilter] = useState('all');

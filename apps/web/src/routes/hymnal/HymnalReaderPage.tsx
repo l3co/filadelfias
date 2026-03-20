@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { hymnalService } from '../../services/hymnal';
 import { ArrowLeft, Minus, Plus, Volume2, Square } from 'lucide-react';
 import { Button } from '../../components/ui/button';
+import { ROUTES } from '../../lib/routes';
 
 export function HymnalReaderPage() {
     const { number } = useParams();
@@ -67,7 +68,7 @@ export function HymnalReaderPage() {
         return (
             <div className="max-w-3xl mx-auto p-8 text-center bg-white rounded-lg shadow mt-8">
                 <h2 className="text-xl font-bold text-red-600 mb-4">Hino não encontrado</h2>
-                <Link to="/hymnal" className="text-green-700 hover:underline">Voltar para índice</Link>
+                <Link to={ROUTES.PUBLIC.HYMNAL} className="text-green-700 hover:underline">Voltar para índice</Link>
             </div>
         );
     }
@@ -77,7 +78,7 @@ export function HymnalReaderPage() {
             {/* Header com Navegação e Toolbar */}
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 pb-4 border-b border-gray-100 gap-4">
                 <div>
-                    <Link to="/hymnal" className="text-gray-500 hover:text-green-700 flex items-center gap-2 text-sm font-medium transition-colors">
+                    <Link to={ROUTES.PUBLIC.HYMNAL} className="text-gray-500 hover:text-green-700 flex items-center gap-2 text-sm font-medium transition-colors">
                         <ArrowLeft size={18} /> <span className="hidden sm:inline">Voltar ao Hinário</span>
                         <span className="sm:hidden">Voltar</span>
                     </Link>

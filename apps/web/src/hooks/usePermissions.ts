@@ -4,7 +4,7 @@
  */
 
 import { useMemo } from 'react';
-import { useCurrentUser, useCurrentTenant } from './useAuth';
+import { useAuthTenant, useAuthUser } from '../contexts/AuthContext';
 import { useMembers } from '../features/members/hooks/useMembers';
 import {
   getMemberPermissions,
@@ -19,6 +19,7 @@ import {
   type SystemRole,
 } from '../lib/permissions';
 import type { Member, EcclesiasticalOffice } from '../types';
+import { MODULE_ROUTES } from '../lib/routes';
 
 interface UsePermissionsReturn {
   // Estado
@@ -55,8 +56,8 @@ interface UsePermissionsReturn {
 }
 
 export function usePermissions(): UsePermissionsReturn {
-  const { data: user, isLoading: isLoadingUser } = useCurrentUser();
-  const tenant = useCurrentTenant();
+  const user = useAuthUser();
+  const tenant = useAuthTenant();
   
   // Busca membros do tenant para encontrar o membro atual
   const { data: members, isLoading: isLoadingMembers } = useMembers(tenant?.id);
@@ -133,7 +134,7 @@ export function usePermissions(): UsePermissionsReturn {
   const canManageSettings = can('settings', 'manage');
 
   return {
-    isLoading: isLoadingUser || isLoadingMembers,
+    isLoading: isLoadingMembers,
     currentMember,
     systemRole,
     permissions,
@@ -183,17 +184,7 @@ export function useCanAccessModule(path: string): boolean {
   if (isLoading) return false;
 
   // Mapeia path para resource
-  const resourceMap: Record<string, Resource> = {
-    '/app/members': 'members',
-    '/app/governance': 'governance',
-    '/app/financial': 'financial',
-    '/app/ebd': 'ebd',
-    '/app/missions': 'missions',
-    '/app/events': 'events',
-    '/app/settings': 'settings',
-  };
-
-  const resource = resourceMap[path];
+  const resource = Object.entries(MODULE_ROUTES).find(([, route]) => route === path)?.[0] as Resource | undefined;
   if (!resource) return true; // Se não está mapeado, permite acesso
   
   return can(resource, 'view');

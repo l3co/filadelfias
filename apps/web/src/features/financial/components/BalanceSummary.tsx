@@ -1,4 +1,6 @@
+import { useMemo } from 'react';
 import { ArrowUpCircle, ArrowDownCircle, Wallet, TrendingUp } from "lucide-react";
+import { formatCurrencyBRL } from "../../../lib/formatters";
 import type { Transaction } from "../../../services/financial";
 
 interface BalanceSummaryProps {
@@ -8,17 +10,20 @@ interface BalanceSummaryProps {
 }
 
 export function BalanceSummary({ totalBalance, isLoading, transactions }: BalanceSummaryProps) {
-    const formatBRL = (value: number) =>
-        new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+    const { monthlyIncome, monthlyExpenses } = useMemo(() => {
+        const income = transactions
+            ?.filter(transaction => transaction.type === 'CREDIT')
+            .reduce((sum, transaction) => sum + transaction.amount, 0) || 0;
 
-    // Calcular receitas e despesas do mês a partir das transações
-    const monthlyIncome = transactions
-        ?.filter(t => t.type === 'CREDIT')
-        .reduce((sum, t) => sum + t.amount, 0) || 0;
-    
-    const monthlyExpenses = transactions
-        ?.filter(t => t.type === 'DEBIT')
-        .reduce((sum, t) => sum + t.amount, 0) || 0;
+        const expenses = transactions
+            ?.filter(transaction => transaction.type === 'DEBIT')
+            .reduce((sum, transaction) => sum + transaction.amount, 0) || 0;
+
+        return {
+            monthlyIncome: income,
+            monthlyExpenses: expenses,
+        };
+    }, [transactions]);
 
     if (isLoading) {
         return (
@@ -42,7 +47,7 @@ export function BalanceSummary({ totalBalance, isLoading, transactions }: Balanc
                             <Wallet className="h-5 w-5 text-green-300" />
                         </div>
                     </div>
-                    <div className="text-3xl font-bold">{formatBRL(totalBalance)}</div>
+                    <div className="text-3xl font-bold">{formatCurrencyBRL(totalBalance)}</div>
                     <div className="mt-3 flex items-center gap-1.5 text-sm">
                         <TrendingUp className="h-4 w-4 text-green-400" />
                         <span className="text-green-100/60">Saldo consolidado</span>
@@ -58,7 +63,7 @@ export function BalanceSummary({ totalBalance, isLoading, transactions }: Balanc
                         <ArrowUpCircle className="h-5 w-5 text-green-600" />
                     </div>
                 </div>
-                <div className="text-2xl font-bold text-[#002333]">{formatBRL(monthlyIncome)}</div>
+                <div className="text-2xl font-bold text-[#002333]">{formatCurrencyBRL(monthlyIncome)}</div>
                 <p className="text-sm text-gray-500 mt-2">Total de receitas do mês</p>
             </div>
 
@@ -70,7 +75,7 @@ export function BalanceSummary({ totalBalance, isLoading, transactions }: Balanc
                         <ArrowDownCircle className="h-5 w-5 text-red-500" />
                     </div>
                 </div>
-                <div className="text-2xl font-bold text-[#002333]">{formatBRL(monthlyExpenses)}</div>
+                <div className="text-2xl font-bold text-[#002333]">{formatCurrencyBRL(monthlyExpenses)}</div>
                 <p className="text-sm text-gray-500 mt-2">Total de despesas do mês</p>
             </div>
         </div>

@@ -4,6 +4,7 @@ import { bibleService } from '../../services/bible';
 import { Scroll, Book } from 'lucide-react';
 import { useBibleVersion } from '../../hooks/useBibleVersion';
 import { BibleVersionSelector } from '../../features/bible/components/BibleVersionSelector';
+import { ROUTES } from '../../lib/routes';
 
 export function BiblePage() {
     const { version, setVersion } = useBibleVersion();
@@ -45,7 +46,7 @@ export function BiblePage() {
                         {oldTestament.map((book) => (
                             <Link
                                 key={book.abbrev}
-                                to={`/bible/${book.abbrev}/1`}
+                                to={ROUTES.PUBLIC.BIBLE_READER(book.abbrev, 1)}
                                 className="flex items-center justify-between gap-2 p-3 rounded-lg hover:bg-green-100 border border-transparent hover:border-green-200 transition-all group w-full"
                             >
                                 <span className="font-medium text-gray-700 group-hover:text-green-900 text-left whitespace-nowrap overflow-hidden text-ellipsis">{book.name}</span>
@@ -65,7 +66,7 @@ export function BiblePage() {
                         {newTestament.map((book) => (
                             <Link
                                 key={book.abbrev}
-                                to={`/bible/${book.abbrev}/1`}
+                                to={ROUTES.PUBLIC.BIBLE_READER(book.abbrev, 1)}
                                 className="flex items-center justify-between gap-2 p-3 rounded-lg hover:bg-green-100 border border-transparent hover:border-green-200 transition-all group w-full"
                             >
                                 <span className="font-medium text-gray-700 group-hover:text-green-900 text-left whitespace-nowrap overflow-hidden text-ellipsis">{book.name}</span>

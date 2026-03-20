@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, ArrowLeft, Minus, Plus, Volume2, Square, Boo
 import { Button } from '../../components/ui/button';
 import { useBibleVersion } from '../../hooks/useBibleVersion';
 import { BibleVersionSelector } from '../../features/bible/components/BibleVersionSelector';
+import { ROUTES } from '../../lib/routes';
 
 export function BibleReaderPage() {
     const { book, chapter } = useParams();
@@ -82,7 +83,7 @@ export function BibleReaderPage() {
         return (
             <div className="max-w-3xl mx-auto p-8 text-center bg-white rounded-lg shadow mt-8">
                 <h2 className="text-xl font-bold text-red-600 mb-4">Capítulo não encontrado</h2>
-                <Link to="/bible" className="text-green-700 hover:underline">Voltar para índice</Link>
+                <Link to={ROUTES.PUBLIC.BIBLE} className="text-green-700 hover:underline">Voltar para índice</Link>
             </div>
         );
     }
@@ -94,7 +95,7 @@ export function BibleReaderPage() {
                 {/* Top row: Back + Title + Version */}
                 <div className="flex items-center gap-3 mb-3">
                     <Link 
-                        to="/bible" 
+                        to={ROUTES.PUBLIC.BIBLE}
                         className="flex items-center gap-1 text-gray-500 hover:text-green-700 transition-colors shrink-0"
                         title="Voltar aos Livros"
                     >
@@ -171,7 +172,7 @@ export function BibleReaderPage() {
                             {Array.from({ length: totalChapters }, (_, i) => i + 1).map((num) => (
                                 <Link
                                     key={num}
-                                    to={`/bible/${book}/${num}`}
+                                    to={ROUTES.PUBLIC.BIBLE_READER(book ?? '', num)}
                                     className={`
                                         aspect-square flex items-center justify-center rounded-lg text-sm font-medium transition-all
                                         ${num === chapterNum 
@@ -213,7 +214,7 @@ export function BibleReaderPage() {
                 {/* Previous Button */}
                 {content.previous_chapter ? (
                     <Link
-                        to={`/bible/${content.previous_chapter.book}/${content.previous_chapter.chapter}`}
+                        to={ROUTES.PUBLIC.BIBLE_READER(content.previous_chapter.book, content.previous_chapter.chapter)}
                         className="flex items-center gap-2 bg-white text-green-700 font-medium hover:bg-green-50 hover:border-green-200 border border-gray-200 px-4 py-3 rounded-full shadow-lg transition-all hover:-translate-x-1"
                     >
                         <ChevronLeft size={20} />
@@ -226,7 +227,7 @@ export function BibleReaderPage() {
                 {/* Next Button */}
                 {content.next_chapter ? (
                     <Link
-                        to={`/bible/${content.next_chapter.book}/${content.next_chapter.chapter}`}
+                        to={ROUTES.PUBLIC.BIBLE_READER(content.next_chapter.book, content.next_chapter.chapter)}
                         className="flex items-center gap-2 bg-green-700 text-white font-medium hover:bg-green-800 px-6 py-3 rounded-full shadow-lg shadow-green-700/20 transition-all hover:translate-x-1"
                     >
                         <span className="hidden sm:inline text-sm">

@@ -3,7 +3,6 @@ import { useParams, Link, useSearchParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, GraduationCap, BookOpen, Plus, Users, Calendar, MapPin, Trash2, ExternalLink } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { useCurrentTenant } from '../../hooks/useAuth';
 import { useMembers } from '../../features/members/hooks/useMembers';
 import { ebdService } from '../../services/ebd';
 import { Button } from '../../components/ui/button';
@@ -14,19 +13,21 @@ import { EmptyState } from '../../components/EmptyState';
 import { EnrollStudentDialog } from '../../features/ebd/components/EnrollStudentDialog';
 import { CreateLessonDialog } from '../../features/ebd/components/CreateLessonDialog';
 import { LessonComments } from '../../features/ebd/components/LessonComments';
+import { useAuthTenant } from '../../contexts/AuthContext';
+import { ROUTES } from '../../lib/routes';
 
 export function EBDClassDetailPage() {
     const { classId } = useParams<{ classId: string }>();
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
-    const tenant = useCurrentTenant();
+    const tenant = useAuthTenant();
     const activeTab = searchParams.get('tab') || 'students';
     const [isEnrollDialogOpen, setIsEnrollDialogOpen] = useState(false);
     const [isLessonDialogOpen, setIsLessonDialogOpen] = useState(false);
     const [expandedLessonId, setExpandedLessonId] = useState<string | null>(null);
 
     const handleTabChange = (value: string) => {
-        navigate(`/admin/education/${classId}?tab=${value}`, { replace: true });
+        navigate(`${ROUTES.ADMIN.EDUCATION_CLASS(classId ?? '')}?tab=${value}`, { replace: true });
     };
 
     const { data: classes } = useQuery({
@@ -92,7 +93,7 @@ export function EBDClassDetailPage() {
         <div className="space-y-6 animate-in fade-in duration-500">
             {/* Header */}
             <div className="flex items-center gap-4">
-                <Link to="/app/ebd">
+                <Link to={ROUTES.ADMIN.EDUCATION}>
                     <Button variant="ghost" size="sm" className="gap-2">
                         <ArrowLeft size={16} /> Voltar
                     </Button>

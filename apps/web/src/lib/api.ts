@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { ROUTES } from './routes';
 
 // Runtime config type
 interface RuntimeConfig {
@@ -66,8 +67,8 @@ api.interceptors.response.use(
             // Clear token on 401, but only redirect if NOT on login page
             // This allows login errors to be shown to the user
             localStorage.removeItem('access_token');
-            if (!window.location.pathname.includes('/login')) {
-                window.location.href = '/login';
+            if (!window.location.pathname.includes(ROUTES.AUTH.LOGIN)) {
+                window.location.href = ROUTES.AUTH.LOGIN;
             }
         }
         return Promise.reject(error);

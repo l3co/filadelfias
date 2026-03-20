@@ -6,6 +6,7 @@ import { MemberLayout } from './components/layout/MemberLayout';
 import { PublicLayout } from './components/layout/PublicLayout';
 import { Toaster } from './components/ui/sonner';
 import { LoadingOverlay } from './components/ui/spinner';
+import { ROUTES } from './lib/routes';
 
 // Lazy loaded pages - Auth
 const LoginPage = lazy(() => import('./routes/LoginPage'));
@@ -59,26 +60,26 @@ function App() {
         <Routes>
         {/* Rotas Públicas com Layout Público */}
         <Route element={<PublicLayout />}>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/bible" element={<BiblePage />} />
-          <Route path="/bible/:book/:chapter" element={<BibleReaderPage />} />
-          <Route path="/hymnal" element={<HymnalPage />} />
-          <Route path="/hymnal/:number" element={<HymnalReaderPage />} />
-          <Route path="/manual" element={<ManualPage />} />
-          <Route path="/manual/*" element={<ManualReaderPage />} />
-          <Route path="/terms" element={<TermsPage />} />
-          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path={ROUTES.PUBLIC.HOME} element={<LandingPage />} />
+          <Route path={ROUTES.PUBLIC.BIBLE} element={<BiblePage />} />
+          <Route path={`${ROUTES.PUBLIC.BIBLE}/:book/:chapter`} element={<BibleReaderPage />} />
+          <Route path={ROUTES.PUBLIC.HYMNAL} element={<HymnalPage />} />
+          <Route path={`${ROUTES.PUBLIC.HYMNAL}/:number`} element={<HymnalReaderPage />} />
+          <Route path={ROUTES.PUBLIC.MANUAL} element={<ManualPage />} />
+          <Route path={`${ROUTES.PUBLIC.MANUAL}/*`} element={<ManualReaderPage />} />
+          <Route path={ROUTES.PUBLIC.TERMS} element={<TermsPage />} />
+          <Route path={ROUTES.PUBLIC.PRIVACY} element={<PrivacyPage />} />
         </Route>
 
         {/* Autenticação (Sem Layout Específico) */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/reset-password" element={<ResetPasswordPage />} />
-        <Route path="/register" element={<ChurchRegistrationWizard />} />
+        <Route path={ROUTES.AUTH.LOGIN} element={<LoginPage />} />
+        <Route path={ROUTES.AUTH.FORGOT_PASSWORD} element={<ForgotPasswordPage />} />
+        <Route path={ROUTES.AUTH.RESET_PASSWORD} element={<ResetPasswordPage />} />
+        <Route path={ROUTES.AUTH.REGISTER} element={<ChurchRegistrationWizard />} />
 
         {/* Onboarding Protegido */}
         <Route
-          path="/onboarding"
+          path={ROUTES.AUTH.ONBOARDING}
           element={
             <ProtectedRoute>
               <OnboardingPage />
@@ -88,7 +89,7 @@ function App() {
 
         {/* Admin Dashboard */}
         <Route
-          path="/admin"
+          path={ROUTES.ADMIN.ROOT}
           element={
             <ProtectedRoute>
               <DashboardLayout />
@@ -109,12 +110,12 @@ function App() {
         </Route>
 
         {/* Legacy redirects for /app/* */}
-        <Route path="/app" element={<Navigate to="/admin" replace />} />
-        <Route path="/app/*" element={<Navigate to="/admin" replace />} />
+        <Route path={ROUTES.LEGACY.APP} element={<Navigate to={ROUTES.ADMIN.ROOT} replace />} />
+        <Route path={ROUTES.LEGACY.APP_ANY} element={<Navigate to={ROUTES.ADMIN.ROOT} replace />} />
 
         {/* Member Portal */}
         <Route
-          path="/member"
+          path={ROUTES.MEMBER.ROOT}
           element={
             <ProtectedRoute>
               <MemberLayout />
@@ -138,11 +139,11 @@ function App() {
         </Route>
 
         {/* Legacy redirects for /membro/* */}
-        <Route path="/membro" element={<Navigate to="/member" replace />} />
-        <Route path="/membro/*" element={<Navigate to="/member" replace />} />
+        <Route path={ROUTES.LEGACY.MEMBER_PT} element={<Navigate to={ROUTES.MEMBER.ROOT} replace />} />
+        <Route path={ROUTES.LEGACY.MEMBER_PT_ANY} element={<Navigate to={ROUTES.MEMBER.ROOT} replace />} />
 
         {/* Fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to={ROUTES.PUBLIC.HOME} replace />} />
         </Routes>
       </Suspense>
       <Toaster />

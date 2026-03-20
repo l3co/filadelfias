@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Settings, ChevronRight } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { ROUTES } from '../lib/routes';
 
 interface AdminAccessCardProps {
   userRole?: string;
@@ -21,7 +22,7 @@ export function AdminAccessCard({ userRole, className }: AdminAccessCardProps) {
 
   return (
     <Link
-      to="/admin"
+      to={ROUTES.ADMIN.ROOT}
       className={cn(
         'group relative block rounded-2xl border-2 border-dashed border-slate-300 bg-gradient-to-br from-slate-50 to-slate-100 p-6 transition-all duration-300',
         'hover:border-solid hover:border-indigo-300 hover:shadow-xl hover:shadow-indigo-100/50 hover:-translate-y-1',

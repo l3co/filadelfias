@@ -4,7 +4,7 @@ import { PageHeaderWithIcon } from '../../components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
 import { EmptyState } from '../../components/EmptyState';
-import { useCurrentTenant } from '../../hooks/useAuth';
+import { useAuthTenant } from '../../contexts/AuthContext';
 import { ebdService, type EBDLesson } from '../../services/ebd';
 
 function getLessonStatus(lessonDate: string): 'completed' | 'current' | 'upcoming' {
@@ -48,7 +48,7 @@ function getCurrentLesson(lessons: EBDLesson[]): EBDLesson | null {
 }
 
 export function MemberEBDPage() {
-  const tenant = useCurrentTenant();
+  const tenant = useAuthTenant();
 
   const { data: userClass, isLoading } = useQuery({
     queryKey: ['my-ebd-class', tenant?.id],

@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useLogin } from '../hooks/useAuth';
 import { getPostLoginRoute } from '../lib/userRouting';
 import { Mail, Lock, ArrowRight, AlertCircle } from 'lucide-react';
+import { ROUTES, useAppNavigate } from '../lib/routes';
 
 export default function LoginPage() {
-    const navigate = useNavigate();
+    const appNavigate = useAppNavigate();
     const { mutate: login, isPending, error } = useLogin();
 
     const [formData, setFormData] = useState({
@@ -19,7 +20,7 @@ export default function LoginPage() {
         login(formData, {
             onSuccess: () => {
                 const route = getPostLoginRoute();
-                navigate(route);
+                appNavigate.to(route);
             },
         });
     };
@@ -34,7 +35,7 @@ export default function LoginPage() {
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-64 bg-gradient-to-r from-transparent via-green-500/5 to-transparent" />
                 
                 <div className="relative z-10 flex flex-col justify-center px-16 text-white">
-                    <Link to="/" className="flex items-center gap-3 mb-12">
+                    <Link to={ROUTES.PUBLIC.HOME} className="flex items-center gap-3 mb-12">
                         <img src="/logo.svg" alt="Logo" className="h-10 w-10" />
                         <h1 className="text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-teal-300">
                             Filadélfias
@@ -60,7 +61,7 @@ export default function LoginPage() {
                 <div className="w-full max-w-md space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
                     {/* Mobile Logo */}
                     <div className="lg:hidden text-center mb-8">
-                        <Link to="/" className="inline-flex items-center gap-2">
+                        <Link to={ROUTES.PUBLIC.HOME} className="inline-flex items-center gap-2">
                             <img src="/logo.svg" alt="Logo" className="h-8 w-8" />
                             <h1 className="text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-green-700 to-teal-600">
                                 Filadélfias
@@ -115,7 +116,7 @@ export default function LoginPage() {
                                         <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                                             Senha
                                         </label>
-                                        <Link to="/forgot-password" className="text-sm text-green-600 hover:text-green-700 font-medium">
+                                        <Link to={ROUTES.AUTH.FORGOT_PASSWORD} className="text-sm text-green-600 hover:text-green-700 font-medium">
                                             Esqueceu a senha?
                                         </Link>
                                     </div>
@@ -164,7 +165,7 @@ export default function LoginPage() {
                     {/* Footer */}
                     <p className="text-center text-gray-500">
                         É administrador?{' '}
-                        <Link to="/register" className="text-green-600 hover:text-green-700 font-semibold">
+                        <Link to={ROUTES.AUTH.REGISTER} className="text-green-600 hover:text-green-700 font-semibold">
                             Cadastre sua igreja
                         </Link>
                     </p>

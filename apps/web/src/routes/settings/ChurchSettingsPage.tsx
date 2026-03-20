@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useCurrentUser } from '../../hooks/useAuth';
 import { useViaCEP } from '../../hooks/useViaCEP';
 import { api } from '../../lib/api';
 import { Button } from '../../components/ui/button';
@@ -11,6 +10,7 @@ import {
     Building2, Trash2, Globe, Instagram, Youtube, MessageCircle
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface ChurchFormData {
     name: string;
@@ -32,7 +32,7 @@ interface ChurchFormData {
 }
 
 export function ChurchSettingsPage() {
-    const { data: user } = useCurrentUser();
+    const { tenant, membership } = useAuth();
     const queryClient = useQueryClient();
     const navigate = useNavigate();
     const { fetchAddress, isLoading: isFetchingCEP } = useViaCEP();
@@ -40,9 +40,8 @@ export function ChurchSettingsPage() {
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [deleteConfirmText, setDeleteConfirmText] = useState('');
 
-    const tenant = user?.memberships?.[0]?.tenant;
     const tenantId = tenant?.id;
-    const userRole = user?.memberships?.[0]?.role?.toUpperCase();
+    const userRole = membership?.role?.toUpperCase();
     const isAdmin = userRole === 'ADMIN' || userRole === 'MODERATOR';
 
     const { register, handleSubmit, setValue, control, formState: { errors, isDirty } } = useForm<ChurchFormData>({

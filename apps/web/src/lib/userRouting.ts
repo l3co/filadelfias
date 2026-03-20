@@ -1,5 +1,6 @@
 import type { User } from '../types';
 import type { EcclesiasticalOffice, EcclesiasticalFunction } from '../types';
+import { ROUTES } from './routes';
 
 export type UserExperience = 'admin' | 'member' | 'teacher';
 
@@ -63,12 +64,12 @@ export function getMemberExperience(
 export function getExperienceRoute(experience: UserExperience): string {
   switch (experience) {
     case 'admin':
-      return '/admin';
+      return ROUTES.ADMIN.ROOT;
     case 'teacher':
-      return '/member/education';
+      return ROUTES.MEMBER.EDUCATION;
     case 'member':
     default:
-      return '/member';
+      return ROUTES.MEMBER.ROOT;
   }
 }
 
@@ -79,5 +80,5 @@ export function getExperienceRoute(experience: UserExperience): string {
 export function getPostLoginRoute(): string {
   // Sempre redireciona para área de membro
   // Admins verão o AdminAccessCard na home para acessar o painel admin
-  return '/member';
+  return ROUTES.MEMBER.ROOT;
 }

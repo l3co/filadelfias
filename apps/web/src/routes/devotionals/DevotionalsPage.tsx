@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Plus, BookHeart, Calendar, MoreVertical, Pencil, Trash2 } from 'lucide-react';
-import { useCurrentTenant } from '../../hooks/useAuth';
+import { useAuthTenant } from '../../contexts/AuthContext';
 import { useDevotionals, useDeleteDevotional } from '../../features/devotionals/hooks/useDevotionals';
 import { DevotionalDialog } from '../../features/devotionals/components/DevotionalDialog';
 import { Button } from '../../components/ui/button';
@@ -28,7 +28,7 @@ import { CardSkeleton } from '../../components/LoadingState';
 import type { Devotional } from '../../services/devotionals';
 
 export function DevotionalsPage() {
-    const tenant = useCurrentTenant();
+    const tenant = useAuthTenant();
     const { data: devotionals, isLoading } = useDevotionals(tenant?.id);
     const deleteDevotional = useDeleteDevotional(tenant?.id);
     const [isDialogOpen, setIsDialogOpen] = useState(false);

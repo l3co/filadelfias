@@ -1,23 +1,17 @@
 import { useState } from 'react';
 import { Heart, PlusCircle, Clock, CheckCircle2, XCircle, Trash2 } from 'lucide-react';
-import { useCurrentTenant } from '../../hooks/useAuth';
+import { useAuthTenant } from '../../contexts/AuthContext';
 import { useMyTitheRecords, useMyTitheSummary, useTitheMutations } from '../../features/tithe/hooks/useTithe';
 import { TitheRecordForm } from '../../features/tithe/components/TitheRecordForm';
 import { Button } from '../../components/ui/button';
 import { PageHeaderWithIcon } from '../../components/PageHeader';
 import { EmptyState } from '../../components/EmptyState';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/card';
+import { formatCurrencyBRL, formatDateBR } from '../../lib/formatters';
 import type { TitheRecord } from '../../services/tithe';
+import { getTitheTypeLabel } from '../../features/tithe/lib/tithePresentation';
 
 const currentYear = new Date().getFullYear();
-
-function formatCurrency(value: number) {
-    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
-}
-
-function formatDate(dateStr: string) {
-    return new Date(dateStr).toLocaleDateString('pt-BR');
-}
 
 function StatusBadge({ status }: { status: TitheRecord['status'] }) {
     const config = {
@@ -37,7 +31,7 @@ function StatusBadge({ status }: { status: TitheRecord['status'] }) {
 }
 
 export function MyTithesPage() {
-    const tenant = useCurrentTenant();
+    const tenant = useAuthTenant();
     const [year, setYear] = useState(currentYear);
     const [isFormOpen, setIsFormOpen] = useState(false);
 
@@ -104,7 +98,7 @@ export function MyTithesPage() {
                         <div className="text-center">
                             <p className="text-sm text-gray-500">Dízimos ({year})</p>
                             <p className="text-2xl font-bold text-green-600">
-                                {isLoading ? '...' : formatCurrency(summary?.total_dizimo || 0)}
+                                {isLoading ? '...' : formatCurrencyBRL(summary?.total_dizimo || 0)}
                             </p>
                             <p className="text-xs text-gray-400">{summary?.count_dizimo || 0} registros</p>
                         </div>
@@ -115,7 +109,7 @@ export function MyTithesPage() {
                         <div className="text-center">
                             <p className="text-sm text-gray-500">Ofertas ({year})</p>
                             <p className="text-2xl font-bold text-blue-600">
-                                {isLoading ? '...' : formatCurrency(summary?.total_oferta || 0)}
+                                {isLoading ? '...' : formatCurrencyBRL(summary?.total_oferta || 0)}
                             </p>
                             <p className="text-xs text-gray-400">{summary?.count_oferta || 0} registros</p>
                         </div>
@@ -126,7 +120,7 @@ export function MyTithesPage() {
                         <div className="text-center">
                             <p className="text-sm text-gray-500">Total ({year})</p>
                             <p className="text-2xl font-bold text-[#002333]">
-                                {isLoading ? '...' : formatCurrency(summary?.total || 0)}
+                                {isLoading ? '...' : formatCurrencyBRL(summary?.total || 0)}
                             </p>
                             {(summary?.count_pending || 0) > 0 && (
                                 <p className="text-xs text-amber-500">{summary?.count_pending} pendentes</p>
@@ -165,9 +159,9 @@ export function MyTithesPage() {
                                         </div>
                                         <div>
                                             <p className="font-medium text-[#002333]">
-                                                {record.type === 'DIZIMO' ? 'Dízimo' : 'Oferta'}
+                                                {getTitheTypeLabel(record.type)}
                                             </p>
-                                            <p className="text-sm text-gray-500">{formatDate(record.date)}</p>
+                                            <p className="text-sm text-gray-500">{formatDateBR(record.date)}</p>
                                             {record.notes && (
                                                 <p className="text-xs text-gray-400 mt-1">{record.notes}</p>
                                             )}
@@ -181,7 +175,7 @@ export function MyTithesPage() {
                                     <div className="flex items-center gap-4">
                                         <div className="text-right">
                                             <p className="font-semibold text-[#002333]">
-                                                {formatCurrency(record.amount)}
+                                                {formatCurrencyBRL(record.amount)}
                                             </p>
                                             <StatusBadge status={record.status} />
                                         </div>

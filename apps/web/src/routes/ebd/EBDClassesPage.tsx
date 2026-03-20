@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Plus, GraduationCap } from 'lucide-react';
-import { useCurrentTenant } from '../../hooks/useAuth';
+import { useAuthTenant } from '../../contexts/AuthContext';
 import { useEducation } from '../../features/ebd/hooks/useEducation';
 import { ClassList } from '../../features/ebd/components/ClassList';
 import { CreateClassDialog } from '../../features/ebd/components/CreateClassDialog';
@@ -9,7 +9,7 @@ import { PageHeaderWithIcon } from '../../components/PageHeader';
 import { EmptyState } from '../../components/EmptyState';
 
 export function EBDClassesPage() {
-    const tenant = useCurrentTenant();
+    const tenant = useAuthTenant();
     const { data: classes, isLoading } = useEducation(tenant?.id);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 

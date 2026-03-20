@@ -5,11 +5,11 @@ import { EmptyState } from '../../components/EmptyState';
 import { Card, CardContent } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
-import { useCurrentTenant } from '../../hooks/useAuth';
+import { useAuthTenant } from '../../contexts/AuthContext';
 import { useEvents } from '../../features/events/hooks/useEvents';
 
 export function MemberEventsPage() {
-  const tenant = useCurrentTenant();
+  const tenant = useAuthTenant();
   const { data: events, isLoading, error } = useEvents(tenant?.id);
   const [showPastEvents, setShowPastEvents] = useState(false);
 

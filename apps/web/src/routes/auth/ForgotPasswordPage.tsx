@@ -6,6 +6,7 @@ import { Mail, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { api } from '../../lib/api';
+import { ROUTES } from '../../lib/routes';
 
 interface ForgotPasswordData {
     email: string;
@@ -43,7 +44,7 @@ export function ForgotPasswordPage() {
                         <p className="text-sm text-gray-500 mb-6">
                             Verifique também sua pasta de spam.
                         </p>
-                        <Link to="/login">
+                        <Link to={ROUTES.AUTH.LOGIN}>
                             <Button variant="outline" className="gap-2">
                                 <ArrowLeft size={16} />
                                 Voltar para Login
@@ -103,7 +104,7 @@ export function ForgotPasswordPage() {
 
                     <div className="mt-6 text-center">
                         <Link 
-                            to="/login" 
+                            to={ROUTES.AUTH.LOGIN} 
                             className="text-sm text-gray-500 hover:text-green-600 inline-flex items-center gap-1"
                         >
                             <ArrowLeft size={14} />

@@ -17,8 +17,8 @@ import { MeetingDetailsDialog } from './MeetingDetailsDialog';
 import { EmptyState } from "../../../components/EmptyState";
 import type { Council, Meeting, MeetingType, UpdateMeetingDTO } from '../../../services/governance';
 import { useMeetings, useCreateMeeting, useUpdateMeeting, useCompleteMeeting } from '../hooks/useGovernance';
-import { useCurrentTenant } from '../../../hooks/useAuth';
 import { isPast, parseISO, isToday } from 'date-fns';
+import { useAuthTenant } from '../../../contexts/AuthContext';
 
 interface MeetingsDialogProps {
     isOpen: boolean;
@@ -44,7 +44,7 @@ export function MeetingsDialog({
     council,
     membersList = []
 }: MeetingsDialogProps) {
-    const tenant = useCurrentTenant();
+  const tenant = useAuthTenant();
     const tenantId = tenant?.id;
     const [showCreateDialog, setShowCreateDialog] = useState(false);
     const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null);

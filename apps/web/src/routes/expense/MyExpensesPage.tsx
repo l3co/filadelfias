@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Receipt, Plus, Clock, CheckCircle2, XCircle, Trash2 } from 'lucide-react';
-import { useCurrentTenant } from '../../hooks/useAuth';
+import { Receipt, Plus, Clock, Trash2 } from 'lucide-react';
+import { useAuthTenant } from '../../contexts/AuthContext';
 import { useMyExpenses, useExpenseMutations } from '../../features/expense/hooks/useExpense';
 import { Button } from '../../components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/card';
@@ -9,59 +9,28 @@ import { Label } from '../../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../components/ui/dialog';
 import { PageHeaderWithIcon } from '../../components/PageHeader';
-
-const EXPENSE_CATEGORIES = [
-    { value: 'MATERIAL', label: 'Material (escritório, didático)' },
-    { value: 'CLEANING', label: 'Material de Limpeza' },
-    { value: 'TRANSPORT', label: 'Transporte / Combustível' },
-    { value: 'FOOD', label: 'Alimentação (eventos)' },
-    { value: 'MAINTENANCE', label: 'Manutenção' },
-    { value: 'UTILITIES', label: 'Contas (água, luz, internet)' },
-    { value: 'OTHER', label: 'Outros' },
-];
-
-function formatCurrency(value: number) {
-    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
-}
-
-function formatDate(dateStr: string) {
-    return new Date(dateStr).toLocaleDateString('pt-BR');
-}
-
-function getCategoryLabel(category: string) {
-    return EXPENSE_CATEGORIES.find(c => c.value === category)?.label || category;
-}
+import { formatCurrencyBRL, formatDateBR } from '../../lib/formatters';
+import {
+    EXPENSE_CATEGORIES,
+    getExpenseCategoryLabel,
+    getExpenseStatusConfig,
+} from '../../features/expense/lib/expensePresentation';
 
 function getStatusBadge(status: string) {
-    switch (status) {
-        case 'PENDING':
-            return (
-                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
-                    <Clock size={12} />
-                    Pendente
-                </span>
-            );
-        case 'APPROVED':
-            return (
-                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                    <CheckCircle2 size={12} />
-                    Aprovado
-                </span>
-            );
-        case 'REJECTED':
-            return (
-                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
-                    <XCircle size={12} />
-                    Rejeitado
-                </span>
-            );
-        default:
-            return null;
-    }
+    const config = getExpenseStatusConfig(status);
+    if (!config) return null;
+    const { icon: Icon, label, className } = config;
+
+    return (
+        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${className}`}>
+            <Icon size={12} />
+            {label}
+        </span>
+    );
 }
 
 export function MyExpensesPage() {
-    const tenant = useCurrentTenant();
+    const tenant = useAuthTenant();
     const { data: expenses, isLoading } = useMyExpenses(tenant?.id);
     const { submitExpense, deleteExpense } = useExpenseMutations(tenant?.id);
 
@@ -153,12 +122,12 @@ export function MyExpensesPage() {
                                             <div>
                                                 <p className="font-medium text-[#002333]">{expense.description}</p>
                                                 <p className="text-sm text-gray-500">
-                                                    {getCategoryLabel(expense.category)} • {formatDate(expense.expense_date)}
+                                                    {getExpenseCategoryLabel(expense.category)} • {formatDateBR(expense.expense_date)}
                                                 </p>
                                             </div>
                                             <div className="flex items-center gap-4">
                                                 <p className="font-semibold text-lg text-[#002333]">
-                                                    {formatCurrency(expense.amount)}
+                                                    {formatCurrencyBRL(expense.amount)}
                                                 </p>
                                                 <Button
                                                     variant="ghost"
@@ -203,7 +172,7 @@ export function MyExpensesPage() {
                                                     {getStatusBadge(expense.status)}
                                                 </div>
                                                 <p className="text-sm text-gray-500">
-                                                    {getCategoryLabel(expense.category)} • {formatDate(expense.expense_date)}
+                                                    {getExpenseCategoryLabel(expense.category)} • {formatDateBR(expense.expense_date)}
                                                 </p>
                                                 {expense.rejection_reason && (
                                                     <p className="text-sm text-red-500 mt-1">
@@ -212,7 +181,7 @@ export function MyExpensesPage() {
                                                 )}
                                             </div>
                                             <p className="font-semibold text-lg text-[#002333]">
-                                                {formatCurrency(expense.amount)}
+                                                {formatCurrencyBRL(expense.amount)}
                                             </p>
                                         </div>
                                     ))}

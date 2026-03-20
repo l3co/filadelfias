@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { User, Mail, Phone, Calendar, Shield, Church, Camera, Eye, EyeOff, Lock, X, Briefcase } from 'lucide-react';
-import { useCurrentUser, useCurrentTenant } from '../../hooks/useAuth';
 import { useMembers } from '../../features/members/hooks/useMembers';
 import { PageHeaderWithIcon } from '../../components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
@@ -8,12 +7,13 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Badge } from '../../components/ui/badge';
+import { LazyImage } from '../../components/ui/LazyImage';
 import { authService } from '../../services/auth';
 import { toast } from 'sonner';
+import { useAuth } from '../../contexts/AuthContext';
 
 export function ProfilePage() {
-  const { data: user } = useCurrentUser();
-  const tenant = useCurrentTenant();
+  const { user, tenant, membership } = useAuth();
   const [showEditModal, setShowEditModal] = useState(false);
   const [editForm, setEditForm] = useState({
     name: '',
@@ -43,7 +43,6 @@ export function ProfilePage() {
   });
   const [isChangingPassword, setIsChangingPassword] = useState(false);
 
-  const membership = user?.memberships?.[0];
   const roleLabels: Record<string, { label: string; color: string }> = {
     ADMIN: { label: 'Administrador', color: 'bg-purple-100 text-purple-700' },
     MODERATOR: { label: 'Moderador', color: 'bg-blue-100 text-blue-700' },
@@ -158,10 +157,11 @@ export function ProfilePage() {
             <div className="relative">
               <div className="h-24 w-24 rounded-2xl bg-white shadow-xl flex items-center justify-center border-4 border-white">
                 {user?.avatar_url ? (
-                  <img 
+                  <LazyImage
                     src={user.avatar_url} 
                     alt={user.name} 
                     className="h-full w-full rounded-xl object-cover"
+                    fallbackSrc="/logo.svg"
                   />
                 ) : (
                   <span className="text-4xl font-bold text-emerald-600">

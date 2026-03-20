@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Plus, Gavel } from 'lucide-react';
-import { useCurrentTenant } from '../../hooks/useAuth';
+import { useAuthTenant } from '../../contexts/AuthContext';
 import { useGovernance, useDeleteCouncil } from '../../features/governance/hooks/useGovernance';
 import { usePermissions } from '../../hooks/usePermissions';
 import { CouncilList } from '../../features/governance/components/CouncilList';
@@ -13,7 +13,7 @@ import { EmptyState } from '../../components/EmptyState';
 import type { Council } from '../../services/governance';
 
 export function CouncilsPage() {
-    const tenant = useCurrentTenant();
+    const tenant = useAuthTenant();
     const { data: councils, isLoading } = useGovernance(tenant?.id);
     const deleteCouncil = useDeleteCouncil(tenant?.id);
     const { canViewGovernance } = usePermissions();
@@ -80,4 +80,3 @@ export function CouncilsPage() {
         </div>
     );
 }
-

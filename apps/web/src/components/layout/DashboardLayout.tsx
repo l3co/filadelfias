@@ -1,11 +1,13 @@
 import { useState, useMemo } from 'react';
 import { Outlet, Link, useLocation, Navigate } from 'react-router-dom';
 import { Menu, Home, Users, Calendar, LogOut, Gavel, Wallet, Globe, BookOpen, Bell, Search, ChevronRight, X, Settings, UserCircle } from 'lucide-react';
-import { useCurrentUser, useLogout } from '../../hooks/useAuth';
+import { useLogout } from '../../hooks/useAuth';
 import { usePermissions } from '../../hooks/usePermissions';
 import { PermissionBadge } from '../PermissionGate';
 import { cn } from '../../lib/utils';
 import type { Resource } from '../../lib/permissions';
+import { useAuth } from '../../contexts/AuthContext';
+import { ROUTES } from '../../lib/routes';
 
 interface NavItem {
     name: string;
@@ -15,24 +17,24 @@ interface NavItem {
 }
 
 const allNavigation: NavItem[] = [
-    { name: 'Dashboard', href: '/admin', icon: Home },
-    { name: 'Membros', href: '/admin/members', icon: Users, resource: 'members' },
-    { name: 'Governança', href: '/admin/governance', icon: Gavel, resource: 'governance' },
-    { name: 'Tesouraria', href: '/admin/treasury', icon: Wallet, resource: 'financial' },
-    { name: 'Missões', href: '/admin/missions', icon: Globe, resource: 'missions' },
-    { name: 'EBD', href: '/admin/education', icon: BookOpen, resource: 'ebd' },
-    { name: 'Eventos', href: '/admin/events', icon: Calendar, resource: 'events' },
-    { name: 'Configurações', href: '/admin/settings', icon: Settings, resource: 'settings' },
+    { name: 'Dashboard', href: ROUTES.ADMIN.ROOT, icon: Home },
+    { name: 'Membros', href: ROUTES.ADMIN.MEMBERS, icon: Users, resource: 'members' },
+    { name: 'Governança', href: ROUTES.ADMIN.GOVERNANCE, icon: Gavel, resource: 'governance' },
+    { name: 'Tesouraria', href: ROUTES.ADMIN.TREASURY, icon: Wallet, resource: 'financial' },
+    { name: 'Missões', href: ROUTES.ADMIN.MISSIONS, icon: Globe, resource: 'missions' },
+    { name: 'EBD', href: ROUTES.ADMIN.EDUCATION, icon: BookOpen, resource: 'ebd' },
+    { name: 'Eventos', href: ROUTES.ADMIN.EVENTS, icon: Calendar, resource: 'events' },
+    { name: 'Configurações', href: ROUTES.ADMIN.SETTINGS, icon: Settings, resource: 'settings' },
 ];
 
 export function DashboardLayout() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const location = useLocation();
-    const { data: user, isLoading } = useCurrentUser();
+    const { user, isLoading, tenant } = useAuth();
     const logout = useLogout();
     const { can } = usePermissions();
 
-    const tenantName = user?.memberships?.[0]?.tenant?.name || 'Minha Igreja';
+    const tenantName = tenant?.name || 'Minha Igreja';
 
     // Filtra navegação baseada nas permissões do usuário
     const navigation = useMemo(() => {
@@ -56,7 +58,7 @@ export function DashboardLayout() {
     }
 
     if (user && (!user.memberships || user.memberships.length === 0)) {
-        return <Navigate to="/onboarding" replace />;
+        return <Navigate to={ROUTES.AUTH.ONBOARDING} replace />;
     }
 
     return (
@@ -78,7 +80,7 @@ export function DashboardLayout() {
             >
                 {/* Logo Header */}
                 <div className="flex h-16 items-center justify-between px-6 border-b border-gray-100">
-                    <Link to="/admin" className="flex items-center gap-2">
+                    <Link to={ROUTES.ADMIN.ROOT} className="flex items-center gap-2">
                         <img src="/logo.svg" alt="Logo" className="h-8 w-8" />
                         <h1 className="text-xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-green-700 to-teal-600">
                             Filadélfias
@@ -95,7 +97,7 @@ export function DashboardLayout() {
                 {/* Tenant Selector - Links to Settings */}
                 <div className="px-4 py-4 border-b border-gray-100">
                     <Link
-                        to="/admin/settings"
+                        to={ROUTES.ADMIN.SETTINGS}
                         className="w-full flex items-center justify-between px-3 py-2.5 bg-gradient-to-r from-green-50 to-teal-50 hover:from-green-100 hover:to-teal-100 rounded-xl transition-colors group"
                     >
                         <div className="flex items-center gap-3">
@@ -147,7 +149,7 @@ export function DashboardLayout() {
                 {/* User Profile & Logout - Always visible at bottom */}
                 <div className="flex-shrink-0 border-t border-gray-100 p-4 bg-white">
                     <Link
-                        to="/admin/profile"
+                        to={ROUTES.ADMIN.PROFILE}
                         className="flex items-center gap-3 px-3 py-3 rounded-xl bg-gray-50 mb-3 hover:bg-gray-100 transition-colors"
                     >
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-100 to-teal-100 flex items-center justify-center text-green-700 font-bold shadow-sm">
@@ -159,7 +161,7 @@ export function DashboardLayout() {
                         </div>
                     </Link>
                     <Link
-                        to="/member"
+                        to={ROUTES.MEMBER.ROOT}
                         className="group flex w-full items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700 rounded-xl transition-colors border border-indigo-100 hover:border-indigo-200 mb-2"
                     >
                         <UserCircle className="h-4 w-4" />

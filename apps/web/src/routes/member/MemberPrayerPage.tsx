@@ -3,8 +3,8 @@ import { MessageCircle, Plus, Heart, Clock, User, Send, Trash2 } from 'lucide-re
 import { PageHeaderWithIcon } from '../../components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
-import { useCurrentTenant, useCurrentUser } from '../../hooks/useAuth';
 import { usePrayerRequests, useCreatePrayerRequest, usePrayFor, useDeletePrayerRequest } from '../../features/prayer/hooks/usePrayer';
+import { useAuth } from '../../contexts/AuthContext';
 
 const categoryLabels: Record<string, { label: string; color: string }> = {
   health: { label: 'Saúde', color: 'bg-red-100 text-red-700' },
@@ -15,8 +15,7 @@ const categoryLabels: Record<string, { label: string; color: string }> = {
 };
 
 export function MemberPrayerPage() {
-  const tenant = useCurrentTenant();
-  const { data: user } = useCurrentUser();
+  const { tenant, user } = useAuth();
   const { data: prayerRequests, isLoading } = usePrayerRequests(tenant?.id);
   const createRequest = useCreatePrayerRequest(tenant?.id);
   const prayFor = usePrayFor(tenant?.id);

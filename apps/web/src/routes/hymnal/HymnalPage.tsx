@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { hymnalService } from '../../services/hymnal';
 import { Music, Search, User } from 'lucide-react';
 import { useState } from 'react';
+import { ROUTES } from '../../lib/routes';
 
 export function HymnalPage() {
     const { data: hymns, isLoading } = useQuery({
@@ -52,7 +53,7 @@ export function HymnalPage() {
                 {filteredHymns.map((hymn) => (
                     <Link
                         key={hymn.number}
-                        to={`/hymnal/${hymn.number}`}
+                        to={ROUTES.PUBLIC.HYMNAL_READER(hymn.number)}
                         className="flex flex-col p-6 bg-white rounded-xl shadow-sm hover:shadow-md border border-gray-100 hover:border-green-100 transition-all group h-full relative overflow-hidden"
                     >
                         <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">

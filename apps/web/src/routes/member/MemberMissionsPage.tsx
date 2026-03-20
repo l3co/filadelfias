@@ -1,12 +1,13 @@
 import { Globe, MapPin } from 'lucide-react';
-import { useCurrentTenant } from '../../hooks/useAuth';
+import { useAuthTenant } from '../../contexts/AuthContext';
 import { useMissions } from '../../features/missions/hooks/useMissions';
 import { PageHeader } from '../../components/PageHeader';
 import { EmptyState } from '../../components/EmptyState';
 import { LoadingOverlay } from '../../components/ui/spinner';
+import { LazyImage } from '../../components/ui/LazyImage';
 
 export function MemberMissionsPage() {
-  const tenant = useCurrentTenant();
+  const tenant = useAuthTenant();
   const { data: missionaries, isLoading } = useMissions(tenant?.id);
 
   if (isLoading) {
@@ -36,10 +37,11 @@ export function MemberMissionsPage() {
               <div className="flex items-start gap-4">
                 <div className="h-16 w-16 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
                   {missionary.photo_url ? (
-                    <img 
+                    <LazyImage
                       src={missionary.photo_url} 
                       alt={missionary.name}
                       className="h-16 w-16 rounded-full object-cover"
+                      fallbackSrc="/logo.svg"
                     />
                   ) : (
                     <Globe className="h-8 w-8 text-indigo-600" />

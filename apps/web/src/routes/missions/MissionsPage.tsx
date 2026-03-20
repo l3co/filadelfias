@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Plus, Globe } from 'lucide-react';
-import { useCurrentTenant } from '../../hooks/useAuth';
+import { useAuthTenant } from '../../contexts/AuthContext';
 import { useMissions, useDeleteMissionary } from '../../features/missions/hooks/useMissions';
 import { MissionaryList } from '../../features/missions/components/MissionaryList';
 import { CreateMissionaryDialog } from '../../features/missions/components/CreateMissionaryDialog';
@@ -9,7 +9,7 @@ import { PageHeaderWithIcon } from '../../components/PageHeader';
 import { EmptyState } from '../../components/EmptyState';
 
 export function MissionsPage() {
-    const tenant = useCurrentTenant();
+    const tenant = useAuthTenant();
     const { data: missionaries, isLoading } = useMissions(tenant?.id);
     const deleteMissionary = useDeleteMissionary(tenant?.id);
     const [isDialogOpen, setIsDialogOpen] = useState(false);

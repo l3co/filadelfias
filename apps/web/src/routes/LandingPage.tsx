@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { BookOpen, Music, Book, Wallet, Users, GraduationCap, Gavel, Globe, Calendar, ChevronRight, Sparkles, Church } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
+import { ROUTES } from '../lib/routes';
 
 const features = [
     {
@@ -73,7 +74,7 @@ export function LandingPage() {
                     {/* Main Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-150">
                         {/* Bíblia */}
-                        <Link to="/bible" className="group">
+                        <Link to={ROUTES.PUBLIC.BIBLE} className="group">
                             <Card className="h-full border-0 bg-white/80 backdrop-blur-sm shadow-lg shadow-gray-200/50 hover:shadow-2xl hover:shadow-green-200/30 transition-all duration-500 hover:-translate-y-1 overflow-hidden">
                                 <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-teal-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                                 <CardContent className="relative flex flex-col items-center p-10 text-center h-full justify-center space-y-6">
@@ -96,7 +97,7 @@ export function LandingPage() {
                         </Link>
 
                         {/* Hinário */}
-                        <Link to="/hymnal" className="group">
+                        <Link to={ROUTES.PUBLIC.HYMNAL} className="group">
                             <Card className="h-full border-0 bg-white/80 backdrop-blur-sm shadow-lg shadow-gray-200/50 hover:shadow-2xl hover:shadow-green-200/30 transition-all duration-500 hover:-translate-y-1 overflow-hidden">
                                 <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-teal-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                                 <CardContent className="relative flex flex-col items-center p-10 text-center h-full justify-center space-y-6">
@@ -119,7 +120,7 @@ export function LandingPage() {
                         </Link>
 
                         {/* Manual */}
-                        <Link to="/manual" className="group">
+                        <Link to={ROUTES.PUBLIC.MANUAL} className="group">
                             <Card className="h-full border-0 bg-white/80 backdrop-blur-sm shadow-lg shadow-gray-200/50 hover:shadow-2xl hover:shadow-green-200/30 transition-all duration-500 hover:-translate-y-1 overflow-hidden">
                                 <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-teal-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                                 <CardContent className="relative flex flex-col items-center p-10 text-center h-full justify-center space-y-6">
@@ -252,7 +253,7 @@ export function LandingPage() {
                                 Cadastre sua igreja e comece a usar todas as ferramentas de gestão e edificação disponíveis gratuitamente.
                             </p>
                             <div className="pt-4 flex flex-col sm:flex-row gap-4 justify-center items-center">
-                                <Link to="/register">
+                                <Link to={ROUTES.AUTH.REGISTER}>
                                     <Button 
                                         size="lg" 
                                         className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-10 py-7 text-lg rounded-2xl shadow-xl shadow-green-900/30 hover:shadow-2xl hover:scale-105 transition-all duration-300 font-semibold"
@@ -261,7 +262,7 @@ export function LandingPage() {
                                         Cadastre sua Igreja
                                     </Button>
                                 </Link>
-                                <Link to="/login">
+                                <Link to={ROUTES.AUTH.LOGIN}>
                                     <Button 
                                         variant="ghost" 
                                         size="lg"

@@ -3,11 +3,11 @@ import { Heart, Calendar, ChevronLeft, ChevronRight, BookOpen, Share2 } from 'lu
 import { PageHeaderWithIcon } from '../../components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
-import { useCurrentTenant } from '../../hooks/useAuth';
+import { useAuthTenant } from '../../contexts/AuthContext';
 import { useDevotionalByDate, useDevotionals } from '../../features/devotionals/hooks/useDevotionals';
 
 export function MemberDevotionalsPage() {
-  const tenant = useCurrentTenant();
+  const tenant = useAuthTenant();
   const [selectedDate, setSelectedDate] = useState(new Date());
   
   const dateString = selectedDate.toISOString().split('T')[0];

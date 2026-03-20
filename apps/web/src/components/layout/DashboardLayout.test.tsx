@@ -1,25 +1,9 @@
-import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { screen } from '@testing-library/react';
 import { DashboardLayout } from './DashboardLayout';
-import { vi } from 'vitest';
+import { beforeEach, vi } from 'vitest';
+import { renderWithProviders } from '../../test/utils';
 
-// Mock the auth hooks
 vi.mock('../../hooks/useAuth', () => ({
-    useCurrentUser: vi.fn(() => ({
-        data: {
-            id: '1',
-            name: 'Test User',
-            email: 'test@example.com',
-            memberships: [{
-                id: 'm1',
-                tenant: { id: 't1', name: 'Igreja Teste', slug: 'igreja-teste' },
-                role: 'ADMIN',
-                status: 'ACTIVE',
-            }],
-        },
-        isLoading: false,
-    })),
     useLogout: vi.fn(() => ({
         mutate: vi.fn(),
     })),
@@ -34,37 +18,20 @@ vi.mock('../../hooks/usePermissions', () => ({
     })),
 }));
 
-const queryClient = new QueryClient({
-    defaultOptions: {
-        queries: { retry: false },
-        mutations: { retry: false },
-    },
-});
-
-const renderWithProviders = (ui: React.ReactElement, { route = '/app' } = {}) => {
-    return render(
-        <QueryClientProvider client={queryClient}>
-            <MemoryRouter initialEntries={[route]}>
-                {ui}
-            </MemoryRouter>
-        </QueryClientProvider>
-    );
-};
-
 describe('DashboardLayout Component', () => {
     beforeEach(() => {
-        queryClient.clear();
+        vi.clearAllMocks();
     });
 
     it('should render the layout with logo', () => {
-        renderWithProviders(<DashboardLayout />);
+        renderWithProviders(<DashboardLayout />, { initialRoute: '/admin' });
         
         // Logo should be visible
         expect(screen.getAllByText('Filadélfias').length).toBeGreaterThan(0);
     });
 
     it('should render navigation items', () => {
-        renderWithProviders(<DashboardLayout />);
+        renderWithProviders(<DashboardLayout />, { initialRoute: '/admin' });
         
         expect(screen.getByText('Dashboard')).toBeInTheDocument();
         expect(screen.getByText('Membros')).toBeInTheDocument();
@@ -73,31 +40,31 @@ describe('DashboardLayout Component', () => {
     });
 
     it('should display tenant name', () => {
-        renderWithProviders(<DashboardLayout />);
+        renderWithProviders(<DashboardLayout />, { initialRoute: '/admin' });
         
         expect(screen.getAllByText('Igreja Teste').length).toBeGreaterThan(0);
     });
 
     it('should display user name', () => {
-        renderWithProviders(<DashboardLayout />);
+        renderWithProviders(<DashboardLayout />, { initialRoute: '/admin' });
         
         expect(screen.getByText('Test User')).toBeInTheDocument();
     });
 
     it('should have logout button', () => {
-        renderWithProviders(<DashboardLayout />);
+        renderWithProviders(<DashboardLayout />, { initialRoute: '/admin' });
         
         expect(screen.getByText('Sair da conta')).toBeInTheDocument();
     });
 
     it('should have search input', () => {
-        renderWithProviders(<DashboardLayout />);
+        renderWithProviders(<DashboardLayout />, { initialRoute: '/admin' });
         
         expect(screen.getByPlaceholderText('Buscar...')).toBeInTheDocument();
     });
 
     it('should have notification bell', () => {
-        renderWithProviders(<DashboardLayout />);
+        renderWithProviders(<DashboardLayout />, { initialRoute: '/admin' });
         
         // Bell icon button exists
         const buttons = screen.getAllByRole('button');

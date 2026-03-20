@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { api } from '../lib/api';
 import { useViaCEP } from '../hooks/useViaCEP';
+import { ROUTES, useAppNavigate } from '../lib/routes';
 import {
     Church, Building2, MapPin, User, CheckCircle2, ArrowRight, ArrowLeft,
     AlertCircle, Loader2, Mail, Lock, Phone, Link2, Check, X
@@ -98,7 +99,7 @@ const steps = [
 export function ChurchRegistrationWizard() {
     const [currentStep, setCurrentStep] = useState<Step>(1);
     const [error, setError] = useState('');
-    const navigate = useNavigate();
+    const appNavigate = useAppNavigate();
     const { fetchAddress, isLoading: isFetchingCEP } = useViaCEP();
 
     const { register, handleSubmit, setValue, control, formState: { errors }, trigger } = useForm<FormData>({
@@ -143,7 +144,7 @@ export function ChurchRegistrationWizard() {
         },
         onSuccess: (data) => {
             localStorage.setItem('access_token', data.access_token);
-            navigate('/app');
+            appNavigate.toAdmin();
         },
         onError: (error: AxiosError<{ detail?: string | Array<{ msg: string }> }>) => {
             const detail = error.response?.data?.detail;
@@ -228,7 +229,7 @@ export function ChurchRegistrationWizard() {
                 <div className="absolute bottom-0 left-0 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl" />
 
                 <div className="relative z-10 flex flex-col justify-center px-12 text-white w-full">
-                    <Link to="/" className="mb-12">
+                    <Link to={ROUTES.PUBLIC.HOME} className="mb-12">
                         <h1 className="text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-teal-300">
                             Filadélfias
                         </h1>
@@ -272,7 +273,7 @@ export function ChurchRegistrationWizard() {
                 <div className="w-full max-w-lg animate-in fade-in slide-in-from-right-4 duration-500">
                     {/* Mobile Header */}
                     <div className="lg:hidden text-center mb-8">
-                        <Link to="/">
+                        <Link to={ROUTES.PUBLIC.HOME}>
                             <h1 className="text-2xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-green-700 to-teal-600">
                                 Filadélfias
                             </h1>
@@ -624,7 +625,7 @@ export function ChurchRegistrationWizard() {
                                     </button>
                                 ) : (
                                     <Link
-                                        to="/login"
+                                        to={ROUTES.AUTH.LOGIN}
                                         className="flex items-center gap-2 px-4 py-2.5 text-gray-600 hover:text-gray-900 transition-colors"
                                     >
                                         <ArrowLeft size={18} />
@@ -665,7 +666,7 @@ export function ChurchRegistrationWizard() {
                     </div>
 
                     <p className="text-center text-sm text-gray-500 mt-6">
-                        Já tem uma conta? <Link to="/login" className="text-green-600 hover:text-green-700 font-medium">Faça login</Link>
+                        Já tem uma conta? <Link to={ROUTES.AUTH.LOGIN} className="text-green-600 hover:text-green-700 font-medium">Faça login</Link>
                     </p>
                 </div>
             </div>

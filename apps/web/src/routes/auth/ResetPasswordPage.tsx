@@ -6,6 +6,7 @@ import { Lock, ArrowLeft, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { api } from '../../lib/api';
+import { ROUTES } from '../../lib/routes';
 
 interface ResetPasswordData {
     new_password: string;
@@ -31,7 +32,7 @@ export function ResetPasswordPage() {
         },
         onSuccess: () => {
             setSuccess(true);
-            setTimeout(() => navigate('/login'), 3000);
+            setTimeout(() => navigate(ROUTES.AUTH.LOGIN), 3000);
         }
     });
 
@@ -51,7 +52,7 @@ export function ResetPasswordPage() {
                         <p className="text-gray-600 mb-6">
                             Este link de redefinição de senha é inválido ou expirou.
                         </p>
-                        <Link to="/forgot-password">
+                        <Link to={ROUTES.AUTH.FORGOT_PASSWORD}>
                             <Button>Solicitar Novo Link</Button>
                         </Link>
                     </div>
@@ -72,7 +73,7 @@ export function ResetPasswordPage() {
                         <p className="text-gray-600 mb-6">
                             Sua senha foi redefinida com sucesso. Você será redirecionado para o login...
                         </p>
-                        <Link to="/login">
+                        <Link to={ROUTES.AUTH.LOGIN}>
                             <Button className="gap-2">
                                 Ir para Login
                             </Button>
@@ -163,7 +164,7 @@ export function ResetPasswordPage() {
 
                     <div className="mt-6 text-center">
                         <Link
-                            to="/login"
+                            to={ROUTES.AUTH.LOGIN}
                             className="text-sm text-gray-500 hover:text-green-600 inline-flex items-center gap-1"
                         >
                             <ArrowLeft size={14} />

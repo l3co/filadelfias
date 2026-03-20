@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { manualService } from '@/services/manual';
 import { BookOpen, ChevronRight, Search, FileText } from 'lucide-react';
+import { ROUTES } from '@/lib/routes';
 
 export function ManualPage() {
     const [searchQuery, setSearchQuery] = useState('');
@@ -99,7 +100,7 @@ export function ManualPage() {
                             {searchResults.results.map((result) => (
                                 <Link
                                     key={result.id}
-                                    to={`/manual/${result.id}`}
+                                    to={ROUTES.PUBLIC.MANUAL_ARTICLE(result.id)}
                                     className="block p-3 rounded-lg hover:bg-green-50 transition-colors border border-gray-100"
                                 >
                                     <div className="flex items-start gap-3">
@@ -170,7 +171,7 @@ export function ManualPage() {
                                                                 {section.articles.map((article) => (
                                                                     <Link
                                                                         key={article.id}
-                                                                        to={`/manual/${article.id}`}
+                                                                        to={ROUTES.PUBLIC.MANUAL_ARTICLE(article.id)}
                                                                         className="w-8 h-8 flex items-center justify-center text-xs font-medium bg-gray-100 text-gray-700 rounded hover:bg-green-100 hover:text-green-700 transition-colors"
                                                                     >
                                                                         {article.number}
@@ -187,7 +188,7 @@ export function ManualPage() {
                                                                 {chapter.articles.map((article) => (
                                                                     <Link
                                                                         key={article.id}
-                                                                        to={`/manual/${article.id}`}
+                                                                        to={ROUTES.PUBLIC.MANUAL_ARTICLE(article.id)}
                                                                         className="w-10 h-10 flex items-center justify-center text-sm font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-green-100 hover:text-green-700 transition-colors"
                                                                     >
                                                                         {article.number}

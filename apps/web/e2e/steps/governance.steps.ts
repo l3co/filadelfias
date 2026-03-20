@@ -9,6 +9,34 @@ import { testGovernance } from '../support/fixtures';
 
 const { Given, When, Then } = createBdd();
 
+async function openMeetingsDialog(page: any) {
+    await page.goto('/admin/governance');
+    await page.waitForLoadState('networkidle');
+    const meetingsButton = page.getByRole('button', { name: /reuniões/i }).first();
+    await meetingsButton.click();
+    await expect(page.locator('[data-testid="meetings-dialog"]')).toBeVisible({ timeout: 5000 });
+}
+
+async function ensureScheduledMeeting(page: any) {
+    await openMeetingsDialog(page);
+
+    const meetingCard = page.locator('[data-testid^="meeting-card-"]').first();
+    if (await meetingCard.count() > 0) {
+        return;
+    }
+
+    const meeting = testGovernance.meetings.ordinary;
+    await page.locator('[data-testid="new-meeting-btn"]').click();
+    await expect(page.locator('[data-testid="create-meeting-dialog"]')).toBeVisible({ timeout: 5000 });
+    await page.locator('[data-testid="meeting-date-input"]').fill(meeting.date);
+    await page.locator('[data-testid="meeting-time-input"]').fill(meeting.time);
+    await page.locator('[data-testid="meeting-location-input"]').fill(meeting.location);
+    await page.locator('[data-testid="meeting-agenda-input"]').fill(meeting.agenda);
+    await page.locator('[data-testid="submit-create-meeting"]').click();
+    await page.waitForLoadState('networkidle').catch(() => {});
+    await expect(page.locator('[data-testid^="meeting-card-"]').first()).toBeVisible({ timeout: 10000 });
+}
+
 // ============================================
 // Given Steps
 // ============================================
@@ -21,10 +49,8 @@ Given('que existe um conselho cadastrado', async ({ page }) => {
     await expect(page.locator('text=Conselhos e Juntas').or(page.locator('[data-testid="council-card"]').first())).toBeVisible({ timeout: 10000 });
 });
 
-Given('que existe uma reunião agendada no conselho', async function () {
-    // Meeting should be created via API or seed data before this step
-    // Store reference for later use in world context
-    this.meetingData = testGovernance.meetings.ordinary;
+Given('que existe uma reunião agendada no conselho', async ({ page }) => {
+    await ensureScheduledMeeting(page);
 });
 
 Given('que o conselho possui membros cadastrados', async function () {
@@ -66,12 +92,7 @@ Given('que existem reuniões finalizadas no conselho', async ({ page }) => {
 // ============================================
 
 When('eu abro o dialog de reuniões do conselho', async ({ page }) => {
-    // Click on the meetings button of a council card
-    const meetingsButton = page.getByRole('button', { name: /reuniões/i }).first();
-    await meetingsButton.click();
-
-    // Wait for meetings dialog to open
-    await expect(page.locator('[data-testid="meetings-dialog"]')).toBeVisible({ timeout: 5000 });
+    await openMeetingsDialog(page);
 });
 
 When('preencho o formulário de reunião:', async ({ page }, dataTable) => {

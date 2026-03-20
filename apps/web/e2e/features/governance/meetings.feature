@@ -39,7 +39,7 @@ Funcionalidade: Gestão de Reuniões
     E confirmo o agendamento
     Então a reunião deve aparecer com badge "Extraordinária"
 
-  @skip @integration @needs-backend
+  @integration @needs-backend
   Cenário: Visualizar detalhes de reunião agendada
     Dado que existe uma reunião agendada no conselho
     Quando eu abro o dialog de reuniões do conselho

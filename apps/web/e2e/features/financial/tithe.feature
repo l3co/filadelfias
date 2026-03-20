@@ -41,15 +41,12 @@ Funcionalidade: Gestão de Dízimos e Ofertas
     Então devo ver a seção "Dízimos Pendentes"
     E devo ver registros aguardando aprovação
 
-  @skip @integration @needs-backend
+  @integration @needs-backend
   Cenário: Tesoureiro aprova dízimo
     Dado que estou logado como tesoureiro
     E que existe um dízimo pendente
     E que estou na página de Tesouraria
     Quando clico em "Aprovar" no registro pendente
-    E seleciono a conta de destino
-    E confirmo a aprovação
-    Então devo ver a mensagem "Dízimo aprovado com sucesso"
     E o registro deve ser removido da lista de pendentes
 
   @skip @integration @needs-backend

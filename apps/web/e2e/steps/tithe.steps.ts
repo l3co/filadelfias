@@ -2,6 +2,7 @@ import { createBdd } from 'playwright-bdd';
 import { expect } from '@playwright/test';
 
 const { Given, When, Then } = createBdd();
+let lastPendingRecordText: string | null = null;
 
 /**
  * Step definitions for tithe/offering management.
@@ -40,11 +41,15 @@ Then('devo ver registros aguardando aprovação', async ({ page }) => {
 
 Given('que existe um dízimo pendente', async () => {
     // Seed data includes pending tithes
+    lastPendingRecordText = null;
 });
 
 When('clico em {string} no registro pendente', async ({ page }, action: string) => {
     const button = page.getByRole('button', { name: new RegExp(action, 'i') });
-    await button.first().click();
+    const targetButton = button.first();
+    const pendingCard = targetButton.locator('xpath=ancestor::div[contains(@class,"rounded-xl")][1]');
+    lastPendingRecordText = (await pendingCard.textContent())?.replace(/\s+/g, ' ').trim() || null;
+    await targetButton.click();
 });
 
 When('seleciono a conta de destino', async ({ page }) => {
@@ -73,4 +78,6 @@ When('confirmo a rejeição', async ({ page }) => {
 
 Then('o registro deve ser removido da lista de pendentes', async ({ page }) => {
     await page.waitForTimeout(1000);
+    expect(lastPendingRecordText).toBeTruthy();
+    await expect(page.getByText(lastPendingRecordText!, { exact: false })).toHaveCount(0);
 });

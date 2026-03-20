@@ -49,7 +49,7 @@ Funcionalidade: Gestão de Dízimos e Ofertas
     Quando clico em "Aprovar" no registro pendente
     E o registro deve ser removido da lista de pendentes
 
-  @skip @integration @needs-backend
+  @integration @needs-backend
   Cenário: Tesoureiro rejeita dízimo
     Dado que estou logado como tesoureiro
     E que existe um dízimo pendente
@@ -57,4 +57,4 @@ Funcionalidade: Gestão de Dízimos e Ofertas
     Quando clico em "Rejeitar" no registro pendente
     E informo o motivo "Comprovante ilegível"
     E confirmo a rejeição
-    Então devo ver a mensagem "Dízimo rejeitado"
+    Então o registro deve ser removido da lista de pendentes

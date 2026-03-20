@@ -3,6 +3,7 @@ import { expect } from '@playwright/test';
 
 const { Given, When, Then } = createBdd();
 let lastPendingRecordText: string | null = null;
+let lastPendingRecordsCount: number | null = null;
 
 /**
  * Step definitions for tithe/offering management.
@@ -53,6 +54,7 @@ When('clico em {string} no registro pendente', async ({ page }, action: string) 
     const targetButton = button.first();
     const pendingCard = targetButton.locator('xpath=ancestor::div[contains(@class,"rounded-xl")][1]');
     lastPendingRecordText = (await pendingCard.textContent())?.replace(/\s+/g, ' ').trim() || null;
+    lastPendingRecordsCount = await page.getByText(/Enviado em \d{2}\/\d{2}\/\d{4}/i).count();
     await targetButton.click();
 });
 
@@ -76,12 +78,15 @@ When('informo o motivo {string}', async ({ page }, reason: string) => {
 });
 
 When('confirmo a rejeição', async ({ page }) => {
-    const confirmButton = page.getByRole('button', { name: /confirmar|rejeitar/i });
+    const confirmButton = page.getByRole('button', { name: /confirmar rejeição/i });
     await confirmButton.click();
 });
 
 Then('o registro deve ser removido da lista de pendentes', async ({ page }) => {
-    await page.waitForTimeout(1000);
-    expect(lastPendingRecordText).toBeTruthy();
-    await expect(page.getByText(lastPendingRecordText!, { exact: false })).toHaveCount(0);
+    await page.waitForLoadState('networkidle').catch(() => {});
+    await page.waitForTimeout(500);
+    expect(lastPendingRecordsCount).not.toBeNull();
+    await expect(page.getByText(/Enviado em \d{2}\/\d{2}\/\d{4}/i)).toHaveCount(
+        Math.max((lastPendingRecordsCount ?? 1) - 1, 0),
+    );
 });

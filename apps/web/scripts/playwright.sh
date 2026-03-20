@@ -39,6 +39,10 @@ run_docker_fallback() {
     node:22-bookworm \
     sh -lc "
       set -eu
+      REPORT_NEXT_DIR=/src/playwright-report.docker-next.\$\$
+      REPORT_PREV_DIR=/src/playwright-report.docker-prev.\$\$
+      RESULTS_NEXT_DIR=/src/test-results.docker-next.\$\$
+      RESULTS_PREV_DIR=/src/test-results.docker-prev.\$\$
       rm -rf /tmp/app
       mkdir -p /tmp/app
       cd /src
@@ -52,23 +56,23 @@ run_docker_fallback() {
       npm ci >/tmp/playwright-npm-ci.log
       node node_modules/.bin/playwright install --with-deps chromium >/tmp/playwright-install.log
       node node_modules/.bin/playwright \"\$@\"
-      rm -rf /src/playwright-report.docker-next /src/playwright-report.docker-prev
-      rm -rf /src/test-results.docker-next /src/test-results.docker-prev
       if [ -d /tmp/app/playwright-report ]; then
-        cp -R /tmp/app/playwright-report /src/playwright-report.docker-next
+        rm -rf \"\$REPORT_NEXT_DIR\" \"\$REPORT_PREV_DIR\"
+        cp -R /tmp/app/playwright-report \"\$REPORT_NEXT_DIR\"
         if [ -e /src/playwright-report ]; then
-          mv /src/playwright-report /src/playwright-report.docker-prev
+          mv /src/playwright-report \"\$REPORT_PREV_DIR\"
         fi
-        mv /src/playwright-report.docker-next /src/playwright-report
-        rm -rf /src/playwright-report.docker-prev || true
+        mv \"\$REPORT_NEXT_DIR\" /src/playwright-report
+        rm -rf \"\$REPORT_PREV_DIR\" /src/playwright-report.docker-next /src/playwright-report.docker-prev || true
       fi
       if [ -d /tmp/app/test-results ]; then
-        cp -R /tmp/app/test-results /src/test-results.docker-next
+        rm -rf \"\$RESULTS_NEXT_DIR\" \"\$RESULTS_PREV_DIR\"
+        cp -R /tmp/app/test-results \"\$RESULTS_NEXT_DIR\"
         if [ -e /src/test-results ]; then
-          mv /src/test-results /src/test-results.docker-prev
+          mv /src/test-results \"\$RESULTS_PREV_DIR\"
         fi
-        mv /src/test-results.docker-next /src/test-results
-        rm -rf /src/test-results.docker-prev || true
+        mv \"\$RESULTS_NEXT_DIR\" /src/test-results
+        rm -rf \"\$RESULTS_PREV_DIR\" /src/test-results.docker-next /src/test-results.docker-prev || true
       fi
     " sh "$@"
 }

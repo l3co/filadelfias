@@ -25,6 +25,7 @@ interface EventListProps {
 
 export const EventList = memo(function EventList({ events, isLoading, onEdit, onDelete }: EventListProps) {
     const [eventToDelete, setEventToDelete] = useState<Event | null>(null);
+    const sortedEvents = useMemo(() => sortEventsByStartDate(events ?? []), [events]);
 
     const handleDeleteConfirm = useCallback(() => {
         if (eventToDelete && onDelete) {
@@ -50,8 +51,6 @@ export const EventList = memo(function EventList({ events, isLoading, onEdit, on
             />
         );
     }
-
-    const sortedEvents = useMemo(() => sortEventsByStartDate(events), [events]);
 
     return (
         <>

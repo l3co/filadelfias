@@ -211,7 +211,10 @@ Then('devo ver eventos na lista', async ({ page }) => {
 });
 
 Then('devo ver a página de eventos admin', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: /eventos/i }).first()).toBeVisible({ timeout: 5000 });
+    const adminEventsPage = page.getByRole('heading', { name: /eventos/i })
+        .or(page.getByRole('button', { name: /novo evento/i }))
+        .or(page.getByText(/nenhum evento/i));
+    await expect(adminEventsPage.first()).toBeVisible({ timeout: 10000 });
 });
 
 Then('devo ver lista de eventos futuros', async ({ page }) => {

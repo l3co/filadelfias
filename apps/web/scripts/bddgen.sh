@@ -30,6 +30,8 @@ run_docker_fallback() {
     node:22-bookworm \
     sh -lc "
       set -eu
+      NEXT_DIR=/src/.features-gen.docker-next.\$\$
+      PREV_DIR=/src/.features-gen.docker-prev.\$\$
       rm -rf /tmp/app
       mkdir -p /tmp/app
       cd /src
@@ -43,13 +45,13 @@ run_docker_fallback() {
       cd /tmp/app
       npm ci >/tmp/bddgen-npm-ci.log
       node node_modules/.bin/bddgen test \"\$@\"
-      rm -rf /src/.features-gen.docker-next /src/.features-gen.docker-prev
-      cp -R /tmp/app/.features-gen /src/.features-gen.docker-next
+      rm -rf \"\$NEXT_DIR\" \"\$PREV_DIR\"
+      cp -R /tmp/app/.features-gen \"\$NEXT_DIR\"
       if [ -e /src/.features-gen ]; then
-        mv /src/.features-gen /src/.features-gen.docker-prev
+        mv /src/.features-gen \"\$PREV_DIR\"
       fi
-      mv /src/.features-gen.docker-next /src/.features-gen
-      rm -rf /src/.features-gen.docker-prev || true
+      mv \"\$NEXT_DIR\" /src/.features-gen
+      rm -rf \"\$PREV_DIR\" /src/.features-gen.docker-next /src/.features-gen.docker-prev || true
     " sh "$@"
 }
 

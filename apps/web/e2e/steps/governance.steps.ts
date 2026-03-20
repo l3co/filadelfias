@@ -37,6 +37,32 @@ async function ensureScheduledMeeting(page: any) {
     await expect(page.locator('[data-testid^="meeting-card-"]').first()).toBeVisible({ timeout: 10000 });
 }
 
+async function ensureCompletedMeeting(page: any) {
+    await ensureScheduledMeeting(page);
+
+    const realizedTab = page.getByRole('tab', { name: /realizadas/i })
+        .or(page.getByRole('button', { name: /realizadas/i }));
+    await realizedTab.first().click();
+    await page.waitForTimeout(300);
+    if (await page.locator('[data-testid^="meeting-card-"]').count() > 0) {
+        return;
+    }
+
+    const upcomingTab = page.getByRole('tab', { name: /próximas/i })
+        .or(page.getByRole('button', { name: /próximas/i }));
+    await upcomingTab.first().click();
+    await page.waitForTimeout(300);
+
+    const meetingCard = page.locator('[data-testid^="meeting-card-"]').first();
+    await meetingCard.getByRole('button', { name: /detalhes/i }).click();
+    await expect(page.locator('[data-testid="meeting-details-dialog"]')).toBeVisible({ timeout: 5000 });
+    await page.locator('[data-testid="complete-meeting-btn"]').click();
+    await page.waitForLoadState('networkidle').catch(() => {});
+
+    await realizedTab.first().click();
+    await expect(page.locator('[data-testid^="meeting-card-"]').first()).toBeVisible({ timeout: 10000 });
+}
+
 // ============================================
 // Given Steps
 // ============================================
@@ -66,25 +92,13 @@ Given('que registrei a ata e as presenças', async function () {
 });
 
 Given('que existe uma reunião finalizada no conselho', async ({ page }) => {
-    // Navega para governance e abre o dialog de reuniões
-    await page.goto('/admin/governance');
-    await page.waitForLoadState('networkidle');
-    
-    // Abre o dialog de reuniões
-    const meetingsButton = page.getByRole('button', { name: /reuniões/i }).first();
-    await meetingsButton.click();
-    await expect(page.locator('[data-testid="meetings-dialog"]')).toBeVisible({ timeout: 5000 });
-    
-    // Clica na aba "Realizadas" para ver se há reuniões finalizadas
-    const realizedTab = page.getByRole('button', { name: /realizadas/i });
-    await realizedTab.click();
-    await page.waitForTimeout(500);
+    await openMeetingsDialog(page);
+    await ensureCompletedMeeting(page);
 });
 
 Given('que existem reuniões finalizadas no conselho', async ({ page }) => {
-    // Navega para governance
-    await page.goto('/admin/governance');
-    await page.waitForLoadState('networkidle');
+    await openMeetingsDialog(page);
+    await ensureCompletedMeeting(page);
 });
 
 // ============================================

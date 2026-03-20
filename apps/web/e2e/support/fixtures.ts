@@ -296,7 +296,7 @@ export const testGovernance = {
     },
     meetings: {
         ordinary: {
-            date: '2026-02-15',
+            date: '2026-04-15',
             time: '19:30',
             location: 'Salão da Igreja',
             agenda: 'Reunião ordinária mensal - Planejamento do semestre',

@@ -81,7 +81,7 @@ Funcionalidade: Gestão de Reuniões
     Então devo ver a mensagem "Reunião finalizada com sucesso"
     E a reunião deve aparecer na aba "Realizadas"
 
-  @skip @integration @needs-backend
+  @integration @needs-backend
   Cenário: Reunião finalizada não pode ser editada
     Dado que existe uma reunião finalizada no conselho
     Quando eu abro os detalhes da reunião

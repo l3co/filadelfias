@@ -8,7 +8,7 @@ from src.middleware.permissions import (
     require_authenticated,
     require_view_missions,
 )
-from src.modules.missions.repository import country_repository
+from src.modules.missions.repository import country_repository, missionary_repository
 from src.modules.missions.schemas import (
     CountryCreate,
     CountryResponse,
@@ -20,6 +20,7 @@ from src.services.mission_service import MissionService
 router = APIRouter(prefix="/missions", tags=["Missions"])
 
 require_create_missions = PermissionChecker("missions", "create")
+require_delete_missions = PermissionChecker("missions", "delete")
 
 
 # ============================================================================
@@ -76,3 +77,22 @@ async def list_missionaries(
     """
     service = MissionService()
     return await service.list_missionaries(tenant_id)
+
+
+@router.delete("/missionaries/{missionary_id}")
+async def delete_missionary(
+    missionary_id: str,
+    tenant_id: UUID = Query(..., description="ID of the tenant"),
+    auth_context: dict = Depends(require_delete_missions),
+):
+    """
+    Delete a missionary.
+    Requires: missions:delete permission.
+    """
+    deleted = await missionary_repository.delete(tenant_id, missionary_id)
+    if not deleted:
+        from fastapi import HTTPException
+
+        raise HTTPException(status_code=404, detail="Missionário não encontrado")
+
+    return {"success": True}

@@ -121,6 +121,15 @@ export function CreateMissionaryDialog({ isOpen, onClose, tenantId }: Props) {
                     </div>
 
                     <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-700">Foto (URL opcional)</label>
+                        <Input
+                            {...register('photo_url')}
+                            type="url"
+                            placeholder="https://..."
+                        />
+                    </div>
+
+                    <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-700">Link da Newsletter (opcional)</label>
                         <Input
                             {...register('newsletter_url')}

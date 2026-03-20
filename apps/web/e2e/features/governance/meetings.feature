@@ -63,7 +63,7 @@ Funcionalidade: Gestão de Reuniões
     Então devo ver a mensagem "Reunião atualizada com sucesso"
     E a ata deve estar salva
 
-  @skip @integration @needs-backend
+  @integration @needs-backend
   Cenário: Marcar presença de membros
     Dado que existe uma reunião agendada no conselho
     E que o conselho possui membros cadastrados

@@ -5,7 +5,7 @@ Funcionalidade: Gestão da Tesouraria
   Eu quero gerenciar as finanças
   Para manter o controle do orçamento
 
-  @integration @needs-backend
+  @integration @needs-backend @critical
   Cenário: Visualizar resumo financeiro
     Dado que estou logado como administrador
     E que estou na página de Tesouraria
@@ -13,7 +13,7 @@ Funcionalidade: Gestão da Tesouraria
     E devo ver total de entradas do mês
     E devo ver total de saídas do mês
 
-  @integration @needs-backend
+  @integration @needs-backend @critical
   Cenário: Navegar entre meses nas movimentações
     Dado que estou logado como administrador
     E que estou na página de Tesouraria

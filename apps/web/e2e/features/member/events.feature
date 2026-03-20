@@ -5,13 +5,13 @@ Funcionalidade: Eventos
   Eu quero ver os próximos eventos
   Para participar das atividades
 
-  @integration @needs-backend
+  @integration @needs-backend @critical
   Cenário: Visualizar lista de eventos
     Dado que estou logado como membro
     E que estou na página de Eventos
     Então devo ver lista de eventos futuros
 
-  @integration @needs-backend
+  @integration @needs-backend @critical
   Cenário: Ver detalhes de um evento
     Dado que estou logado como membro
     E que estou na página de Eventos

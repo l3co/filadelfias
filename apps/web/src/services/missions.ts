@@ -41,6 +41,8 @@ export interface CreateMissionaryDTO {
     newsletter_url?: string;
 }
 
+export interface UpdateMissionaryDTO extends Partial<CreateMissionaryDTO> {}
+
 export const missionService = {
     // Countries
     listCountries: async (tenantId: string) => {
@@ -67,6 +69,13 @@ export const missionService = {
 
     createMissionary: async (tenantId: string, missionary: CreateMissionaryDTO) => {
         const { data } = await api.post<Missionary>('/missions/missionaries', missionary, {
+            params: { tenant_id: tenantId }
+        });
+        return data;
+    },
+
+    updateMissionary: async (tenantId: string, missionaryId: string, missionary: UpdateMissionaryDTO) => {
+        const { data } = await api.put<Missionary>(`/missions/missionaries/${missionaryId}`, missionary, {
             params: { tenant_id: tenantId }
         });
         return data;

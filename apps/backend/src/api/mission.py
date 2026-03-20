@@ -14,6 +14,7 @@ from src.modules.missions.schemas import (
     CountryResponse,
     MissionaryCreate,
     MissionaryResponse,
+    MissionaryUpdate,
 )
 from src.services.mission_service import MissionService
 
@@ -77,6 +78,26 @@ async def list_missionaries(
     """
     service = MissionService()
     return await service.list_missionaries(tenant_id)
+
+
+@router.put("/missionaries/{missionary_id}", response_model=MissionaryResponse)
+async def update_missionary(
+    missionary_id: str,
+    data: MissionaryUpdate,
+    tenant_id: UUID = Query(..., description="ID of the tenant"),
+    auth_context: dict = Depends(require_create_missions),
+):
+    """
+    Update a missionary.
+    Requires: missions:create permission.
+    """
+    service = MissionService()
+    updated = await service.update_missionary(tenant_id, missionary_id, data)
+    if not updated:
+        from fastapi import HTTPException
+
+        raise HTTPException(status_code=404, detail="Missionário não encontrado")
+    return updated
 
 
 @router.delete("/missionaries/{missionary_id}")

@@ -6,7 +6,7 @@ from sqlalchemy import select
 
 from src.infra.db.models import CountryModel, MissionaryModel
 from src.infra.repositories.sqlalchemy_repository import SQLAlchemyRepository
-from src.modules.missions.schemas import CountryCreate, MissionaryCreate
+from src.modules.missions.schemas import CountryCreate, MissionaryCreate, MissionaryUpdate
 
 logger = logging.getLogger(__name__)
 
@@ -79,6 +79,31 @@ class MissionaryRepository(SQLAlchemyRepository):
                 .order_by(MissionaryModel.name.asc(), MissionaryModel.created_at.desc())
             )
             return [self._to_dict(item, self.fields) for item in result.scalars().all()]
+
+    async def update(self, tenant_id: UUID, missionary_id: str, data: MissionaryUpdate) -> dict | None:
+        payload = data.model_dump(exclude_unset=True)
+        if "latitude" in payload:
+            payload["latitude"] = str(payload["latitude"]) if payload["latitude"] is not None else None
+        if "longitude" in payload:
+            payload["longitude"] = str(payload["longitude"]) if payload["longitude"] is not None else None
+
+        async with self.session() as session:
+            missionary = await self._first(
+                session,
+                select(MissionaryModel).where(
+                    MissionaryModel.tenant_id == tenant_id,
+                    MissionaryModel.id == self._maybe_uuid(missionary_id),
+                ),
+            )
+            if not missionary:
+                return None
+
+            for field, value in payload.items():
+                setattr(missionary, field, value)
+
+            await session.commit()
+            await session.refresh(missionary)
+            return self._to_dict(missionary, self.fields)
 
     async def delete(self, tenant_id: UUID, missionary_id: str) -> bool:
         async with self.session() as session:

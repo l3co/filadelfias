@@ -21,6 +21,7 @@ import {
 } from "../../../components/ui/alert-dialog";
 import { CardSkeleton } from "../../../components/LoadingState";
 import { EmptyState } from "../../../components/EmptyState";
+import { LazyImage } from '../../../components/ui/LazyImage';
 import type { Missionary } from '../../../services/missions';
 
 interface MissionaryListProps {
@@ -64,7 +65,16 @@ export function MissionaryList({ missionaries, isLoading, onEdit, onDelete }: Mi
                 {missionaries.map((m) => (
                     <Card key={m.id} className="hover:shadow-md transition-shadow overflow-hidden group relative">
                         <div className="h-32 bg-indigo-50 flex items-center justify-center group-hover:bg-indigo-100 transition-colors">
-                            <Globe size={48} className="text-indigo-200 group-hover:text-indigo-300" />
+                            {m.photo_url ? (
+                                <LazyImage
+                                    src={m.photo_url}
+                                    alt={m.name}
+                                    className="h-full w-full object-cover"
+                                    fallbackSrc="/logo.svg"
+                                />
+                            ) : (
+                                <Globe size={48} className="text-indigo-200 group-hover:text-indigo-300" />
+                            )}
                         </div>
                         <CardContent className="p-6">
                             <div className="flex justify-between items-start mb-2">
@@ -100,6 +110,10 @@ export function MissionaryList({ missionaries, isLoading, onEdit, onDelete }: Mi
                                 <MapPin size={16} />
                                 {m.city && m.state ? `${m.city}, ${m.state}` : m.field_name}
                             </div>
+
+                            <p className="mb-3 text-xs uppercase tracking-wide text-gray-400">
+                                {m.field_name}
+                            </p>
 
                             <p className="text-gray-600 text-sm mb-6 line-clamp-3 min-h-[60px]">
                                 {m.bio || "Sem biografia."}

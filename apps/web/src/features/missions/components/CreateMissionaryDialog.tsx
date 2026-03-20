@@ -1,28 +1,31 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import {
     Dialog,
     DialogContent,
+    DialogDescription,
     DialogHeader,
     DialogTitle,
     DialogFooter
 } from "../../../components/ui/dialog";
 import { CreatableCombobox } from "../../../components/ui/creatable-combobox";
 import type { ComboboxOption } from "../../../components/ui/creatable-combobox";
-import { useCreateMissionary, useCountries, useCreateCountry } from '../hooks/useMissions';
-import type { CreateMissionaryDTO } from '../../../services/missions';
+import { useCreateMissionary, useCountries, useCreateCountry, useUpdateMissionary } from '../hooks/useMissions';
+import type { CreateMissionaryDTO, Missionary } from '../../../services/missions';
 
 type Props = {
     isOpen: boolean;
     onClose: () => void;
     tenantId: string;
+    initialData?: Missionary | null;
 }
 
-export function CreateMissionaryDialog({ isOpen, onClose, tenantId }: Props) {
+export function CreateMissionaryDialog({ isOpen, onClose, tenantId, initialData }: Props) {
     const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<CreateMissionaryDTO>();
     const createMissionary = useCreateMissionary(tenantId);
+    const updateMissionary = useUpdateMissionary(tenantId);
     const { data: countries } = useCountries(tenantId);
     const createCountry = useCreateCountry(tenantId);
     const [selectedCountry, setSelectedCountry] = useState('');
@@ -44,20 +47,52 @@ export function CreateMissionaryDialog({ isOpen, onClose, tenantId }: Props) {
     };
 
     const onSubmit = (data: CreateMissionaryDTO) => {
+        const onSuccess = () => {
+            reset();
+            setSelectedCountry('');
+            onClose();
+        };
+
+        if (initialData?.id) {
+            updateMissionary.mutate({ missionaryId: initialData.id, data }, {
+                onSuccess,
+            });
+            return;
+        }
+
         createMissionary.mutate(data, {
             onSuccess: () => {
-                reset();
-                setSelectedCountry('');
-                onClose();
+                onSuccess();
             }
         });
     };
+
+    useEffect(() => {
+        if (!isOpen) return;
+
+        reset({
+            name: initialData?.name ?? '',
+            field_name: initialData?.field_name ?? '',
+            country_code: initialData?.country_code ?? '',
+            state: initialData?.state ?? '',
+            city: initialData?.city ?? '',
+            bio: initialData?.bio ?? '',
+            photo_url: initialData?.photo_url ?? '',
+            newsletter_url: initialData?.newsletter_url ?? '',
+        });
+        setSelectedCountry(initialData?.country_code ?? '');
+    }, [initialData, isOpen, reset]);
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
-                    <DialogTitle>Novo Missionário</DialogTitle>
+                    <DialogTitle>{initialData ? 'Editar Missionário' : 'Novo Missionário'}</DialogTitle>
+                    <DialogDescription>
+                        {initialData
+                            ? 'Atualize os dados do missionário ou projeto apoiado.'
+                            : 'Cadastre um missionário ou projeto apoiado pela igreja.'}
+                    </DialogDescription>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4">
@@ -144,9 +179,9 @@ export function CreateMissionaryDialog({ isOpen, onClose, tenantId }: Props) {
                         </Button>
                         <Button
                             type="submit"
-                            isLoading={createMissionary.isPending}
+                            isLoading={createMissionary.isPending || updateMissionary.isPending}
                         >
-                            Salvar
+                            {initialData ? 'Atualizar' : 'Salvar'}
                         </Button>
                     </DialogFooter>
                 </form>

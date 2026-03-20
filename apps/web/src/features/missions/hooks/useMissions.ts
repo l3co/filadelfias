@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { missionService } from '../../../services/missions';
-import type { CreateMissionaryDTO, CreateCountryDTO } from '../../../services/missions';
+import type { CreateMissionaryDTO, CreateCountryDTO, UpdateMissionaryDTO } from '../../../services/missions';
 import { toast } from 'sonner';
 
 export const MISSIONS_KEY = 'missionaries';
@@ -72,6 +72,22 @@ export function useDeleteMissionary(tenantId: string | undefined) {
         },
         onError: () => {
             toast.error('Erro ao excluir missionário.');
+        }
+    });
+}
+
+export function useUpdateMissionary(tenantId: string | undefined) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ missionaryId, data }: { missionaryId: string; data: UpdateMissionaryDTO }) =>
+            missionService.updateMissionary(tenantId!, missionaryId, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [MISSIONS_KEY, tenantId] });
+            toast.success('Missionário atualizado com sucesso!');
+        },
+        onError: () => {
+            toast.error('Erro ao atualizar missionário.');
         }
     });
 }

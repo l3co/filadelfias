@@ -35,6 +35,19 @@ class MissionaryCreate(MissionaryBase):
     pass
 
 
+class MissionaryUpdate(BaseModel):
+    name: Optional[str] = Field(default=None, min_length=1)
+    field_name: Optional[str] = None
+    country_code: Optional[str] = Field(default=None, min_length=2, max_length=10)
+    state: Optional[str] = None
+    city: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    bio: Optional[str] = None
+    photo_url: Optional[str] = None
+    newsletter_url: Optional[str] = None
+
+
 class MissionaryResponse(MissionaryBase):
     id: UUID
     tenant_id: UUID

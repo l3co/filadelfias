@@ -7,18 +7,35 @@ import { CreateMissionaryDialog } from '../../features/missions/components/Creat
 import { Button } from '../../components/ui/button';
 import { PageHeaderWithIcon } from '../../components/PageHeader';
 import { EmptyState } from '../../components/EmptyState';
+import type { Missionary } from '../../services/missions';
 
 export function MissionsPage() {
     const tenant = useAuthTenant();
     const { data: missionaries, isLoading } = useMissions(tenant?.id);
     const deleteMissionary = useDeleteMissionary(tenant?.id);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [editingMissionary, setEditingMissionary] = useState<Missionary | null>(null);
     const missionaryCount = missionaries?.length ?? 0;
     const countryCount = new Set((missionaries ?? []).map((missionary) => missionary.country_code)).size;
     const newsletterCount = (missionaries ?? []).filter((missionary) => missionary.newsletter_url).length;
 
     const handleDelete = (missionaryId: string) => {
         deleteMissionary.mutate(missionaryId);
+    };
+
+    const handleCreate = () => {
+        setEditingMissionary(null);
+        setIsDialogOpen(true);
+    };
+
+    const handleEdit = (missionary: Missionary) => {
+        setEditingMissionary(missionary);
+        setIsDialogOpen(true);
+    };
+
+    const handleCloseDialog = () => {
+        setIsDialogOpen(false);
+        setEditingMissionary(null);
     };
 
     if (!tenant) {
@@ -39,7 +56,7 @@ export function MissionsPage() {
                 title="Missões"
                 description={`Acompanhe os missionários e projetos apoiados pela ${tenant.name}`}
                 actions={
-                    <Button onClick={() => setIsDialogOpen(true)} className="gap-2">
+                    <Button onClick={handleCreate} className="gap-2">
                         <Plus size={16} /> Novo Missionário
                     </Button>
                 }
@@ -74,12 +91,14 @@ export function MissionsPage() {
             <MissionaryList 
                 missionaries={missionaries} 
                 isLoading={isLoading} 
+                onEdit={handleEdit}
                 onDelete={handleDelete}
             />
 
             <CreateMissionaryDialog
                 isOpen={isDialogOpen}
-                onClose={() => setIsDialogOpen(false)}
+                initialData={editingMissionary}
+                onClose={handleCloseDialog}
                 tenantId={tenant.id}
             />
         </div>

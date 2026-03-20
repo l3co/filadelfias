@@ -30,7 +30,7 @@ Funcionalidade: Gestão de Reuniões
     Então devo ver a mensagem "Reunião agendada com sucesso"
     E a reunião deve aparecer na aba "Próximas"
 
-  @skip @integration @needs-backend
+  @integration @needs-backend
   Cenário: Agendar reunião extraordinária
     Quando eu abro o dialog de reuniões do conselho
     E clico em "Nova Reunião"

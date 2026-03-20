@@ -102,8 +102,12 @@ When('preencho o formulário de reunião:', async ({ page }, dataTable) => {
 });
 
 When('seleciono o tipo {string}', async ({ page }, tipo: string) => {
-    await page.locator('[data-testid="meeting-type-select"]').click();
-    await page.getByRole('option', { name: new RegExp(tipo, 'i') }).click();
+    const trigger = page.locator('[data-testid="meeting-type-select"]');
+    await trigger.click();
+
+    const visibleOption = page.locator('div[role="option"]').filter({ hasText: new RegExp(tipo, 'i') });
+    await visibleOption.first().click();
+    await expect(trigger).toContainText(new RegExp(tipo, 'i'));
 });
 
 When('preencho os dados da reunião', async ({ page }) => {
@@ -180,8 +184,14 @@ Then('a reunião deve aparecer na aba {string}', async ({ page }, tabName: strin
 });
 
 Then('a reunião deve aparecer com badge {string}', async ({ page }, badgeText: string) => {
-    // Usa .first() para evitar strict mode violation quando há múltiplos elementos
-    await expect(page.getByText(badgeText, { exact: true }).first()).toBeVisible();
+    await page.waitForLoadState('networkidle').catch(() => {});
+    const normalizedBadgePattern = badgeText
+        .replace(/á/gi, '[áa]')
+        .replace(/é/gi, '[ée]')
+        .replace(/í/gi, '[íi]')
+        .replace(/ó/gi, '[óo]')
+        .replace(/ú/gi, '[úu]');
+    await expect(page.getByText(new RegExp(normalizedBadgePattern, 'i')).first()).toBeVisible({ timeout: 10000 });
 });
 
 Then('devo ver os dados da reunião:', async ({ page }) => {

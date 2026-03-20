@@ -303,7 +303,7 @@ export const testGovernance = {
             meetingType: 'ORDINARY',
         },
         extraordinary: {
-            date: '2026-02-20',
+            date: '2026-04-20',
             time: '10:00',
             location: 'Sala de Reuniões',
             agenda: 'Reunião extraordinária - Assunto urgente',
@@ -319,4 +319,3 @@ export const testGovernance = {
         },
     },
 } as const;
-

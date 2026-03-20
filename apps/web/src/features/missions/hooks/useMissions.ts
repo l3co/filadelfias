@@ -1,10 +1,16 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { missionService } from '../../../services/missions';
-import type { CreateMissionaryDTO, CreateCountryDTO, UpdateMissionaryDTO } from '../../../services/missions';
+import type {
+  CreateCountryDTO,
+  CreateMissionaryDTO,
+  CreateSocialProjectDTO,
+  UpdateMissionaryDTO,
+} from '../../../services/missions';
 import { toast } from 'sonner';
 
 export const MISSIONS_KEY = 'missionaries';
 export const COUNTRIES_KEY = 'countries';
+export const SOCIAL_PROJECTS_KEY = 'social-projects';
 
 // ============================================================================
 // COUNTRIES
@@ -88,6 +94,45 @@ export function useUpdateMissionary(tenantId: string | undefined) {
         },
         onError: () => {
             toast.error('Erro ao atualizar missionário.');
+        }
+    });
+}
+
+export function useSocialProjects(tenantId: string | undefined) {
+    return useQuery({
+        queryKey: [SOCIAL_PROJECTS_KEY, tenantId],
+        queryFn: () => missionService.listSocialProjects(tenantId!),
+        enabled: !!tenantId,
+        staleTime: 1000 * 60 * 10,
+    });
+}
+
+export function useCreateSocialProject(tenantId: string | undefined) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (data: CreateSocialProjectDTO) => missionService.createSocialProject(tenantId!, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [SOCIAL_PROJECTS_KEY, tenantId] });
+            toast.success('Projeto social criado com sucesso!');
+        },
+        onError: () => {
+            toast.error('Erro ao criar projeto social.');
+        }
+    });
+}
+
+export function useDeleteSocialProject(tenantId: string | undefined) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (projectId: string) => missionService.deleteSocialProject(tenantId!, projectId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [SOCIAL_PROJECTS_KEY, tenantId] });
+            toast.success('Projeto social removido com sucesso!');
+        },
+        onError: () => {
+            toast.error('Erro ao remover projeto social.');
         }
     });
 }

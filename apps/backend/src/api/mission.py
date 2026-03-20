@@ -15,6 +15,8 @@ from src.modules.missions.schemas import (
     MissionaryCreate,
     MissionaryResponse,
     MissionaryUpdate,
+    SocialProjectCreate,
+    SocialProjectResponse,
 )
 from src.services.mission_service import MissionService
 
@@ -115,5 +117,52 @@ async def delete_missionary(
         from fastapi import HTTPException
 
         raise HTTPException(status_code=404, detail="Missionário não encontrado")
+
+    return {"success": True}
+
+
+@router.post("/social-projects", response_model=SocialProjectResponse)
+async def create_social_project(
+    data: SocialProjectCreate,
+    tenant_id: UUID = Query(..., description="ID of the tenant"),
+    auth_context: dict = Depends(require_create_missions),
+):
+    """
+    Create a social project.
+    Requires: missions:create permission.
+    """
+    service = MissionService()
+    return await service.create_social_project(tenant_id, data)
+
+
+@router.get("/social-projects", response_model=List[SocialProjectResponse])
+async def list_social_projects(
+    tenant_id: UUID = Query(..., description="ID of the tenant"),
+    auth_context: dict = Depends(require_view_missions),
+):
+    """
+    List social projects.
+    Requires: missions:view permission.
+    """
+    service = MissionService()
+    return await service.list_social_projects(tenant_id)
+
+
+@router.delete("/social-projects/{project_id}")
+async def delete_social_project(
+    project_id: str,
+    tenant_id: UUID = Query(..., description="ID of the tenant"),
+    auth_context: dict = Depends(require_delete_missions),
+):
+    """
+    Delete a social project.
+    Requires: missions:delete permission.
+    """
+    service = MissionService()
+    deleted = await service.delete_social_project(tenant_id, project_id)
+    if not deleted:
+        from fastapi import HTTPException
+
+        raise HTTPException(status_code=404, detail="Projeto social não encontrado")
 
     return {"success": True}

@@ -43,6 +43,33 @@ export interface CreateMissionaryDTO {
 
 export interface UpdateMissionaryDTO extends Partial<CreateMissionaryDTO> {}
 
+export interface SocialProject {
+    id: string;
+    tenant_id: string;
+    title: string;
+    summary: string;
+    location?: string;
+    status: string;
+    target_audience?: string;
+    coordinator_name?: string;
+    contact_info?: string;
+    start_date?: string;
+    end_date?: string;
+    created_at: string;
+}
+
+export interface CreateSocialProjectDTO {
+    title: string;
+    summary: string;
+    location?: string;
+    status: string;
+    target_audience?: string;
+    coordinator_name?: string;
+    contact_info?: string;
+    start_date?: string;
+    end_date?: string;
+}
+
 export const missionService = {
     // Countries
     listCountries: async (tenantId: string) => {
@@ -85,5 +112,25 @@ export const missionService = {
         await api.delete(`/missions/missionaries/${missionaryId}`, {
             params: { tenant_id: tenantId }
         });
-    }
+    },
+
+    listSocialProjects: async (tenantId: string) => {
+        const { data } = await api.get<SocialProject[]>('/missions/social-projects', {
+            params: { tenant_id: tenantId }
+        });
+        return data;
+    },
+
+    createSocialProject: async (tenantId: string, project: CreateSocialProjectDTO) => {
+        const { data } = await api.post<SocialProject>('/missions/social-projects', project, {
+            params: { tenant_id: tenantId }
+        });
+        return data;
+    },
+
+    deleteSocialProject: async (tenantId: string, projectId: string) => {
+        await api.delete(`/missions/social-projects/${projectId}`, {
+            params: { tenant_id: tenantId }
+        });
+    },
 };

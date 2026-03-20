@@ -204,6 +204,23 @@ class MissionaryModel(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     newsletter_url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
 
+class SocialProjectModel(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    __tablename__ = "social_projects"
+
+    tenant_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    summary: Mapped[str] = mapped_column(Text, nullable=False)
+    location: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="PLANNING", index=True)
+    target_audience: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    coordinator_name: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    contact_info: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    start_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True, index=True)
+    end_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True, index=True)
+
+
 class ExpenseRequestModel(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     __tablename__ = "expense_requests"
 

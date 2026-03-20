@@ -4,9 +4,9 @@ from uuid import UUID
 
 from sqlalchemy import select
 
-from src.infra.db.models import CountryModel, MissionaryModel
+from src.infra.db.models import CountryModel, MissionaryModel, SocialProjectModel
 from src.infra.repositories.sqlalchemy_repository import SQLAlchemyRepository
-from src.modules.missions.schemas import CountryCreate, MissionaryCreate, MissionaryUpdate
+from src.modules.missions.schemas import CountryCreate, MissionaryCreate, MissionaryUpdate, SocialProjectCreate
 
 logger = logging.getLogger(__name__)
 
@@ -123,3 +123,57 @@ class MissionaryRepository(SQLAlchemyRepository):
 
 
 missionary_repository = MissionaryRepository()
+
+
+class SocialProjectRepository(SQLAlchemyRepository):
+    fields = [
+        "id",
+        "tenant_id",
+        "title",
+        "summary",
+        "location",
+        "status",
+        "target_audience",
+        "coordinator_name",
+        "contact_info",
+        "start_date",
+        "end_date",
+        "created_at",
+        "updated_at",
+    ]
+
+    async def create(self, tenant_id: UUID, data: SocialProjectCreate) -> dict:
+        async with self.session() as session:
+            project = SocialProjectModel(tenant_id=tenant_id, **data.model_dump())
+            session.add(project)
+            await session.commit()
+            await session.refresh(project)
+            return self._to_dict(project, self.fields)
+
+    async def get_by_tenant(self, tenant_id: UUID) -> List[dict]:
+        async with self.session() as session:
+            result = await session.execute(
+                select(SocialProjectModel)
+                .where(SocialProjectModel.tenant_id == tenant_id)
+                .order_by(SocialProjectModel.created_at.desc(), SocialProjectModel.title.asc())
+            )
+            return [self._to_dict(item, self.fields) for item in result.scalars().all()]
+
+    async def delete(self, tenant_id: UUID, project_id: str) -> bool:
+        async with self.session() as session:
+            project = await self._first(
+                session,
+                select(SocialProjectModel).where(
+                    SocialProjectModel.tenant_id == tenant_id,
+                    SocialProjectModel.id == self._maybe_uuid(project_id),
+                ),
+            )
+            if not project:
+                return False
+
+            await session.delete(project)
+            await session.commit()
+            return True
+
+
+social_project_repository = SocialProjectRepository()

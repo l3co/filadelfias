@@ -1,23 +1,36 @@
 import { useState } from 'react';
-import { Plus, Globe, MapPinned, Mail } from 'lucide-react';
+import { Plus, Globe, HandHeart, MapPinned, Mail } from 'lucide-react';
 import { useAuthTenant } from '../../contexts/AuthContext';
-import { useMissions, useDeleteMissionary } from '../../features/missions/hooks/useMissions';
+import {
+  useCreateSocialProject,
+  useDeleteMissionary,
+  useDeleteSocialProject,
+  useMissions,
+  useSocialProjects,
+} from '../../features/missions/hooks/useMissions';
 import { MissionaryList } from '../../features/missions/components/MissionaryList';
 import { CreateMissionaryDialog } from '../../features/missions/components/CreateMissionaryDialog';
+import { CreateSocialProjectDialog } from '../../features/missions/components/CreateSocialProjectDialog';
+import { SocialProjectList } from '../../features/missions/components/SocialProjectList';
 import { Button } from '../../components/ui/button';
 import { PageHeaderWithIcon } from '../../components/PageHeader';
 import { EmptyState } from '../../components/EmptyState';
-import type { Missionary } from '../../services/missions';
+import type { CreateSocialProjectDTO, Missionary } from '../../services/missions';
 
 export function MissionsPage() {
     const tenant = useAuthTenant();
     const { data: missionaries, isLoading } = useMissions(tenant?.id);
+    const { data: socialProjects, isLoading: isLoadingProjects } = useSocialProjects(tenant?.id);
     const deleteMissionary = useDeleteMissionary(tenant?.id);
+    const createSocialProject = useCreateSocialProject(tenant?.id);
+    const deleteSocialProject = useDeleteSocialProject(tenant?.id);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isSocialProjectDialogOpen, setIsSocialProjectDialogOpen] = useState(false);
     const [editingMissionary, setEditingMissionary] = useState<Missionary | null>(null);
     const missionaryCount = missionaries?.length ?? 0;
     const countryCount = new Set((missionaries ?? []).map((missionary) => missionary.country_code)).size;
     const newsletterCount = (missionaries ?? []).filter((missionary) => missionary.newsletter_url).length;
+    const socialProjectCount = socialProjects?.length ?? 0;
 
     const handleDelete = (missionaryId: string) => {
         deleteMissionary.mutate(missionaryId);
@@ -36,6 +49,12 @@ export function MissionsPage() {
     const handleCloseDialog = () => {
         setIsDialogOpen(false);
         setEditingMissionary(null);
+    };
+
+    const handleCreateSocialProject = (data: CreateSocialProjectDTO) => {
+        createSocialProject.mutate(data, {
+            onSuccess: () => setIsSocialProjectDialogOpen(false),
+        });
     };
 
     if (!tenant) {
@@ -95,11 +114,47 @@ export function MissionsPage() {
                 onDelete={handleDelete}
             />
 
+            <section className="space-y-4 rounded-3xl border border-rose-100 bg-gradient-to-br from-rose-50 to-orange-50 p-6">
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div>
+                        <div className="mb-2 flex items-center gap-2 text-rose-700">
+                            <HandHeart size={18} />
+                            <span className="text-sm font-semibold uppercase tracking-wide">Projetos Sociais</span>
+                        </div>
+                        <h2 className="text-xl font-semibold text-gray-900">
+                            {socialProjectCount} projeto(s) social(is) cadastrado(s)
+                        </h2>
+                        <p className="text-sm text-gray-600">
+                            Organize frentes de ação social da igreja com status, público-alvo e coordenação.
+                        </p>
+                    </div>
+
+                    <Button className="gap-2" onClick={() => setIsSocialProjectDialogOpen(true)}>
+                        <Plus size={16} />
+                        Novo Projeto Social
+                    </Button>
+                </div>
+
+                <SocialProjectList
+                    isDeleting={deleteSocialProject.isPending}
+                    isLoading={isLoadingProjects}
+                    onDelete={(projectId) => deleteSocialProject.mutate(projectId)}
+                    projects={socialProjects}
+                />
+            </section>
+
             <CreateMissionaryDialog
                 isOpen={isDialogOpen}
                 initialData={editingMissionary}
                 onClose={handleCloseDialog}
                 tenantId={tenant.id}
+            />
+
+            <CreateSocialProjectDialog
+                isOpen={isSocialProjectDialogOpen}
+                isSubmitting={createSocialProject.isPending}
+                onClose={() => setIsSocialProjectDialogOpen(false)}
+                onSubmit={handleCreateSocialProject}
             />
         </div>
     );

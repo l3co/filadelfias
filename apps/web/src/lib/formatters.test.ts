@@ -16,6 +16,7 @@ describe('formatters', () => {
 
   it('formats pt-BR dates with default and custom options', () => {
     expect(formatDateBR('2026-03-19T12:00:00Z')).toBe('19/03/2026');
+    expect(formatDateBR('2026-03-20')).toBe('20/03/2026');
     expect(
       formatDateBR('2026-03-19T12:00:00Z', {
         day: '2-digit',

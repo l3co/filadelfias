@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from typing import Optional
 from uuid import UUID
 
@@ -49,6 +49,31 @@ class MissionaryUpdate(BaseModel):
 
 
 class MissionaryResponse(MissionaryBase):
+    id: UUID
+    tenant_id: UUID
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class SocialProjectBase(BaseModel):
+    title: str = Field(..., min_length=1)
+    summary: str = Field(..., min_length=1)
+    location: Optional[str] = None
+    status: str = Field(default="PLANNING", min_length=1, max_length=50)
+    target_audience: Optional[str] = None
+    coordinator_name: Optional[str] = None
+    contact_info: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+
+
+class SocialProjectCreate(SocialProjectBase):
+    pass
+
+
+class SocialProjectResponse(SocialProjectBase):
     id: UUID
     tenant_id: UUID
     created_at: datetime

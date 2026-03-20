@@ -19,8 +19,13 @@ run_docker_fallback() {
     exit 1
   fi
 
+  CACHE_DIR="$APP_DIR/.docker-node22-cache"
+  mkdir -p "$CACHE_DIR/npm"
+
   docker run --rm \
+    -e npm_config_cache=/pwcache/npm \
     -v "$APP_DIR:/src" \
+    -v "$CACHE_DIR:/pwcache" \
     -w /tmp \
     node:22-bookworm \
     sh -lc "
@@ -28,10 +33,10 @@ run_docker_fallback() {
       rm -rf /tmp/app
       mkdir -p /tmp/app
       cd /src
-      tar --exclude='./node_modules' -cf - . | tar -C /tmp/app -xf -
+      tar --exclude='./node_modules' --exclude='./.docker-node22-cache' -cf - . | tar -C /tmp/app -xf -
       cd /tmp/app
       npm ci >/tmp/bddgen-npm-ci.log
-      node node_modules/.bin/bddgen \"\$@\"
+      node node_modules/.bin/bddgen test \"\$@\"
       rm -rf /src/.features-gen
       cp -R /tmp/app/.features-gen /src/.features-gen
     " sh "$@"

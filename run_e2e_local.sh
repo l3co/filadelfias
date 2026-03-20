@@ -60,4 +60,4 @@ cd apps/web
 
 # Generate BDD files and run tests
 ./scripts/bddgen.sh
-npx playwright test --config=playwright.config.ts "$@"
+./scripts/playwright.sh test --config=playwright.config.ts "$@"

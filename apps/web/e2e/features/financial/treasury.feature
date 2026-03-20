@@ -22,7 +22,7 @@ Funcionalidade: Gestão da Tesouraria
     Quando clico no botão de próximo mês
     Então devo ver o mês atual no seletor
 
-  @skip @integration @needs-backend
+  @integration @needs-backend
   Cenário: Paginar lista de movimentações
     Dado que estou logado como administrador
     E que estou na página de Tesouraria

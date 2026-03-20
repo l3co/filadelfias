@@ -139,8 +139,22 @@ Then('devo ver o mês atual no seletor', async ({ page }) => {
 // Pagination Steps
 // ============================================================================
 
-Given('que existem mais de 10 movimentações no mês', async () => {
-    // Assumes test data has been seeded with enough transactions
+Given('que existem mais de 10 movimentações no mês', async ({ page }) => {
+    const monthLabel = page.getByTestId('current-month-display');
+    const prevButton = page.getByTestId('prev-month-button');
+
+    await expect(monthLabel).toBeVisible();
+    for (let attempts = 0; attempts < 12; attempts += 1) {
+        const label = await monthLabel.innerText();
+        if (/Janeiro 2026/i.test(label)) {
+            break;
+        }
+        await prevButton.click();
+        await page.waitForTimeout(200);
+    }
+
+    await expect(monthLabel).toContainText('Janeiro 2026');
+    await expect(page.getByRole('button', { name: /próxima/i })).toBeEnabled();
 });
 
 When('clico em {string} na paginação', async ({ page }, buttonText: string) => {

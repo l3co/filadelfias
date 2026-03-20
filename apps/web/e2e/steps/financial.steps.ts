@@ -3,6 +3,20 @@ import { expect } from '@playwright/test';
 
 const { Given, When, Then } = createBdd();
 
+async function selectComboboxOption(page: any, label: RegExp, optionText?: string) {
+    const field = page.locator('label').filter({ hasText: label }).locator('xpath=..');
+    const trigger = field.getByRole('button').first();
+    await trigger.click();
+
+    if (optionText) {
+        await page.getByRole('button', { name: new RegExp(optionText, 'i') }).click();
+        return;
+    }
+
+    const options = page.locator('div.max-h-60 button');
+    await options.first().click();
+}
+
 /**
  * Step definitions for treasury/financial management.
  * Note: Generic steps like 'clico em', 'preencho', etc. are defined in common.steps.ts
@@ -174,22 +188,13 @@ Then('devo ver a segunda página de movimentações', async ({ page }) => {
 // Only financial-specific steps here
 
 When('seleciono uma conta', async ({ page }) => {
-    const combobox = page.locator('[data-testid="account-select"]')
-        .or(page.getByLabel(/conta/i));
-    await combobox.first().click();
-    await page.getByRole('option').first().click();
+    await selectComboboxOption(page, /conta/i);
 });
 
 When('seleciono uma categoria', async ({ page }) => {
-    const combobox = page.locator('[data-testid="category-select"]')
-        .or(page.getByLabel(/categoria/i));
-    await combobox.first().click();
-    await page.getByRole('option').first().click();
+    await selectComboboxOption(page, /categoria/i);
 });
 
 When('seleciono um membro', async ({ page }) => {
-    const combobox = page.locator('[data-testid="member-select"]')
-        .or(page.getByLabel(/membro/i));
-    await combobox.first().click();
-    await page.getByRole('option').first().click();
+    await selectComboboxOption(page, /^membro/i);
 });

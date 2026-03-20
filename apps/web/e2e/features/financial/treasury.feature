@@ -31,7 +31,7 @@ Funcionalidade: Gestão da Tesouraria
     Então devo ver a segunda página de movimentações
     E devo ver "Página 2"
 
-  @skip @integration @needs-backend
+  @integration @needs-backend
   Cenário: Cadastrar nova receita
     Dado que estou logado como administrador
     E que estou na página de Tesouraria
@@ -43,7 +43,7 @@ Funcionalidade: Gestão da Tesouraria
     E clico em "Salvar Lançamento"
     Então devo ver a mensagem "Receita cadastrada com sucesso"
 
-  @skip @integration @needs-backend
+  @integration @needs-backend
   Cenário: Cadastrar nova despesa
     Dado que estou logado como administrador
     E que estou na página de Tesouraria
@@ -55,7 +55,7 @@ Funcionalidade: Gestão da Tesouraria
     E clico em "Salvar Lançamento"
     Então devo ver a mensagem "Despesa cadastrada com sucesso"
 
-  @skip @integration @needs-backend
+  @integration @needs-backend
   Cenário: Vincular membro a uma receita
     Dado que estou logado como administrador
     E que estou na página de Tesouraria

@@ -191,7 +191,10 @@ When('preencho o nome {string}', async ({ page }, name: string) => {
 });
 
 When('preencho a descrição {string}', async ({ page }, description: string) => {
-    await page.getByPlaceholder(/descrição/i).first().fill(description);
+    const input = page.locator('#description')
+        .or(page.getByLabel(/descrição/i))
+        .or(page.getByPlaceholder(/descrição|oferta de domingo|conta de luz/i));
+    await input.first().fill(description);
 });
 
 When('preencho o valor {string}', async ({ page }, value: string) => {
@@ -400,4 +403,3 @@ When('preencho o campo {string}', async ({ page }, value: string) => {
     const fieldInput = page.getByLabel(/campo|field/i);
     await fieldInput.fill(value);
 });
-

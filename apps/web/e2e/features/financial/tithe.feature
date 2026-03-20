@@ -22,17 +22,17 @@ Funcionalidade: Gestão de Dízimos e Ofertas
     E clico em "Enviar para Aprovação"
     Então devo ver "Pendente" na lista
 
-  @skip @integration @needs-backend
+  @integration @needs-backend
   Cenário: Membro registra nova oferta
     Dado que estou logado como membro
     E que estou na página "Meus Dízimos"
     Quando clico em "Novo Registro"
     E preencho o valor "100"
-    E seleciono o tipo "Oferta"
+    E seleciono o tipo de contribuição "Oferta"
     E preencho a data "2026-01-20"
     E adiciono observação "Oferta missionária"
-    E clico em "Salvar"
-    Então devo ver a mensagem "Registro enviado com sucesso"
+    E clico em "Enviar para Aprovação"
+    Então devo ver "Pendente" na lista
 
   @integration @needs-backend
   Cenário: Tesoureiro visualiza dízimos pendentes

@@ -23,6 +23,10 @@ When('adiciono observação {string}', async ({ page }, note: string) => {
     await textarea.first().fill(note);
 });
 
+When('seleciono o tipo de contribuição {string}', async ({ page }, tipo: string) => {
+    await page.getByRole('button', { name: new RegExp(`^${tipo}$`, 'i') }).click();
+});
+
 Then('o registro deve aparecer na lista com status {string}', async ({ page }, status: string) => {
     const statusBadge = page.getByText(new RegExp(status, 'i'));
     await expect(statusBadge.first()).toBeVisible();

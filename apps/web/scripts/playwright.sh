@@ -42,14 +42,34 @@ run_docker_fallback() {
       rm -rf /tmp/app
       mkdir -p /tmp/app
       cd /src
-      tar --exclude='./node_modules' --exclude='./.docker-node22-cache' -cf - . | tar -C /tmp/app -xf -
+      tar \
+        --exclude='./node_modules' \
+        --exclude='./.docker-node22-cache' \
+        --exclude='./playwright-report' \
+        --exclude='./test-results' \
+        -cf - . | tar -C /tmp/app -xf -
       cd /tmp/app
       npm ci >/tmp/playwright-npm-ci.log
       node node_modules/.bin/playwright install --with-deps chromium >/tmp/playwright-install.log
       node node_modules/.bin/playwright \"\$@\"
-      rm -rf /src/playwright-report /src/test-results
-      [ ! -d /tmp/app/playwright-report ] || cp -R /tmp/app/playwright-report /src/playwright-report
-      [ ! -d /tmp/app/test-results ] || cp -R /tmp/app/test-results /src/test-results
+      rm -rf /src/playwright-report.docker-next /src/playwright-report.docker-prev
+      rm -rf /src/test-results.docker-next /src/test-results.docker-prev
+      if [ -d /tmp/app/playwright-report ]; then
+        cp -R /tmp/app/playwright-report /src/playwright-report.docker-next
+        if [ -e /src/playwright-report ]; then
+          mv /src/playwright-report /src/playwright-report.docker-prev
+        fi
+        mv /src/playwright-report.docker-next /src/playwright-report
+        rm -rf /src/playwright-report.docker-prev || true
+      fi
+      if [ -d /tmp/app/test-results ]; then
+        cp -R /tmp/app/test-results /src/test-results.docker-next
+        if [ -e /src/test-results ]; then
+          mv /src/test-results /src/test-results.docker-prev
+        fi
+        mv /src/test-results.docker-next /src/test-results
+        rm -rf /src/test-results.docker-prev || true
+      fi
     " sh "$@"
 }
 

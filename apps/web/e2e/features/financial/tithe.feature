@@ -34,7 +34,7 @@ Funcionalidade: Gestão de Dízimos e Ofertas
     E clico em "Salvar"
     Então devo ver a mensagem "Registro enviado com sucesso"
 
-  @skip @integration @needs-backend
+  @integration @needs-backend
   Cenário: Tesoureiro visualiza dízimos pendentes
     Dado que estou logado como tesoureiro
     E que estou na página de Tesouraria

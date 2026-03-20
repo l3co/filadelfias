@@ -33,12 +33,23 @@ run_docker_fallback() {
       rm -rf /tmp/app
       mkdir -p /tmp/app
       cd /src
-      tar --exclude='./node_modules' --exclude='./.docker-node22-cache' -cf - . | tar -C /tmp/app -xf -
+      tar \
+        --exclude='./node_modules' \
+        --exclude='./.docker-node22-cache' \
+        --exclude='./.features-gen' \
+        --exclude='./playwright-report' \
+        --exclude='./test-results' \
+        -cf - . | tar -C /tmp/app -xf -
       cd /tmp/app
       npm ci >/tmp/bddgen-npm-ci.log
       node node_modules/.bin/bddgen test \"\$@\"
-      rm -rf /src/.features-gen
-      cp -R /tmp/app/.features-gen /src/.features-gen
+      rm -rf /src/.features-gen.docker-next /src/.features-gen.docker-prev
+      cp -R /tmp/app/.features-gen /src/.features-gen.docker-next
+      if [ -e /src/.features-gen ]; then
+        mv /src/.features-gen /src/.features-gen.docker-prev
+      fi
+      mv /src/.features-gen.docker-next /src/.features-gen
+      rm -rf /src/.features-gen.docker-prev || true
     " sh "$@"
 }
 

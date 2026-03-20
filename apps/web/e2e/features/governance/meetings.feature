@@ -15,7 +15,7 @@ Funcionalidade: Gestão de Reuniões
     Então devo ver a mensagem "Nenhuma reunião agendada"
     E devo ver botão "Nova Reunião"
 
-  @skip @integration @needs-backend
+  @integration @needs-backend
   Cenário: Agendar nova reunião ordinária
     Quando eu abro o dialog de reuniões do conselho
     E clico em "Nova Reunião"

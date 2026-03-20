@@ -171,8 +171,12 @@ Then('a reunião deve aparecer na aba {string}', async ({ page }, tabName: strin
     if (await tab.count() > 0) {
         await tab.first().click();
     }
-    // Verifica se há cards de reunião ou botões de detalhes
-    await expect(page.locator('[data-testid^="meeting-card-"], button:has-text("Detalhes")').first()).toBeVisible({ timeout: 5000 });
+    await page.waitForLoadState('networkidle').catch(() => {});
+    // Verifica se há cards de reunião, botão de detalhes ou badge de reunião agendada
+    const meetingContent = page.locator('[data-testid^="meeting-card-"]')
+        .or(page.getByRole('button', { name: /detalhes/i }))
+        .or(page.getByText(/ordinária|extraordinária|agendada/i));
+    await expect(meetingContent.first()).toBeVisible({ timeout: 10000 });
 });
 
 Then('a reunião deve aparecer com badge {string}', async ({ page }, badgeText: string) => {

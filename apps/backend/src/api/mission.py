@@ -17,6 +17,7 @@ from src.modules.missions.schemas import (
     MissionaryUpdate,
     SocialProjectCreate,
     SocialProjectResponse,
+    SocialProjectUpdate,
 )
 from src.services.mission_service import MissionService
 
@@ -146,6 +147,26 @@ async def list_social_projects(
     """
     service = MissionService()
     return await service.list_social_projects(tenant_id)
+
+
+@router.put("/social-projects/{project_id}", response_model=SocialProjectResponse)
+async def update_social_project(
+    project_id: str,
+    data: SocialProjectUpdate,
+    tenant_id: UUID = Query(..., description="ID of the tenant"),
+    auth_context: dict = Depends(require_create_missions),
+):
+    """
+    Update a social project.
+    Requires: missions:create permission.
+    """
+    service = MissionService()
+    updated = await service.update_social_project(tenant_id, project_id, data)
+    if not updated:
+        from fastapi import HTTPException
+
+        raise HTTPException(status_code=404, detail="Projeto social não encontrado")
+    return updated
 
 
 @router.delete("/social-projects/{project_id}")

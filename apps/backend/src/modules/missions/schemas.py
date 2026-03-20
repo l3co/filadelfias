@@ -73,6 +73,18 @@ class SocialProjectCreate(SocialProjectBase):
     pass
 
 
+class SocialProjectUpdate(BaseModel):
+    title: Optional[str] = Field(default=None, min_length=1)
+    summary: Optional[str] = Field(default=None, min_length=1)
+    location: Optional[str] = None
+    status: Optional[str] = Field(default=None, min_length=1, max_length=50)
+    target_audience: Optional[str] = None
+    coordinator_name: Optional[str] = None
+    contact_info: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+
+
 class SocialProjectResponse(SocialProjectBase):
     id: UUID
     tenant_id: UUID

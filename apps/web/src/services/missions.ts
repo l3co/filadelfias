@@ -70,6 +70,8 @@ export interface CreateSocialProjectDTO {
     end_date?: string;
 }
 
+export interface UpdateSocialProjectDTO extends Partial<CreateSocialProjectDTO> {}
+
 export const missionService = {
     // Countries
     listCountries: async (tenantId: string) => {
@@ -123,6 +125,13 @@ export const missionService = {
 
     createSocialProject: async (tenantId: string, project: CreateSocialProjectDTO) => {
         const { data } = await api.post<SocialProject>('/missions/social-projects', project, {
+            params: { tenant_id: tenantId }
+        });
+        return data;
+    },
+
+    updateSocialProject: async (tenantId: string, projectId: string, project: UpdateSocialProjectDTO) => {
+        const { data } = await api.put<SocialProject>(`/missions/social-projects/${projectId}`, project, {
             params: { tenant_id: tenantId }
         });
         return data;

@@ -7,6 +7,7 @@ import {
   useDeleteSocialProject,
   useMissions,
   useSocialProjects,
+  useUpdateSocialProject,
 } from '../../features/missions/hooks/useMissions';
 import { MissionaryList } from '../../features/missions/components/MissionaryList';
 import { CreateMissionaryDialog } from '../../features/missions/components/CreateMissionaryDialog';
@@ -15,7 +16,7 @@ import { SocialProjectList } from '../../features/missions/components/SocialProj
 import { Button } from '../../components/ui/button';
 import { PageHeaderWithIcon } from '../../components/PageHeader';
 import { EmptyState } from '../../components/EmptyState';
-import type { CreateSocialProjectDTO, Missionary } from '../../services/missions';
+import type { CreateSocialProjectDTO, Missionary, SocialProject } from '../../services/missions';
 
 export function MissionsPage() {
     const tenant = useAuthTenant();
@@ -23,10 +24,12 @@ export function MissionsPage() {
     const { data: socialProjects, isLoading: isLoadingProjects } = useSocialProjects(tenant?.id);
     const deleteMissionary = useDeleteMissionary(tenant?.id);
     const createSocialProject = useCreateSocialProject(tenant?.id);
+    const updateSocialProject = useUpdateSocialProject(tenant?.id);
     const deleteSocialProject = useDeleteSocialProject(tenant?.id);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isSocialProjectDialogOpen, setIsSocialProjectDialogOpen] = useState(false);
     const [editingMissionary, setEditingMissionary] = useState<Missionary | null>(null);
+    const [editingSocialProject, setEditingSocialProject] = useState<SocialProject | null>(null);
     const missionaryCount = missionaries?.length ?? 0;
     const countryCount = new Set((missionaries ?? []).map((missionary) => missionary.country_code)).size;
     const newsletterCount = (missionaries ?? []).filter((missionary) => missionary.newsletter_url).length;
@@ -52,9 +55,33 @@ export function MissionsPage() {
     };
 
     const handleCreateSocialProject = (data: CreateSocialProjectDTO) => {
+        if (editingSocialProject) {
+            updateSocialProject.mutate(
+                { projectId: editingSocialProject.id, data },
+                { onSuccess: () => {
+                    setEditingSocialProject(null);
+                    setIsSocialProjectDialogOpen(false);
+                } },
+            );
+            return;
+        }
+
         createSocialProject.mutate(data, {
-            onSuccess: () => setIsSocialProjectDialogOpen(false),
+            onSuccess: () => {
+                setEditingSocialProject(null);
+                setIsSocialProjectDialogOpen(false);
+            },
         });
+    };
+
+    const handleEditSocialProject = (project: SocialProject) => {
+        setEditingSocialProject(project);
+        setIsSocialProjectDialogOpen(true);
+    };
+
+    const handleCloseSocialProjectDialog = () => {
+        setEditingSocialProject(null);
+        setIsSocialProjectDialogOpen(false);
     };
 
     if (!tenant) {
@@ -129,7 +156,10 @@ export function MissionsPage() {
                         </p>
                     </div>
 
-                    <Button className="gap-2" onClick={() => setIsSocialProjectDialogOpen(true)}>
+                    <Button className="gap-2" onClick={() => {
+                        setEditingSocialProject(null);
+                        setIsSocialProjectDialogOpen(true);
+                    }}>
                         <Plus size={16} />
                         Novo Projeto Social
                     </Button>
@@ -138,6 +168,7 @@ export function MissionsPage() {
                 <SocialProjectList
                     isDeleting={deleteSocialProject.isPending}
                     isLoading={isLoadingProjects}
+                    onEdit={handleEditSocialProject}
                     onDelete={(projectId) => deleteSocialProject.mutate(projectId)}
                     projects={socialProjects}
                 />
@@ -151,9 +182,10 @@ export function MissionsPage() {
             />
 
             <CreateSocialProjectDialog
+                initialData={editingSocialProject}
                 isOpen={isSocialProjectDialogOpen}
-                isSubmitting={createSocialProject.isPending}
-                onClose={() => setIsSocialProjectDialogOpen(false)}
+                isSubmitting={createSocialProject.isPending || updateSocialProject.isPending}
+                onClose={handleCloseSocialProjectDialog}
                 onSubmit={handleCreateSocialProject}
             />
         </div>

@@ -1,4 +1,4 @@
-import { CalendarDays, MapPin, Trash2, Users2 } from 'lucide-react';
+import { CalendarDays, MapPin, Pencil, Trash2, Users2 } from 'lucide-react';
 import { Button } from '../../../components/ui/button';
 import { EmptyState } from '../../../components/EmptyState';
 import { formatDateBR } from '../../../lib/formatters';
@@ -7,6 +7,7 @@ import type { SocialProject } from '../../../services/missions';
 type Props = {
   isDeleting: boolean;
   isLoading: boolean;
+  onEdit: (project: SocialProject) => void;
   onDelete: (projectId: string) => void;
   projects?: SocialProject[];
 };
@@ -25,7 +26,7 @@ const STATUS_COLORS: Record<string, string> = {
   COMPLETED: 'bg-blue-100 text-blue-700',
 };
 
-export function SocialProjectList({ isDeleting, isLoading, onDelete, projects }: Props) {
+export function SocialProjectList({ isDeleting, isLoading, onDelete, onEdit, projects }: Props) {
   if (isLoading) {
     return <p className="text-sm text-gray-500">Carregando projetos sociais...</p>;
   }
@@ -54,9 +55,14 @@ export function SocialProjectList({ isDeleting, isLoading, onDelete, projects }:
               </span>
             </div>
 
-            <Button isLoading={isDeleting} onClick={() => onDelete(project.id)} size="sm" variant="ghost">
-              <Trash2 className="h-4 w-4 text-red-500" />
-            </Button>
+            <div className="flex items-center gap-1">
+              <Button onClick={() => onEdit(project)} size="sm" variant="ghost">
+                <Pencil className="h-4 w-4 text-blue-500" />
+              </Button>
+              <Button isLoading={isDeleting} onClick={() => onDelete(project.id)} size="sm" variant="ghost">
+                <Trash2 className="h-4 w-4 text-red-500" />
+              </Button>
+            </div>
           </div>
 
           <p className="text-sm leading-relaxed text-gray-600">{project.summary}</p>

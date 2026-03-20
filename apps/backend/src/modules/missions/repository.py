@@ -6,7 +6,13 @@ from sqlalchemy import select
 
 from src.infra.db.models import CountryModel, MissionaryModel, SocialProjectModel
 from src.infra.repositories.sqlalchemy_repository import SQLAlchemyRepository
-from src.modules.missions.schemas import CountryCreate, MissionaryCreate, MissionaryUpdate, SocialProjectCreate
+from src.modules.missions.schemas import (
+    CountryCreate,
+    MissionaryCreate,
+    MissionaryUpdate,
+    SocialProjectCreate,
+    SocialProjectUpdate,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -158,6 +164,27 @@ class SocialProjectRepository(SQLAlchemyRepository):
                 .order_by(SocialProjectModel.created_at.desc(), SocialProjectModel.title.asc())
             )
             return [self._to_dict(item, self.fields) for item in result.scalars().all()]
+
+    async def update(self, tenant_id: UUID, project_id: str, data: SocialProjectUpdate) -> dict | None:
+        payload = data.model_dump(exclude_unset=True)
+
+        async with self.session() as session:
+            project = await self._first(
+                session,
+                select(SocialProjectModel).where(
+                    SocialProjectModel.tenant_id == tenant_id,
+                    SocialProjectModel.id == self._maybe_uuid(project_id),
+                ),
+            )
+            if not project:
+                return None
+
+            for field, value in payload.items():
+                setattr(project, field, value)
+
+            await session.commit()
+            await session.refresh(project)
+            return self._to_dict(project, self.fields)
 
     async def delete(self, tenant_id: UUID, project_id: str) -> bool:
         async with self.session() as session:

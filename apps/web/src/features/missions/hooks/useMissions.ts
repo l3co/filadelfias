@@ -5,6 +5,7 @@ import type {
   CreateMissionaryDTO,
   CreateSocialProjectDTO,
   UpdateMissionaryDTO,
+  UpdateSocialProjectDTO,
 } from '../../../services/missions';
 import { toast } from 'sonner';
 
@@ -118,6 +119,22 @@ export function useCreateSocialProject(tenantId: string | undefined) {
         },
         onError: () => {
             toast.error('Erro ao criar projeto social.');
+        }
+    });
+}
+
+export function useUpdateSocialProject(tenantId: string | undefined) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ projectId, data }: { projectId: string; data: UpdateSocialProjectDTO }) =>
+            missionService.updateSocialProject(tenantId!, projectId, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [SOCIAL_PROJECTS_KEY, tenantId] });
+            toast.success('Projeto social atualizado com sucesso!');
+        },
+        onError: () => {
+            toast.error('Erro ao atualizar projeto social.');
         }
     });
 }

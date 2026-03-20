@@ -2,7 +2,7 @@ from typing import List
 from uuid import UUID
 
 from src.modules.missions.repository import missionary_repository, social_project_repository
-from src.modules.missions.schemas import MissionaryCreate, MissionaryUpdate, SocialProjectCreate
+from src.modules.missions.schemas import MissionaryCreate, MissionaryUpdate, SocialProjectCreate, SocialProjectUpdate
 
 
 class MissionService:
@@ -21,6 +21,9 @@ class MissionService:
 
     async def create_social_project(self, tenant_id: UUID, data: SocialProjectCreate):
         return await self.social_project_repo.create(tenant_id, data)
+
+    async def update_social_project(self, tenant_id: UUID, project_id: str, data: SocialProjectUpdate):
+        return await self.social_project_repo.update(tenant_id, project_id, data)
 
     async def list_social_projects(self, tenant_id: UUID) -> List[dict]:
         return await self.social_project_repo.get_by_tenant(tenant_id)

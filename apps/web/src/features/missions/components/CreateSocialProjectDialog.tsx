@@ -17,9 +17,11 @@ import {
   SelectValue,
 } from '../../../components/ui/select';
 import { Textarea } from '../../../components/ui/textarea';
-import type { CreateSocialProjectDTO } from '../../../services/missions';
+import { useEffect } from 'react';
+import type { CreateSocialProjectDTO, SocialProject } from '../../../services/missions';
 
 type Props = {
+  initialData?: SocialProject | null;
   isOpen: boolean;
   isSubmitting: boolean;
   onClose: () => void;
@@ -33,7 +35,7 @@ const STATUS_OPTIONS = [
   { value: 'COMPLETED', label: 'Concluído' },
 ];
 
-export function CreateSocialProjectDialog({ isOpen, isSubmitting, onClose, onSubmit }: Props) {
+export function CreateSocialProjectDialog({ initialData, isOpen, isSubmitting, onClose, onSubmit }: Props) {
   const {
     register,
     handleSubmit,
@@ -48,6 +50,30 @@ export function CreateSocialProjectDialog({ isOpen, isSubmitting, onClose, onSub
   });
 
   const status = watch('status');
+
+  useEffect(() => {
+    if (!isOpen) {
+      reset({ status: 'PLANNING' });
+      return;
+    }
+
+    if (initialData) {
+      reset({
+        contact_info: initialData.contact_info || '',
+        coordinator_name: initialData.coordinator_name || '',
+        end_date: initialData.end_date || '',
+        location: initialData.location || '',
+        start_date: initialData.start_date || '',
+        status: initialData.status,
+        summary: initialData.summary,
+        target_audience: initialData.target_audience || '',
+        title: initialData.title,
+      });
+      return;
+    }
+
+    reset({ status: 'PLANNING' });
+  }, [initialData, isOpen, reset]);
 
   const submit = (data: CreateSocialProjectDTO) => {
     onSubmit({
@@ -66,7 +92,7 @@ export function CreateSocialProjectDialog({ isOpen, isSubmitting, onClose, onSub
     <Dialog onOpenChange={onClose} open={isOpen}>
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Novo Projeto Social</DialogTitle>
+          <DialogTitle>{initialData ? 'Editar Projeto Social' : 'Novo Projeto Social'}</DialogTitle>
           <DialogDescription>
             Registre iniciativas de ação social apoiadas pela igreja.
           </DialogDescription>
@@ -147,7 +173,7 @@ export function CreateSocialProjectDialog({ isOpen, isSubmitting, onClose, onSub
               Cancelar
             </Button>
             <Button isLoading={isSubmitting} type="submit">
-              Salvar projeto
+              {initialData ? 'Salvar alterações' : 'Salvar projeto'}
             </Button>
           </DialogFooter>
         </form>

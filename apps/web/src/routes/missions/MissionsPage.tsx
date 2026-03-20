@@ -9,7 +9,7 @@ import {
   useSocialProjects,
   useUpdateSocialProject,
 } from '../../features/missions/hooks/useMissions';
-import { usePrayerRequests } from '../../features/prayer/hooks/usePrayer';
+import { useDeletePrayerRequest, usePrayerRequests } from '../../features/prayer/hooks/usePrayer';
 import { MissionaryList } from '../../features/missions/components/MissionaryList';
 import { CreateMissionaryDialog } from '../../features/missions/components/CreateMissionaryDialog';
 import { CreateSocialProjectDialog } from '../../features/missions/components/CreateSocialProjectDialog';
@@ -26,6 +26,7 @@ export function MissionsPage() {
     const { data: socialProjects, isLoading: isLoadingProjects } = useSocialProjects(tenant?.id);
     const { data: prayerRequests, isLoading: isLoadingPrayerRequests } = usePrayerRequests(tenant?.id);
     const deleteMissionary = useDeleteMissionary(tenant?.id);
+    const deletePrayerRequest = useDeletePrayerRequest(tenant?.id);
     const createSocialProject = useCreateSocialProject(tenant?.id);
     const updateSocialProject = useUpdateSocialProject(tenant?.id);
     const deleteSocialProject = useDeleteSocialProject(tenant?.id);
@@ -33,6 +34,7 @@ export function MissionsPage() {
     const [isSocialProjectDialogOpen, setIsSocialProjectDialogOpen] = useState(false);
     const [editingMissionary, setEditingMissionary] = useState<Missionary | null>(null);
     const [editingSocialProject, setEditingSocialProject] = useState<SocialProject | null>(null);
+    const [prayerFilter, setPrayerFilter] = useState<'all' | 'missionaries' | 'projects'>('all');
     const missionaryCount = missionaries?.length ?? 0;
     const countryCount = new Set((missionaries ?? []).map((missionary) => missionary.country_code)).size;
     const newsletterCount = (missionaries ?? []).filter((missionary) => missionary.newsletter_url).length;
@@ -62,6 +64,22 @@ export function MissionsPage() {
                 .slice(0, 5),
         [prayerRequests],
     );
+
+    const managedPrayerRequests = useMemo(() => {
+        const linkedRequests = (prayerRequests ?? []).filter(
+            (request) => request.missionary_id || request.social_project_id,
+        );
+
+        if (prayerFilter === 'missionaries') {
+            return linkedRequests.filter((request) => !!request.missionary_id);
+        }
+
+        if (prayerFilter === 'projects') {
+            return linkedRequests.filter((request) => !!request.social_project_id);
+        }
+
+        return linkedRequests;
+    }, [prayerFilter, prayerRequests]);
 
     const handleDelete = (missionaryId: string) => {
         deleteMissionary.mutate(missionaryId);
@@ -236,6 +254,92 @@ export function MissionsPage() {
                         })}
                     </div>
                 )}
+            </section>
+
+            <section className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div>
+                        <h2 className="text-xl font-semibold text-gray-900">Gestão de Pedidos Vinculados</h2>
+                        <p className="text-sm text-gray-500">
+                            Filtre e modere pedidos ligados a missionários e projetos sociais.
+                        </p>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                        <Button
+                            className="gap-2"
+                            onClick={() => setPrayerFilter('all')}
+                            size="sm"
+                            variant={prayerFilter === 'all' ? 'default' : 'outline'}
+                        >
+                            Todos
+                        </Button>
+                        <Button
+                            className="gap-2"
+                            onClick={() => setPrayerFilter('missionaries')}
+                            size="sm"
+                            variant={prayerFilter === 'missionaries' ? 'default' : 'outline'}
+                        >
+                            Missionários
+                        </Button>
+                        <Button
+                            className="gap-2"
+                            onClick={() => setPrayerFilter('projects')}
+                            size="sm"
+                            variant={prayerFilter === 'projects' ? 'default' : 'outline'}
+                        >
+                            Projetos
+                        </Button>
+                    </div>
+                </div>
+
+                <div className="mt-5 space-y-3">
+                    {isLoadingPrayerRequests ? (
+                        <p className="text-sm text-gray-500">Carregando pedidos vinculados...</p>
+                    ) : managedPrayerRequests.length === 0 ? (
+                        <p className="rounded-2xl bg-gray-50 px-4 py-5 text-sm text-gray-500">
+                            Nenhum pedido encontrado para o filtro atual.
+                        </p>
+                    ) : (
+                        managedPrayerRequests.map((request) => {
+                            const linkedLabel = request.missionary_id
+                                ? missionaryNameById[request.missionary_id] || 'Missão vinculada'
+                                : socialProjectNameById[request.social_project_id ?? ''] || 'Projeto social vinculado';
+                            const linkedType = request.missionary_id ? 'Missionário' : 'Projeto social';
+
+                            return (
+                                <article key={request.id} className="rounded-2xl border border-gray-100 p-4">
+                                    <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                                        <div className="space-y-2">
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700">
+                                                    {linkedType}
+                                                </span>
+                                                <span className="text-sm font-semibold text-gray-900">{linkedLabel}</span>
+                                            </div>
+                                            <p className="text-sm leading-relaxed text-gray-600">{request.content}</p>
+                                            <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500">
+                                                <span>{request.author_name}</span>
+                                                <span>{formatDateBR(request.created_at)}</span>
+                                                <span>{request.prayer_count} oração(ões)</span>
+                                            </div>
+                                        </div>
+
+                                        <Button
+                                            className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                                            isLoading={deletePrayerRequest.isPending}
+                                            onClick={() => deletePrayerRequest.mutate(request.id)}
+                                            size="sm"
+                                            variant="ghost"
+                                        >
+                                            Remover
+                                        </Button>
+                                    </div>
+                                </article>
+                            );
+                        })
+                    )}
+                </div>
             </section>
 
             <MissionaryList 

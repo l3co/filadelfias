@@ -23,6 +23,15 @@ Before(async ({ page }: { page: Page }) => {
     // Set default timeout for assertions
     page.setDefaultTimeout(10000);
 
+    if (process.env.VITE_API_URL) {
+        await page.addInitScript((apiUrl: string) => {
+            window.__CONFIG__ = {
+                ...(window.__CONFIG__ ?? {}),
+                API_URL: apiUrl,
+            };
+        }, process.env.VITE_API_URL);
+    }
+
     // Clear any previous state
     await page.context().clearCookies();
 });

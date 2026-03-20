@@ -11,9 +11,14 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:e2e": "npx bddgen && npx playwright test",
+    "test:e2e:local": "cd ../.. && ./run_e2e_local.sh",
     "test:e2e:ui": "npx bddgen && npx playwright test --ui",
-    "test:e2e:smoke": "npx bddgen && npx playwright test --grep @smoke",
+    "test:e2e:smoke": "npx bddgen && npx playwright test --grep @smoke_public",
+    "test:e2e:smoke:public": "npx bddgen && npx playwright test --grep @smoke_public",
+    "test:e2e:smoke:auth": "npx bddgen && npx playwright test --grep @smoke_auth",
+    "test:e2e:smoke:auth:local": "cd ../.. && ./run_e2e_local.sh --grep @smoke_auth",
     "test:e2e:critical": "npx bddgen && npx playwright test --grep @critical",
+    "test:e2e:critical:local": "cd ../.. && ./run_e2e_local.sh --grep @critical",
     "test:e2e:report": "npx playwright show-report"
   },
   "dependencies": {

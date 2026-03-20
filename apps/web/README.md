@@ -181,8 +181,26 @@ npm run test:e2e
 # Modo interativo (UI)
 npm run test:e2e:ui
 
-# Apenas testes @smoke
+# Apenas smoke público
 npm run test:e2e:smoke
+
+# Smoke público explícito
+npm run test:e2e:smoke:public
+
+# Smoke autenticado (requer backend/seeds)
+npm run test:e2e:smoke:auth
+
+# Smoke autenticado com backend seeded local
+npm run test:e2e:smoke:auth:local
+
+# Jornadas críticas
+npm run test:e2e:critical
+
+# Jornadas críticas com backend seeded local
+npm run test:e2e:critical:local
+
+Observação:
+os comandos `*:local` usam o backend de teste em `http://127.0.0.1:8010` para não conflitar com backends locais já rodando em `:8000`.
 
 # Ver relatório
 npm run test:e2e:report
@@ -230,6 +248,9 @@ npm test
 
 # Testes E2E
 npm run test:e2e
+
+# E2E autenticado com backend de teste + seed automático
+npm run test:e2e:smoke:auth:local
 ```
 
 ---

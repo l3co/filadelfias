@@ -8,13 +8,13 @@ Funcionalidade: Cadastro de nova igreja
   Contexto:
     Dado que estou na página de cadastro de igreja
 
-  @smoke
+  @smoke @smoke_public
   Cenário: Visualizar wizard de cadastro
     Então devo ver o passo "Dados da Igreja"
     E devo ver campo de nome da igreja
     E devo ver campo de identificador
 
-  @smoke
+  @smoke @smoke_public
   Cenário: Preencher dados básicos da igreja
     Quando preencho o nome da igreja "Igreja Presbiteriana Central"
     E preencho o identificador "ipc-centro"

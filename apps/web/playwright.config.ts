@@ -1,5 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
-import { defineBddConfig, cucumberReporter } from 'playwright-bdd';
+import { defineBddConfig } from 'playwright-bdd';
 
 /**
  * Playwright BDD configuration for Cucumber/Gherkin tests.
@@ -20,11 +20,9 @@ export default defineConfig({
   reporter: [
     ['list'],
     ['html', { open: 'never', outputFolder: 'playwright-report' }],
-    cucumberReporter('html', { outputFile: 'reports/cucumber-report.html' }),
-    cucumberReporter('json', { outputFile: 'reports/cucumber-report.json' }),
   ],
   use: {
-    baseURL: process.env.BASE_URL || 'http://localhost:5173',
+    baseURL: process.env.BASE_URL || 'http://127.0.0.1:4173',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'on-first-retry',
@@ -36,9 +34,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:5173',
-    reuseExistingServer: true,
+    command: `VITE_API_URL=${process.env.VITE_API_URL || 'http://localhost:8000'} npm run dev -- --host 127.0.0.1 --port 4173`,
+    url: 'http://127.0.0.1:4173',
+    reuseExistingServer: !process.env.VITE_API_URL,
     timeout: 120 * 1000,
   },
 });

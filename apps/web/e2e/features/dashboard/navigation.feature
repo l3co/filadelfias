@@ -5,7 +5,7 @@ Funcionalidade: Navegação na área administrativa
   Eu quero navegar pelo sistema
   Para acessar os diferentes módulos
 
-  @integration @needs-backend
+  @integration @needs-backend @smoke_auth @critical
   Cenário: Visualizar dashboard
     Dado que estou logado como administrador
     E que acesso o modo administração

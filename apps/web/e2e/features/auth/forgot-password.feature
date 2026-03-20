@@ -8,7 +8,7 @@ Funcionalidade: Recuperação de senha
   Contexto:
     Dado que estou na página de recuperação de senha
 
-  @smoke
+  @smoke @smoke_public
   Cenário: Verificar página de recuperação
     Então devo ver o título "Esqueceu sua senha"
     E devo ver botão "Enviar"

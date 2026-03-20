@@ -8,7 +8,7 @@ Funcionalidade: Dashboard do Membro
   Contexto:
     Dado que estou logado como membro
 
-  @integration @needs-backend
+  @integration @needs-backend @smoke_auth @critical
   Cenário: Visualizar dashboard de membro
     Então devo ser redirecionado para "/member"
     E devo ver card "Bíblia Online"

@@ -28,13 +28,14 @@ services:
       - ENVIRONMENT=test
       - SECRET_KEY=test-secret-key-for-e2e
       - DEBUG=true
-      - CORS_ORIGINS_STR=http://localhost:5173
+      - CORS_ORIGINS_STR=http://localhost:5173,http://localhost:4173,http://127.0.0.1:4173
+      - FRONTEND_URL=http://127.0.0.1:4173
       - PYTHONPATH=/app
     depends_on:
       postgres-test:
         condition: service_healthy
     ports:
-      - "8000:8000"
+      - "8010:8000"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 2s
@@ -43,6 +44,7 @@ services:
       start_period: 3s
 
   # 2. Frontend Web App
+  # Optional for containerized E2E only. Local Playwright runs use Vite from playwright.config.ts.
   web-test:
     build:
       context: ./apps/web

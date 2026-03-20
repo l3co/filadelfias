@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/auth';
 import type { RegisterData, LoginData } from '../services/auth';
+import { ROUTES } from '../lib/routes';
 
 const USER_QUERY_KEY = ['currentUser'];
 
@@ -16,9 +17,12 @@ export const useLogin = () => {
 
     return useMutation({
         mutationFn: (data: LoginData) => authService.login(data),
-        onSuccess: (response) => {
+        onSuccess: async (response) => {
             localStorage.setItem('access_token', response.access_token);
-            queryClient.invalidateQueries({ queryKey: USER_QUERY_KEY });
+            await queryClient.fetchQuery({
+                queryKey: USER_QUERY_KEY,
+                queryFn: authService.getCurrentUser,
+            });
         },
     });
 };
@@ -45,19 +49,7 @@ export const useLogout = () => {
         },
         onSuccess: () => {
             queryClient.clear();
-            navigate('/login', { replace: true });
+            navigate(ROUTES.AUTH.LOGIN, { replace: true });
         },
     });
 };
-
-export function useCurrentTenant() {
-    const { data: user } = useCurrentUser();
-    // For MVP, return the first tenant from memberships
-    return user?.memberships?.[0]?.tenant;
-}
-
-export function useCurrentMembership() {
-    const { data: user } = useCurrentUser();
-    // For MVP, return the first membership
-    return user?.memberships?.[0];
-}

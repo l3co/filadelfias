@@ -21,12 +21,21 @@ describe('useAuth Hooks', () => {
     });
 
     describe('useLogin', () => {
-        it('should call authService.login and store token on success', async () => {
+        it('should call authService.login, store token, and fetch the current user on success', async () => {
             const mockTokenResponse = {
                 access_token: 'test-token',
                 token_type: 'bearer',
             };
+            const mockUser = {
+                id: '1',
+                email: 'test@example.com',
+                name: 'Test User',
+                is_active: true,
+                created_at: '2024-01-01T00:00:00Z',
+                memberships: []
+            };
             vi.mocked(authService.login).mockResolvedValue(mockTokenResponse);
+            vi.mocked(authService.getCurrentUser).mockResolvedValue(mockUser);
 
             const { result } = renderHook(() => useLogin(), {
                 wrapper: createWrapper(),
@@ -41,6 +50,7 @@ describe('useAuth Hooks', () => {
                 password: 'password',
             });
             expect(localStorage.getItem('access_token')).toBe('test-token');
+            expect(authService.getCurrentUser).toHaveBeenCalledTimes(1);
         });
     });
 

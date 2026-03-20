@@ -11,6 +11,9 @@ import { TransactionList } from './TransactionList';
 import { PendingTithesList } from '../../tithe/components/PendingTithesList';
 import { PendingExpensesList } from '../../expense/components/PendingExpensesList';
 import { formatCurrencyBRL } from '../../../lib/formatters';
+import { MonthlyReportDialog } from './MonthlyReportDialog';
+import { AssetInventoryCard } from './AssetInventoryCard';
+import { CreateAssetDialog } from './CreateAssetDialog';
 
 type TreasuryPageViewProps = ReturnType<typeof useTreasuryPageData>;
 
@@ -19,18 +22,27 @@ export function TreasuryPageView({
   canViewFinancial,
   categories,
   closeModal,
+  createAsset,
   createAccount,
   createCategory,
   createTransaction,
+  deleteAsset,
   expensesLoading,
   filters,
+  handleAssetSubmit,
+  handleCloseAssetDialog,
   handleCloseCsvDialog,
+  handleCloseReport,
   handleDownloadTemplate,
   handleImportCsv,
   handleOpenCsvDialog,
+  handleOpenAssetDialog,
+  handleOpenReport,
   handleTransactionSubmit,
   isCsvDialogOpen,
+  isAssetDialogOpen,
   isLoading,
+  isReportOpen,
   members,
   modalState,
   nextPage,
@@ -46,6 +58,10 @@ export function TreasuryPageView({
   tithesLoading,
   totalBalance,
   transactions,
+  assets,
+  assetsLoading,
+  report,
+  reportLoading,
   approveExpense,
   approveRecord,
 }: TreasuryPageViewProps) {
@@ -148,7 +164,11 @@ export function TreasuryPageView({
                   <h3 className="font-semibold text-lg">Relatório Mensal</h3>
                 </div>
                 <p className="text-green-100/80 text-sm mb-4">Gere relatórios financeiros detalhados.</p>
-                <button className="w-full flex items-center justify-between px-4 py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-xl text-sm font-medium transition-colors group">
+                <button
+                  className="w-full flex items-center justify-between px-4 py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-xl text-sm font-medium transition-colors group"
+                  onClick={handleOpenReport}
+                  type="button"
+                >
                   Visualizar Relatório
                   <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
                 </button>
@@ -174,6 +194,15 @@ export function TreasuryPageView({
                 )}
               </div>
             </div>
+
+            <AssetInventoryCard
+              assets={assets}
+              canManage={showTreasuryControls}
+              isDeleting={deleteAsset.isPending}
+              isLoading={assetsLoading}
+              onCreate={handleOpenAssetDialog}
+              onDelete={(assetId) => deleteAsset.mutate(assetId)}
+            />
           </div>
         </div>
       )}
@@ -202,6 +231,20 @@ export function TreasuryPageView({
         onClose={handleCloseCsvDialog}
         onImport={handleImportCsv}
         onDownloadTemplate={handleDownloadTemplate}
+      />
+
+      <MonthlyReportDialog
+        isLoading={reportLoading}
+        isOpen={isReportOpen}
+        onClose={handleCloseReport}
+        report={report}
+      />
+
+      <CreateAssetDialog
+        isOpen={isAssetDialogOpen}
+        isSubmitting={createAsset.isPending}
+        onClose={handleCloseAssetDialog}
+        onSubmit={handleAssetSubmit}
       />
     </div>
   );

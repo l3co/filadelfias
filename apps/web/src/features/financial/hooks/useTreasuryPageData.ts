@@ -1,16 +1,17 @@
 import { useCallback, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useAuthTenant } from '../../../contexts/AuthContext';
 import { usePendingExpenses, useExpenseMutations } from '../../expense/hooks/useExpense';
 import { useFinancialData } from './useFinancial';
 import { useTitheMutations, usePendingTitheRecords } from '../../tithe/hooks/useTithe';
 import { membersService } from '../../../services/members';
-import { financialService } from '../../../services/financial';
+import { financialService, type CreateAssetDTO } from '../../../services/financial';
 import { usePermissions } from '../../../hooks/usePermissions';
 
 export function useTreasuryPageData() {
   const tenant = useAuthTenant();
+  const queryClient = useQueryClient();
   const {
     accounts,
     categories,
@@ -31,6 +32,36 @@ export function useTreasuryPageData() {
   const { approveRecord } = useTitheMutations(tenant?.id);
   const { data: pendingExpenses, isLoading: expensesLoading } = usePendingExpenses(tenant?.id);
   const { approveExpense } = useExpenseMutations(tenant?.id);
+  const { data: report, isLoading: reportLoading } = useQuery({
+    queryKey: ['financial-report', tenant?.id, filters.month, filters.year],
+    queryFn: () => financialService.getMonthlyReport(tenant!.id, filters),
+    enabled: !!tenant?.id && canViewFinancial,
+  });
+  const { data: assets, isLoading: assetsLoading } = useQuery({
+    queryKey: ['financial-assets', tenant?.id],
+    queryFn: () => financialService.listAssets(tenant!.id),
+    enabled: !!tenant?.id && canViewFinancial,
+  });
+  const createAsset = useMutation({
+    mutationFn: (data: CreateAssetDTO) => financialService.createAsset(tenant!.id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['financial-assets', tenant?.id] });
+      toast.success('Bem patrimonial cadastrado com sucesso!');
+    },
+    onError: (error) => {
+      toast.error(`Erro ao cadastrar bem: ${error instanceof Error ? error.message : 'erro desconhecido'}`);
+    },
+  });
+  const deleteAsset = useMutation({
+    mutationFn: (assetId: string) => financialService.deleteAsset(tenant!.id, assetId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['financial-assets', tenant?.id] });
+      toast.success('Bem patrimonial excluído com sucesso!');
+    },
+    onError: (error) => {
+      toast.error(`Erro ao excluir bem: ${error instanceof Error ? error.message : 'erro desconhecido'}`);
+    },
+  });
   const { data: members } = useQuery({
     queryKey: ['members', tenant?.id],
     queryFn: () => membersService.listMembers(tenant!.id),
@@ -42,6 +73,8 @@ export function useTreasuryPageData() {
     type: 'CREDIT',
   });
   const [isCsvDialogOpen, setIsCsvDialogOpen] = useState(false);
+  const [isReportOpen, setIsReportOpen] = useState(false);
+  const [isAssetDialogOpen, setIsAssetDialogOpen] = useState(false);
 
   const openCreditModal = useCallback(() => {
     setModalState({ isOpen: true, type: 'CREDIT' });
@@ -81,20 +114,30 @@ export function useTreasuryPageData() {
 
   return {
     accounts,
+    assets,
+    assetsLoading,
     canViewFinancial,
     categories,
     closeModal,
+    createAsset,
     createAccount,
     createCategory,
     createTransaction,
+    deleteAsset,
     expensesLoading,
     filters,
     handleCloseCsvDialog,
     handleDownloadTemplate,
     handleImportCsv,
     handleOpenCsvDialog,
+    handleOpenReport: () => setIsReportOpen(true),
+    handleCloseReport: () => setIsReportOpen(false),
+    handleOpenAssetDialog: () => setIsAssetDialogOpen(true),
+    handleCloseAssetDialog: () => setIsAssetDialogOpen(false),
     isCsvDialogOpen,
+    isAssetDialogOpen,
     isLoading,
+    isReportOpen,
     members,
     modalState,
     nextPage,
@@ -110,6 +153,8 @@ export function useTreasuryPageData() {
     tithesLoading,
     totalBalance,
     transactions,
+    report,
+    reportLoading,
     approveExpense,
     approveRecord,
     handleTransactionSubmit: (
@@ -127,7 +172,14 @@ export function useTreasuryPageData() {
           closeModal();
         },
         onError: (error) => {
-          toast.error(`Erro ao cadastrar: ${error.message}`);
+          toast.error(`Erro ao cadastrar: ${error instanceof Error ? error.message : 'erro desconhecido'}`);
+        },
+      });
+    },
+    handleAssetSubmit: (data: CreateAssetDTO) => {
+      createAsset.mutate(data, {
+        onSuccess: () => {
+          setIsAssetDialogOpen(false);
         },
       });
     },

@@ -29,6 +29,41 @@ export interface Transaction {
     account?: FinancialAccount;
 }
 
+export interface FinancialAsset {
+    id: string;
+    tenant_id: string;
+    name: string;
+    category: string;
+    location?: string;
+    condition: string;
+    quantity: number;
+    purchase_value?: number;
+    acquired_date?: string;
+    notes?: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface MonthlyReportBreakdownItem {
+    category: string;
+    amount: number;
+    count: number;
+}
+
+export interface MonthlyReport {
+    month: number;
+    year: number;
+    total_income: number;
+    total_expenses: number;
+    net_balance: number;
+    transaction_count: number;
+    income_breakdown: MonthlyReportBreakdownItem[];
+    expense_breakdown: MonthlyReportBreakdownItem[];
+    accounts: FinancialAccount[];
+    pending_tithes: number;
+    pending_expenses: number;
+}
+
 export interface CreateAccountDTO {
     name: string;
     type: string;
@@ -43,6 +78,17 @@ export interface CreateTransactionDTO {
     type: string;
     description: string;
     date: string;
+}
+
+export interface CreateAssetDTO {
+    name: string;
+    category: string;
+    location?: string;
+    condition: string;
+    quantity: number;
+    purchase_value?: number;
+    acquired_date?: string;
+    notes?: string;
 }
 
 export const financialService = {
@@ -95,6 +141,37 @@ export const financialService = {
             params: { tenant_id: tenantId }
         });
         return data;
+    },
+
+    getMonthlyReport: async (tenantId: string, options?: { month?: number; year?: number }) => {
+        const { data } = await api.get<MonthlyReport>('/financial/reports/monthly', {
+            params: {
+                tenant_id: tenantId,
+                month: options?.month,
+                year: options?.year,
+            }
+        });
+        return data;
+    },
+
+    listAssets: async (tenantId: string) => {
+        const { data } = await api.get<FinancialAsset[]>('/financial/assets', {
+            params: { tenant_id: tenantId }
+        });
+        return data;
+    },
+
+    createAsset: async (tenantId: string, asset: CreateAssetDTO) => {
+        const { data } = await api.post<FinancialAsset>('/financial/assets', asset, {
+            params: { tenant_id: tenantId }
+        });
+        return data;
+    },
+
+    deleteAsset: async (tenantId: string, assetId: string) => {
+        await api.delete(`/financial/assets/${assetId}`, {
+            params: { tenant_id: tenantId }
+        });
     },
 
     downloadCsvTemplate: async (tenantId: string) => {

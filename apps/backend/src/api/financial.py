@@ -12,18 +12,25 @@ from src.middleware.permissions import (
     require_view_financial,
 )
 from src.modules.financial.repository import (
+    asset_repository,
     financial_account_repository,
     transaction_category_repository,
     transaction_repository,
 )
 from src.modules.financial.schemas import (
+    AssetCreate,
+    AssetResponse,
+    AssetUpdate,
     FinancialAccountCreate,
     FinancialAccountResponse,
+    MonthlyReportResponse,
     TransactionCategoryCreate,
     TransactionCategoryResponse,
     TransactionCreate,
     TransactionResponse,
 )
+from src.modules.expense.repository import expense_request_repository
+from src.modules.tithe.repository import tithe_record_repository
 
 router = APIRouter(prefix="/financial", tags=["Financial - Treasury"])
 
@@ -125,6 +132,89 @@ async def list_transactions(
     Requires: financial:view permission.
     """
     return await transaction_repository.get_all(tenant_id, month=month, year=year, page=page, page_size=page_size)
+
+
+@router.get("/reports/monthly", response_model=MonthlyReportResponse)
+async def get_monthly_report(
+    tenant_id: str = Query(..., description="ID of the tenant"),
+    month: Optional[int] = Query(None, ge=1, le=12, description="Report month"),
+    year: Optional[int] = Query(None, description="Report year"),
+    auth_context: dict = Depends(require_view_financial),
+):
+    """
+    Build a monthly financial report with totals and category breakdowns.
+    Requires: financial:view permission.
+    """
+    today = date.today()
+    report_month = month or today.month
+    report_year = year or today.year
+
+    report = await transaction_repository.build_monthly_report(tenant_id, report_month, report_year)
+    report["pending_tithes"] = len(await tithe_record_repository.get_pending(tenant_id))
+    report["pending_expenses"] = len(await expense_request_repository.get_pending(tenant_id))
+    return report
+
+
+@router.post("/assets", response_model=AssetResponse)
+async def create_asset(
+    data: AssetCreate,
+    tenant_id: str = Query(..., description="ID of the tenant"),
+    auth_context: dict = Depends(require_manage_financial),
+):
+    """
+    Create an asset for the church inventory.
+    Requires: financial:manage permission.
+    """
+    return await asset_repository.create(tenant_id, **data.model_dump())
+
+
+@router.get("/assets", response_model=List[AssetResponse])
+async def list_assets(
+    tenant_id: str = Query(..., description="ID of the tenant"),
+    auth_context: dict = Depends(require_view_financial),
+):
+    """
+    List church inventory assets.
+    Requires: financial:view permission.
+    """
+    return await asset_repository.get_all(tenant_id)
+
+
+@router.put("/assets/{asset_id}", response_model=AssetResponse)
+async def update_asset(
+    asset_id: str,
+    data: AssetUpdate,
+    tenant_id: str = Query(..., description="ID of the tenant"),
+    auth_context: dict = Depends(require_manage_financial),
+):
+    """
+    Update an asset from the church inventory.
+    Requires: financial:manage permission.
+    """
+    updated = await asset_repository.update(tenant_id, asset_id, **data.model_dump(exclude_unset=True))
+    if not updated:
+        from fastapi import HTTPException
+
+        raise HTTPException(status_code=404, detail="Bem patrimonial não encontrado")
+    return updated
+
+
+@router.delete("/assets/{asset_id}")
+async def delete_asset(
+    asset_id: str,
+    tenant_id: str = Query(..., description="ID of the tenant"),
+    auth_context: dict = Depends(require_manage_financial),
+):
+    """
+    Delete an asset from the church inventory.
+    Requires: financial:manage permission.
+    """
+    deleted = await asset_repository.delete(tenant_id, asset_id)
+    if not deleted:
+        from fastapi import HTTPException
+
+        raise HTTPException(status_code=404, detail="Bem patrimonial não encontrado")
+    return {"success": True}
 
 
 @router.get("/transactions/csv/template")

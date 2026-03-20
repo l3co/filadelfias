@@ -287,6 +287,22 @@ class TransactionModel(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     category: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
 
 
+class AssetModel(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    __tablename__ = "assets"
+
+    tenant_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    category: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
+    location: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    condition: Mapped[str] = mapped_column(String(50), nullable=False, default="GOOD", index=True)
+    quantity: Mapped[int] = mapped_column(nullable=False, default=1)
+    purchase_value: Mapped[Optional[float]] = mapped_column(nullable=True)
+    acquired_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True, index=True)
+    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+
 class CouncilModel(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     __tablename__ = "councils"
 

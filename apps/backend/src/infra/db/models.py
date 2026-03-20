@@ -150,6 +150,7 @@ class PrayerRequestModel(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         PGUUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True
     )
     member_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    missionary_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True, index=True)
     author_name: Mapped[str] = mapped_column(String(255), nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
     category: Mapped[str] = mapped_column(String(100), default="other", nullable=False)

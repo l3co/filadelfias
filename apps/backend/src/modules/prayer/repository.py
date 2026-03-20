@@ -17,6 +17,7 @@ class PrayerRequestRepository(SQLAlchemyRepository):
         "id",
         "tenant_id",
         "member_id",
+        "missionary_id",
         "author_name",
         "content",
         "category",
@@ -40,6 +41,7 @@ class PrayerRequestRepository(SQLAlchemyRepository):
             request = PrayerRequestModel(
                 tenant_id=tenant_id,
                 member_id=member_id,
+                missionary_id=data.missionary_id,
                 author_name="Anônimo" if data.is_anonymous else author_name,
                 content=data.content,
                 category=data.category,
@@ -52,13 +54,14 @@ class PrayerRequestRepository(SQLAlchemyRepository):
             await session.refresh(request)
             return self._to_request_dict(request)
 
-    async def get_by_tenant(self, tenant_id: UUID) -> List[dict]:
+    async def get_by_tenant(self, tenant_id: UUID, missionary_id: Optional[str] = None) -> List[dict]:
         async with self.session() as session:
+            statement = select(PrayerRequestModel).where(PrayerRequestModel.tenant_id == tenant_id)
+            if missionary_id:
+                statement = statement.where(PrayerRequestModel.missionary_id == missionary_id)
+
             result = await session.execute(
-                select(PrayerRequestModel)
-                .where(PrayerRequestModel.tenant_id == tenant_id)
-                .order_by(PrayerRequestModel.created_at.desc())
-                .limit(50)
+                statement.order_by(PrayerRequestModel.created_at.desc()).limit(50)
             )
             return [self._to_request_dict(item) for item in result.scalars().all()]
 

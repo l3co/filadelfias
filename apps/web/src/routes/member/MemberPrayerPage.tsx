@@ -11,6 +11,7 @@ const categoryLabels: Record<string, { label: string; color: string }> = {
   family: { label: 'Família', color: 'bg-blue-100 text-blue-700' },
   work: { label: 'Trabalho', color: 'bg-amber-100 text-amber-700' },
   spiritual: { label: 'Espiritual', color: 'bg-purple-100 text-purple-700' },
+  missions: { label: 'Missões', color: 'bg-indigo-100 text-indigo-700' },
   other: { label: 'Outros', color: 'bg-gray-100 text-gray-700' },
 };
 

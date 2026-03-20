@@ -5,10 +5,10 @@ import { toast } from 'sonner';
 
 export const PRAYER_KEY = 'prayer-requests';
 
-export function usePrayerRequests(tenantId: string | undefined) {
+export function usePrayerRequests(tenantId: string | undefined, options?: { missionaryId?: string }) {
     return useQuery({
-        queryKey: [PRAYER_KEY, tenantId],
-        queryFn: () => prayerService.listRequests(tenantId!),
+        queryKey: [PRAYER_KEY, tenantId, options?.missionaryId],
+        queryFn: () => prayerService.listRequests(tenantId!, options),
         enabled: !!tenantId,
         staleTime: 1000 * 60 * 2, // 2 minutes
     });

@@ -46,8 +46,9 @@ export function MemberMissionsPage() {
     const groups: Record<string, typeof missionPrayerRequests> = {};
     (missionPrayerRequests ?? []).forEach((request) => {
       if (!request.missionary_id) return;
-      groups[request.missionary_id] ??= [];
-      groups[request.missionary_id].push(request);
+      const missionaryId = request.missionary_id;
+      groups[missionaryId] ??= [];
+      groups[missionaryId].push(request);
     });
     return groups;
   }, [missionPrayerRequests]);
@@ -56,8 +57,9 @@ export function MemberMissionsPage() {
     const groups: Record<string, typeof missionPrayerRequests> = {};
     (missionPrayerRequests ?? []).forEach((request) => {
       if (!request.social_project_id) return;
-      groups[request.social_project_id] ??= [];
-      groups[request.social_project_id].push(request);
+      const socialProjectId = request.social_project_id;
+      groups[socialProjectId] ??= [];
+      groups[socialProjectId].push(request);
     });
     return groups;
   }, [missionPrayerRequests]);

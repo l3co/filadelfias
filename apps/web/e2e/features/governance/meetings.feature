@@ -72,7 +72,7 @@ Funcionalidade: Gestão de Reuniões
     E marco os membros presentes na lista
     Então a contagem de presenças deve ser atualizada
 
-  @skip @integration @needs-backend
+  @integration @needs-backend
   Cenário: Finalizar reunião
     Dado que existe uma reunião agendada no conselho
     Quando eu abro o dialog de reuniões do conselho

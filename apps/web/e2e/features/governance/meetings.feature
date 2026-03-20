@@ -1,6 +1,5 @@
 # language: pt
 
-@skip
 Funcionalidade: Gestão de Reuniões
   Como um líder de igreja (Pastor/Presbítero)
   Eu quero gerenciar as reuniões dos conselhos
@@ -16,7 +15,7 @@ Funcionalidade: Gestão de Reuniões
     Então devo ver a mensagem "Nenhuma reunião agendada"
     E devo ver botão "Nova Reunião"
 
-  @integration @needs-backend
+  @skip @integration @needs-backend
   Cenário: Agendar nova reunião ordinária
     Quando eu abro o dialog de reuniões do conselho
     E clico em "Nova Reunião"
@@ -31,7 +30,7 @@ Funcionalidade: Gestão de Reuniões
     Então devo ver a mensagem "Reunião agendada com sucesso"
     E a reunião deve aparecer na aba "Próximas"
 
-  @integration @needs-backend
+  @skip @integration @needs-backend
   Cenário: Agendar reunião extraordinária
     Quando eu abro o dialog de reuniões do conselho
     E clico em "Nova Reunião"
@@ -40,7 +39,7 @@ Funcionalidade: Gestão de Reuniões
     E confirmo o agendamento
     Então a reunião deve aparecer com badge "Extraordinária"
 
-  @integration @needs-backend
+  @skip @integration @needs-backend
   Cenário: Visualizar detalhes de reunião agendada
     Dado que existe uma reunião agendada no conselho
     Quando eu abro o dialog de reuniões do conselho
@@ -53,7 +52,7 @@ Funcionalidade: Gestão de Reuniões
     E devo ver a lista de presença vazia
     E devo ver opção para editar ata
 
-  @integration @needs-backend
+  @skip @integration @needs-backend
   Cenário: Registrar ata da reunião
     Dado que existe uma reunião agendada no conselho
     Quando eu abro o dialog de reuniões do conselho
@@ -64,7 +63,7 @@ Funcionalidade: Gestão de Reuniões
     Então devo ver a mensagem "Reunião atualizada com sucesso"
     E a ata deve estar salva
 
-  @integration @needs-backend
+  @skip @integration @needs-backend
   Cenário: Marcar presença de membros
     Dado que existe uma reunião agendada no conselho
     E que o conselho possui membros cadastrados
@@ -73,7 +72,7 @@ Funcionalidade: Gestão de Reuniões
     E marco os membros presentes na lista
     Então a contagem de presenças deve ser atualizada
 
-  @integration @needs-backend
+  @skip @integration @needs-backend
   Cenário: Finalizar reunião
     Dado que existe uma reunião agendada no conselho
     Quando eu abro o dialog de reuniões do conselho
@@ -82,7 +81,7 @@ Funcionalidade: Gestão de Reuniões
     Então devo ver a mensagem "Reunião finalizada com sucesso"
     E a reunião deve aparecer na aba "Realizadas"
 
-  @integration @needs-backend
+  @skip @integration @needs-backend
   Cenário: Reunião finalizada não pode ser editada
     Dado que existe uma reunião finalizada no conselho
     Quando eu abro os detalhes da reunião
@@ -90,7 +89,7 @@ Funcionalidade: Gestão de Reuniões
     E não devo ver o botão "Finalizar Reunião"
     E devo ver a ata em modo somente leitura
 
-  @integration @needs-backend
+  @skip @integration @needs-backend
   Cenário: Visualizar aba de reuniões realizadas
     Dado que existem reuniões finalizadas no conselho
     Quando eu abro o dialog de reuniões do conselho

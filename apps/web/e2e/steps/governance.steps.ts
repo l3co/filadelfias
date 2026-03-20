@@ -15,7 +15,7 @@ const { Given, When, Then } = createBdd();
 
 Given('que existe um conselho cadastrado', async ({ page }) => {
     // Navigate to governance page to verify councils exist
-    await page.goto('/app/governance');
+    await page.goto('/admin/governance');
     await page.waitForLoadState('networkidle');
     // Council list should be loaded
     await expect(page.locator('text=Conselhos e Juntas').or(page.locator('[data-testid="council-card"]').first())).toBeVisible({ timeout: 10000 });
@@ -41,7 +41,7 @@ Given('que registrei a ata e as presenças', async function () {
 
 Given('que existe uma reunião finalizada no conselho', async ({ page }) => {
     // Navega para governance e abre o dialog de reuniões
-    await page.goto('/app/governance');
+    await page.goto('/admin/governance');
     await page.waitForLoadState('networkidle');
     
     // Abre o dialog de reuniões
@@ -57,7 +57,7 @@ Given('que existe uma reunião finalizada no conselho', async ({ page }) => {
 
 Given('que existem reuniões finalizadas no conselho', async ({ page }) => {
     // Navega para governance
-    await page.goto('/app/governance');
+    await page.goto('/admin/governance');
     await page.waitForLoadState('networkidle');
 });
 

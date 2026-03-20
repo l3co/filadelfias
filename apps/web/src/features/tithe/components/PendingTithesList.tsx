@@ -54,8 +54,12 @@ function PendingTitheRow({
             {...ariaAttributes}
             style={style}
             className="border-b border-gray-100 px-0 py-0"
+            data-testid={`pending-tithe-row-${record.id}`}
         >
-            <div className="p-4 rounded-xl border border-gray-100 hover:bg-gray-50 transition-colors">
+            <div
+                className="p-4 rounded-xl border border-gray-100 hover:bg-gray-50 transition-colors"
+                data-testid={`pending-tithe-card-${record.id}`}
+            >
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-3">
                         <div className="p-2 rounded-lg bg-gray-100">
@@ -119,6 +123,7 @@ function PendingTitheRow({
                                 onClick={() => setRejectingId(record.id)}
                                 disabled={isApproving}
                                 className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                data-testid={`reject-pending-tithe-${record.id}`}
                             >
                                 <XCircle className="h-4 w-4 mr-1" />
                                 Rejeitar
@@ -128,6 +133,7 @@ function PendingTitheRow({
                                 onClick={() => onApprove(record.id)}
                                 disabled={isApproving}
                                 className="bg-green-600 hover:bg-green-700 text-white"
+                                data-testid={`approve-pending-tithe-${record.id}`}
                             >
                                 <CheckCircle2 className="h-4 w-4 mr-1" />
                                 Aprovar

@@ -89,7 +89,7 @@ Funcionalidade: Gestão de Reuniões
     E não devo ver o botão "Finalizar Reunião"
     E devo ver a ata em modo somente leitura
 
-  @skip @integration @needs-backend
+  @integration @needs-backend
   Cenário: Visualizar aba de reuniões realizadas
     Dado que existem reuniões finalizadas no conselho
     Quando eu abro o dialog de reuniões do conselho

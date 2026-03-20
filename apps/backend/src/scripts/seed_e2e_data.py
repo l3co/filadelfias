@@ -221,6 +221,7 @@ async def seed_test_data():
             phone="(11) 77777-7777",
             status="COMUNGANTE",
             office=test_user["office"],
+            functions=test_user.get("functions"),
             user_id=user["id"],
         )
         print(f"  ✓ {test_user['office']} created: {test_user['email']}")

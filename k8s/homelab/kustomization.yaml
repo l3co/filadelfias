@@ -10,6 +10,8 @@ resources:
   - migrate-job.yaml
   - backend.yaml
   - web.yaml
+  - cloudflared.yaml
+  - network-policies.yaml
 
 images:
   - name: ghcr.io/l3co/filadelfias-backend

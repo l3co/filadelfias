@@ -84,6 +84,13 @@ kubectl create secret docker-registry ghcr-secret \
   -n filadelfias
 ```
 
+Para o túnel Cloudflare Zero Trust:
+```bash
+kubectl create secret generic cloudflare-tunnel-secret \
+  --from-literal=token='<TOKEN_DO_TUNNEL>' \
+  -n filadelfias
+```
+
 ---
 
 ## PostgreSQL (StatefulSet)
@@ -154,6 +161,90 @@ spec:
 ```
 
 **DNS interno:** `postgres.filadelfias.svc.cluster.local` (ou simplesmente `postgres`)
+
+---
+
+## Cloudflare Zero Trust Tunnel
+
+O cluster do `filadelfias` pode ser exposto sem abrir portas no host usando `cloudflared` como conector outbound.
+
+### Manifesto do conector
+
+Arquivo: `k8s/homelab/cloudflared.yaml`
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudflared
+  namespace: filadelfias
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: cloudflared
+          image: cloudflare/cloudflared:latest
+          args:
+            - tunnel
+            - --no-autoupdate
+            - run
+            - --token
+            - $(TUNNEL_TOKEN)
+          env:
+            - name: TUNNEL_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: cloudflare-tunnel-secret
+                  key: token
+```
+
+### Public Hostnames
+
+No dashboard do Cloudflare Zero Trust, configure os hostnames públicos apontando para os DNS internos do Kubernetes:
+
+| Hostname público | URL do serviço no tunnel |
+| --- | --- |
+| `filadelfias.com` | `http://web.filadelfias.svc.cluster.local:8080` |
+| `app.filadelfias.com` | `http://web.filadelfias.svc.cluster.local:8080` |
+| `api.filadelfias.com` | `http://backend.filadelfias.svc.cluster.local:8000` |
+
+O formato é sempre:
+
+`http://<service>.<namespace>.svc.cluster.local:<port>`
+
+### DNS conflitante
+
+Se o dashboard mostrar:
+
+`An A, AAAA, or CNAME record with that host already exists`
+
+remova antes o registro conflitante em Cloudflare DNS. O tunnel vai criar automaticamente o CNAME para `<uuid>.cfargotunnel.com`.
+
+### NetworkPolicy
+
+Arquivos adicionados:
+
+- `k8s/homelab/network-policies.yaml`
+
+Políticas incluídas:
+
+- `default-deny-ingress`
+- `allow-cloudflared-to-web`
+- `allow-cloudflared-to-backend`
+- `allow-backend-to-postgres`
+
+Essas regras assumem que o CNI do cluster suporta `NetworkPolicy`. Em K3s com Flannel padrão, isso pode ser ignorado silenciosamente até que você instale um provider compatível, como Calico ou Cilium.
+
+### Checklist
+
+- Criar o tunnel em Cloudflare Zero Trust
+- Copiar o token em `Networks -> Tunnels -> <tunnel> -> Configure -> Install connector`
+- Criar o secret `cloudflare-tunnel-secret`
+- Aplicar `k8s/homelab/cloudflared.yaml`
+- Configurar os Public Hostnames com `*.svc.cluster.local`
+- Verificar registros DNS conflitantes
+- Confirmar se o CNI suporta `NetworkPolicy`
 
 ---
 

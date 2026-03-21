@@ -1,4 +1,4 @@
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { renderWithProviders } from '../../test/utils';
 import { MembersPage } from './MembersPage';
@@ -16,8 +16,8 @@ vi.mock('../../features/members/hooks/useMembers', () => ({
   useMembers: vi.fn(),
 }));
 
-vi.mock('../../features/members/components/MembersCards', () => ({
-  MembersCards: vi.fn(({ members, isLoading, onEditMember, onInviteMember }) => (
+vi.mock('../../features/members/client/MembersPageClient', () => ({
+  MembersPageClient: vi.fn(({ members, isLoading, onEditMember, onInviteMember }) => (
     <div>
       <div data-testid="members-loading">{String(isLoading)}</div>
       <ul>
@@ -35,6 +35,10 @@ vi.mock('../../features/members/components/MembersCards', () => ({
       </ul>
     </div>
   )),
+}));
+
+vi.mock('../../features/members/client/MembersSummary', () => ({
+  MembersSummary: vi.fn(() => null),
 }));
 
 vi.mock('../../features/members/components/MemberDialog', () => ({
@@ -76,7 +80,7 @@ describe('MembersPage', () => {
     expect(screen.getByText('Nenhuma igreja vinculada')).toBeInTheDocument();
   });
 
-  it('filters members by search query and office', () => {
+  it('filters members by search query and office', async () => {
     mockUseAuthTenant.mockReturnValue({
       id: 'tenant-1',
       name: 'Igreja Teste',
@@ -101,9 +105,11 @@ describe('MembersPage', () => {
       target: { value: 'maria' },
     });
 
-    expect(screen.queryByText('João Silva')).not.toBeInTheDocument();
-    expect(screen.getByText('Maria Souza')).toBeInTheDocument();
-    expect(screen.queryByText('Pedro Santos')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByText('João Silva')).not.toBeInTheDocument();
+      expect(screen.getByText('Maria Souza')).toBeInTheDocument();
+      expect(screen.queryByText('Pedro Santos')).not.toBeInTheDocument();
+    });
 
     fireEvent.click(screen.getByRole('button', { name: /diácono/i }));
 

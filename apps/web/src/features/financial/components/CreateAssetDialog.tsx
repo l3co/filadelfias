@@ -1,3 +1,4 @@
+import { startTransition, useActionState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { Button } from '../../../components/ui/button';
 import {
@@ -17,14 +18,20 @@ import {
   SelectValue,
 } from '../../../components/ui/select';
 import { Textarea } from '../../../components/ui/textarea';
+import { AlertCircle } from 'lucide-react';
 import type { CreateAssetDTO } from '../../../services/financial';
 
 type CreateAssetDialogProps = {
   isOpen: boolean;
   isSubmitting: boolean;
   onClose: () => void;
-  onSubmit: (data: CreateAssetDTO) => void;
+  onSubmit: (data: CreateAssetDTO) => void | Promise<void>;
 };
+
+interface AssetActionState {
+  error: string | null;
+  success: boolean;
+}
 
 const CONDITIONS = [
   { value: 'EXCELLENT', label: 'Excelente' },
@@ -54,14 +61,30 @@ export function CreateAssetDialog({
   });
 
   const selectedCondition = useWatch({ control, name: 'condition' }) ?? 'GOOD';
+  const [submissionState, submitAssetAction, isPending] = useActionState<AssetActionState, CreateAssetDTO>(
+    async (_previousState, data) => {
+      try {
+        await onSubmit(data);
+        reset({ condition: 'GOOD', quantity: 1 });
+        return { error: null, success: true };
+      } catch (error) {
+        return {
+          error: error instanceof Error ? error.message : 'Não foi possível salvar o bem patrimonial.',
+          success: false,
+        };
+      }
+    },
+    { error: null, success: false },
+  );
 
   const submit = (data: CreateAssetDTO) => {
-    onSubmit({
-      ...data,
-      purchase_value: data.purchase_value ? Number(data.purchase_value) : undefined,
-      quantity: Number(data.quantity),
+    startTransition(() => {
+      submitAssetAction({
+        ...data,
+        purchase_value: data.purchase_value ? Number(data.purchase_value) : undefined,
+        quantity: Number(data.quantity),
+      });
     });
-    reset({ condition: 'GOOD', quantity: 1 });
   };
 
   return (
@@ -141,11 +164,18 @@ export function CreateAssetDialog({
             <Textarea {...register('notes')} placeholder="Estado de conservação, histórico, detalhes..." />
           </div>
 
+          {submissionState.error && (
+            <p className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+              <span>{submissionState.error}</span>
+            </p>
+          )}
+
           <DialogFooter>
             <Button onClick={onClose} type="button" variant="outline">
               Cancelar
             </Button>
-            <Button isLoading={isSubmitting} type="submit">
+            <Button isLoading={isSubmitting || isPending} type="submit">
               Salvar bem
             </Button>
           </DialogFooter>

@@ -1,8 +1,9 @@
-import { useState, useMemo, useCallback, useDeferredValue, startTransition } from 'react';
+import { Suspense, useState, useMemo, useCallback, useDeferredValue, startTransition, useOptimistic } from 'react';
 import { Plus, Users } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useMembers } from '../../features/members/hooks/useMembers';
-import { MembersCards } from '../../features/members/components/MembersCards';
+import { MembersPageClient } from '../../features/members/client/MembersPageClient';
+import { MembersSummary } from '../../features/members/client/MembersSummary';
 import { MemberDialog } from '../../features/members/components/MemberDialog';
 import { InviteMemberDialog } from '../../features/members/components/InviteMemberDialog';
 import { InviteSuccessDialog } from '../../features/members/components/InviteSuccessDialog';
@@ -30,13 +31,25 @@ const officeLabels: Record<string, string> = {
 export function MembersPage() {
     const tenant = useAuthTenant();
     const queryClient = useQueryClient();
-    const { data: members, isLoading } = useMembers(tenant?.id);
+    const { data: members, dataUpdatedAt, isLoading } = useMembers(tenant?.id);
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [editingMember, setEditingMember] = useState<Member | null>(null);
     const [inviteMember, setInviteMember] = useState<Member | null>(null);
     const [inviteResult, setInviteResult] = useState<{ member: Member; result: InviteResult } | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [officeFilter, setOfficeFilter] = useState<string | null>(null);
+    const [pendingInviteMemberIds, updatePendingInviteMemberIds] = useOptimistic<
+        string[],
+        { memberId: string; type: 'start' | 'finish' }
+    >([], (currentState, action) => {
+        if (action.type === 'start') {
+            return currentState.includes(action.memberId)
+                ? currentState
+                : [...currentState, action.memberId];
+        }
+
+        return currentState.filter((memberId) => memberId !== action.memberId);
+    });
     const deferredSearchQuery = useDeferredValue(searchQuery);
     const deferredOfficeFilter = useDeferredValue(officeFilter);
 
@@ -74,11 +87,6 @@ export function MembersPage() {
             );
             return { member, result: response.data };
         },
-        onSuccess: (data) => {
-            setInviteResult(data);
-            setInviteMember(null);
-            queryClient.invalidateQueries({ queryKey: ['members', tenant?.id] });
-        }
     });
 
     const handleCreateOpen = useCallback(() => {
@@ -92,6 +100,23 @@ export function MembersPage() {
     const handleInviteMember = useCallback((member: Member) => {
         setInviteMember(member);
     }, []);
+
+    const handleInviteSubmit = useCallback(async (member: Member, role: 'ADMIN' | 'MEMBER') => {
+        startTransition(() => {
+            updatePendingInviteMemberIds({ memberId: member.id, type: 'start' });
+        });
+
+        try {
+            const data = await inviteMutation.mutateAsync({ member, role });
+            setInviteResult(data);
+            setInviteMember(null);
+            await queryClient.invalidateQueries({ queryKey: ['members', tenant?.id] });
+        } finally {
+            startTransition(() => {
+                updatePendingInviteMemberIds({ memberId: member.id, type: 'finish' });
+            });
+        }
+    }, [inviteMutation, queryClient, tenant?.id, updatePendingInviteMemberIds]);
 
     const handleMemberDialogClose = useCallback(() => {
         setIsCreateOpen(false);
@@ -177,11 +202,24 @@ export function MembersPage() {
                 onFilterChange={handleOfficeFilterChange}
             />
 
-            <MembersCards
+            <Suspense
+                fallback={
+                    <div className="grid gap-4 md:grid-cols-3">
+                        <div className="h-28 rounded-2xl bg-slate-100" />
+                        <div className="h-28 rounded-2xl bg-slate-100" />
+                        <div className="h-28 rounded-2xl bg-slate-100" />
+                    </div>
+                }
+            >
+                <MembersSummary tenantId={tenant.id} refreshKey={String(dataUpdatedAt)} />
+            </Suspense>
+
+            <MembersPageClient
                 members={filteredMembers}
                 isLoading={isLoading}
                 onEditMember={handleEditMember}
                 onInviteMember={handleInviteMember}
+                pendingInviteMemberIds={pendingInviteMemberIds}
             />
 
             {/* Create/Edit Dialog (Unified) */}
@@ -197,7 +235,7 @@ export function MembersPage() {
                 isOpen={!!inviteMember}
                 onClose={handleInviteDialogClose}
                 member={inviteMember}
-                onInvite={(member, role) => inviteMutation.mutate({ member, role })}
+                onInvite={handleInviteSubmit}
                 isLoading={inviteMutation.isPending}
             />
 

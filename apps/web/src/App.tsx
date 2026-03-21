@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, type ReactNode } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
 import { DashboardLayout } from './components/layout/DashboardLayout';
@@ -6,7 +6,11 @@ import { MemberLayout } from './components/layout/MemberLayout';
 import { PublicLayout } from './components/layout/PublicLayout';
 import { Toaster } from './components/ui/sonner';
 import { LoadingOverlay } from './components/ui/spinner';
+import { ErrorBoundary, ErrorFallback } from './components/ErrorBoundary';
+import { InstallPrompt } from './components/pwa/InstallPrompt';
+import { OfflineBanner } from './components/pwa/OfflineBanner';
 import { ROUTES } from './lib/routes';
+import { AppMetadata } from './lib/page-metadata';
 
 // Lazy loaded pages - Auth
 const LoginPage = lazy(() => import('./routes/LoginPage'));
@@ -53,37 +57,70 @@ const MyExpensesPage = lazy(() => import('./routes/expense/MyExpensesPage').then
 // Lazy loaded pages - Shared
 const ProfilePage = lazy(() => import('./routes/profile/ProfilePage').then(m => ({ default: m.ProfilePage })));
 
+function RouteBoundary({
+  children,
+  description = 'A página não pôde ser carregada. Tente novamente.',
+  message = 'Carregando...',
+  title = 'Erro ao carregar página',
+}: {
+  children: ReactNode;
+  description?: string;
+  message?: string;
+  title?: string;
+}) {
+  return (
+    <ErrorBoundary
+      fallback={
+        <ErrorFallback
+          error={null}
+          title={title}
+          description={description}
+          onRetry={() => window.location.reload()}
+        />
+      }
+    >
+      <Suspense fallback={<LoadingOverlay message={message} />}>
+        {children}
+      </Suspense>
+    </ErrorBoundary>
+  );
+}
+
 function App() {
   return (
     <>
-      <Suspense fallback={<LoadingOverlay message="Carregando..." />}>
-        <Routes>
+      <AppMetadata />
+      <OfflineBanner />
+      <InstallPrompt />
+      <Routes>
         {/* Rotas Públicas com Layout Público */}
-        <Route element={<PublicLayout />}>
-          <Route path={ROUTES.PUBLIC.HOME} element={<LandingPage />} />
-          <Route path={ROUTES.PUBLIC.BIBLE} element={<BiblePage />} />
-          <Route path={`${ROUTES.PUBLIC.BIBLE}/:book/:chapter`} element={<BibleReaderPage />} />
-          <Route path={ROUTES.PUBLIC.HYMNAL} element={<HymnalPage />} />
-          <Route path={`${ROUTES.PUBLIC.HYMNAL}/:number`} element={<HymnalReaderPage />} />
-          <Route path={ROUTES.PUBLIC.MANUAL} element={<ManualPage />} />
-          <Route path={`${ROUTES.PUBLIC.MANUAL}/*`} element={<ManualReaderPage />} />
-          <Route path={ROUTES.PUBLIC.TERMS} element={<TermsPage />} />
-          <Route path={ROUTES.PUBLIC.PRIVACY} element={<PrivacyPage />} />
+        <Route element={<RouteBoundary message="Carregando portal público..."><PublicLayout /></RouteBoundary>}>
+          <Route path={ROUTES.PUBLIC.HOME} element={<RouteBoundary message="Carregando página inicial..."><LandingPage /></RouteBoundary>} />
+          <Route path={ROUTES.PUBLIC.BIBLE} element={<RouteBoundary message="Carregando Bíblia..."><BiblePage /></RouteBoundary>} />
+          <Route path={`${ROUTES.PUBLIC.BIBLE}/:book/:chapter`} element={<RouteBoundary message="Carregando leitura bíblica..."><BibleReaderPage /></RouteBoundary>} />
+          <Route path={ROUTES.PUBLIC.HYMNAL} element={<RouteBoundary message="Carregando hinário..."><HymnalPage /></RouteBoundary>} />
+          <Route path={`${ROUTES.PUBLIC.HYMNAL}/:number`} element={<RouteBoundary message="Carregando hino..."><HymnalReaderPage /></RouteBoundary>} />
+          <Route path={ROUTES.PUBLIC.MANUAL} element={<RouteBoundary message="Carregando manual..."><ManualPage /></RouteBoundary>} />
+          <Route path={`${ROUTES.PUBLIC.MANUAL}/*`} element={<RouteBoundary message="Carregando artigo..."><ManualReaderPage /></RouteBoundary>} />
+          <Route path={ROUTES.PUBLIC.TERMS} element={<RouteBoundary message="Carregando termos..."><TermsPage /></RouteBoundary>} />
+          <Route path={ROUTES.PUBLIC.PRIVACY} element={<RouteBoundary message="Carregando política de privacidade..."><PrivacyPage /></RouteBoundary>} />
         </Route>
 
         {/* Autenticação (Sem Layout Específico) */}
-        <Route path={ROUTES.AUTH.LOGIN} element={<LoginPage />} />
-        <Route path={ROUTES.AUTH.FORGOT_PASSWORD} element={<ForgotPasswordPage />} />
-        <Route path={ROUTES.AUTH.RESET_PASSWORD} element={<ResetPasswordPage />} />
-        <Route path={ROUTES.AUTH.REGISTER} element={<ChurchRegistrationWizard />} />
+        <Route path={ROUTES.AUTH.LOGIN} element={<RouteBoundary message="Carregando login..."><LoginPage /></RouteBoundary>} />
+        <Route path={ROUTES.AUTH.FORGOT_PASSWORD} element={<RouteBoundary message="Carregando recuperação de senha..."><ForgotPasswordPage /></RouteBoundary>} />
+        <Route path={ROUTES.AUTH.RESET_PASSWORD} element={<RouteBoundary message="Carregando redefinição de senha..."><ResetPasswordPage /></RouteBoundary>} />
+        <Route path={ROUTES.AUTH.REGISTER} element={<RouteBoundary message="Carregando cadastro..."><ChurchRegistrationWizard /></RouteBoundary>} />
 
         {/* Onboarding Protegido */}
         <Route
           path={ROUTES.AUTH.ONBOARDING}
           element={
-            <ProtectedRoute>
-              <OnboardingPage />
-            </ProtectedRoute>
+            <RouteBoundary message="Carregando onboarding...">
+              <ProtectedRoute>
+                <OnboardingPage />
+              </ProtectedRoute>
+            </RouteBoundary>
           }
         />
 
@@ -91,22 +128,24 @@ function App() {
         <Route
           path={ROUTES.ADMIN.ROOT}
           element={
-            <ProtectedRoute>
-              <DashboardLayout />
-            </ProtectedRoute>
+            <RouteBoundary message="Carregando painel administrativo...">
+              <ProtectedRoute>
+                <DashboardLayout />
+              </ProtectedRoute>
+            </RouteBoundary>
           }
         >
-          <Route index element={<HomePage />} />
-          <Route path="members" element={<MembersPage />} />
-          <Route path="governance" element={<CouncilsPage />} />
-          <Route path="treasury" element={<TreasuryPage />} />
-          <Route path="missions" element={<MissionsPage />} />
-          <Route path="education" element={<EBDClassesPage />} />
-          <Route path="education/:classId" element={<EBDClassDetailPage />} />
-          <Route path="events" element={<EventsPage />} />
-          <Route path="devotionals" element={<DevotionalsPage />} />
-          <Route path="settings" element={<ChurchSettingsPage />} />
-          <Route path="profile" element={<ProfilePage />} />
+          <Route index element={<RouteBoundary message="Carregando dashboard..."><HomePage /></RouteBoundary>} />
+          <Route path="members" element={<RouteBoundary message="Carregando membros..."><MembersPage /></RouteBoundary>} />
+          <Route path="governance" element={<RouteBoundary message="Carregando governança..."><CouncilsPage /></RouteBoundary>} />
+          <Route path="treasury" element={<RouteBoundary message="Carregando tesouraria..."><TreasuryPage /></RouteBoundary>} />
+          <Route path="missions" element={<RouteBoundary message="Carregando missões..."><MissionsPage /></RouteBoundary>} />
+          <Route path="education" element={<RouteBoundary message="Carregando educação..."><EBDClassesPage /></RouteBoundary>} />
+          <Route path="education/:classId" element={<RouteBoundary message="Carregando turma..."><EBDClassDetailPage /></RouteBoundary>} />
+          <Route path="events" element={<RouteBoundary message="Carregando eventos..."><EventsPage /></RouteBoundary>} />
+          <Route path="devotionals" element={<RouteBoundary message="Carregando devocionais..."><DevotionalsPage /></RouteBoundary>} />
+          <Route path="settings" element={<RouteBoundary message="Carregando configurações..."><ChurchSettingsPage /></RouteBoundary>} />
+          <Route path="profile" element={<RouteBoundary message="Carregando perfil..."><ProfilePage /></RouteBoundary>} />
         </Route>
 
         {/* Legacy redirects for /app/* */}
@@ -117,25 +156,27 @@ function App() {
         <Route
           path={ROUTES.MEMBER.ROOT}
           element={
-            <ProtectedRoute>
-              <MemberLayout />
-            </ProtectedRoute>
+            <RouteBoundary message="Carregando portal do membro...">
+              <ProtectedRoute>
+                <MemberLayout />
+              </ProtectedRoute>
+            </RouteBoundary>
           }
         >
-          <Route index element={<MemberHomePage />} />
-          <Route path="directory" element={<MemberDirectoryPage />} />
-          <Route path="events" element={<MemberEventsPage />} />
-          <Route path="missions" element={<MemberMissionsPage />} />
-          <Route path="bible" element={<BiblePage />} />
-          <Route path="hymnal" element={<HymnalPage />} />
-          <Route path="manual" element={<ManualPage />} />
-          <Route path="education" element={<MemberEBDPage />} />
-          <Route path="prayer" element={<MemberPrayerPage />} />
-          <Route path="devotionals" element={<MemberDevotionalsPage />} />
-          <Route path="governance" element={<MemberGovernancePage />} />
-          <Route path="tithes" element={<MyTithesPage />} />
-          <Route path="expenses" element={<MyExpensesPage />} />
-          <Route path="profile" element={<ProfilePage />} />
+          <Route index element={<RouteBoundary message="Carregando início..."><MemberHomePage /></RouteBoundary>} />
+          <Route path="directory" element={<RouteBoundary message="Carregando diretório..."><MemberDirectoryPage /></RouteBoundary>} />
+          <Route path="events" element={<RouteBoundary message="Carregando eventos..."><MemberEventsPage /></RouteBoundary>} />
+          <Route path="missions" element={<RouteBoundary message="Carregando missões..."><MemberMissionsPage /></RouteBoundary>} />
+          <Route path="bible" element={<RouteBoundary message="Carregando Bíblia..."><BiblePage /></RouteBoundary>} />
+          <Route path="hymnal" element={<RouteBoundary message="Carregando hinário..."><HymnalPage /></RouteBoundary>} />
+          <Route path="manual" element={<RouteBoundary message="Carregando manual..."><ManualPage /></RouteBoundary>} />
+          <Route path="education" element={<RouteBoundary message="Carregando educação..."><MemberEBDPage /></RouteBoundary>} />
+          <Route path="prayer" element={<RouteBoundary message="Carregando oração..."><MemberPrayerPage /></RouteBoundary>} />
+          <Route path="devotionals" element={<RouteBoundary message="Carregando devocionais..."><MemberDevotionalsPage /></RouteBoundary>} />
+          <Route path="governance" element={<RouteBoundary message="Carregando governança..."><MemberGovernancePage /></RouteBoundary>} />
+          <Route path="tithes" element={<RouteBoundary message="Carregando dízimos..."><MyTithesPage /></RouteBoundary>} />
+          <Route path="expenses" element={<RouteBoundary message="Carregando despesas..."><MyExpensesPage /></RouteBoundary>} />
+          <Route path="profile" element={<RouteBoundary message="Carregando perfil..."><ProfilePage /></RouteBoundary>} />
         </Route>
 
         {/* Legacy redirects for /membro/* */}
@@ -144,8 +185,7 @@ function App() {
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to={ROUTES.PUBLIC.HOME} replace />} />
-        </Routes>
-      </Suspense>
+      </Routes>
       <Toaster />
     </>
   );

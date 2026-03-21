@@ -1,17 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../../../components/ui/dialog';
 import { Button } from '../../../components/ui/button';
 import { Label } from '../../../components/ui/label';
-import { Loader2, Shield, User } from 'lucide-react';
+import { AlertCircle, Loader2, Shield, User } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import type { Member } from '../../../types';
 
 interface InviteMemberDialogProps {
     isOpen: boolean;
     onClose: () => void;
-    onInvite: (member: Member, role: 'ADMIN' | 'MEMBER') => void;
+    onInvite: (member: Member, role: 'ADMIN' | 'MEMBER') => Promise<void>;
     member: Member | null;
     isLoading?: boolean;
+}
+
+interface InviteMemberDialogState {
+    error: string | null;
+    success: boolean;
 }
 
 export function InviteMemberDialog({
@@ -23,6 +28,30 @@ export function InviteMemberDialog({
 }: InviteMemberDialogProps) {
     const initialRole = (member?.system_role as 'ADMIN' | 'MEMBER') || 'MEMBER';
     const [role, setRole] = useState<'ADMIN' | 'MEMBER'>(initialRole);
+    const [state, submitAction, isPending] = useActionState<InviteMemberDialogState, FormData>(
+        async (_previousState, formData) => {
+            if (!member) {
+                return { error: 'Membro não encontrado.', success: false };
+            }
+
+            const nextRole = formData.get('role');
+            if (nextRole !== 'ADMIN' && nextRole !== 'MEMBER') {
+                return { error: 'Selecione um nível de acesso válido.', success: false };
+            }
+
+            try {
+                await onInvite(member, nextRole);
+                onClose();
+                return { error: null, success: true };
+            } catch (error) {
+                return {
+                    error: error instanceof Error ? error.message : 'Não foi possível enviar o convite.',
+                    success: false,
+                };
+            }
+        },
+        { error: null, success: false },
+    );
 
     useEffect(() => {
         const newRole = (member?.system_role as 'ADMIN' | 'MEMBER') || 'MEMBER';
@@ -31,10 +60,7 @@ export function InviteMemberDialog({
     }, [member?.id]);
 
     if (!member) return null;
-
-    const handleInvite = () => {
-        onInvite(member, role);
-    };
+    const isSubmitting = isLoading || isPending;
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
@@ -47,7 +73,9 @@ export function InviteMemberDialog({
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="grid gap-4 py-4">
+                <form action={submitAction} className="grid gap-4 py-4">
+                    <input type="hidden" name="role" value={role} />
+
                     <div className="space-y-3">
                         <Label id="invite-member-role-label">Nível de Acesso</Label>
                         <div className="space-y-2" role="radiogroup" aria-labelledby="invite-member-role-label">
@@ -89,17 +117,24 @@ export function InviteMemberDialog({
                             </button>
                         </div>
                     </div>
-                </div>
 
-                <DialogFooter>
-                    <Button variant="outline" onClick={onClose} disabled={isLoading}>
-                        Cancelar
-                    </Button>
-                    <Button onClick={handleInvite} disabled={isLoading} className="gap-2">
-                        {isLoading && <Loader2 size={16} className="animate-spin" aria-hidden="true" />}
-                        Enviar Convite
-                    </Button>
-                </DialogFooter>
+                    {state.error && (
+                        <p className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                            <span>{state.error}</span>
+                        </p>
+                    )}
+
+                    <DialogFooter>
+                        <Button variant="outline" onClick={onClose} disabled={isSubmitting} type="button">
+                            Cancelar
+                        </Button>
+                        <Button disabled={isSubmitting} className="gap-2" type="submit">
+                            {isSubmitting && <Loader2 size={16} className="animate-spin" aria-hidden="true" />}
+                            Enviar Convite
+                        </Button>
+                    </DialogFooter>
+                </form>
             </DialogContent>
         </Dialog>
     );

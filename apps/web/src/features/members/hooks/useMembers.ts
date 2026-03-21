@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getMembers } from '../data/members.data';
 import { membersService } from '../../../services/members';
 import type { MemberCreateData } from '../../../types/members.types';
 import { toast } from 'sonner';
@@ -8,7 +9,7 @@ export const MEMBERS_QUERY_KEY = 'members';
 export function useMembers(tenantId: string | undefined) {
     return useQuery({
         queryKey: [MEMBERS_QUERY_KEY, tenantId],
-        queryFn: () => membersService.listMembers(tenantId!),
+        queryFn: () => getMembers(tenantId!),
         enabled: !!tenantId,
         staleTime: 1000 * 60 * 5, // 5 minutos
     });

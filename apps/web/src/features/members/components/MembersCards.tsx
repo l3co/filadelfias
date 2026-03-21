@@ -13,6 +13,7 @@ interface MembersCardsProps {
     isLoading?: boolean;
     onEditMember?: (member: Member) => void;
     onInviteMember?: (member: Member) => void;
+    pendingInviteMemberIds?: string[];
 }
 
 const getStatusVariant = (status: string) => {
@@ -41,6 +42,7 @@ const MemberCard = memo(function MemberCard({
     member, 
     onEdit, 
     onInvite,
+    pendingInviteMemberIds,
     officeLabels,
     statusLabels,
     functionLabels,
@@ -48,12 +50,14 @@ const MemberCard = memo(function MemberCard({
     member: Member; 
     onEdit?: (member: Member) => void;
     onInvite?: (member: Member) => void;
+    pendingInviteMemberIds?: string[];
     officeLabels: Record<string, string>;
     statusLabels: Record<string, string>;
     functionLabels: Record<string, string>;
 }) {
     const initials = member.full_name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
     const gradientClass = officeColors[member.office] || 'from-gray-500 to-gray-600';
+    const isInvitePending = pendingInviteMemberIds?.includes(member.id) ?? false;
 
     return (
         <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 overflow-hidden" data-testid={`member-card-${member.id}`} role="listitem">
@@ -71,10 +75,13 @@ const MemberCard = memo(function MemberCard({
                             <Button
                                 variant="ghost"
                                 size="sm"
+                                disabled={isInvitePending}
                                 onClick={() => onInvite?.(member)}
                                 className="h-8 w-8 p-0 bg-white/20 hover:bg-white/40 text-white"
-                                title="Convidar para a plataforma"
-                                aria-label={`Convidar ${member.full_name} para a plataforma`}
+                                title={isInvitePending ? 'Enviando convite' : 'Convidar para a plataforma'}
+                                aria-label={isInvitePending
+                                    ? `Enviando convite para ${member.full_name}`
+                                    : `Convidar ${member.full_name} para a plataforma`}
                             >
                                 <UserPlus size={14} aria-hidden="true" />
                             </Button>
@@ -152,6 +159,15 @@ const MemberCard = memo(function MemberCard({
                             </div>
                         </div>
                     )}
+
+                    {isInvitePending && (
+                        <div className="mt-3 pt-3 border-t border-gray-100">
+                            <div className="flex items-center gap-2 text-xs text-amber-600">
+                                <div className="w-2 h-2 rounded-full bg-amber-500" />
+                                <span>Convite em envio</span>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </CardContent>
         </Card>
@@ -162,7 +178,8 @@ export const MembersCards = memo(function MembersCards({
     members, 
     isLoading, 
     onEditMember, 
-    onInviteMember 
+    onInviteMember,
+    pendingInviteMemberIds,
 }: MembersCardsProps) {
     // Labels do backend - fonte única de verdade
     const officeLabels = useEnumLabelsMap('ecclesiastical_offices');
@@ -195,6 +212,7 @@ export const MembersCards = memo(function MembersCards({
                     member={member} 
                     onEdit={onEditMember}
                     onInvite={onInviteMember}
+                    pendingInviteMemberIds={pendingInviteMemberIds}
                     officeLabels={officeLabels}
                     statusLabels={statusLabels}
                     functionLabels={functionLabels}

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { startTransition, useActionState, useEffect } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
@@ -24,10 +24,15 @@ export interface MemberFormState extends MemberFormData {
 
 interface MemberFormProps {
   member?: Member | null;
-  onSubmit: (data: MemberFormData) => void;
+  onSubmit: (data: MemberFormData) => Promise<void>;
   onCancel: () => void;
   isLoading?: boolean;
   submitLabel?: string;
+}
+
+interface MemberFormActionState {
+  error: string | null;
+  success: boolean;
 }
 
 export function MemberForm({
@@ -38,6 +43,20 @@ export function MemberForm({
   submitLabel = 'Salvar'
 }: MemberFormProps) {
   const { fetchAddress, isLoading: isFetchingCEP } = useViaCEP();
+  const [submissionState, submitMemberAction, isPending] = useActionState<MemberFormActionState, MemberFormData>(
+    async (_previousState, data) => {
+      try {
+        await onSubmit(data);
+        return { error: null, success: true };
+      } catch (error) {
+        return {
+          error: error instanceof Error ? error.message : 'Não foi possível salvar o membro.',
+          success: false,
+        };
+      }
+    },
+    { error: null, success: false },
+  );
 
   const { register, handleSubmit, setValue, control, formState: { errors, isDirty } } = useForm<MemberFormState>({
     defaultValues: {
@@ -119,11 +138,14 @@ export function MemberForm({
     // Set system_role based on checkbox
     cleanedData.system_role = isAdmin ? 'ADMIN' : 'MEMBER';
 
-    onSubmit(cleanedData);
+    startTransition(() => {
+      submitMemberAction(cleanedData);
+    });
   };
 
   const isEditMode = !!member;
   const canSubmit = isEditMode ? isDirty : true;
+  const isSubmitting = isLoading || isPending;
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6 py-4">
@@ -454,9 +476,9 @@ export function MemberForm({
         </Button>
         <Button
           type="submit"
-          disabled={!canSubmit || isLoading}
+          disabled={!canSubmit || isSubmitting}
         >
-          {isLoading ? (
+          {isSubmitting ? (
             <>
               <Loader2 size={16} className="animate-spin mr-2" aria-hidden="true" />
               Salvando...
@@ -466,6 +488,12 @@ export function MemberForm({
           )}
         </Button>
       </div>
+
+      {submissionState.error && (
+        <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
+          {submissionState.error}
+        </p>
+      )}
     </form>
   );
 }

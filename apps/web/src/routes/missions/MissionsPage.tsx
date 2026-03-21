@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { Suspense, startTransition, useMemo, useOptimistic, useState } from 'react';
 import { Plus, Globe, HandHeart, Heart, MapPinned, Mail, Clock3 } from 'lucide-react';
 import { useAuthTenant } from '../../contexts/AuthContext';
 import {
@@ -13,6 +13,7 @@ import { useDeletePrayerRequest, usePrayerRequests } from '../../features/prayer
 import { MissionaryList } from '../../features/missions/components/MissionaryList';
 import { CreateMissionaryDialog } from '../../features/missions/components/CreateMissionaryDialog';
 import { CreateSocialProjectDialog } from '../../features/missions/components/CreateSocialProjectDialog';
+import { MissionsSummary } from '../../features/missions/client/MissionsSummary';
 import { SocialProjectList } from '../../features/missions/components/SocialProjectList';
 import { Button } from '../../components/ui/button';
 import { PageHeaderWithIcon } from '../../components/PageHeader';
@@ -22,8 +23,8 @@ import type { CreateSocialProjectDTO, Missionary, SocialProject } from '../../se
 
 export function MissionsPage() {
     const tenant = useAuthTenant();
-    const { data: missionaries, isLoading } = useMissions(tenant?.id);
-    const { data: socialProjects, isLoading: isLoadingProjects } = useSocialProjects(tenant?.id);
+    const { data: missionaries, dataUpdatedAt: missionariesUpdatedAt, isLoading } = useMissions(tenant?.id);
+    const { data: socialProjects, dataUpdatedAt: projectsUpdatedAt, isLoading: isLoadingProjects } = useSocialProjects(tenant?.id);
     const { data: prayerRequests, isLoading: isLoadingPrayerRequests } = usePrayerRequests(tenant?.id);
     const deleteMissionary = useDeleteMissionary(tenant?.id);
     const deletePrayerRequest = useDeletePrayerRequest(tenant?.id);
@@ -35,11 +36,39 @@ export function MissionsPage() {
     const [editingMissionary, setEditingMissionary] = useState<Missionary | null>(null);
     const [editingSocialProject, setEditingSocialProject] = useState<SocialProject | null>(null);
     const [prayerFilter, setPrayerFilter] = useState<'all' | 'missionaries' | 'projects'>('all');
-    const missionaryCount = missionaries?.length ?? 0;
-    const countryCount = new Set((missionaries ?? []).map((missionary) => missionary.country_code)).size;
-    const newsletterCount = (missionaries ?? []).filter((missionary) => missionary.newsletter_url).length;
-    const socialProjectCount = socialProjects?.length ?? 0;
-    const activeSocialProjectCount = (socialProjects ?? []).filter((project) => project.status === 'ACTIVE').length;
+    const [missionaryPendingDeleteIds, updateMissionaryPendingDeleteIds] = useOptimistic<
+        string[],
+        { missionaryId: string; type: 'start' | 'finish' }
+    >([], (currentState, action) => (
+        action.type === 'start'
+            ? currentState.includes(action.missionaryId)
+                ? currentState
+                : [...currentState, action.missionaryId]
+            : currentState.filter((missionaryId) => missionaryId !== action.missionaryId)
+    ));
+    const [projectPendingDeleteIds, updateProjectPendingDeleteIds] = useOptimistic<
+        string[],
+        { projectId: string; type: 'start' | 'finish' }
+    >([], (currentState, action) => (
+        action.type === 'start'
+            ? currentState.includes(action.projectId)
+                ? currentState
+                : [...currentState, action.projectId]
+            : currentState.filter((projectId) => projectId !== action.projectId)
+    ));
+    const optimisticMissionaries = useMemo(
+        () => (missionaries ?? []).filter((missionary) => !missionaryPendingDeleteIds.includes(missionary.id)),
+        [missionaries, missionaryPendingDeleteIds],
+    );
+    const optimisticSocialProjects = useMemo(
+        () => (socialProjects ?? []).filter((project) => !projectPendingDeleteIds.includes(project.id)),
+        [projectPendingDeleteIds, socialProjects],
+    );
+    const missionaryCount = optimisticMissionaries.length;
+    const countryCount = new Set(optimisticMissionaries.map((missionary) => missionary.country_code)).size;
+    const newsletterCount = optimisticMissionaries.filter((missionary) => missionary.newsletter_url).length;
+    const socialProjectCount = optimisticSocialProjects.length;
+    const activeSocialProjectCount = optimisticSocialProjects.filter((project) => project.status === 'ACTIVE').length;
     const linkedMissionPrayerCount = (prayerRequests ?? []).filter((request) => !!request.missionary_id).length;
     const linkedProjectPrayerCount = (prayerRequests ?? []).filter((request) => !!request.social_project_id).length;
     const totalPrayerCount = prayerRequests?.length ?? 0;
@@ -81,8 +110,18 @@ export function MissionsPage() {
         return linkedRequests;
     }, [prayerFilter, prayerRequests]);
 
-    const handleDelete = (missionaryId: string) => {
-        deleteMissionary.mutate(missionaryId);
+    const handleDelete = async (missionaryId: string) => {
+        startTransition(() => {
+            updateMissionaryPendingDeleteIds({ missionaryId, type: 'start' });
+        });
+
+        try {
+            await deleteMissionary.mutateAsync(missionaryId);
+        } finally {
+            startTransition(() => {
+                updateMissionaryPendingDeleteIds({ missionaryId, type: 'finish' });
+            });
+        }
     };
 
     const handleCreate = () => {
@@ -100,24 +139,17 @@ export function MissionsPage() {
         setEditingMissionary(null);
     };
 
-    const handleCreateSocialProject = (data: CreateSocialProjectDTO) => {
+    const handleCreateSocialProject = async (data: CreateSocialProjectDTO) => {
         if (editingSocialProject) {
-            updateSocialProject.mutate(
-                { projectId: editingSocialProject.id, data },
-                { onSuccess: () => {
-                    setEditingSocialProject(null);
-                    setIsSocialProjectDialogOpen(false);
-                } },
-            );
+            await updateSocialProject.mutateAsync({ projectId: editingSocialProject.id, data });
+            setEditingSocialProject(null);
+            setIsSocialProjectDialogOpen(false);
             return;
         }
 
-        createSocialProject.mutate(data, {
-            onSuccess: () => {
-                setEditingSocialProject(null);
-                setIsSocialProjectDialogOpen(false);
-            },
-        });
+        await createSocialProject.mutateAsync(data);
+        setEditingSocialProject(null);
+        setIsSocialProjectDialogOpen(false);
     };
 
     const handleEditSocialProject = (project: SocialProject) => {
@@ -208,6 +240,22 @@ export function MissionsPage() {
                     <p className="text-xs text-amber-600">orações registradas</p>
                 </div>
             </div>
+
+            <Suspense
+                fallback={
+                    <div className="grid gap-4 md:grid-cols-3">
+                        <div className="h-28 rounded-2xl bg-slate-100" />
+                        <div className="h-28 rounded-2xl bg-slate-100" />
+                        <div className="h-28 rounded-2xl bg-slate-100" />
+                    </div>
+                }
+            >
+                <MissionsSummary
+                    tenantId={tenant.id}
+                    missionariesRefreshKey={String(missionariesUpdatedAt)}
+                    projectsRefreshKey={String(projectsUpdatedAt)}
+                />
+            </Suspense>
 
             <section className="rounded-3xl border border-indigo-100 bg-white p-6 shadow-sm">
                 <div className="mb-4 flex items-center gap-2 text-indigo-700">
@@ -342,9 +390,9 @@ export function MissionsPage() {
                 </div>
             </section>
 
-            <MissionaryList 
-                missionaries={missionaries} 
-                isLoading={isLoading} 
+            <MissionaryList
+                missionaries={optimisticMissionaries}
+                isLoading={isLoading}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
             />
@@ -376,9 +424,22 @@ export function MissionsPage() {
                 <SocialProjectList
                     isDeleting={deleteSocialProject.isPending}
                     isLoading={isLoadingProjects}
+                    onDelete={async (projectId) => {
+                        startTransition(() => {
+                            updateProjectPendingDeleteIds({ projectId, type: 'start' });
+                        });
+
+                        try {
+                            await deleteSocialProject.mutateAsync(projectId);
+                        } finally {
+                            startTransition(() => {
+                                updateProjectPendingDeleteIds({ projectId, type: 'finish' });
+                            });
+                        }
+                    }}
                     onEdit={handleEditSocialProject}
-                    onDelete={(projectId) => deleteSocialProject.mutate(projectId)}
-                    projects={socialProjects}
+                    pendingDeleteIds={projectPendingDeleteIds}
+                    projects={optimisticSocialProjects}
                 />
             </section>
 

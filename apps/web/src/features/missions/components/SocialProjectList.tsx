@@ -9,6 +9,7 @@ type Props = {
   isLoading: boolean;
   onEdit: (project: SocialProject) => void;
   onDelete: (projectId: string) => void;
+  pendingDeleteIds?: string[];
   projects?: SocialProject[];
 };
 
@@ -26,7 +27,7 @@ const STATUS_COLORS: Record<string, string> = {
   COMPLETED: 'bg-blue-100 text-blue-700',
 };
 
-export function SocialProjectList({ isDeleting, isLoading, onDelete, onEdit, projects }: Props) {
+export function SocialProjectList({ isDeleting, isLoading, onDelete, onEdit, pendingDeleteIds, projects }: Props) {
   if (isLoading) {
     return <p className="text-sm text-gray-500">Carregando projetos sociais...</p>;
   }
@@ -66,7 +67,7 @@ export function SocialProjectList({ isDeleting, isLoading, onDelete, onEdit, pro
                 <Pencil className="h-4 w-4 text-blue-500" aria-hidden="true" />
               </Button>
               <Button
-                isLoading={isDeleting}
+                isLoading={isDeleting && pendingDeleteIds?.includes(project.id)}
                 onClick={() => onDelete(project.id)}
                 size="sm"
                 variant="ghost"

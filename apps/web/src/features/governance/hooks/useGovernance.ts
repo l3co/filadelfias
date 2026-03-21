@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getCouncilMeetings, getCouncils } from '../data/governance.data';
 import { governanceService } from '../../../services/governance';
 import type { CreateCouncilDTO, CreateMeetingDTO, UpdateMeetingDTO } from '../../../services/governance';
 import { toast } from 'sonner';
@@ -9,7 +10,7 @@ export const MEETINGS_KEY = 'meetings';
 export function useGovernance(tenantId: string | undefined) {
     return useQuery({
         queryKey: [COUNCILS_KEY, tenantId],
-        queryFn: () => governanceService.listCouncils(tenantId!),
+        queryFn: () => getCouncils(tenantId!),
         enabled: !!tenantId,
         staleTime: 1000 * 60 * 60, // 1 hora
     });
@@ -100,7 +101,7 @@ export function useRemoveCouncilMember(tenantId: string | undefined) {
 export function useMeetings(tenantId: string | undefined, councilId: string | undefined) {
     return useQuery({
         queryKey: [MEETINGS_KEY, tenantId, councilId],
-        queryFn: () => governanceService.listMeetings(tenantId!, councilId!),
+        queryFn: () => getCouncilMeetings(tenantId!, councilId!),
         enabled: !!tenantId && !!councilId,
         staleTime: 1000 * 60 * 5, // 5 minutes
     });

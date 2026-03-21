@@ -177,12 +177,9 @@ export function useTreasuryPageData() {
         },
       });
     },
-    handleAssetSubmit: (data: CreateAssetDTO) => {
-      createAsset.mutate(data, {
-        onSuccess: () => {
-          setIsAssetDialogOpen(false);
-        },
-      });
+    handleAssetSubmit: async (data: CreateAssetDTO) => {
+      await createAsset.mutateAsync(data);
+      setIsAssetDialogOpen(false);
     },
   };
 }

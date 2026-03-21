@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getMissionaries, getSocialProjects } from '../data/missions.data';
 import { missionService } from '../../../services/missions';
 import type {
   CreateCountryDTO,
@@ -47,7 +48,7 @@ export function useCreateCountry(tenantId: string | undefined) {
 export function useMissions(tenantId: string | undefined) {
     return useQuery({
         queryKey: [MISSIONS_KEY, tenantId],
-        queryFn: () => missionService.listMissionaries(tenantId!),
+        queryFn: () => getMissionaries(tenantId!),
         enabled: !!tenantId,
         staleTime: 1000 * 60 * 60, // 1 hora
     });
@@ -102,7 +103,7 @@ export function useUpdateMissionary(tenantId: string | undefined) {
 export function useSocialProjects(tenantId: string | undefined) {
     return useQuery({
         queryKey: [SOCIAL_PROJECTS_KEY, tenantId],
-        queryFn: () => missionService.listSocialProjects(tenantId!),
+        queryFn: () => getSocialProjects(tenantId!),
         enabled: !!tenantId,
         staleTime: 1000 * 60 * 10,
     });

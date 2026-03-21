@@ -1,3 +1,4 @@
+import { startTransition, useActionState, useEffect } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { Button } from '../../../components/ui/button';
 import {
@@ -17,7 +18,7 @@ import {
   SelectValue,
 } from '../../../components/ui/select';
 import { Textarea } from '../../../components/ui/textarea';
-import { useEffect } from 'react';
+import { AlertCircle } from 'lucide-react';
 import type { CreateSocialProjectDTO, SocialProject } from '../../../services/missions';
 
 type Props = {
@@ -25,8 +26,13 @@ type Props = {
   isOpen: boolean;
   isSubmitting: boolean;
   onClose: () => void;
-  onSubmit: (data: CreateSocialProjectDTO) => void;
+  onSubmit: (data: CreateSocialProjectDTO) => void | Promise<void>;
 };
+
+interface SocialProjectActionState {
+  error: string | null;
+  success: boolean;
+}
 
 const STATUS_OPTIONS = [
   { value: 'PLANNING', label: 'Planejamento' },
@@ -50,6 +56,21 @@ export function CreateSocialProjectDialog({ initialData, isOpen, isSubmitting, o
   });
 
   const status = useWatch({ control, name: 'status' }) ?? 'PLANNING';
+  const [submissionState, submitProjectAction, isPending] = useActionState<SocialProjectActionState, CreateSocialProjectDTO>(
+    async (_previousState, data) => {
+      try {
+        await onSubmit(data);
+        reset({ status: 'PLANNING' });
+        return { error: null, success: true };
+      } catch (error) {
+        return {
+          error: error instanceof Error ? error.message : 'Não foi possível salvar o projeto social.',
+          success: false,
+        };
+      }
+    },
+    { error: null, success: false },
+  );
 
   useEffect(() => {
     if (!isOpen) {
@@ -76,16 +97,17 @@ export function CreateSocialProjectDialog({ initialData, isOpen, isSubmitting, o
   }, [initialData, isOpen, reset]);
 
   const submit = (data: CreateSocialProjectDTO) => {
-    onSubmit({
-      ...data,
-      contact_info: data.contact_info?.trim() || undefined,
-      coordinator_name: data.coordinator_name?.trim() || undefined,
-      end_date: data.end_date || undefined,
-      location: data.location?.trim() || undefined,
-      start_date: data.start_date || undefined,
-      target_audience: data.target_audience?.trim() || undefined,
+    startTransition(() => {
+      submitProjectAction({
+        ...data,
+        contact_info: data.contact_info?.trim() || undefined,
+        coordinator_name: data.coordinator_name?.trim() || undefined,
+        end_date: data.end_date || undefined,
+        location: data.location?.trim() || undefined,
+        start_date: data.start_date || undefined,
+        target_audience: data.target_audience?.trim() || undefined,
+      });
     });
-    reset({ status: 'PLANNING' });
   };
 
   return (
@@ -169,11 +191,18 @@ export function CreateSocialProjectDialog({ initialData, isOpen, isSubmitting, o
             </div>
           </div>
 
+          {submissionState.error && (
+            <p className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+              <span>{submissionState.error}</span>
+            </p>
+          )}
+
           <DialogFooter>
             <Button onClick={onClose} type="button" variant="outline">
               Cancelar
             </Button>
-            <Button isLoading={isSubmitting} type="submit">
+            <Button isLoading={isSubmitting || isPending} type="submit">
               {initialData ? 'Salvar alterações' : 'Salvar projeto'}
             </Button>
           </DialogFooter>

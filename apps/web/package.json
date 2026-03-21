@@ -49,6 +49,9 @@
     "serve": "^14.2.5",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
+    "vite-plugin-pwa": "^1.2.0",
+    "workbox-build": "^7.4.0",
+    "workbox-window": "^7.4.0",
     "zod": "^4.3.5"
   },
   "devDependencies": {

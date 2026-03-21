@@ -24,15 +24,15 @@ export function MemberDialog({ isOpen, onClose, tenantId, member }: MemberDialog
   const isEditMode = !!member;
   const isLoading = createMember.isPending || updateMember.isPending;
 
-  const handleSubmit = (data: MemberFormData) => {
+  const handleSubmit = async (data: MemberFormData) => {
     if (isEditMode && member) {
-      updateMember.mutate(
-        { memberId: member.id, data },
-        { onSuccess: onClose }
-      );
-    } else {
-      createMember.mutate(data, { onSuccess: onClose });
+      await updateMember.mutateAsync({ memberId: member.id, data });
+      onClose();
+      return;
     }
+
+    await createMember.mutateAsync(data);
+    onClose();
   };
 
   return (

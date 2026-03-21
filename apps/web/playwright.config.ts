@@ -12,7 +12,7 @@ const testDir = defineBddConfig({
 });
 
 export default defineConfig({
-  testDir,
+  testDir: process.env.PLAYWRIGHT_PWA === '1' ? 'e2e/pwa' : testDir,
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,

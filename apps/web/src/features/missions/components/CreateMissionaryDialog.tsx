@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { startTransition, useActionState, useEffect, useMemo } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
@@ -14,12 +14,18 @@ import { CreatableCombobox } from "../../../components/ui/creatable-combobox";
 import type { ComboboxOption } from "../../../components/ui/creatable-combobox";
 import { useCreateMissionary, useCountries, useCreateCountry, useUpdateMissionary } from '../hooks/useMissions';
 import type { CreateMissionaryDTO, Missionary } from '../../../services/missions';
+import { AlertCircle } from 'lucide-react';
 
 type Props = {
     isOpen: boolean;
     onClose: () => void;
     tenantId: string;
     initialData?: Missionary | null;
+}
+
+interface MissionaryActionState {
+    error: string | null;
+    success: boolean;
 }
 
 export function CreateMissionaryDialog({ isOpen, onClose, tenantId, initialData }: Props) {
@@ -29,6 +35,27 @@ export function CreateMissionaryDialog({ isOpen, onClose, tenantId, initialData 
     const { data: countries } = useCountries(tenantId);
     const createCountry = useCreateCountry(tenantId);
     const selectedCountry = useWatch({ control, name: 'country_code' }) ?? '';
+    const [submissionState, submitMissionaryAction, isPending] = useActionState<MissionaryActionState, CreateMissionaryDTO>(
+        async (_previousState, data) => {
+            try {
+                if (initialData?.id) {
+                    await updateMissionary.mutateAsync({ missionaryId: initialData.id, data });
+                } else {
+                    await createMissionary.mutateAsync(data);
+                }
+
+                reset();
+                onClose();
+                return { error: null, success: true };
+            } catch (error) {
+                return {
+                    error: error instanceof Error ? error.message : 'Não foi possível salvar o missionário.',
+                    success: false,
+                };
+            }
+        },
+        { error: null, success: false },
+    );
 
     const countryOptions: ComboboxOption[] = useMemo(() => {
         if (!countries) return [];
@@ -46,22 +73,8 @@ export function CreateMissionaryDialog({ isOpen, onClose, tenantId, initialData 
     };
 
     const onSubmit = (data: CreateMissionaryDTO) => {
-        const onSuccess = () => {
-            reset();
-            onClose();
-        };
-
-        if (initialData?.id) {
-            updateMissionary.mutate({ missionaryId: initialData.id, data }, {
-                onSuccess,
-            });
-            return;
-        }
-
-        createMissionary.mutate(data, {
-            onSuccess: () => {
-                onSuccess();
-            }
+        startTransition(() => {
+            submitMissionaryAction(data);
         });
     };
 
@@ -177,13 +190,20 @@ export function CreateMissionaryDialog({ isOpen, onClose, tenantId, initialData 
                         />
                     </div>
 
+                    {submissionState.error && (
+                        <p className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                            <span>{submissionState.error}</span>
+                        </p>
+                    )}
+
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={onClose}>
                             Cancelar
                         </Button>
                         <Button
                             type="submit"
-                            isLoading={createMissionary.isPending || updateMissionary.isPending}
+                            isLoading={createMissionary.isPending || updateMissionary.isPending || isPending}
                         >
                             {initialData ? 'Atualizar' : 'Salvar'}
                         </Button>

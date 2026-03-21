@@ -1,4 +1,4 @@
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { Button } from '../../../components/ui/button';
 import {
   Dialog,
@@ -40,11 +40,11 @@ export function CreateAssetDialog({
   onSubmit,
 }: CreateAssetDialogProps) {
   const {
+    control,
     register,
     handleSubmit,
     reset,
     setValue,
-    watch,
     formState: { errors },
   } = useForm<CreateAssetDTO>({
     defaultValues: {
@@ -53,7 +53,7 @@ export function CreateAssetDialog({
     },
   });
 
-  const selectedCondition = watch('condition');
+  const selectedCondition = useWatch({ control, name: 'condition' }) ?? 'GOOD';
 
   const submit = (data: CreateAssetDTO) => {
     onSubmit({

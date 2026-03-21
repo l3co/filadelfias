@@ -41,7 +41,7 @@ export interface CreateMissionaryDTO {
     newsletter_url?: string;
 }
 
-export interface UpdateMissionaryDTO extends Partial<CreateMissionaryDTO> {}
+export type UpdateMissionaryDTO = Partial<CreateMissionaryDTO>;
 
 export interface SocialProject {
     id: string;
@@ -70,7 +70,7 @@ export interface CreateSocialProjectDTO {
     end_date?: string;
 }
 
-export interface UpdateSocialProjectDTO extends Partial<CreateSocialProjectDTO> {}
+export type UpdateSocialProjectDTO = Partial<CreateSocialProjectDTO>;
 
 export const missionService = {
     // Countries

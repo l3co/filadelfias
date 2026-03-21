@@ -1,5 +1,5 @@
 import { createBdd } from 'playwright-bdd';
-import { expect } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 import { testUsers } from '../support/fixtures';
 
 const { Given, When, Then } = createBdd();
@@ -17,7 +17,7 @@ let lastPendingRecordNote: string | null = null;
 // Tithe-specific Steps
 // ============================================================================
 
-async function loginAs(page: any, email: string, password: string) {
+async function loginAs(page: Page, email: string, password: string) {
     await page.context().clearCookies();
     await page.goto('/login');
     await page.evaluate(() => {
@@ -30,7 +30,7 @@ async function loginAs(page: any, email: string, password: string) {
     await page.waitForURL(/\/member/, { timeout: 10000 });
 }
 
-async function ensurePendingTithe(page: any) {
+async function ensurePendingTithe(page: Page) {
     await loginAs(page, testUsers.member.email, testUsers.member.password);
     await page.goto('/member/tithes');
     await page.waitForLoadState('networkidle').catch(() => {});

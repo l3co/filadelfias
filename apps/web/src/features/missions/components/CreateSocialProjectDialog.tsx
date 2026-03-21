@@ -1,4 +1,4 @@
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { Button } from '../../../components/ui/button';
 import {
   Dialog,
@@ -37,11 +37,11 @@ const STATUS_OPTIONS = [
 
 export function CreateSocialProjectDialog({ initialData, isOpen, isSubmitting, onClose, onSubmit }: Props) {
   const {
+    control,
     register,
     handleSubmit,
     setValue,
     reset,
-    watch,
     formState: { errors },
   } = useForm<CreateSocialProjectDTO>({
     defaultValues: {
@@ -49,7 +49,7 @@ export function CreateSocialProjectDialog({ initialData, isOpen, isSubmitting, o
     },
   });
 
-  const status = watch('status');
+  const status = useWatch({ control, name: 'status' }) ?? 'PLANNING';
 
   useEffect(() => {
     if (!isOpen) {

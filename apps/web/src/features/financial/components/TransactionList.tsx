@@ -89,14 +89,6 @@ export const TransactionList = memo(function TransactionList({
     onMonthChange,
     onYearChange
 }: TransactionListProps) {
-    if (isLoading) {
-        return (
-            <Card className="p-12 flex items-center justify-center">
-                <p className="text-gray-500">Carregando movimentações...</p>
-            </Card>
-        );
-    }
-
     const currentMonth = filters?.month || new Date().getMonth() + 1;
     const currentYear = filters?.year || new Date().getFullYear();
     const currentPage = filters?.page || 1;
@@ -130,6 +122,14 @@ export const TransactionList = memo(function TransactionList({
             }
         }
     }, [currentMonth, currentYear, onMonthChange, onYearChange]);
+
+    if (isLoading) {
+        return (
+            <Card className="p-12 flex items-center justify-center">
+                <p className="text-gray-500">Carregando movimentações...</p>
+            </Card>
+        );
+    }
 
     if (!transactions || transactions.length === 0) {
         return (

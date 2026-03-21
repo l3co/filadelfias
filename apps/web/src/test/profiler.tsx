@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { Profiler, type ProfilerOnRenderCallback, type ReactNode } from 'react';
 
 export interface ProfilerEntry {

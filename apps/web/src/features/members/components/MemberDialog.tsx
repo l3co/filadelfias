@@ -1,6 +1,7 @@
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "../../../components/ui/dialog";
@@ -51,6 +52,11 @@ export function MemberDialog({ isOpen, onClose, tenantId, member }: MemberDialog
               </>
             )}
           </DialogTitle>
+          <DialogDescription>
+            {isEditMode
+              ? 'Atualize os dados cadastrais do membro selecionado.'
+              : 'Preencha os dados para cadastrar um novo membro.'}
+          </DialogDescription>
         </DialogHeader>
 
         <MemberForm

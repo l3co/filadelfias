@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useEffect, useMemo } from 'react';
+import { useForm, useWatch } from 'react-hook-form';
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import {
@@ -23,12 +23,12 @@ type Props = {
 }
 
 export function CreateMissionaryDialog({ isOpen, onClose, tenantId, initialData }: Props) {
-    const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<CreateMissionaryDTO>();
+    const { control, register, handleSubmit, reset, setValue, formState: { errors } } = useForm<CreateMissionaryDTO>();
     const createMissionary = useCreateMissionary(tenantId);
     const updateMissionary = useUpdateMissionary(tenantId);
     const { data: countries } = useCountries(tenantId);
     const createCountry = useCreateCountry(tenantId);
-    const [selectedCountry, setSelectedCountry] = useState('');
+    const selectedCountry = useWatch({ control, name: 'country_code' }) ?? '';
 
     const countryOptions: ComboboxOption[] = useMemo(() => {
         if (!countries) return [];
@@ -42,14 +42,12 @@ export function CreateMissionaryDialog({ isOpen, onClose, tenantId, initialData 
     };
 
     const handleCountryChange = (value: string) => {
-        setSelectedCountry(value);
         setValue('country_code', value);
     };
 
     const onSubmit = (data: CreateMissionaryDTO) => {
         const onSuccess = () => {
             reset();
-            setSelectedCountry('');
             onClose();
         };
 
@@ -80,7 +78,6 @@ export function CreateMissionaryDialog({ isOpen, onClose, tenantId, initialData 
             photo_url: initialData?.photo_url ?? '',
             newsletter_url: initialData?.newsletter_url ?? '',
         });
-        setSelectedCountry(initialData?.country_code ?? '');
     }, [initialData, isOpen, reset]);
 
     return (

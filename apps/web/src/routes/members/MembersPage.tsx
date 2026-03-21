@@ -124,6 +124,19 @@ export function MembersPage() {
         });
     }, []);
 
+    const memberCount = members?.length || 0;
+    const officeFilters = useMemo(
+        () => [
+            { key: null, label: 'Todos', count: memberCount },
+            ...Object.entries(officeLabels).map(([key, label]) => ({
+                key,
+                label,
+                count: officeCounts[key],
+            })),
+        ],
+        [memberCount, officeCounts],
+    );
+
     if (!tenant) {
         return (
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center">
@@ -137,19 +150,6 @@ export function MembersPage() {
             </div>
         )
     }
-
-    const memberCount = members?.length || 0;
-    const officeFilters = useMemo(
-        () => [
-            { key: null, label: 'Todos', count: members?.length || 0 },
-            ...Object.entries(officeLabels).map(([key, label]) => ({
-                key,
-                label,
-                count: officeCounts[key],
-            })),
-        ],
-        [members?.length, officeCounts],
-    );
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">

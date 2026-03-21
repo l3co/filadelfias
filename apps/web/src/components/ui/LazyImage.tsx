@@ -15,11 +15,8 @@ export function LazyImage({
 }: LazyImageProps) {
   const imgRef = useRef<HTMLImageElement | null>(null);
   const [currentSrc, setCurrentSrc] = useState<string | undefined>(undefined);
-  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    setIsLoaded(false);
-
     if (!imgRef.current) {
       return;
     }
@@ -47,18 +44,15 @@ export function LazyImage({
       alt={alt}
       loading="lazy"
       decoding="async"
-      onLoad={() => setIsLoaded(true)}
       onError={() => {
         if (fallbackSrc && currentSrc !== fallbackSrc) {
           setCurrentSrc(fallbackSrc);
           return;
         }
-
-        setIsLoaded(true);
       }}
       className={cn(
         'transition-opacity duration-300',
-        isLoaded ? 'opacity-100' : 'opacity-0',
+        currentSrc ? 'opacity-100' : 'opacity-0',
         className,
       )}
     />

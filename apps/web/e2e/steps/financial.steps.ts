@@ -1,9 +1,9 @@
 import { createBdd } from 'playwright-bdd';
-import { expect } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 
 const { Given, When, Then } = createBdd();
 
-async function selectComboboxOption(page: any, label: RegExp, optionText?: string) {
+async function selectComboboxOption(page: Page, label: RegExp, optionText?: string) {
     const field = page.locator('label').filter({ hasText: label }).locator('xpath=..');
     const trigger = field.getByRole('button').first();
     await trigger.click();

@@ -4,12 +4,12 @@
  */
 
 import { createBdd } from 'playwright-bdd';
-import { expect } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 import { testGovernance } from '../support/fixtures';
 
 const { Given, When, Then } = createBdd();
 
-async function openMeetingsDialog(page: any) {
+async function openMeetingsDialog(page: Page) {
     await page.goto('/admin/governance');
     await page.waitForLoadState('networkidle');
     const meetingsButton = page.getByRole('button', { name: /reuniões/i }).first();
@@ -17,7 +17,7 @@ async function openMeetingsDialog(page: any) {
     await expect(page.locator('[data-testid="meetings-dialog"]')).toBeVisible({ timeout: 5000 });
 }
 
-async function ensureScheduledMeeting(page: any) {
+async function ensureScheduledMeeting(page: Page) {
     await openMeetingsDialog(page);
 
     const meetingCard = page.locator('[data-testid^="meeting-card-"]').first();
@@ -37,7 +37,7 @@ async function ensureScheduledMeeting(page: any) {
     await expect(page.locator('[data-testid^="meeting-card-"]').first()).toBeVisible({ timeout: 10000 });
 }
 
-async function ensureCompletedMeeting(page: any) {
+async function ensureCompletedMeeting(page: Page) {
     await ensureScheduledMeeting(page);
 
     const realizedTab = page.getByRole('tab', { name: /realizadas/i })

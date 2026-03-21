@@ -11,6 +11,7 @@ import { usePermissions } from '../../../hooks/usePermissions';
 
 export function useTreasuryPageData() {
   const tenant = useAuthTenant();
+  const tenantId = tenant?.id;
   const queryClient = useQueryClient();
   const {
     accounts,
@@ -26,26 +27,26 @@ export function useTreasuryPageData() {
     prevPage,
     setMonth,
     setYear,
-  } = useFinancialData(tenant?.id);
+  } = useFinancialData(tenantId);
   const { canViewFinancial, canManageFinancial, isTreasurer } = usePermissions();
-  const { data: pendingTithes, isLoading: tithesLoading } = usePendingTitheRecords(tenant?.id);
-  const { approveRecord } = useTitheMutations(tenant?.id);
-  const { data: pendingExpenses, isLoading: expensesLoading } = usePendingExpenses(tenant?.id);
-  const { approveExpense } = useExpenseMutations(tenant?.id);
+  const { data: pendingTithes, isLoading: tithesLoading } = usePendingTitheRecords(tenantId);
+  const { approveRecord } = useTitheMutations(tenantId);
+  const { data: pendingExpenses, isLoading: expensesLoading } = usePendingExpenses(tenantId);
+  const { approveExpense } = useExpenseMutations(tenantId);
   const { data: report, isLoading: reportLoading } = useQuery({
-    queryKey: ['financial-report', tenant?.id, filters.month, filters.year],
-    queryFn: () => financialService.getMonthlyReport(tenant!.id, filters),
-    enabled: !!tenant?.id && canViewFinancial,
+    queryKey: ['financial-report', tenantId, filters.month, filters.year],
+    queryFn: () => financialService.getMonthlyReport(tenantId!, filters),
+    enabled: !!tenantId && canViewFinancial,
   });
   const { data: assets, isLoading: assetsLoading } = useQuery({
-    queryKey: ['financial-assets', tenant?.id],
-    queryFn: () => financialService.listAssets(tenant!.id),
-    enabled: !!tenant?.id && canViewFinancial,
+    queryKey: ['financial-assets', tenantId],
+    queryFn: () => financialService.listAssets(tenantId!),
+    enabled: !!tenantId && canViewFinancial,
   });
   const createAsset = useMutation({
-    mutationFn: (data: CreateAssetDTO) => financialService.createAsset(tenant!.id, data),
+    mutationFn: (data: CreateAssetDTO) => financialService.createAsset(tenantId!, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['financial-assets', tenant?.id] });
+      queryClient.invalidateQueries({ queryKey: ['financial-assets', tenantId] });
       toast.success('Bem patrimonial cadastrado com sucesso!');
     },
     onError: (error) => {
@@ -53,9 +54,9 @@ export function useTreasuryPageData() {
     },
   });
   const deleteAsset = useMutation({
-    mutationFn: (assetId: string) => financialService.deleteAsset(tenant!.id, assetId),
+    mutationFn: (assetId: string) => financialService.deleteAsset(tenantId!, assetId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['financial-assets', tenant?.id] });
+      queryClient.invalidateQueries({ queryKey: ['financial-assets', tenantId] });
       toast.success('Bem patrimonial excluído com sucesso!');
     },
     onError: (error) => {
@@ -63,9 +64,9 @@ export function useTreasuryPageData() {
     },
   });
   const { data: members } = useQuery({
-    queryKey: ['members', tenant?.id],
-    queryFn: () => membersService.listMembers(tenant!.id),
-    enabled: !!tenant?.id,
+    queryKey: ['members', tenantId],
+    queryFn: () => membersService.listMembers(tenantId!),
+    enabled: !!tenantId,
   });
 
   const [modalState, setModalState] = useState<{ isOpen: boolean; type: 'CREDIT' | 'DEBIT' }>({
@@ -97,17 +98,17 @@ export function useTreasuryPageData() {
   }, []);
 
   const handleDownloadTemplate = useCallback(() => {
-    if (tenant?.id) {
-      financialService.downloadCsvTemplate(tenant.id);
+    if (tenantId) {
+      financialService.downloadCsvTemplate(tenantId);
     }
-  }, [tenant?.id]);
+  }, [tenantId]);
 
   const handleImportCsv = useCallback(
     async (file: File) => {
-      if (!tenant?.id) throw new Error('Tenant não encontrado');
-      return financialService.importCsv(tenant.id, file);
+      if (!tenantId) throw new Error('Tenant não encontrado');
+      return financialService.importCsv(tenantId, file);
     },
-    [tenant?.id],
+    [tenantId],
   );
 
   const showTreasuryControls = isTreasurer || canManageFinancial;

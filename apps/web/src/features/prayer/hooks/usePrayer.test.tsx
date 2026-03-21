@@ -50,7 +50,7 @@ describe('usePrayer hooks', () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    expect(mockPrayerService.listRequests).toHaveBeenCalledWith('tenant-1');
+    expect(mockPrayerService.listRequests).toHaveBeenCalledWith('tenant-1', undefined);
     expect(result.current.data).toEqual(requests);
   });
 

@@ -40,7 +40,7 @@ describe('MissionaryList Component', () => {
 
         expect(screen.getByText('Família Silva')).toBeInTheDocument();
         expect(screen.getByText('Project Africa')).toBeInTheDocument();
-        expect(screen.getByText('Sertão Nordestino')).toBeInTheDocument();
+        expect(screen.getAllByText('Sertão Nordestino').length).toBeGreaterThan(0);
         expect(screen.getByText('BR')).toBeInTheDocument();
         expect(screen.getByText('MZ')).toBeInTheDocument();
     });

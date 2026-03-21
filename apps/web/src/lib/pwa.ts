@@ -1,34 +1,49 @@
 import { toast } from 'sonner';
-import { registerSW } from 'virtual:pwa-register';
+import { Workbox } from 'workbox-window';
 
 let isRegistered = false;
 
-export function registerServiceWorker() {
-  if (typeof window === 'undefined' || isRegistered) {
+export async function registerServiceWorker() {
+  if (
+    typeof window === 'undefined' ||
+    isRegistered ||
+    !('serviceWorker' in navigator)
+  ) {
     return;
   }
 
   isRegistered = true;
 
-  const updateSW = registerSW({
-    immediate: true,
-    onNeedRefresh() {
+  try {
+    const workbox = new Workbox('/sw.js');
+
+    workbox.addEventListener('waiting', () => {
       toast.message('Nova versão disponível', {
         action: {
           label: 'Atualizar',
-          onClick: () => updateSW(true),
+          onClick: async () => {
+            await workbox.messageSkipWaiting();
+          },
         },
         description: 'Atualize para aplicar as melhorias mais recentes do app.',
         duration: 10000,
       });
-    },
-    onOfflineReady() {
-      toast.success('Modo offline pronto', {
-        description: 'Os recursos essenciais do app já podem ser usados sem conexão.',
-      });
-    },
-    onRegisterError(error: unknown) {
-      console.error('Falha ao registrar service worker', error);
-    },
-  });
+    });
+
+    workbox.addEventListener('controlling', () => {
+      window.location.reload();
+    });
+
+    workbox.addEventListener('activated', (event) => {
+      if (!event.isUpdate) {
+        toast.success('Modo offline pronto', {
+          description: 'Os recursos essenciais do app já podem ser usados sem conexão.',
+        });
+      }
+    });
+
+    await workbox.register({ immediate: true });
+  } catch (error) {
+    console.warn('Falha ao registrar service worker.', error);
+  }
 }

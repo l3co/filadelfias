@@ -41,12 +41,12 @@ export function MemberDialog({ isOpen, onClose, tenantId, member }: MemberDialog
           <DialogTitle className="flex items-center gap-2">
             {isEditMode ? (
               <>
-                <User size={20} className="text-green-600" />
+                <User size={20} className="text-green-600" aria-hidden="true" />
                 Editar Membro
               </>
             ) : (
               <>
-                <UserPlus size={20} className="text-green-600" />
+                <UserPlus size={20} className="text-green-600" aria-hidden="true" />
                 Novo Membro
               </>
             )}

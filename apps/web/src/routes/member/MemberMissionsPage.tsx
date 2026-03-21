@@ -290,7 +290,7 @@ export function MemberMissionsPage() {
                         Compartilhar pedido de oração por {missionary.name}
                       </label>
                       <textarea
-                        className="min-h-[88px] w-full rounded-xl border border-indigo-100 bg-white p-3 text-sm outline-none focus:border-indigo-300"
+                        className="min-h-[88px] w-full rounded-xl border border-indigo-100 bg-white p-3 text-sm outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/20"
                         onChange={(event) =>
                           setPrayerDrafts((current) => ({ ...current, [missionary.id]: event.target.value }))
                         }
@@ -431,7 +431,7 @@ export function MemberMissionsPage() {
                         Compartilhar pedido de oração por {project.title}
                       </label>
                       <textarea
-                        className="min-h-[88px] w-full rounded-xl border border-rose-100 bg-white p-3 text-sm outline-none focus:border-rose-300"
+                        className="min-h-[88px] w-full rounded-xl border border-rose-100 bg-white p-3 text-sm outline-none focus:border-rose-300 focus:ring-2 focus:ring-rose-500/20"
                         onChange={(event) =>
                           setPrayerDrafts((current) => ({ ...current, [project.id]: event.target.value }))
                         }

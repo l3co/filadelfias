@@ -56,11 +56,24 @@ export function SocialProjectList({ isDeleting, isLoading, onDelete, onEdit, pro
             </div>
 
             <div className="flex items-center gap-1">
-              <Button onClick={() => onEdit(project)} size="sm" variant="ghost">
-                <Pencil className="h-4 w-4 text-blue-500" />
+              <Button
+                onClick={() => onEdit(project)}
+                size="sm"
+                variant="ghost"
+                aria-label={`Editar projeto ${project.title}`}
+                title={`Editar projeto ${project.title}`}
+              >
+                <Pencil className="h-4 w-4 text-blue-500" aria-hidden="true" />
               </Button>
-              <Button isLoading={isDeleting} onClick={() => onDelete(project.id)} size="sm" variant="ghost">
-                <Trash2 className="h-4 w-4 text-red-500" />
+              <Button
+                isLoading={isDeleting}
+                onClick={() => onDelete(project.id)}
+                size="sm"
+                variant="ghost"
+                aria-label={`Excluir projeto ${project.title}`}
+                title={`Excluir projeto ${project.title}`}
+              >
+                <Trash2 className="h-4 w-4 text-red-500" aria-hidden="true" />
               </Button>
             </div>
           </div>
@@ -70,19 +83,19 @@ export function SocialProjectList({ isDeleting, isLoading, onDelete, onEdit, pro
           <div className="mt-4 space-y-2 text-xs text-gray-500">
             {project.location && (
               <p className="flex items-center gap-2">
-                <MapPin className="h-3.5 w-3.5" />
+                <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
                 {project.location}
               </p>
             )}
             {project.target_audience && (
               <p className="flex items-center gap-2">
-                <Users2 className="h-3.5 w-3.5" />
+                <Users2 className="h-3.5 w-3.5" aria-hidden="true" />
                 Público: {project.target_audience}
               </p>
             )}
             {(project.start_date || project.end_date) && (
               <p className="flex items-center gap-2">
-                <CalendarDays className="h-3.5 w-3.5" />
+                <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />
                 {project.start_date ? formatDateBR(project.start_date) : 'Sem início'}
                 {' - '}
                 {project.end_date ? formatDateBR(project.end_date) : 'Sem fim'}

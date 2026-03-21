@@ -30,12 +30,17 @@ export function SearchAndFilter<T extends string | null>({
     <div className="flex flex-col gap-4">
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+          <label htmlFor="search-and-filter-input" className="sr-only">
+            {searchPlaceholder}
+          </label>
+          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden="true" />
           <input
+            id="search-and-filter-input"
             type="text"
             value={searchValue}
             onChange={(event) => onSearchChange(event.target.value)}
             placeholder={searchPlaceholder}
+            aria-label={searchPlaceholder}
             className="w-full pl-11 pr-10 py-3 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all placeholder:text-gray-400"
           />
           {searchValue && (
@@ -45,7 +50,7 @@ export function SearchAndFilter<T extends string | null>({
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
               aria-label="Limpar busca"
             >
-              <X size={16} />
+              <X size={16} aria-hidden="true" />
             </button>
           )}
         </div>

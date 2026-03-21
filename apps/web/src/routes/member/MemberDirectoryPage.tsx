@@ -88,11 +88,16 @@ export function MemberDirectoryPage() {
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 mb-6">
         {/* Search */}
         <div className="relative mb-4">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+          <label htmlFor="member-directory-search" className="sr-only">
+            Buscar membros por nome
+          </label>
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" aria-hidden="true" />
           <Input
+            id="member-directory-search"
             placeholder="Buscar por nome..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            aria-label="Buscar membros por nome"
             className="pl-12 h-12 rounded-xl border-slate-200 bg-slate-50 focus:bg-white transition-colors"
           />
         </div>
@@ -103,7 +108,9 @@ export function MemberDirectoryPage() {
           {officeFilters.map((filter) => (
             <button
               key={filter.value}
+              type="button"
               onClick={() => setOfficeFilter(filter.value)}
+              aria-pressed={officeFilter === filter.value}
               className={cn(
                 "flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap border-2",
                 officeFilter === filter.value

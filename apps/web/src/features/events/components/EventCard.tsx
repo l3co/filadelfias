@@ -37,8 +37,14 @@ export function EventCard({ event, onEdit, onDelete }: EventCardProps) {
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-              <MoreVertical size={16} />
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              aria-label={`Abrir ações para o evento ${event.title}`}
+              title={`Abrir ações para o evento ${event.title}`}
+            >
+              <MoreVertical size={16} aria-hidden="true" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -61,13 +67,13 @@ export function EventCard({ event, onEdit, onDelete }: EventCardProps) {
 
         <div className="space-y-2 text-sm text-gray-600">
           <div className="flex items-center gap-2">
-            <Calendar size={14} className="text-gray-400" />
+            <Calendar size={14} className="text-gray-400" aria-hidden="true" />
             {formatEventCardDate(event.start_date)}
           </div>
 
           {!event.all_day && (
             <div className="flex items-center gap-2">
-              <Clock size={14} className="text-gray-400" />
+              <Clock size={14} className="text-gray-400" aria-hidden="true" />
               {formatEventCardTime(event.start_date)}
               {event.end_date && ` - ${formatEventCardTime(event.end_date)}`}
             </div>
@@ -75,7 +81,7 @@ export function EventCard({ event, onEdit, onDelete }: EventCardProps) {
 
           {event.location && (
             <div className="flex items-center gap-2">
-              <MapPin size={14} className="text-gray-400" />
+              <MapPin size={14} className="text-gray-400" aria-hidden="true" />
               {event.location}
             </div>
           )}

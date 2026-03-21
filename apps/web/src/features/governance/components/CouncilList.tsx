@@ -126,8 +126,14 @@ export const CouncilList = memo(function CouncilList({ councils, isLoading, onDe
                                                     </Badge>
                                                     <DropdownMenu>
                                                         <DropdownMenuTrigger asChild>
-                                                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                                                <MoreVertical size={16} />
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="h-8 w-8 p-0"
+                                                                aria-label={`Abrir ações para o órgão ${council.name}`}
+                                                                title={`Abrir ações para o órgão ${council.name}`}
+                                                            >
+                                                                <MoreVertical size={16} aria-hidden="true" />
                                                             </Button>
                                                         </DropdownMenuTrigger>
                                                         <DropdownMenuContent align="end">

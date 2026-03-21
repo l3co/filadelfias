@@ -49,11 +49,13 @@ export function InviteMemberDialog({
 
                 <div className="grid gap-4 py-4">
                     <div className="space-y-3">
-                        <Label>Nível de Acesso</Label>
-                        <div className="space-y-2">
+                        <Label id="invite-member-role-label">Nível de Acesso</Label>
+                        <div className="space-y-2" role="radiogroup" aria-labelledby="invite-member-role-label">
                             <button
                                 type="button"
                                 onClick={() => setRole('MEMBER')}
+                                role="radio"
+                                aria-checked={role === 'MEMBER'}
                                 className={cn(
                                     "w-full flex items-start gap-3 p-3 rounded-lg border-2 text-left transition-all",
                                     role === 'MEMBER' 
@@ -61,7 +63,7 @@ export function InviteMemberDialog({
                                         : "border-gray-200 hover:border-gray-300"
                                 )}
                             >
-                                <User size={20} className={cn("mt-0.5", role === 'MEMBER' ? "text-green-600" : "text-gray-400")} />
+                                <User size={20} className={cn("mt-0.5", role === 'MEMBER' ? "text-green-600" : "text-gray-400")} aria-hidden="true" />
                                 <div>
                                     <span className={cn("font-medium", role === 'MEMBER' ? "text-green-700" : "text-gray-700")}>Membro</span>
                                     <p className="text-xs text-gray-500 mt-0.5">Acesso básico de leitura e registro pessoal.</p>
@@ -70,6 +72,8 @@ export function InviteMemberDialog({
                             <button
                                 type="button"
                                 onClick={() => setRole('ADMIN')}
+                                role="radio"
+                                aria-checked={role === 'ADMIN'}
                                 className={cn(
                                     "w-full flex items-start gap-3 p-3 rounded-lg border-2 text-left transition-all",
                                     role === 'ADMIN' 
@@ -77,7 +81,7 @@ export function InviteMemberDialog({
                                         : "border-gray-200 hover:border-gray-300"
                                 )}
                             >
-                                <Shield size={20} className={cn("mt-0.5", role === 'ADMIN' ? "text-purple-600" : "text-gray-400")} />
+                                <Shield size={20} className={cn("mt-0.5", role === 'ADMIN' ? "text-purple-600" : "text-gray-400")} aria-hidden="true" />
                                 <div>
                                     <span className={cn("font-medium", role === 'ADMIN' ? "text-purple-700" : "text-gray-700")}>Administrador</span>
                                     <p className="text-xs text-gray-500 mt-0.5">Acesso total para gerenciar a igreja.</p>
@@ -92,7 +96,7 @@ export function InviteMemberDialog({
                         Cancelar
                     </Button>
                     <Button onClick={handleInvite} disabled={isLoading} className="gap-2">
-                        {isLoading && <Loader2 size={16} className="animate-spin" />}
+                        {isLoading && <Loader2 size={16} className="animate-spin" aria-hidden="true" />}
                         Enviar Convite
                     </Button>
                 </DialogFooter>

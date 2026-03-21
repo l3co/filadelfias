@@ -8,6 +8,8 @@ export interface InputProps
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
     ({ className, type, error, ...props }, ref) => {
+        const ariaInvalid = props['aria-invalid'] ?? (error ? true : undefined)
+
         return (
             <input
                 type={type}
@@ -17,6 +19,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                     className
                 )}
                 ref={ref}
+                aria-invalid={ariaInvalid}
                 {...props}
             />
         )

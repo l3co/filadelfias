@@ -43,8 +43,9 @@ export function CreateClassDialog({ isOpen, onClose, tenantId }: Props) {
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4">
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Nome da Classe</label>
+                        <label htmlFor="ebd-class-name" className="text-sm font-medium text-gray-700">Nome da Classe</label>
                         <Input
+                            id="ebd-class-name"
                             {...register('name', { required: 'Nome é obrigatório' })}
                             placeholder="Ex: Jovens e Adolescentes"
                         />
@@ -52,8 +53,9 @@ export function CreateClassDialog({ isOpen, onClose, tenantId }: Props) {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Descrição</label>
+                        <label htmlFor="ebd-class-description" className="text-sm font-medium text-gray-700">Descrição</label>
                         <Input
+                            id="ebd-class-description"
                             {...register('description')}
                             placeholder="Breve descrição da turma"
                         />
@@ -61,16 +63,18 @@ export function CreateClassDialog({ isOpen, onClose, tenantId }: Props) {
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-700">Idade Mín.</label>
+                            <label htmlFor="ebd-class-min-age" className="text-sm font-medium text-gray-700">Idade Mín.</label>
                             <Input
+                                id="ebd-class-min-age"
                                 type="number"
                                 {...register('min_age')}
                                 placeholder="Ex: 12"
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-700">Idade Máx.</label>
+                            <label htmlFor="ebd-class-max-age" className="text-sm font-medium text-gray-700">Idade Máx.</label>
                             <Input
+                                id="ebd-class-max-age"
                                 type="number"
                                 {...register('max_age')}
                                 placeholder="Ex: 18"
@@ -79,8 +83,9 @@ export function CreateClassDialog({ isOpen, onClose, tenantId }: Props) {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Local / Sala</label>
+                        <label htmlFor="ebd-class-location" className="text-sm font-medium text-gray-700">Local / Sala</label>
                         <Input
+                            id="ebd-class-location"
                             {...register('location')}
                             placeholder="Ex: Sala 3 - Bloco B"
                         />

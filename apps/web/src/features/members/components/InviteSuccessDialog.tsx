@@ -52,7 +52,7 @@ export function InviteSuccessDialog({
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-3 text-green-700">
                         <div className="p-2 bg-green-100 rounded-full">
-                            <CheckCircle2 size={24} />
+                            <CheckCircle2 size={24} aria-hidden="true" />
                         </div>
                         Convite Enviado!
                     </DialogTitle>
@@ -65,12 +65,12 @@ export function InviteSuccessDialog({
 
                     {emailSent ? (
                         <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 p-3 rounded-lg">
-                            <Mail size={18} />
+                            <Mail size={18} aria-hidden="true" />
                             <span>Email de boas-vindas enviado para <strong>{memberEmail}</strong></span>
                         </div>
                     ) : (
                         <div className="flex items-center gap-2 text-sm text-amber-600 bg-amber-50 p-3 rounded-lg">
-                            <Mail size={18} />
+                            <Mail size={18} aria-hidden="true" />
                             <span>Email não configurado. Compartilhe a senha manualmente.</span>
                         </div>
                     )}
@@ -87,8 +87,9 @@ export function InviteSuccessDialog({
                                 size="sm"
                                 onClick={handleCopyPassword}
                                 className="gap-2"
+                                aria-label={copied ? 'Senha temporária copiada' : 'Copiar senha temporária'}
                             >
-                                {copied ? <Check size={16} /> : <Copy size={16} />}
+                                {copied ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}
                                 {copied ? 'Copiado!' : 'Copiar'}
                             </Button>
                         </div>
@@ -103,8 +104,9 @@ export function InviteSuccessDialog({
                             variant="outline"
                             onClick={handleCopyAll}
                             className="flex-1 gap-2"
+                            aria-label={`Copiar mensagem de convite para ${memberName}`}
                         >
-                            <Copy size={16} />
+                            <Copy size={16} aria-hidden="true" />
                             Copiar Mensagem
                         </Button>
                         <Button
@@ -112,8 +114,9 @@ export function InviteSuccessDialog({
                             variant="outline"
                             onClick={handleWhatsApp}
                             className="flex-1 gap-2 text-green-600 border-green-200 hover:bg-green-50"
+                            aria-label={`Compartilhar convite de ${memberName} via WhatsApp`}
                         >
-                            <MessageCircle size={16} />
+                            <MessageCircle size={16} aria-hidden="true" />
                             WhatsApp
                         </Button>
                     </div>

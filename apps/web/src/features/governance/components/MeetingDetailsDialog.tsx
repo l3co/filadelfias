@@ -121,14 +121,14 @@ export function MeetingDetailsDialog({
             <DialogContent className="sm:max-w-lg max-h-[90vh]" data-testid="meeting-details-dialog">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
-                        <Calendar className="text-indigo-600" size={20} />
+                        <Calendar className="text-indigo-600" size={20} aria-hidden="true" />
                         Detalhes da Reunião
                     </DialogTitle>
                     <DialogDescription>
                         {meeting.meeting_type === 'ORDINARY' ? 'Reunião Ordinária' : 'Reunião Extraordinária'}
                         {isCompleted && (
                             <Badge variant="outline" className="ml-2 text-green-600 border-green-600">
-                                <Check size={12} className="mr-1" />
+                                <Check size={12} className="mr-1" aria-hidden="true" />
                                 Finalizada
                             </Badge>
                         )}
@@ -140,7 +140,7 @@ export function MeetingDetailsDialog({
                         {/* Meeting Info */}
                         <div className="bg-gray-50 rounded-lg p-4 space-y-2">
                             <div className="flex items-center gap-2 text-sm">
-                                <Clock size={14} className="text-indigo-500" />
+                                <Clock size={14} className="text-indigo-500" aria-hidden="true" />
                                 <span className="capitalize">{formattedDate}</span>
                                 <span className="text-gray-400">às</span>
                                 <span className="font-medium">{formattedTime}</span>
@@ -148,7 +148,7 @@ export function MeetingDetailsDialog({
 
                             {meeting.location && (
                                 <div className="flex items-center gap-2 text-sm">
-                                    <MapPin size={14} className="text-indigo-500" />
+                                    <MapPin size={14} className="text-indigo-500" aria-hidden="true" />
                                     <span>{meeting.location}</span>
                                 </div>
                             )}
@@ -158,7 +158,7 @@ export function MeetingDetailsDialog({
                         {meeting.agenda && (
                             <div className="space-y-2">
                                 <Label className="flex items-center gap-1">
-                                    <FileText size={14} />
+                                    <FileText size={14} aria-hidden="true" />
                                     Pauta
                                 </Label>
                                 <div className="bg-gray-50 rounded-lg p-3 text-sm">
@@ -172,7 +172,7 @@ export function MeetingDetailsDialog({
                         {/* Attendance */}
                         <div className="space-y-3">
                             <Label className="flex items-center gap-1">
-                                <Users size={14} />
+                                <Users size={14} aria-hidden="true" />
                                 Lista de Presença ({attendees.length}/{councilMembers.length})
                             </Label>
                             <div className="space-y-2">
@@ -211,7 +211,7 @@ export function MeetingDetailsDialog({
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
                                 <Label className="flex items-center gap-1">
-                                    <FileText size={14} />
+                                    <FileText size={14} aria-hidden="true" />
                                     Ata da Reunião
                                 </Label>
                                 {canModify && !isEditing && (
@@ -220,7 +220,7 @@ export function MeetingDetailsDialog({
                                         size="sm"
                                         onClick={() => setIsEditing(true)}
                                     >
-                                        <Edit size={14} className="mr-1" />
+                                        <Edit size={14} className="mr-1" aria-hidden="true" />
                                         Editar
                                     </Button>
                                 )}
@@ -244,7 +244,7 @@ export function MeetingDetailsDialog({
                                                 setIsEditing(false);
                                             }}
                                         >
-                                            <X size={14} className="mr-1" />
+                                            <X size={14} className="mr-1" aria-hidden="true" />
                                             Cancelar
                                         </Button>
                                         <Button
@@ -253,7 +253,7 @@ export function MeetingDetailsDialog({
                                             disabled={isUpdating}
                                             data-testid="save-minutes-btn"
                                         >
-                                            <Save size={14} className="mr-1" />
+                                            <Save size={14} className="mr-1" aria-hidden="true" />
                                             Salvar
                                         </Button>
                                     </div>
@@ -283,7 +283,7 @@ export function MeetingDetailsDialog({
                             className="bg-green-600 hover:bg-green-700"
                             data-testid="complete-meeting-btn"
                         >
-                            <Check size={14} className="mr-1" />
+                            <Check size={14} className="mr-1" aria-hidden="true" />
                             Finalizar Reunião
                         </Button>
                     )}

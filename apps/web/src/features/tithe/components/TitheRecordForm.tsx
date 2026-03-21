@@ -36,13 +36,18 @@ export function TitheRecordForm({
 
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-            <Card className="w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200">
+            <Card
+                className="w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="tithe-record-form-title"
+            >
                 <CardHeader className="flex flex-row items-center justify-between border-b border-gray-100 pb-4">
-                    <CardTitle className="text-green-600">
+                    <CardTitle id="tithe-record-form-title" className="text-green-600">
                         Registrar Dízimo/Oferta
                     </CardTitle>
-                    <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8 rounded-full">
-                        <X className="h-4 w-4" />
+                    <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8 rounded-full" aria-label="Fechar formulário de dízimo e oferta">
+                        <X className="h-4 w-4" aria-hidden="true" />
                     </Button>
                 </CardHeader>
 
@@ -54,6 +59,7 @@ export function TitheRecordForm({
                                 <button
                                     type="button"
                                     onClick={() => setSelectedType('DIZIMO')}
+                                    aria-pressed={selectedType === 'DIZIMO'}
                                     className={`flex-1 py-2 px-4 rounded-lg border-2 text-sm font-medium transition-colors ${
                                         selectedType === 'DIZIMO'
                                             ? 'border-green-500 bg-green-50 text-green-700'
@@ -65,6 +71,7 @@ export function TitheRecordForm({
                                 <button
                                     type="button"
                                     onClick={() => setSelectedType('OFERTA')}
+                                    aria-pressed={selectedType === 'OFERTA'}
                                     className={`flex-1 py-2 px-4 rounded-lg border-2 text-sm font-medium transition-colors ${
                                         selectedType === 'OFERTA'
                                             ? 'border-green-500 bg-green-50 text-green-700'

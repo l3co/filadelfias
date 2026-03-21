@@ -97,8 +97,9 @@ export function CreateMissionaryDialog({ isOpen, onClose, tenantId, initialData 
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4">
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Nome</label>
+                        <label htmlFor="missionary-name" className="text-sm font-medium text-gray-700">Nome</label>
                         <Input
+                            id="missionary-name"
                             {...register('name', { required: 'Nome é obrigatório' })}
                             placeholder="Nome do missionário ou projeto"
                         />
@@ -123,15 +124,17 @@ export function CreateMissionaryDialog({ isOpen, onClose, tenantId, initialData 
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-700">Estado/Região</label>
+                            <label htmlFor="missionary-state" className="text-sm font-medium text-gray-700">Estado/Região</label>
                             <Input
+                                id="missionary-state"
                                 {...register('state')}
                                 placeholder="Ex: Amazonas"
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-700">Cidade</label>
+                            <label htmlFor="missionary-city" className="text-sm font-medium text-gray-700">Cidade</label>
                             <Input
+                                id="missionary-city"
                                 {...register('city')}
                                 placeholder="Ex: Manaus"
                             />
@@ -139,8 +142,9 @@ export function CreateMissionaryDialog({ isOpen, onClose, tenantId, initialData 
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Campo Missionário</label>
+                        <label htmlFor="missionary-field-name" className="text-sm font-medium text-gray-700">Campo Missionário</label>
                         <Input
+                            id="missionary-field-name"
                             {...register('field_name', { required: 'Campo é obrigatório' })}
                             placeholder="Ex: Amazônia, Sertão Nordestino"
                         />
@@ -148,16 +152,18 @@ export function CreateMissionaryDialog({ isOpen, onClose, tenantId, initialData 
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Biografia</label>
+                        <label htmlFor="missionary-bio" className="text-sm font-medium text-gray-700">Biografia</label>
                         <Input
+                            id="missionary-bio"
                             {...register('bio')}
                             placeholder="Breve descrição do trabalho missionário"
                         />
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Foto (URL opcional)</label>
+                        <label htmlFor="missionary-photo-url" className="text-sm font-medium text-gray-700">Foto (URL opcional)</label>
                         <Input
+                            id="missionary-photo-url"
                             {...register('photo_url')}
                             type="url"
                             placeholder="https://..."
@@ -165,8 +171,9 @@ export function CreateMissionaryDialog({ isOpen, onClose, tenantId, initialData 
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Link da Newsletter (opcional)</label>
+                        <label htmlFor="missionary-newsletter-url" className="text-sm font-medium text-gray-700">Link da Newsletter (opcional)</label>
                         <Input
+                            id="missionary-newsletter-url"
                             {...register('newsletter_url')}
                             type="url"
                             placeholder="https://..."

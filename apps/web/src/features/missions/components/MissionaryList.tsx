@@ -85,8 +85,14 @@ export function MissionaryList({ missionaries, isLoading, onEdit, onDelete }: Mi
                                     </Badge>
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
-                                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                                <MoreVertical size={16} />
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="h-8 w-8 p-0"
+                                                aria-label={`Abrir ações para ${m.name}`}
+                                                title={`Abrir ações para ${m.name}`}
+                                            >
+                                                <MoreVertical size={16} aria-hidden="true" />
                                             </Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end">
@@ -107,7 +113,7 @@ export function MissionaryList({ missionaries, isLoading, onEdit, onDelete }: Mi
                             </div>
 
                             <div className="flex items-center text-gray-500 text-sm mb-4 gap-1">
-                                <MapPin size={16} />
+                                <MapPin size={16} aria-hidden="true" />
                                 {m.city && m.state ? `${m.city}, ${m.state}` : m.field_name}
                             </div>
 
@@ -126,7 +132,7 @@ export function MissionaryList({ missionaries, isLoading, onEdit, onDelete }: Mi
                                     rel="noreferrer"
                                     className={buttonVariants({ variant: "outline", size: "sm", className: "w-full gap-2" })}
                                 >
-                                    <Mail size={16} /> Ver Newsletter
+                                    <Mail size={16} aria-hidden="true" /> Ver Newsletter
                                 </a>
                             )}
                         </CardContent>

@@ -42,6 +42,12 @@ export function OnboardingPage() {
 
     return (
         <div className="min-h-screen flex">
+            <a
+                href="#onboarding-main"
+                className="sr-only sr-only-focusable absolute left-4 top-4 z-50 rounded-md bg-white px-4 py-2 text-sm font-medium text-green-700 shadow-lg"
+            >
+                Pular para o formulário de configuração da igreja
+            </a>
             {/* Left Side - Branding */}
             <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-[#002333] via-green-900 to-[#002333] relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-96 h-96 bg-green-500/10 rounded-full blur-3xl" />
@@ -56,7 +62,7 @@ export function OnboardingPage() {
                     </Link>
                     
                     <div className="w-20 h-20 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center mb-8">
-                        <Church size={40} className="text-green-300" />
+                        <Church size={40} className="text-green-300" aria-hidden="true" />
                     </div>
                     
                     <h2 className="text-3xl font-bold mb-4">
@@ -78,7 +84,7 @@ export function OnboardingPage() {
                                             ? 'bg-white text-green-700' 
                                             : 'bg-white/20 text-white/60'
                                 }`}>
-                                    {step.completed ? <CheckCircle2 size={18} /> : step.number}
+                                    {step.completed ? <CheckCircle2 size={18} aria-hidden="true" /> : step.number}
                                 </div>
                                 <span className={`text-sm font-medium ${
                                     step.completed || step.active ? 'text-white' : 'text-white/50'
@@ -92,7 +98,7 @@ export function OnboardingPage() {
             </div>
 
             {/* Right Side - Form */}
-            <div className="flex-1 flex items-center justify-center p-8 bg-gradient-to-b from-white to-[#DEEFE7]/30">
+            <main id="onboarding-main" className="flex-1 flex items-center justify-center p-8 bg-gradient-to-b from-white to-[#DEEFE7]/30">
                 <div className="w-full max-w-md space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
                     {/* Mobile Logo */}
                     <div className="lg:hidden text-center mb-8">
@@ -107,7 +113,7 @@ export function OnboardingPage() {
                     {/* Header */}
                     <div className="text-center lg:text-left">
                         <div className="lg:hidden w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-green-50 to-teal-50 flex items-center justify-center mb-4">
-                            <Church size={32} className="text-green-600" />
+                            <Church size={32} className="text-green-600" aria-hidden="true" />
                         </div>
                         <h2 className="text-3xl font-extrabold text-[#002333] tracking-tight">
                             Bem-vindo ao Filadélfias!
@@ -122,20 +128,21 @@ export function OnboardingPage() {
                         <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
                             {error && (
                                 <div className="flex items-center gap-3 bg-red-50 border border-red-100 text-red-700 px-4 py-3 rounded-xl">
-                                    <AlertCircle size={20} className="flex-shrink-0" />
+                                    <AlertCircle size={20} className="flex-shrink-0" aria-hidden="true" />
                                     <span className="text-sm">{error}</span>
                                 </div>
                             )}
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <label htmlFor="onboarding-church-name" className="block text-sm font-medium text-gray-700 mb-2">
                                     Nome da Igreja
                                 </label>
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                        <Building2 size={18} className="text-gray-400" />
+                                        <Building2 size={18} className="text-gray-400" aria-hidden="true" />
                                     </div>
                                     <input
+                                        id="onboarding-church-name"
                                         {...register('name', { required: 'Nome obrigatório' })}
                                         type="text"
                                         placeholder="Ex: Igreja Presbiteriana Central"
@@ -148,14 +155,15 @@ export function OnboardingPage() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <label htmlFor="onboarding-church-slug" className="block text-sm font-medium text-gray-700 mb-2">
                                     Identificador (Slug)
                                 </label>
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                        <Link2 size={18} className="text-gray-400" />
+                                        <Link2 size={18} className="text-gray-400" aria-hidden="true" />
                                     </div>
                                     <input
+                                        id="onboarding-church-slug"
                                         {...register('slug', {
                                             required: 'Slug obrigatório',
                                             pattern: { value: /^[a-z0-9-]+$/, message: 'Use apenas letras minúsculas, números e hifens' }
@@ -183,7 +191,7 @@ export function OnboardingPage() {
                                 ) : (
                                     <>
                                         <span>Criar Igreja e Começar</span>
-                                        <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                                        <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" aria-hidden="true" />
                                     </>
                                 )}
                             </button>
@@ -194,7 +202,7 @@ export function OnboardingPage() {
                         Precisa de ajuda? <a href="#" className="text-green-600 hover:text-green-700 font-medium">Entre em contato</a>
                     </p>
                 </div>
-            </div>
+            </main>
         </div>
     );
 }

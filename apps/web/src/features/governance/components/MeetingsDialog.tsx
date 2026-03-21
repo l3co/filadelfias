@@ -135,7 +135,7 @@ export function MeetingsDialog({
                 <DialogContent className="sm:max-w-2xl max-h-[90vh]" data-testid="meetings-dialog">
                     <DialogHeader className="pr-8">
                         <DialogTitle className="flex items-center gap-2">
-                            <Calendar className="text-indigo-600" size={20} />
+                            <Calendar className="text-indigo-600" size={20} aria-hidden="true" />
                             Reuniões - {council?.name}
                         </DialogTitle>
                         <DialogDescription>
@@ -149,7 +149,7 @@ export function MeetingsDialog({
                             size="sm"
                             data-testid="new-meeting-btn"
                         >
-                            <Plus size={16} className="mr-1" />
+                            <Plus size={16} className="mr-1" aria-hidden="true" />
                             Nova Reunião
                         </Button>
                     </div>
@@ -161,11 +161,11 @@ export function MeetingsDialog({
                     >
                         <TabsList className="grid w-full grid-cols-2">
                             <TabsTrigger value="upcoming" className="flex items-center gap-1">
-                                <CalendarCheck size={14} />
+                                <CalendarCheck size={14} aria-hidden="true" />
                                 Próximas ({upcomingMeetings.length})
                             </TabsTrigger>
                             <TabsTrigger value="past" className="flex items-center gap-1">
-                                <CalendarX size={14} />
+                                <CalendarX size={14} aria-hidden="true" />
                                 Realizadas ({pastMeetings.length})
                             </TabsTrigger>
                         </TabsList>

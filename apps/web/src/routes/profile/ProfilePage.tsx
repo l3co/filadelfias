@@ -169,8 +169,8 @@ export function ProfilePage() {
                   </span>
                 )}
               </div>
-              <button className="absolute -bottom-1 -right-1 p-2 rounded-full bg-emerald-500 text-white shadow-lg hover:bg-emerald-600 transition-colors">
-                <Camera className="h-4 w-4" />
+              <button className="absolute -bottom-1 -right-1 p-2 rounded-full bg-emerald-500 text-white shadow-lg hover:bg-emerald-600 transition-colors" aria-label="Alterar foto do perfil">
+                <Camera className="h-4 w-4" aria-hidden="true" />
               </button>
             </div>
 
@@ -184,14 +184,14 @@ export function ProfilePage() {
                 )}
                 {tenant && (
                   <span className="text-sm text-slate-500 flex items-center gap-1">
-                    <Church className="h-3.5 w-3.5" />
+                    <Church className="h-3.5 w-3.5" aria-hidden="true" />
                     {tenant.name}
                   </span>
                 )}
               </div>
               {memberFunctions.length > 0 && (
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 mt-2">
-                  <Briefcase className="h-3.5 w-3.5 text-slate-400" />
+                  <Briefcase className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
                   {memberFunctions.map(fn => (
                     <Badge key={fn} variant="outline" className="text-xs text-indigo-600 border-indigo-200">
                       {functionLabels[fn] || fn}
@@ -231,7 +231,7 @@ export function ProfilePage() {
             <div className="space-y-2">
               <Label>Email</Label>
               <div className="flex items-center gap-2 text-slate-700 py-2">
-                <Mail className="h-4 w-4 text-slate-400" />
+                <Mail className="h-4 w-4 text-slate-400" aria-hidden="true" />
                 {user?.email || '-'}
               </div>
             </div>
@@ -239,7 +239,7 @@ export function ProfilePage() {
             <div className="space-y-2">
               <Label>Telefone</Label>
               <div className="flex items-center gap-2 text-slate-700 py-2">
-                <Phone className="h-4 w-4 text-slate-400" />
+                <Phone className="h-4 w-4 text-slate-400" aria-hidden="true" />
                 {currentMember?.phone || 'Não informado'}
               </div>
             </div>
@@ -247,7 +247,7 @@ export function ProfilePage() {
             <div className="space-y-2">
               <Label>Data de Nascimento</Label>
               <div className="flex items-center gap-2 text-slate-700 py-2">
-                <Calendar className="h-4 w-4 text-slate-400" />
+                <Calendar className="h-4 w-4 text-slate-400" aria-hidden="true" />
                 {currentMember?.birth_date ? formatDate(currentMember.birth_date) : 'Não informado'}
               </div>
             </div>
@@ -255,7 +255,7 @@ export function ProfilePage() {
             <div className="space-y-2">
               <Label>Membro desde</Label>
               <div className="flex items-center gap-2 text-slate-700 py-2">
-                <Calendar className="h-4 w-4 text-slate-400" />
+                <Calendar className="h-4 w-4 text-slate-400" aria-hidden="true" />
                 {formatDate(membership?.joined_at)}
               </div>
             </div>
@@ -297,7 +297,7 @@ export function ProfilePage() {
                 </p>
                 {tenant.phone && (
                   <p className="text-sm text-slate-500 mt-1 flex items-center gap-1">
-                    <Phone className="h-3.5 w-3.5" />
+                    <Phone className="h-3.5 w-3.5" aria-hidden="true" />
                     {tenant.phone}
                   </p>
                 )}
@@ -343,19 +343,20 @@ export function ProfilePage() {
             className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
             onClick={() => setShowPasswordModal(false)}
           />
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6">
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6" role="dialog" aria-modal="true" aria-labelledby="change-password-title">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-xl bg-emerald-100">
-                  <Lock className="h-5 w-5 text-emerald-600" />
+                  <Lock className="h-5 w-5 text-emerald-600" aria-hidden="true" />
                 </div>
-                <h2 className="text-xl font-bold text-slate-900">Alterar Senha</h2>
+                <h2 id="change-password-title" className="text-xl font-bold text-slate-900">Alterar Senha</h2>
               </div>
               <button
                 onClick={() => setShowPasswordModal(false)}
                 className="p-2 rounded-lg hover:bg-slate-100 transition-colors"
+                aria-label="Fechar alteração de senha"
               >
-                <X className="h-5 w-5 text-slate-500" />
+                <X className="h-5 w-5 text-slate-500" aria-hidden="true" />
               </button>
             </div>
 
@@ -374,8 +375,9 @@ export function ProfilePage() {
                     type="button"
                     onClick={() => setShowPasswords({ ...showPasswords, current: !showPasswords.current })}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    aria-label={showPasswords.current ? 'Ocultar senha atual' : 'Mostrar senha atual'}
                   >
-                    {showPasswords.current ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPasswords.current ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
                   </button>
                 </div>
               </div>
@@ -394,8 +396,9 @@ export function ProfilePage() {
                     type="button"
                     onClick={() => setShowPasswords({ ...showPasswords, new: !showPasswords.new })}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    aria-label={showPasswords.new ? 'Ocultar nova senha' : 'Mostrar nova senha'}
                   >
-                    {showPasswords.new ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPasswords.new ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
                   </button>
                 </div>
               </div>
@@ -414,8 +417,9 @@ export function ProfilePage() {
                     type="button"
                     onClick={() => setShowPasswords({ ...showPasswords, confirm: !showPasswords.confirm })}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    aria-label={showPasswords.confirm ? 'Ocultar confirmação de senha' : 'Mostrar confirmação de senha'}
                   >
-                    {showPasswords.confirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPasswords.confirm ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
                   </button>
                 </div>
               </div>
@@ -448,19 +452,20 @@ export function ProfilePage() {
             className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
             onClick={() => setShowEditModal(false)}
           />
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 p-6 max-h-[90vh] overflow-y-auto">
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 p-6 max-h-[90vh] overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="edit-profile-title">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-xl bg-emerald-100">
-                  <User className="h-5 w-5 text-emerald-600" />
+                  <User className="h-5 w-5 text-emerald-600" aria-hidden="true" />
                 </div>
-                <h2 className="text-xl font-bold text-slate-900">Editar Perfil</h2>
+                <h2 id="edit-profile-title" className="text-xl font-bold text-slate-900">Editar Perfil</h2>
               </div>
               <button
                 onClick={() => setShowEditModal(false)}
                 className="p-2 rounded-lg hover:bg-slate-100 transition-colors"
+                aria-label="Fechar edição de perfil"
               >
-                <X className="h-5 w-5 text-slate-500" />
+                <X className="h-5 w-5 text-slate-500" aria-hidden="true" />
               </button>
             </div>
 

@@ -89,7 +89,7 @@ export function CreateMeetingDialog({
             <DialogContent className="sm:max-w-md" data-testid="create-meeting-dialog">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
-                        <CalendarClock className="text-indigo-600" size={20} />
+                        <CalendarClock className="text-indigo-600" size={20} aria-hidden="true" />
                         Nova Reunião
                     </DialogTitle>
                     <DialogDescription>
@@ -119,7 +119,7 @@ export function CreateMeetingDialog({
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label htmlFor="date">
-                                <Calendar size={14} className="inline mr-1" />
+                                <Calendar size={14} className="inline mr-1" aria-hidden="true" />
                                 Data *
                             </Label>
                             <Input
@@ -149,7 +149,7 @@ export function CreateMeetingDialog({
                     {/* Location */}
                     <div className="space-y-2">
                         <Label htmlFor="location">
-                            <MapPin size={14} className="inline mr-1" />
+                            <MapPin size={14} className="inline mr-1" aria-hidden="true" />
                             Local
                         </Label>
                         <Input
@@ -163,7 +163,7 @@ export function CreateMeetingDialog({
                     {/* Agenda */}
                     <div className="space-y-2">
                         <Label htmlFor="agenda">
-                            <FileText size={14} className="inline mr-1" />
+                            <FileText size={14} className="inline mr-1" aria-hidden="true" />
                             Pauta
                         </Label>
                         <Textarea

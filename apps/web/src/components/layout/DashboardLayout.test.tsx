@@ -2,6 +2,7 @@ import { screen } from '@testing-library/react';
 import { DashboardLayout } from './DashboardLayout';
 import { beforeEach, vi } from 'vitest';
 import { renderWithProviders } from '../../test/utils';
+import { axe } from 'jest-axe';
 
 vi.mock('../../hooks/useAuth', () => ({
     useLogout: vi.fn(() => ({
@@ -66,8 +67,21 @@ describe('DashboardLayout Component', () => {
     it('should have notification bell', () => {
         renderWithProviders(<DashboardLayout />, { initialRoute: '/admin' });
         
-        // Bell icon button exists
-        const buttons = screen.getAllByRole('button');
-        expect(buttons.length).toBeGreaterThan(0);
+        expect(screen.getByRole('button', { name: 'Abrir notificações' })).toBeInTheDocument();
+    });
+
+    it('should expose skip link and labeled search input', () => {
+        renderWithProviders(<DashboardLayout />, { initialRoute: '/admin' });
+
+        expect(screen.getByRole('link', { name: 'Pular para o conteúdo principal' })).toHaveAttribute('href', '#dashboard-main-content');
+        expect(screen.getByRole('textbox', { name: 'Buscar no painel administrativo' })).toBeInTheDocument();
+    });
+
+    it('should not have accessibility violations in the admin shell', async () => {
+        const { container } = renderWithProviders(<DashboardLayout />, { initialRoute: '/admin' });
+
+        const results = await axe(container);
+
+        expect(results).toHaveNoViolations();
     });
 });

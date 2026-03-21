@@ -31,7 +31,7 @@ export function HymnalPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 animate-in fade-in duration-500">
             <div className="text-center mb-12">
                 <h1 className="text-4xl font-extrabold text-gray-900 mb-4 flex items-center justify-center gap-3">
-                    <Music className="text-green-700" size={32} />
+                    <Music className="text-green-700" size={32} aria-hidden="true" />
                     Novo Cântico
                 </h1>
                 <p className="text-lg text-gray-500">Hinário Presbiteriano</p>
@@ -39,14 +39,19 @@ export function HymnalPage() {
 
             {/* Search */}
             <div className="relative mb-12 max-w-xl mx-auto">
+                <label htmlFor="hymnal-search" className="sr-only">
+                    Buscar hinos por número, título ou autor
+                </label>
                 <input
+                    id="hymnal-search"
                     type="text"
                     placeholder="Buscar por número, título ou autor..."
                     className="w-full pl-12 pr-4 py-3 rounded-full border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none shadow-sm transition-shadow"
                     value={search}
                     onChange={e => setSearch(e.target.value)}
+                    aria-label="Buscar hinos por número, título ou autor"
                 />
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} aria-hidden="true" />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -57,7 +62,7 @@ export function HymnalPage() {
                         className="flex flex-col p-6 bg-white rounded-xl shadow-sm hover:shadow-md border border-gray-100 hover:border-green-100 transition-all group h-full relative overflow-hidden"
                     >
                         <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                            <Music size={64} />
+                            <Music size={64} aria-hidden="true" />
                         </div>
 
                         <div className="flex items-start gap-4 relative z-10">
@@ -70,7 +75,7 @@ export function HymnalPage() {
                                 </h3>
                                 {hymn.author && (
                                     <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                                        <User size={12} className="shrink-0" />
+                                        <User size={12} className="shrink-0" aria-hidden="true" />
                                         <span className="truncate">{hymn.author}</span>
                                     </div>
                                 )}

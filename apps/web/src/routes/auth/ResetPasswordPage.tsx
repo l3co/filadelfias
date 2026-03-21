@@ -90,7 +90,7 @@ export function ResetPasswordPage() {
                 <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
                     <div className="text-center mb-8">
                         <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-green-500 to-teal-600 flex items-center justify-center mb-4 shadow-lg">
-                            <Lock size={32} className="text-white" />
+                            <Lock size={32} className="text-white" aria-hidden="true" />
                         </div>
                         <h1 className="text-2xl font-bold text-[#002333]">Nova Senha</h1>
                         <p className="text-gray-500 mt-2">
@@ -106,10 +106,11 @@ export function ResetPasswordPage() {
 
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-700">Nova Senha</label>
+                            <label htmlFor="reset-password-new" className="text-sm font-medium text-gray-700">Nova Senha</label>
                             <div className="relative">
-                                <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden="true" />
                                 <Input
+                                    id="reset-password-new"
                                     type={showPassword ? 'text' : 'password'}
                                     {...register('new_password', {
                                         required: 'Senha é obrigatória',
@@ -125,8 +126,9 @@ export function ResetPasswordPage() {
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
                                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                    aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
                                 >
-                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                    {showPassword ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
                                 </button>
                             </div>
                             {errors.new_password && (
@@ -135,10 +137,11 @@ export function ResetPasswordPage() {
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-700">Confirmar Senha</label>
+                            <label htmlFor="reset-password-confirm" className="text-sm font-medium text-gray-700">Confirmar Senha</label>
                             <div className="relative">
-                                <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden="true" />
                                 <Input
+                                    id="reset-password-confirm"
                                     type={showPassword ? 'text' : 'password'}
                                     {...register('confirm_password', {
                                         required: 'Confirmação é obrigatória',
@@ -167,7 +170,7 @@ export function ResetPasswordPage() {
                             to={ROUTES.AUTH.LOGIN}
                             className="text-sm text-gray-500 hover:text-green-600 inline-flex items-center gap-1"
                         >
-                            <ArrowLeft size={14} />
+                            <ArrowLeft size={14} aria-hidden="true" />
                             Voltar para Login
                         </Link>
                     </div>

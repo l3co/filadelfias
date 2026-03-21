@@ -50,8 +50,9 @@ export function CreateLessonDialog({ isOpen, onClose, classId, tenantId }: Props
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4">
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Data</label>
+                        <label htmlFor="ebd-lesson-date" className="text-sm font-medium text-gray-700">Data</label>
                         <Input
+                            id="ebd-lesson-date"
                             type="date"
                             {...register('date', { required: 'Data é obrigatória' })}
                         />
@@ -59,8 +60,9 @@ export function CreateLessonDialog({ isOpen, onClose, classId, tenantId }: Props
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Tema</label>
+                        <label htmlFor="ebd-lesson-topic" className="text-sm font-medium text-gray-700">Tema</label>
                         <Input
+                            id="ebd-lesson-topic"
                             {...register('topic', { required: 'Tema é obrigatório' })}
                             placeholder="Ex: A Parábola do Semeador"
                         />
@@ -68,16 +70,18 @@ export function CreateLessonDialog({ isOpen, onClose, classId, tenantId }: Props
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Referência Bíblica (opcional)</label>
+                        <label htmlFor="ebd-lesson-bible-reference" className="text-sm font-medium text-gray-700">Referência Bíblica (opcional)</label>
                         <Input
+                            id="ebd-lesson-bible-reference"
                             {...register('bible_reference')}
                             placeholder="Ex: Mateus 13:1-23"
                         />
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Descrição (opcional)</label>
+                        <label htmlFor="ebd-lesson-description" className="text-sm font-medium text-gray-700">Descrição (opcional)</label>
                         <textarea
+                            id="ebd-lesson-description"
                             {...register('description')}
                             placeholder="Descrição ou resumo da lição"
                             className="flex min-h-[80px] w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 resize-none"
@@ -85,8 +89,9 @@ export function CreateLessonDialog({ isOpen, onClose, classId, tenantId }: Props
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Link do Material (opcional)</label>
+                        <label htmlFor="ebd-lesson-homework-url" className="text-sm font-medium text-gray-700">Link do Material (opcional)</label>
                         <Input
+                            id="ebd-lesson-homework-url"
                             {...register('homework_url')}
                             type="url"
                             placeholder="https://..."

@@ -105,8 +105,14 @@ export function DevotionalsPage() {
                                     </div>
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
-                                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                                <MoreVertical size={16} />
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="h-8 w-8 p-0"
+                                                aria-label={`Abrir ações para o devocional ${devotional.title}`}
+                                                title={`Abrir ações para o devocional ${devotional.title}`}
+                                            >
+                                                <MoreVertical size={16} aria-hidden="true" />
                                             </Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end">

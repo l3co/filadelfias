@@ -32,22 +32,22 @@ export const MeetingCard = memo(function MeetingCard({ meeting, onView, onEdit }
             'SCHEDULED': {
                 label: 'Agendada',
                 variant: 'default',
-                icon: <Clock size={12} className="mr-1" />
+                icon: <Clock size={12} className="mr-1" aria-hidden="true" />
             },
             'IN_PROGRESS': {
                 label: 'Em andamento',
                 variant: 'secondary',
-                icon: <AlertCircle size={12} className="mr-1" />
+                icon: <AlertCircle size={12} className="mr-1" aria-hidden="true" />
             },
             'COMPLETED': {
                 label: 'Realizada',
                 variant: 'outline',
-                icon: <Check size={12} className="mr-1" />
+                icon: <Check size={12} className="mr-1" aria-hidden="true" />
             },
             'CANCELLED': {
                 label: 'Cancelada',
                 variant: 'destructive',
-                icon: <AlertCircle size={12} className="mr-1" />
+                icon: <AlertCircle size={12} className="mr-1" aria-hidden="true" />
             },
         };
         const config = configs[status];
@@ -85,7 +85,7 @@ export const MeetingCard = memo(function MeetingCard({ meeting, onView, onEdit }
 
                 <div className="space-y-2 text-sm text-gray-600 mb-4">
                     <div className="flex items-center gap-2">
-                        <Calendar size={14} className="text-indigo-500" />
+                        <Calendar size={14} className="text-indigo-500" aria-hidden="true" />
                         <span className="font-medium">{formattedDate}</span>
                         <span className="text-gray-400">às</span>
                         <span className="font-medium">{formattedTime}</span>
@@ -93,21 +93,21 @@ export const MeetingCard = memo(function MeetingCard({ meeting, onView, onEdit }
 
                     {meeting.location && (
                         <div className="flex items-center gap-2">
-                            <MapPin size={14} className="text-indigo-500" />
+                            <MapPin size={14} className="text-indigo-500" aria-hidden="true" />
                             <span>{meeting.location}</span>
                         </div>
                     )}
 
                     {meeting.agenda && (
                         <div className="flex items-start gap-2">
-                            <FileText size={14} className="text-indigo-500 mt-0.5" />
+                            <FileText size={14} className="text-indigo-500 mt-0.5" aria-hidden="true" />
                             <span className="line-clamp-2">{meeting.agenda}</span>
                         </div>
                     )}
 
                     {isCompleted && (
                         <div className="flex items-center gap-2 text-green-600">
-                            <Users size={14} />
+                            <Users size={14} aria-hidden="true" />
                             <span>
                                 {meeting.attendees?.length || 0} presente(s)
                                 {meeting.minutes && ' • Ata registrada'}
@@ -123,6 +123,7 @@ export const MeetingCard = memo(function MeetingCard({ meeting, onView, onEdit }
                         className="flex-1"
                         onClick={() => onView(meeting)}
                         data-testid={`view-meeting-${meeting.id}`}
+                        aria-label={`${isCompleted ? 'Ver ata' : 'Ver detalhes'} da reunião de ${formattedDate} às ${formattedTime}`}
                     >
                         {isCompleted ? 'Ver Ata' : 'Detalhes'}
                     </Button>
@@ -133,6 +134,7 @@ export const MeetingCard = memo(function MeetingCard({ meeting, onView, onEdit }
                             className="flex-1 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 hover:text-indigo-800"
                             onClick={() => onEdit(meeting)}
                             data-testid={`edit-meeting-${meeting.id}`}
+                            aria-label={`Editar reunião de ${formattedDate} às ${formattedTime}`}
                         >
                             Editar
                         </Button>

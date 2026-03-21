@@ -100,14 +100,15 @@ export function CreateSocialProjectDialog({ initialData, isOpen, isSubmitting, o
 
         <form className="space-y-4" onSubmit={handleSubmit(submit)}>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Título</label>
-            <Input {...register('title', { required: 'Título é obrigatório' })} placeholder="Ex: Cesta Solidária" />
+            <label htmlFor="social-project-title" className="text-sm font-medium text-gray-700">Título</label>
+            <Input id="social-project-title" {...register('title', { required: 'Título é obrigatório' })} placeholder="Ex: Cesta Solidária" />
             {errors.title && <p className="text-xs text-red-500">{errors.title.message}</p>}
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Resumo</label>
+            <label htmlFor="social-project-summary" className="text-sm font-medium text-gray-700">Resumo</label>
             <Textarea
+              id="social-project-summary"
               {...register('summary', { required: 'Resumo é obrigatório' })}
               placeholder="Objetivo, formato e impacto esperado do projeto."
             />
@@ -116,8 +117,8 @@ export function CreateSocialProjectDialog({ initialData, isOpen, isSubmitting, o
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Local</label>
-              <Input {...register('location')} placeholder="Ex: Bairro São José" />
+              <label htmlFor="social-project-location" className="text-sm font-medium text-gray-700">Local</label>
+              <Input id="social-project-location" {...register('location')} placeholder="Ex: Bairro São José" />
             </div>
 
             <div className="space-y-2">
@@ -140,30 +141,30 @@ export function CreateSocialProjectDialog({ initialData, isOpen, isSubmitting, o
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Público-alvo</label>
-              <Input {...register('target_audience')} placeholder="Ex: famílias vulneráveis" />
+              <label htmlFor="social-project-target-audience" className="text-sm font-medium text-gray-700">Público-alvo</label>
+              <Input id="social-project-target-audience" {...register('target_audience')} placeholder="Ex: famílias vulneráveis" />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Coordenador</label>
-              <Input {...register('coordinator_name')} placeholder="Ex: Diácono João" />
+              <label htmlFor="social-project-coordinator-name" className="text-sm font-medium text-gray-700">Coordenador</label>
+              <Input id="social-project-coordinator-name" {...register('coordinator_name')} placeholder="Ex: Diácono João" />
             </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Contato</label>
-              <Input {...register('contact_info')} placeholder="Telefone, email ou responsável" />
+              <label htmlFor="social-project-contact-info" className="text-sm font-medium text-gray-700">Contato</label>
+              <Input id="social-project-contact-info" {...register('contact_info')} placeholder="Telefone, email ou responsável" />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Início</label>
-                <Input {...register('start_date', { setValueAs: (value) => value || undefined })} type="date" />
+                <label htmlFor="social-project-start-date" className="text-sm font-medium text-gray-700">Início</label>
+                <Input id="social-project-start-date" {...register('start_date', { setValueAs: (value) => value || undefined })} type="date" />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Fim</label>
-                <Input {...register('end_date', { setValueAs: (value) => value || undefined })} type="date" />
+                <label htmlFor="social-project-end-date" className="text-sm font-medium text-gray-700">Fim</label>
+                <Input id="social-project-end-date" {...register('end_date', { setValueAs: (value) => value || undefined })} type="date" />
               </div>
             </div>
           </div>

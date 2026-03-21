@@ -57,6 +57,12 @@ export default function RegisterPage() {
 
     return (
         <div className="min-h-screen flex">
+            <a
+                href="#register-main"
+                className="sr-only sr-only-focusable absolute left-4 top-4 z-50 rounded-md bg-white px-4 py-2 text-sm font-medium text-green-700 shadow-lg"
+            >
+                Pular para o formulário de criação de conta
+            </a>
             {/* Left Side - Branding */}
             <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-[#002333] via-green-900 to-[#002333] relative overflow-hidden">
                 {/* Decorative elements */}
@@ -93,7 +99,7 @@ export default function RegisterPage() {
             </div>
 
             {/* Right Side - Register Form */}
-            <div className="flex-1 flex items-center justify-center p-8 bg-gradient-to-b from-white to-[#DEEFE7]/30 overflow-y-auto">
+            <main id="register-main" className="flex-1 flex items-center justify-center p-8 bg-gradient-to-b from-white to-[#DEEFE7]/30 overflow-y-auto">
                 <div className="w-full max-w-md space-y-8 animate-in fade-in slide-in-from-right-4 duration-500 py-8">
                     {/* Mobile Logo */}
                     <div className="lg:hidden text-center mb-8">
@@ -120,7 +126,7 @@ export default function RegisterPage() {
                         <form className="space-y-5" onSubmit={handleSubmit}>
                             {errorMessage && (
                                 <div className="flex items-center gap-3 bg-red-50 border border-red-100 text-red-700 px-4 py-3 rounded-xl">
-                                    <AlertCircle size={20} className="flex-shrink-0" />
+                                    <AlertCircle size={20} className="flex-shrink-0" aria-hidden="true" />
                                     <span className="text-sm">{errorMessage}</span>
                                 </div>
                             )}
@@ -132,7 +138,7 @@ export default function RegisterPage() {
                                     </label>
                                     <div className="relative">
                                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                            <User size={18} className="text-gray-400" />
+                                            <User size={18} className="text-gray-400" aria-hidden="true" />
                                         </div>
                                         <input
                                             id="name"
@@ -153,7 +159,7 @@ export default function RegisterPage() {
                                     </label>
                                     <div className="relative">
                                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                            <Mail size={18} className="text-gray-400" />
+                                            <Mail size={18} className="text-gray-400" aria-hidden="true" />
                                         </div>
                                         <input
                                             id="email"
@@ -174,7 +180,7 @@ export default function RegisterPage() {
                                     </label>
                                     <div className="relative">
                                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                            <Lock size={18} className="text-gray-400" />
+                                            <Lock size={18} className="text-gray-400" aria-hidden="true" />
                                         </div>
                                         <input
                                             id="password"
@@ -195,7 +201,7 @@ export default function RegisterPage() {
                                     </label>
                                     <div className="relative">
                                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                            <Lock size={18} className="text-gray-400" />
+                                            <Lock size={18} className="text-gray-400" aria-hidden="true" />
                                         </div>
                                         <input
                                             id="confirmPassword"
@@ -221,7 +227,7 @@ export default function RegisterPage() {
                                 ) : (
                                     <>
                                         <span>Criar conta</span>
-                                        <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                                        <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" aria-hidden="true" />
                                     </>
                                 )}
                             </button>
@@ -240,7 +246,7 @@ export default function RegisterPage() {
                         </Link>
                     </p>
                 </div>
-            </div>
+            </main>
         </div>
     );
 }

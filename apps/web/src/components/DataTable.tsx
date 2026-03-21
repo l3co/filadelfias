@@ -137,14 +137,19 @@ export function DataTable<T>({
     <div className="space-y-4">
       {searchable && (
         <div className="relative max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <label htmlFor="data-table-search" className="sr-only">
+            {searchPlaceholder}
+          </label>
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" aria-hidden="true" />
           <Input
+            id="data-table-search"
             placeholder={searchPlaceholder}
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
               setCurrentPage(1);
             }}
+            aria-label={searchPlaceholder}
             className="pl-9"
           />
         </div>
@@ -219,16 +224,18 @@ export function DataTable<T>({
               size="sm"
               onClick={() => setCurrentPage(1)}
               disabled={currentPage === 1}
+              aria-label="Ir para a primeira página"
             >
-              <ChevronsLeft className="h-4 w-4" />
+              <ChevronsLeft className="h-4 w-4" aria-hidden="true" />
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1}
+              aria-label="Ir para a página anterior"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-4 w-4" aria-hidden="true" />
             </Button>
             <span className="px-3 text-sm">
               {currentPage} / {totalPages}
@@ -238,16 +245,18 @@ export function DataTable<T>({
               size="sm"
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
+              aria-label="Ir para a próxima página"
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-4 w-4" aria-hidden="true" />
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={() => setCurrentPage(totalPages)}
               disabled={currentPage === totalPages}
+              aria-label="Ir para a última página"
             >
-              <ChevronsRight className="h-4 w-4" />
+              <ChevronsRight className="h-4 w-4" aria-hidden="true" />
             </Button>
           </div>
         </div>

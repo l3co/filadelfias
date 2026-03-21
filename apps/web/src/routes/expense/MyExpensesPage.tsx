@@ -23,7 +23,7 @@ function getStatusBadge(status: string) {
 
     return (
         <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${className}`}>
-            <Icon size={12} />
+            <Icon size={12} aria-hidden="true" />
             {label}
         </span>
     );
@@ -86,7 +86,7 @@ export function MyExpensesPage() {
                 description="Solicite reembolso de despesas realizadas em nome da igreja"
                 actions={
                     <Button onClick={() => setIsDialogOpen(true)} className="gap-2">
-                        <Plus size={16} />
+                        <Plus size={16} aria-hidden="true" />
                         Nova Solicitação
                     </Button>
                 }
@@ -105,7 +105,7 @@ export function MyExpensesPage() {
                         <Card>
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2 text-amber-600">
-                                    <Clock size={20} />
+                                    <Clock size={20} aria-hidden="true" />
                                     Aguardando Aprovação
                                     <span className="ml-2 px-2 py-0.5 bg-amber-100 text-amber-700 text-xs rounded-full">
                                         {pendingExpenses.length}
@@ -134,8 +134,9 @@ export function MyExpensesPage() {
                                                     size="sm"
                                                     onClick={() => handleDelete(expense.id)}
                                                     className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                                                    aria-label={`Excluir solicitação de reembolso ${expense.description}`}
                                                 >
-                                                    <Trash2 size={16} />
+                                                    <Trash2 size={16} aria-hidden="true" />
                                                 </Button>
                                             </div>
                                         </div>
@@ -153,7 +154,7 @@ export function MyExpensesPage() {
                         <CardContent>
                             {processedExpenses.length === 0 && pendingExpenses.length === 0 ? (
                                 <div className="text-center py-8 text-gray-500">
-                                    <Receipt className="h-12 w-12 mx-auto text-gray-300 mb-3" />
+                                    <Receipt className="h-12 w-12 mx-auto text-gray-300 mb-3" aria-hidden="true" />
                                     <p>Você ainda não fez nenhuma solicitação de reembolso.</p>
                                     <p className="text-sm mt-1">Clique em "Nova Solicitação" para começar.</p>
                                 </div>
@@ -227,12 +228,12 @@ export function MyExpensesPage() {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="category">Categoria</Label>
+                                    <Label htmlFor="expense-category">Categoria</Label>
                                 <Select
                                     value={formData.category}
                                     onValueChange={(value) => setFormData({ ...formData, category: value })}
                                 >
-                                    <SelectTrigger>
+                                    <SelectTrigger id="expense-category" aria-label="Categoria da despesa">
                                         <SelectValue placeholder="Selecione a categoria" />
                                     </SelectTrigger>
                                     <SelectContent>

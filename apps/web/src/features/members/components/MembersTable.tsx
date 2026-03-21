@@ -110,13 +110,13 @@ const MemberRow = memo(function MemberRow({
                 <div className="space-y-1">
                     {member.email && (
                         <div className="flex items-center gap-1.5 text-sm text-gray-500">
-                            <Mail size={14} />
+                            <Mail size={14} aria-hidden="true" />
                             <span>{member.email}</span>
                         </div>
                     )}
                     {member.phone && (
                         <div className="flex items-center gap-1.5 text-sm text-gray-500">
-                            <Phone size={14} />
+                            <Phone size={14} aria-hidden="true" />
                             <span>{member.phone}</span>
                         </div>
                     )}
@@ -132,16 +132,18 @@ const MemberRow = memo(function MemberRow({
                             onClick={() => onInvite?.(member)}
                             className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
                             title="Convidar para a plataforma"
+                            aria-label={`Convidar ${member.full_name} para a plataforma`}
                         >
-                            <UserPlus size={16} />
+                            <UserPlus size={16} aria-hidden="true" />
                         </button>
                     )}
                     <button 
                         onClick={() => onEdit?.(member)}
                         className="p-2 rounded-lg text-gray-400 hover:text-green-600 hover:bg-green-50 transition-colors"
                         title="Editar membro"
+                        aria-label={`Editar ${member.full_name}`}
                     >
-                        <Pencil size={16} />
+                        <Pencil size={16} aria-hidden="true" />
                     </button>
                 </div>
             </TableCell>

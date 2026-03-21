@@ -51,7 +51,7 @@ export function ManageMembersDialog({ isOpen, onClose, council }: Props) {
             <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
-                        <Users size={20} />
+                        <Users size={20} aria-hidden="true" />
                         Membros - {council.name}
                     </DialogTitle>
                 </DialogHeader>
@@ -85,9 +85,10 @@ export function ManageMembersDialog({ isOpen, onClose, council }: Props) {
                                             size="sm"
                                             onClick={() => handleRemoveMember(member.id)}
                                             disabled={removeMember.isPending}
+                                            aria-label={`Remover ${member.full_name} do órgão ${council.name}`}
                                             className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
                                         >
-                                            <X size={16} />
+                                            <X size={16} aria-hidden="true" />
                                         </Button>
                                     </div>
                                 ))}
@@ -98,11 +99,14 @@ export function ManageMembersDialog({ isOpen, onClose, council }: Props) {
                     {/* Add Members */}
                     <div>
                         <h4 className="text-sm font-medium text-gray-700 mb-2">Adicionar membros</h4>
+                        <label htmlFor="manage-council-members-search" className="sr-only">Buscar membro para adicionar ao órgão</label>
                         <input
+                            id="manage-council-members-search"
                             type="text"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             placeholder="Buscar membro..."
+                            aria-label="Buscar membro para adicionar ao órgão"
                             className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
                         />
                         
@@ -126,9 +130,10 @@ export function ManageMembersDialog({ isOpen, onClose, council }: Props) {
                                         size="sm"
                                         onClick={() => handleAddMember(member.id)}
                                         disabled={addMember.isPending}
+                                        aria-label={`Adicionar ${member.full_name} ao órgão ${council.name}`}
                                         className="h-8 gap-1 text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50"
                                     >
-                                        <UserPlus size={14} />
+                                        <UserPlus size={14} aria-hidden="true" />
                                         Adicionar
                                     </Button>
                                 </div>

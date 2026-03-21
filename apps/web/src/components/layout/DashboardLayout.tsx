@@ -63,11 +63,18 @@ export function DashboardLayout() {
 
     return (
         <div className="min-h-screen bg-[#f8fafc] flex">
+            <a
+                href="#dashboard-main-content"
+                className="sr-only sr-only-focusable fixed left-4 top-4 z-[60] rounded-lg bg-white px-4 py-2 text-sm font-medium text-green-700 shadow-lg"
+            >
+                Pular para o conteúdo principal
+            </a>
             {/* Mobile Sidebar Overlay */}
             {sidebarOpen && (
                 <div
                     className="fixed inset-0 z-40 bg-gray-900/60 backdrop-blur-sm lg:hidden transition-opacity"
                     onClick={() => setSidebarOpen(false)}
+                    aria-hidden="true"
                 />
             )}
 
@@ -89,8 +96,9 @@ export function DashboardLayout() {
                     <button
                         onClick={() => setSidebarOpen(false)}
                         className="lg:hidden p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                        aria-label="Fechar menu lateral"
                     >
-                        <X size={20} />
+                        <X size={20} aria-hidden="true" />
                     </button>
                 </div>
 
@@ -187,17 +195,23 @@ export function DashboardLayout() {
                             type="button"
                             className="lg:hidden p-2 -ml-2 rounded-xl text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
                             onClick={() => setSidebarOpen(true)}
+                            aria-label="Abrir menu lateral"
                         >
-                            <Menu className="h-5 w-5" />
+                            <Menu className="h-5 w-5" aria-hidden="true" />
                         </button>
 
                         {/* Search Bar - Desktop */}
                         <div className="hidden md:flex items-center">
                             <div className="relative">
+                                <label htmlFor="dashboard-search" className="sr-only">
+                                    Buscar no painel administrativo
+                                </label>
                                 <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                                 <input
+                                    id="dashboard-search"
                                     type="text"
                                     placeholder="Buscar..."
+                                    aria-label="Buscar no painel administrativo"
                                     className="w-64 pl-10 pr-4 py-2 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all placeholder:text-gray-400"
                                 />
                             </div>
@@ -214,9 +228,12 @@ export function DashboardLayout() {
 
                     {/* Right: Actions */}
                     <div className="flex items-center gap-2">
-                        <button className="relative p-2.5 rounded-xl text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors">
-                            <Bell size={20} />
-                            <span className="absolute top-2 right-2 w-2 h-2 bg-green-500 rounded-full ring-2 ring-white" />
+                        <button
+                            className="relative p-2.5 rounded-xl text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                            aria-label="Abrir notificações"
+                        >
+                            <Bell size={20} aria-hidden="true" />
+                            <span className="absolute top-2 right-2 w-2 h-2 bg-green-500 rounded-full ring-2 ring-white" aria-hidden="true" />
                         </button>
 
                         {/* Desktop User Avatar */}
@@ -232,7 +249,7 @@ export function DashboardLayout() {
                     </div>
                 </header>
 
-                <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-gradient-to-b from-gray-50/50 to-white">
+                <main id="dashboard-main-content" className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-gradient-to-b from-gray-50/50 to-white">
                     <Outlet />
                 </main>
             </div>

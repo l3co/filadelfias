@@ -58,7 +58,7 @@ function PasswordStrengthIndicator({ password }: { password: string }) {
             <div className="grid grid-cols-2 gap-1">
                 {results.map((req, i) => (
                     <div key={i} className={`flex items-center gap-1.5 text-xs ${req.passed ? 'text-green-600' : 'text-gray-400'}`}>
-                        {req.passed ? <Check size={12} /> : <X size={12} />}
+                        {req.passed ? <Check size={12} aria-hidden="true" /> : <X size={12} aria-hidden="true" />}
                         <span>{req.label}</span>
                     </div>
                 ))}
@@ -223,6 +223,12 @@ export function ChurchRegistrationWizard() {
 
     return (
         <div className="min-h-screen flex">
+            <a
+                href="#church-registration-main"
+                className="sr-only sr-only-focusable absolute left-4 top-4 z-50 rounded-md bg-white px-4 py-2 text-sm font-medium text-green-700 shadow-lg"
+            >
+                Pular para o formulário de cadastro da igreja
+            </a>
             {/* Left Side - Progress */}
             <div className="hidden lg:flex lg:w-[400px] bg-gradient-to-br from-[#002333] via-green-900 to-[#002333] relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-96 h-96 bg-green-500/10 rounded-full blur-3xl" />
@@ -255,7 +261,7 @@ export function ChurchRegistrationWizard() {
                                             ? 'bg-white text-green-700'
                                             : 'bg-white/10 text-white/40'
                                         }`}>
-                                        {isCompleted ? <CheckCircle2 size={20} /> : <Icon size={20} />}
+                                        {isCompleted ? <CheckCircle2 size={20} aria-hidden="true" /> : <Icon size={20} aria-hidden="true" />}
                                     </div>
                                     <span className={`text-sm font-medium ${isCompleted || isCurrent ? 'text-white' : 'text-white/40'
                                         }`}>
@@ -269,7 +275,7 @@ export function ChurchRegistrationWizard() {
             </div>
 
             {/* Right Side - Form */}
-            <div className="flex-1 flex items-center justify-center p-6 sm:p-8 bg-gradient-to-b from-white to-[#DEEFE7]/30">
+            <main id="church-registration-main" className="flex-1 flex items-center justify-center p-6 sm:p-8 bg-gradient-to-b from-white to-[#DEEFE7]/30">
                 <div className="w-full max-w-lg animate-in fade-in slide-in-from-right-4 duration-500">
                     {/* Mobile Header */}
                     <div className="lg:hidden text-center mb-8">
@@ -286,7 +292,7 @@ export function ChurchRegistrationWizard() {
                         <form onSubmit={handleSubmit(onSubmit)}>
                             {error && (
                                 <div className="flex items-center gap-3 bg-red-50 border border-red-100 text-red-700 px-4 py-3 rounded-xl mb-6">
-                                    <AlertCircle size={20} className="flex-shrink-0" />
+                                    <AlertCircle size={20} className="flex-shrink-0" aria-hidden="true" />
                                     <span className="text-sm">{error}</span>
                                 </div>
                             )}
@@ -300,14 +306,15 @@ export function ChurchRegistrationWizard() {
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        <label htmlFor="church-registration-name" className="block text-sm font-medium text-gray-700 mb-2">
                                             Nome da Igreja *
                                         </label>
                                         <div className="relative">
                                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                                <Building2 size={18} className="text-gray-400" />
+                                                <Building2 size={18} className="text-gray-400" aria-hidden="true" />
                                             </div>
                                             <input
+                                                id="church-registration-name"
                                                 {...register('church_name', { required: 'Nome obrigatório' })}
                                                 onChange={handleChurchNameChange}
                                                 placeholder="Ex: Igreja Presbiteriana Central"
@@ -320,14 +327,15 @@ export function ChurchRegistrationWizard() {
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        <label htmlFor="church-registration-slug" className="block text-sm font-medium text-gray-700 mb-2">
                                             Identificador (URL) *
                                         </label>
                                         <div className="relative">
                                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                                <Link2 size={18} className="text-gray-400" />
+                                                <Link2 size={18} className="text-gray-400" aria-hidden="true" />
                                             </div>
                                             <input
+                                                id="church-registration-slug"
                                                 {...register('church_slug', {
                                                     required: 'Identificador obrigatório',
                                                     pattern: { value: /^[a-z0-9-]+$/, message: 'Use apenas letras minúsculas, números e hifens' }
@@ -356,9 +364,10 @@ export function ChurchRegistrationWizard() {
 
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">CEP *</label>
+                                            <label htmlFor="church-registration-postal-code" className="block text-sm font-medium text-gray-700 mb-2">CEP *</label>
                                             <div className="relative">
                                                 <input
+                                                    id="church-registration-postal-code"
                                                     {...register('postal_code', { required: 'CEP obrigatório' })}
                                                     onBlur={handleCEPBlur}
                                                     placeholder="00000-000"
@@ -367,7 +376,7 @@ export function ChurchRegistrationWizard() {
                                                 />
                                                 {isFetchingCEP && (
                                                     <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                                                        <Loader2 size={16} className="animate-spin text-gray-400" />
+                                                        <Loader2 size={16} className="animate-spin text-gray-400" aria-hidden="true" />
                                                     </div>
                                                 )}
                                             </div>
@@ -376,8 +385,9 @@ export function ChurchRegistrationWizard() {
                                             )}
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">Estado *</label>
+                                            <label htmlFor="church-registration-state" className="block text-sm font-medium text-gray-700 mb-2">Estado *</label>
                                             <input
+                                                id="church-registration-state"
                                                 {...register('state', { required: 'Estado obrigatório' })}
                                                 placeholder="SP"
                                                 maxLength={2}
@@ -390,8 +400,9 @@ export function ChurchRegistrationWizard() {
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Logradouro *</label>
+                                        <label htmlFor="church-registration-street" className="block text-sm font-medium text-gray-700 mb-2">Logradouro *</label>
                                         <input
+                                            id="church-registration-street"
                                             {...register('street', { required: 'Logradouro obrigatório' })}
                                             placeholder="Rua, Avenida..."
                                             className="block w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all bg-gray-50/50 hover:bg-white"
@@ -403,8 +414,9 @@ export function ChurchRegistrationWizard() {
 
                                     <div className="grid grid-cols-3 gap-4">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">Número *</label>
+                                            <label htmlFor="church-registration-number" className="block text-sm font-medium text-gray-700 mb-2">Número *</label>
                                             <input
+                                                id="church-registration-number"
                                                 {...register('number', { required: 'Número obrigatório' })}
                                                 placeholder="123"
                                                 className="block w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all bg-gray-50/50 hover:bg-white"
@@ -414,8 +426,9 @@ export function ChurchRegistrationWizard() {
                                             )}
                                         </div>
                                         <div className="col-span-2">
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">Complemento</label>
+                                            <label htmlFor="church-registration-complement" className="block text-sm font-medium text-gray-700 mb-2">Complemento</label>
                                             <input
+                                                id="church-registration-complement"
                                                 {...register('complement')}
                                                 placeholder="Sala, Bloco..."
                                                 className="block w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all bg-gray-50/50 hover:bg-white"
@@ -425,8 +438,9 @@ export function ChurchRegistrationWizard() {
 
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">Bairro *</label>
+                                            <label htmlFor="church-registration-neighborhood" className="block text-sm font-medium text-gray-700 mb-2">Bairro *</label>
                                             <input
+                                                id="church-registration-neighborhood"
                                                 {...register('neighborhood', { required: 'Bairro obrigatório' })}
                                                 placeholder="Centro"
                                                 className="block w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all bg-gray-50/50 hover:bg-white"
@@ -436,8 +450,9 @@ export function ChurchRegistrationWizard() {
                                             )}
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">Cidade *</label>
+                                            <label htmlFor="church-registration-city" className="block text-sm font-medium text-gray-700 mb-2">Cidade *</label>
                                             <input
+                                                id="church-registration-city"
                                                 {...register('city', { required: 'Cidade obrigatória' })}
                                                 placeholder="São Paulo"
                                                 className="block w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all bg-gray-50/50 hover:bg-white"
@@ -459,12 +474,13 @@ export function ChurchRegistrationWizard() {
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Nome completo *</label>
+                                        <label htmlFor="church-registration-admin-name" className="block text-sm font-medium text-gray-700 mb-2">Nome completo *</label>
                                         <div className="relative">
                                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                                <User size={18} className="text-gray-400" />
+                                                <User size={18} className="text-gray-400" aria-hidden="true" />
                                             </div>
                                             <input
+                                                id="church-registration-admin-name"
                                                 {...register('admin_name', { required: 'Nome obrigatório' })}
                                                 placeholder="Seu nome completo"
                                                 className="block w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all bg-gray-50/50 hover:bg-white"
@@ -476,12 +492,13 @@ export function ChurchRegistrationWizard() {
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+                                        <label htmlFor="church-registration-admin-email" className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
                                         <div className="relative">
                                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                                <Mail size={18} className="text-gray-400" />
+                                                <Mail size={18} className="text-gray-400" aria-hidden="true" />
                                             </div>
                                             <input
+                                                id="church-registration-admin-email"
                                                 {...register('admin_email', {
                                                     required: 'Email obrigatório',
                                                     pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Email inválido' }
@@ -497,12 +514,13 @@ export function ChurchRegistrationWizard() {
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Telefone</label>
+                                        <label htmlFor="church-registration-admin-phone" className="block text-sm font-medium text-gray-700 mb-2">Telefone</label>
                                         <div className="relative">
                                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                                <Phone size={18} className="text-gray-400" />
+                                                <Phone size={18} className="text-gray-400" aria-hidden="true" />
                                             </div>
                                             <input
+                                                id="church-registration-admin-phone"
                                                 {...register('admin_phone')}
                                                 placeholder="(11) 99999-9999"
                                                 className="block w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all bg-gray-50/50 hover:bg-white"
@@ -511,12 +529,13 @@ export function ChurchRegistrationWizard() {
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Senha *</label>
+                                        <label htmlFor="church-registration-admin-password" className="block text-sm font-medium text-gray-700 mb-2">Senha *</label>
                                         <div className="relative">
                                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                                <Lock size={18} className="text-gray-400" />
+                                                <Lock size={18} className="text-gray-400" aria-hidden="true" />
                                             </div>
                                             <input
+                                                id="church-registration-admin-password"
                                                 {...register('admin_password', {
                                                     required: 'Senha obrigatória',
                                                     validate: (value) => {
@@ -536,12 +555,13 @@ export function ChurchRegistrationWizard() {
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Confirmar Senha *</label>
+                                        <label htmlFor="church-registration-admin-password-confirm" className="block text-sm font-medium text-gray-700 mb-2">Confirmar Senha *</label>
                                         <div className="relative">
                                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                                <Lock size={18} className="text-gray-400" />
+                                                <Lock size={18} className="text-gray-400" aria-hidden="true" />
                                             </div>
                                             <input
+                                                id="church-registration-admin-password-confirm"
                                                 {...register('admin_password_confirm', {
                                                     required: 'Confirme a senha',
                                                     validate: (value) => value === formValues.admin_password || 'As senhas não coincidem'
@@ -569,7 +589,7 @@ export function ChurchRegistrationWizard() {
                                     <div className="space-y-4">
                                         <div className="bg-gray-50 rounded-xl p-4">
                                             <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                                                <Church size={16} className="text-green-600" />
+                                                <Church size={16} className="text-green-600" aria-hidden="true" />
                                                 Igreja
                                             </h4>
                                             <p className="text-gray-900 font-medium">{formValues.church_name}</p>
@@ -578,7 +598,7 @@ export function ChurchRegistrationWizard() {
 
                                         <div className="bg-gray-50 rounded-xl p-4">
                                             <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                                                <MapPin size={16} className="text-green-600" />
+                                                <MapPin size={16} className="text-green-600" aria-hidden="true" />
                                                 Endereço
                                             </h4>
                                             <p className="text-gray-900">
@@ -593,7 +613,7 @@ export function ChurchRegistrationWizard() {
 
                                         <div className="bg-gray-50 rounded-xl p-4">
                                             <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                                                <User size={16} className="text-green-600" />
+                                                <User size={16} className="text-green-600" aria-hidden="true" />
                                                 Administrador
                                             </h4>
                                             <p className="text-gray-900 font-medium">{formValues.admin_name}</p>
@@ -620,7 +640,7 @@ export function ChurchRegistrationWizard() {
                                         onClick={prevStep}
                                         className="flex items-center gap-2 px-4 py-2.5 text-gray-600 hover:text-gray-900 transition-colors"
                                     >
-                                        <ArrowLeft size={18} />
+                                        <ArrowLeft size={18} aria-hidden="true" />
                                         Voltar
                                     </button>
                                 ) : (
@@ -628,7 +648,7 @@ export function ChurchRegistrationWizard() {
                                         to={ROUTES.AUTH.LOGIN}
                                         className="flex items-center gap-2 px-4 py-2.5 text-gray-600 hover:text-gray-900 transition-colors"
                                     >
-                                        <ArrowLeft size={18} />
+                                        <ArrowLeft size={18} aria-hidden="true" />
                                         Voltar ao login
                                     </Link>
                                 )}
@@ -640,7 +660,7 @@ export function ChurchRegistrationWizard() {
                                         className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-medium rounded-xl transition-all shadow-lg shadow-green-600/25"
                                     >
                                         Próximo
-                                        <ArrowRight size={18} />
+                                        <ArrowRight size={18} aria-hidden="true" />
                                     </button>
                                 ) : (
                                     <button
@@ -650,12 +670,12 @@ export function ChurchRegistrationWizard() {
                                     >
                                         {registerMutation.isPending ? (
                                             <>
-                                                <Loader2 size={18} className="animate-spin" />
+                                                <Loader2 size={18} className="animate-spin" aria-hidden="true" />
                                                 Cadastrando...
                                             </>
                                         ) : (
                                             <>
-                                                <CheckCircle2 size={18} />
+                                                <CheckCircle2 size={18} aria-hidden="true" />
                                                 Cadastrar Igreja
                                             </>
                                         )}
@@ -669,7 +689,7 @@ export function ChurchRegistrationWizard() {
                         Já tem uma conta? <Link to={ROUTES.AUTH.LOGIN} className="text-green-600 hover:text-green-700 font-medium">Faça login</Link>
                     </p>
                 </div>
-            </div>
+            </main>
         </div>
     );
 }

@@ -84,7 +84,7 @@ export default function LoginPage() {
                         <form className="space-y-6" onSubmit={handleSubmit}>
                             {error && (
                                 <div className="flex items-center gap-3 bg-red-50 border border-red-100 text-red-700 px-4 py-3 rounded-xl">
-                                    <AlertCircle size={20} className="flex-shrink-0" />
+                                    <AlertCircle size={20} className="flex-shrink-0" aria-hidden="true" />
                                     <span className="text-sm">Email ou senha incorretos</span>
                                 </div>
                             )}
@@ -96,7 +96,7 @@ export default function LoginPage() {
                                     </label>
                                     <div className="relative">
                                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                            <Mail size={18} className="text-gray-400" />
+                                            <Mail size={18} className="text-gray-400" aria-hidden="true" />
                                         </div>
                                         <input
                                             id="email"
@@ -122,7 +122,7 @@ export default function LoginPage() {
                                     </div>
                                     <div className="relative">
                                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                            <Lock size={18} className="text-gray-400" />
+                                            <Lock size={18} className="text-gray-400" aria-hidden="true" />
                                         </div>
                                         <input
                                             id="password"
@@ -148,7 +148,7 @@ export default function LoginPage() {
                                 ) : (
                                     <>
                                         <span>Entrar</span>
-                                        <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                                        <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" aria-hidden="true" />
                                     </>
                                 )}
                             </button>

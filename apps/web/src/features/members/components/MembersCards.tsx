@@ -74,8 +74,9 @@ const MemberCard = memo(function MemberCard({
                                 onClick={() => onInvite?.(member)}
                                 className="h-8 w-8 p-0 bg-white/20 hover:bg-white/40 text-white"
                                 title="Convidar para a plataforma"
+                                aria-label={`Convidar ${member.full_name} para a plataforma`}
                             >
-                                <UserPlus size={14} />
+                                <UserPlus size={14} aria-hidden="true" />
                             </Button>
                         )}
                         <Button
@@ -84,8 +85,9 @@ const MemberCard = memo(function MemberCard({
                             onClick={() => onEdit?.(member)}
                             className="h-8 w-8 p-0 bg-white/20 hover:bg-white/40 text-white"
                             title="Editar membro"
+                            aria-label={`Editar ${member.full_name}`}
                         >
-                            <Pencil size={14} />
+                            <Pencil size={14} aria-hidden="true" />
                         </Button>
                     </div>
                 </div>
@@ -123,19 +125,19 @@ const MemberCard = memo(function MemberCard({
                     <div className="space-y-1.5 text-sm">
                         {member.email && (
                             <div className="flex items-center gap-2 text-gray-500">
-                                <Mail size={14} className="text-gray-400 flex-shrink-0" />
+                                <Mail size={14} className="text-gray-400 flex-shrink-0" aria-hidden="true" />
                                 <span className="truncate">{member.email}</span>
                             </div>
                         )}
                         {member.phone && (
                             <div className="flex items-center gap-2 text-gray-500">
-                                <Phone size={14} className="text-gray-400 flex-shrink-0" />
+                                <Phone size={14} className="text-gray-400 flex-shrink-0" aria-hidden="true" />
                                 <span>{member.phone}</span>
                             </div>
                         )}
                         {member.birth_date && (
                             <div className="flex items-center gap-2 text-gray-500">
-                                <Calendar size={14} className="text-gray-400 flex-shrink-0" />
+                                <Calendar size={14} className="text-gray-400 flex-shrink-0" aria-hidden="true" />
                                 <span>{new Date(member.birth_date).toLocaleDateString('pt-BR')}</span>
                             </div>
                         )}

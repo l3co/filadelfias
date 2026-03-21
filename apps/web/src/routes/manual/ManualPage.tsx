@@ -72,12 +72,17 @@ export function ManualPage() {
 
             {/* Search */}
             <div className="relative w-full mb-5">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <label htmlFor="manual-search" className="sr-only">
+                    Buscar no manual presbiteriano
+                </label>
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} aria-hidden="true" />
                 <input
+                    id="manual-search"
                     type="text"
                     placeholder="Buscar no manual..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
+                    aria-label="Buscar no manual presbiteriano"
                     className="w-full pl-12 pr-4 py-3 text-base border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 />
                 {isSearching && (

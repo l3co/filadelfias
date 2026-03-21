@@ -39,8 +39,9 @@ export function CreateCouncilDialog({ isOpen, onClose, tenantId }: Props) {
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4">
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Nome</label>
+                        <label htmlFor="create-council-name" className="text-sm font-medium text-gray-700">Nome</label>
                         <Input
+                            id="create-council-name"
                             {...register('name', { required: 'Nome é obrigatório' })}
                             placeholder="Ex: Conselho da Igreja"
                         />
@@ -48,8 +49,9 @@ export function CreateCouncilDialog({ isOpen, onClose, tenantId }: Props) {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Tipo</label>
+                        <label htmlFor="create-council-type" className="text-sm font-medium text-gray-700">Tipo</label>
                         <select
+                            id="create-council-type"
                             {...register('type')}
                             className="flex h-10 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                             defaultValue="SESSION"
@@ -62,8 +64,9 @@ export function CreateCouncilDialog({ isOpen, onClose, tenantId }: Props) {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Descrição</label>
+                        <label htmlFor="create-council-description" className="text-sm font-medium text-gray-700">Descrição</label>
                         <Input
+                            id="create-council-description"
                             {...register('description')}
                             placeholder="Opcional. Propósito deste órgão."
                         />

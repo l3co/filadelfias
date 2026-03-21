@@ -182,7 +182,7 @@ export function ChurchSettingsPage() {
             {/* Error Message */}
             {updateMutation.isError && (
                 <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6">
-                    <AlertCircle size={20} />
+                    <AlertCircle size={20} aria-hidden="true" />
                     <span>Erro ao atualizar dados. Tente novamente.</span>
                 </div>
             )}
@@ -191,7 +191,7 @@ export function ChurchSettingsPage() {
                 {/* Dados Básicos */}
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                     <h2 className="text-lg font-semibold text-[#002333] mb-4 flex items-center gap-2">
-                        <Building2 size={20} className="text-green-600" />
+                        <Building2 size={20} className="text-green-600" aria-hidden="true" />
                         Dados Básicos
                     </h2>
 
@@ -226,7 +226,7 @@ export function ChurchSettingsPage() {
                 {/* Endereço */}
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                     <h2 className="text-lg font-semibold text-[#002333] mb-4 flex items-center gap-2">
-                        <MapPin size={20} className="text-green-600" />
+                        <MapPin size={20} className="text-green-600" aria-hidden="true" />
                         Endereço
                     </h2>
 
@@ -242,7 +242,7 @@ export function ChurchSettingsPage() {
                                 />
                                 {isFetchingCEP && (
                                     <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                                        <Loader2 size={16} className="animate-spin text-gray-400" />
+                                        <Loader2 size={16} className="animate-spin text-gray-400" aria-hidden="true" />
                                     </div>
                                 )}
                             </div>
@@ -303,7 +303,7 @@ export function ChurchSettingsPage() {
                 {/* Contato */}
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                     <h2 className="text-lg font-semibold text-[#002333] mb-4 flex items-center gap-2">
-                        <Phone size={20} className="text-green-600" />
+                        <Phone size={20} className="text-green-600" aria-hidden="true" />
                         Contato
                     </h2>
 
@@ -330,7 +330,7 @@ export function ChurchSettingsPage() {
                 {/* Mídias Sociais */}
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                     <h2 className="text-lg font-semibold text-[#002333] mb-4 flex items-center gap-2">
-                        <Globe size={20} className="text-green-600" />
+                        <Globe size={20} className="text-green-600" aria-hidden="true" />
                         Mídias Sociais
                     </h2>
 
@@ -402,14 +402,14 @@ export function ChurchSettingsPage() {
                     >
                         {updateMutation.isPending ? (
                             <>
-                                <Loader2 size={18} className="animate-spin" />
-                                Salvando...
-                            </>
-                        ) : (
-                            <>
-                                <Save size={18} />
-                                Salvar Alterações
-                            </>
+                                    <Loader2 size={18} className="animate-spin" aria-hidden="true" />
+                                    Salvando...
+                                </>
+                            ) : (
+                                <>
+                                    <Save size={18} aria-hidden="true" />
+                                    Salvar Alterações
+                                </>
                         )}
                     </Button>
                 </div>

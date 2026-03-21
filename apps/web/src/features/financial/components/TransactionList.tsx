@@ -56,8 +56,14 @@ function TransactionRow({
                     {tx.type === 'DEBIT' ? '-' : '+'}
                     {formatCurrencyBRL(tx.amount)}
                 </div>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <MoreHorizontal className="h-4 w-4" />
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                    aria-label={`Abrir ações para transação ${tx.description}`}
+                    title={`Abrir ações para transação ${tx.description}`}
+                >
+                    <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
                 </Button>
             </div>
         </div>
@@ -136,14 +142,14 @@ export const TransactionList = memo(function TransactionList({
                         <h3 className="font-semibold text-gray-800">Movimentações do Mês</h3>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handlePrevMonth} data-testid="prev-month-button">
-                            <ChevronLeft className="h-4 w-4" />
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handlePrevMonth} data-testid="prev-month-button" aria-label="Mês anterior">
+                            <ChevronLeft className="h-4 w-4" aria-hidden="true" />
                         </Button>
                         <span className="text-sm font-medium min-w-[120px] text-center" data-testid="current-month-display">
                             {MONTHS[currentMonth - 1]} {currentYear}
                         </span>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleNextMonth} data-testid="next-month-button">
-                            <ChevronRight className="h-4 w-4" />
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleNextMonth} data-testid="next-month-button" aria-label="Próximo mês">
+                            <ChevronRight className="h-4 w-4" aria-hidden="true" />
                         </Button>
                     </div>
                 </div>
@@ -167,14 +173,14 @@ export const TransactionList = memo(function TransactionList({
                     <h3 className="font-semibold text-gray-800">Movimentações do Mês</h3>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handlePrevMonth} data-testid="prev-month-button">
-                        <ChevronLeft className="h-4 w-4" />
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handlePrevMonth} data-testid="prev-month-button" aria-label="Mês anterior">
+                        <ChevronLeft className="h-4 w-4" aria-hidden="true" />
                     </Button>
                     <span className="text-sm font-medium min-w-[120px] text-center" data-testid="current-month-display">
                         {MONTHS[currentMonth - 1]} {currentYear}
                     </span>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleNextMonth} data-testid="next-month-button">
-                        <ChevronRight className="h-4 w-4" />
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleNextMonth} data-testid="next-month-button" aria-label="Próximo mês">
+                        <ChevronRight className="h-4 w-4" aria-hidden="true" />
                     </Button>
                 </div>
             </div>
@@ -219,8 +225,14 @@ export const TransactionList = memo(function TransactionList({
                                     {tx.type === 'DEBIT' ? '-' : '+'}
                                     {formatCurrencyBRL(tx.amount)}
                                 </div>
-                                <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <MoreHorizontal className="h-4 w-4" />
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    aria-label={`Abrir ações para transação ${tx.description}`}
+                                    title={`Abrir ações para transação ${tx.description}`}
+                                >
+                                    <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
                                 </Button>
                             </div>
                         </div>

@@ -67,6 +67,12 @@ export function MemberLayout() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50/30">
+      <a
+        href="#member-main-content"
+        className="sr-only sr-only-focusable fixed left-4 top-4 z-[60] rounded-lg bg-white px-4 py-2 text-sm font-medium text-emerald-700 shadow-lg"
+      >
+        Pular para o conteúdo principal
+      </a>
       {/* Header Premium */}
       <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-xl border-b border-slate-200/50 shadow-sm">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
@@ -75,8 +81,11 @@ export function MemberLayout() {
             <button
               className="lg:hidden p-2 -ml-2 rounded-lg hover:bg-slate-100 transition-colors"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label={isMobileMenuOpen ? 'Fechar menu do membro' : 'Abrir menu do membro'}
+              aria-expanded={isMobileMenuOpen}
+              aria-controls="member-mobile-navigation"
             >
-              <Menu className="h-5 w-5 text-slate-600" />
+              <Menu className="h-5 w-5 text-slate-600" aria-hidden="true" />
             </button>
 
             <Link to={ROUTES.MEMBER.ROOT} className="flex items-center gap-3 group">
@@ -120,9 +129,14 @@ export function MemberLayout() {
           {/* Right side */}
           <div className="flex items-center gap-2">
             {/* Notifications */}
-            <Button variant="ghost" size="icon" className="relative rounded-xl hover:bg-slate-100">
-              <Bell className="h-5 w-5 text-slate-600" />
-              <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-white" />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative rounded-xl hover:bg-slate-100"
+              aria-label="Abrir notificações"
+            >
+              <Bell className="h-5 w-5 text-slate-600" aria-hidden="true" />
+              <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-white" aria-hidden="true" />
             </Button>
 
             {/* User Menu */}
@@ -169,11 +183,13 @@ export function MemberLayout() {
         <div
           className="fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-sm lg:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
+          aria-hidden="true"
         />
       )}
 
       {/* Mobile Menu - Premium Style */}
       <div
+        id="member-mobile-navigation"
         className={cn(
           'fixed inset-y-0 left-0 z-50 w-80 bg-white shadow-2xl transform transition-transform duration-300 ease-out lg:hidden',
           isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
@@ -192,8 +208,9 @@ export function MemberLayout() {
           <button
             onClick={() => setIsMobileMenuOpen(false)}
             className="p-2 rounded-lg hover:bg-slate-100 transition-colors"
+            aria-label="Fechar menu do membro"
           >
-            <X className="h-5 w-5 text-slate-500" />
+            <X className="h-5 w-5 text-slate-500" aria-hidden="true" />
           </button>
         </div>
 
@@ -250,7 +267,7 @@ export function MemberLayout() {
       </div>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main id="member-main-content" className="container mx-auto px-4 py-8">
         <Outlet />
       </main>
 

@@ -62,7 +62,7 @@ export function ForgotPasswordPage() {
                 <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
                     <div className="text-center mb-8">
                         <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-green-500 to-teal-600 flex items-center justify-center mb-4 shadow-lg">
-                            <Mail size={32} className="text-white" />
+                            <Mail size={32} className="text-white" aria-hidden="true" />
                         </div>
                         <h1 className="text-2xl font-bold text-[#002333]">Esqueceu sua senha?</h1>
                         <p className="text-gray-500 mt-2">
@@ -72,10 +72,11 @@ export function ForgotPasswordPage() {
 
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-700">Email</label>
+                            <label htmlFor="forgot-password-email" className="text-sm font-medium text-gray-700">Email</label>
                             <div className="relative">
-                                <Mail size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                <Mail size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden="true" />
                                 <Input
+                                    id="forgot-password-email"
                                     type="email"
                                     {...register('email', { 
                                         required: 'Email é obrigatório',
@@ -107,7 +108,7 @@ export function ForgotPasswordPage() {
                             to={ROUTES.AUTH.LOGIN} 
                             className="text-sm text-gray-500 hover:text-green-600 inline-flex items-center gap-1"
                         >
-                            <ArrowLeft size={14} />
+                            <ArrowLeft size={14} aria-hidden="true" />
                             Voltar para Login
                         </Link>
                     </div>

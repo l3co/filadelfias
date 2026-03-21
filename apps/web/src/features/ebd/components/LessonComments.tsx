@@ -80,28 +80,34 @@ export function LessonComments({ lessonId, tenantId, currentMemberId, members, c
     return (
         <div className="space-y-4">
             <h4 className="font-medium text-gray-900 flex items-center gap-2">
-                <MessageCircle size={16} />
+                <MessageCircle size={16} aria-hidden="true" />
                 Comentários ({comments?.length || 0})
             </h4>
 
             {/* Comment Form */}
             {currentMemberId && (
                 <form onSubmit={handleSubmit} className="flex gap-2">
+                    <label htmlFor="lesson-comment-input" className="sr-only">
+                        Escreva um comentário
+                    </label>
                     <input
+                        id="lesson-comment-input"
                         type="text"
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
                         placeholder="Escreva um comentário..."
                         className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
                         maxLength={1000}
+                        aria-label="Escreva um comentário"
                     />
                     <Button
                         type="submit"
                         size="sm"
                         disabled={!newComment.trim() || createMutation.isPending}
                         className="gap-1"
+                        aria-label="Enviar comentário"
                     >
-                        <Send size={14} />
+                        <Send size={14} aria-hidden="true" />
                     </Button>
                 </form>
             )}
@@ -142,8 +148,9 @@ export function LessonComments({ lessonId, tenantId, currentMemberId, members, c
                                     onClick={() => deleteMutation.mutate(comment.id)}
                                     className="p-1 rounded text-gray-400 hover:text-red-600 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all"
                                     title="Remover comentário"
+                                    aria-label={`Remover comentário de ${getMemberName(comment.member_id)}`}
                                 >
-                                    <Trash2 size={14} />
+                                    <Trash2 size={14} aria-hidden="true" />
                                 </button>
                             )}
                         </div>

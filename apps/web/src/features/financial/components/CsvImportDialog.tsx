@@ -84,14 +84,19 @@ export function CsvImportDialog({
 
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-            <Card className="w-full max-w-lg shadow-2xl animate-in zoom-in-95 duration-200">
+            <Card
+                className="w-full max-w-lg shadow-2xl animate-in zoom-in-95 duration-200"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="csv-import-dialog-title"
+            >
                 <CardHeader className="flex flex-row items-center justify-between border-b border-gray-100 pb-4">
                     <CardTitle className="flex items-center gap-2">
-                        <FileSpreadsheet className="h-5 w-5 text-green-600" />
-                        Importar Transações
+                        <FileSpreadsheet className="h-5 w-5 text-green-600" aria-hidden="true" />
+                        <span id="csv-import-dialog-title">Importar Transações</span>
                     </CardTitle>
-                    <Button variant="ghost" size="icon" onClick={handleClose} className="h-8 w-8 rounded-full">
-                        <X className="h-4 w-4" />
+                    <Button variant="ghost" size="icon" onClick={handleClose} className="h-8 w-8 rounded-full" aria-label="Fechar importação CSV">
+                        <X className="h-4 w-4" aria-hidden="true" />
                     </Button>
                 </CardHeader>
 
@@ -108,8 +113,9 @@ export function CsvImportDialog({
                             accept=".csv"
                             onChange={handleFileChange}
                             className="hidden"
+                            aria-label="Selecionar arquivo CSV para importação"
                         />
-                        <Upload className="h-10 w-10 mx-auto text-gray-400 mb-3" />
+                        <Upload className="h-10 w-10 mx-auto text-gray-400 mb-3" aria-hidden="true" />
                         {file ? (
                             <p className="text-sm font-medium text-green-600">{file.name}</p>
                         ) : (
@@ -129,7 +135,7 @@ export function CsvImportDialog({
                         onClick={onDownloadTemplate}
                         className="text-sm text-green-600 hover:text-green-700 hover:underline flex items-center gap-1"
                     >
-                        <FileSpreadsheet className="h-4 w-4" />
+                        <FileSpreadsheet className="h-4 w-4" aria-hidden="true" />
                         Baixar planilha modelo
                     </button>
 
@@ -137,9 +143,9 @@ export function CsvImportDialog({
                         <div className={`rounded-lg p-4 ${result.errors.length > 0 ? 'bg-amber-50' : 'bg-green-50'}`}>
                             <div className="flex items-start gap-2">
                                 {result.errors.length > 0 ? (
-                                    <AlertCircle className="h-5 w-5 text-amber-500 shrink-0" />
+                                    <AlertCircle className="h-5 w-5 text-amber-500 shrink-0" aria-hidden="true" />
                                 ) : (
-                                    <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0" />
+                                    <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0" aria-hidden="true" />
                                 )}
                                 <div>
                                     <p className={`text-sm font-medium ${result.errors.length > 0 ? 'text-amber-700' : 'text-green-700'}`}>

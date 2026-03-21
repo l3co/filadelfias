@@ -8,6 +8,12 @@ export function PublicLayout() {
 
     return (
         <div className="min-h-screen flex flex-col bg-white font-sans text-gray-900">
+            <a
+                href="#public-main-content"
+                className="sr-only sr-only-focusable fixed left-4 top-4 z-[60] rounded-lg bg-white px-4 py-2 text-sm font-medium text-green-700 shadow-lg"
+            >
+                Pular para o conteúdo principal
+            </a>
             <header className="border-b border-gray-100 sticky top-0 bg-white/90 backdrop-blur-md z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
@@ -48,9 +54,11 @@ export function PublicLayout() {
                             <button
                                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                                 className="md:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
-                                aria-label="Menu"
+                                aria-label={mobileMenuOpen ? "Fechar menu de navegação" : "Abrir menu de navegação"}
+                                aria-expanded={mobileMenuOpen}
+                                aria-controls="public-mobile-navigation"
                             >
-                                {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                                {mobileMenuOpen ? <X size={24} aria-hidden="true" /> : <Menu size={24} aria-hidden="true" />}
                             </button>
                         </div>
                     </div>
@@ -58,7 +66,7 @@ export function PublicLayout() {
 
                 {/* Mobile Menu */}
                 {mobileMenuOpen && (
-                    <div className="md:hidden border-t border-gray-100 bg-white">
+                    <div id="public-mobile-navigation" className="md:hidden border-t border-gray-100 bg-white">
                         <nav className="max-w-7xl mx-auto px-4 py-4 space-y-2">
                             <Link 
                                 to={ROUTES.PUBLIC.BIBLE} 
@@ -94,7 +102,7 @@ export function PublicLayout() {
                 )}
             </header>
 
-            <main className="flex-grow flex flex-col">
+            <main id="public-main-content" className="flex-grow flex flex-col">
                 <Outlet />
             </main>
 

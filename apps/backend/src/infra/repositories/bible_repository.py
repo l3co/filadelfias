@@ -7,7 +7,7 @@ from __future__ import annotations
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import and_, desc, func, or_, select, text
+from sqlalchemy import and_, func, or_, select, text
 from sqlalchemy.orm import selectinload
 
 from src.infra.db.models import (

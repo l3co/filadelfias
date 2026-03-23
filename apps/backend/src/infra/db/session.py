@@ -4,8 +4,8 @@ Async SQLAlchemy engine and session management.
 
 from collections.abc import AsyncGenerator
 
-from sqlalchemy.pool import NullPool
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.pool import NullPool
 
 from src.config import settings
 

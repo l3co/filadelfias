@@ -11,6 +11,7 @@ from src.middleware.permissions import (
     require_manage_financial,
     require_view_financial,
 )
+from src.modules.expense.repository import expense_request_repository
 from src.modules.financial.repository import (
     asset_repository,
     financial_account_repository,
@@ -29,7 +30,6 @@ from src.modules.financial.schemas import (
     TransactionCreate,
     TransactionResponse,
 )
-from src.modules.expense.repository import expense_request_repository
 from src.modules.tithe.repository import tithe_record_repository
 
 router = APIRouter(prefix="/financial", tags=["Financial - Treasury"])

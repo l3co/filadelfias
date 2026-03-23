@@ -5,7 +5,6 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
 
 from src.api.auth import get_current_user
-from src.services.reading_plan_service import ReadingPlanService
 from src.services.bible_service import (
     BibleBookSummary,
     BibleChapterContent,
@@ -15,6 +14,7 @@ from src.services.bible_service import (
     BibleService,
     BibleVersion,
 )
+from src.services.reading_plan_service import ReadingPlanService
 
 router = APIRouter(prefix="/bible", tags=["Bible"])
 bible_service = BibleService()

@@ -19,6 +19,7 @@ spec:
             - /bin/sh
             - -c
             - |
+              set -eu
               python - <<'PY'
               import asyncio
               import os
@@ -29,14 +30,14 @@ spec:
                   database_url = os.environ["DATABASE_URL"]
                   engine = create_async_engine(database_url, pool_pre_ping=True)
                   try:
-                      for attempt in range(30):
+                      for attempt in range(60):
                           try:
                               async with engine.connect() as conn:
                                   await conn.execute(text("SELECT 1"))
                               print("postgres ready")
                               return
                           except Exception as exc:
-                              print(f"waiting for postgres ({attempt + 1}/30): {exc}")
+                              print(f"waiting for postgres ({attempt + 1}/60): {exc}")
                               await asyncio.sleep(2)
                       raise SystemExit("postgres did not become ready in time")
                   finally:

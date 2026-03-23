@@ -7,7 +7,6 @@ resources:
   - namespace.yaml
   - configmap.yaml
   - postgres.yaml
-  - migrate-job.yaml
   - backend.yaml
   - web.yaml
   - cloudflared.yaml

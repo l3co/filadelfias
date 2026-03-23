@@ -378,41 +378,16 @@ spec:
 
 ---
 
-## Migration Job
+## Migrations no Startup do Backend
 
-Job executado manualmente para aplicar migrações do banco:
+No homelab, as migrations fazem parte do fluxo normal de inicializacao do backend.
 
-```yaml
-# k8s/homelab/migrate-job.yaml
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name: migrate-db
-  namespace: filadelfias
-spec:
-  template:
-    spec:
-      restartPolicy: Never
-      containers:
-        - name: migrate
-          image: ghcr.io/l3co/filadelfias-backend:latest
-          command: ["poetry", "run", "alembic", "upgrade", "head"]
-          envFrom:
-            - configMapRef:
-                name: filadelfias-config
-          env:
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: filadelfias-secrets
-                  key: POSTGRES_PASSWORD
-```
+O container usa [`entrypoint.sh`](/Users/leco/Documents/filadelfias/apps/backend/entrypoint.sh) para:
+- aguardar o PostgreSQL responder
+- executar `alembic upgrade head`
+- iniciar o Uvicorn
 
-**Executar:**
-```bash
-kubectl apply -f k8s/homelab/migrate-job.yaml
-kubectl -n filadelfias logs job/migrate-db
-```
+Esse desenho evita um `Job` separado de migration e concentra a responsabilidade no proprio backend.
 
 ---
 
@@ -431,7 +406,6 @@ resources:
   - namespace.yaml
   - configmap.yaml
   - postgres.yaml
-  - migrate-job.yaml
   - backend.yaml
   - web.yaml
 

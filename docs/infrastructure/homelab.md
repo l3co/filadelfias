@@ -114,9 +114,10 @@ k8s/homelab/
 ├── postgres.yaml           # StatefulSet + Service + PVC
 ├── backend.yaml            # Deployment + Service
 ├── web.yaml                # Deployment + Service
-├── migrate-job.yaml        # Job de migração do banco
 └── kustomization.yaml      # Orquestração Kustomize
 ```
+
+As migrations do banco rodam no startup do backend via [`entrypoint.sh`](/Users/leco/Documents/filadelfias/apps/backend/entrypoint.sh), antes do Uvicorn subir.
 
 ### Principais Recursos
 

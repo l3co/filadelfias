@@ -14,11 +14,18 @@ export default defineConfig({
     exclude: ['node_modules', 'e2e'],
     setupFiles: ['./src/test/setup.ts'],
     coverage: {
+      all: false,
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],
       exclude: [
+        'dist/',
+        'dev-dist/',
+        'public/',
         'node_modules/',
         'src/test/',
+        'src/App.tsx',
+        'src/main.tsx',
+        'src/types.ts',
         '**/*.d.ts',
         '**/*.config.*',
         '**/index.ts',

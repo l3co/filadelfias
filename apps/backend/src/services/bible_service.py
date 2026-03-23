@@ -157,7 +157,9 @@ class BibleService:
             log_error("Error fetching remote chapter", error=str(e), version=version, abbrev=abbrev, chapter=chapter)
             return []
 
-    async def get_chapter(self, abbrev: str, chapter: int, version: str = DEFAULT_VERSION) -> Optional[BibleChapterContent]:
+    async def get_chapter(
+        self, abbrev: str, chapter: int, version: str = DEFAULT_VERSION
+    ) -> Optional[BibleChapterContent]:
         try:
             chapter_data = await self.repository.get_chapter(version, abbrev, chapter)
             if chapter_data:
@@ -171,7 +173,9 @@ class BibleService:
                     next_chapter=chapter_data.get("next_chapter"),
                 )
         except Exception as exc:
-            log_warning("Bible chapter unavailable in PostgreSQL; using fallback source", error=str(exc), version=version)
+            log_warning(
+                "Bible chapter unavailable in PostgreSQL; using fallback source", error=str(exc), version=version
+            )
 
         version_config = next((item for item in ALL_VERSIONS if item["code"] == version), None)
         if not version_config:
@@ -242,7 +246,9 @@ class BibleService:
             if verse:
                 return verse
         except Exception as exc:
-            log_warning("Bible verse unavailable in PostgreSQL; using JSON fallback", error=str(exc), version=version_code)
+            log_warning(
+                "Bible verse unavailable in PostgreSQL; using JSON fallback", error=str(exc), version=version_code
+            )
 
         chapter = await self.get_chapter(book_abbrev, chapter_number, version_code)
         if not chapter or verse_number < 1 or verse_number > len(chapter.verses):

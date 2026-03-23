@@ -69,9 +69,7 @@ class PrayerRequestRepository(SQLAlchemyRepository):
             if social_project_id:
                 statement = statement.where(PrayerRequestModel.social_project_id == social_project_id)
 
-            result = await session.execute(
-                statement.order_by(PrayerRequestModel.created_at.desc()).limit(50)
-            )
+            result = await session.execute(statement.order_by(PrayerRequestModel.created_at.desc()).limit(50))
             return [self._to_request_dict(item) for item in result.scalars().all()]
 
     async def get_by_id(self, tenant_id: UUID, request_id: str) -> Optional[dict]:

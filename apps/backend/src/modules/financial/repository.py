@@ -143,7 +143,9 @@ class TransactionRepository(SQLAlchemyRepository):
     ) -> List[dict]:
         async with self.session() as session:
             statement = select(TransactionModel).where(TransactionModel.tenant_id == self._maybe_uuid(tenant_id))
-            result = await session.execute(statement.order_by(TransactionModel.date.desc(), TransactionModel.created_at.desc()))
+            result = await session.execute(
+                statement.order_by(TransactionModel.date.desc(), TransactionModel.created_at.desc())
+            )
             docs = [self._to_dict(item, self.fields) for item in result.scalars().all()]
 
         if month is not None or year is not None:
@@ -173,9 +175,8 @@ class TransactionRepository(SQLAlchemyRepository):
         total_expenses = 0.0
 
         for transaction in transactions:
-            category_name = (
-                transaction.get("category")
-                or category_map.get(transaction.get("category_id"), "Sem categoria")
+            category_name = transaction.get("category") or category_map.get(
+                transaction.get("category_id"), "Sem categoria"
             )
             amount = float(transaction.get("amount") or 0)
             if transaction.get("type") == "CREDIT":

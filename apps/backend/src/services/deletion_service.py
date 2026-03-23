@@ -75,7 +75,9 @@ async def delete_user_data(user_id: str) -> dict:
         )
         deleted["user_memberships"] = membership_result.rowcount or 0
 
-        user_result = await session.execute(delete(UserModel).where(UserModel.id == member_repository._maybe_uuid(user_id)))
+        user_result = await session.execute(
+            delete(UserModel).where(UserModel.id == member_repository._maybe_uuid(user_id))
+        )
         deleted["user"] = user_result.rowcount or 0
         await session.commit()
 

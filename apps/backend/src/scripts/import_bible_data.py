@@ -64,7 +64,9 @@ async def _clear_existing_version_data(session, version_id) -> None:
         delete(BibleVerseModel).where(
             BibleVerseModel.chapter_id.in_(
                 select(BibleChapterModel.id).where(
-                    BibleChapterModel.book_id.in_(select(BibleBookModel.id).where(BibleBookModel.version_id == version_id))
+                    BibleChapterModel.book_id.in_(
+                        select(BibleBookModel.id).where(BibleBookModel.version_id == version_id)
+                    )
                 )
             )
         )

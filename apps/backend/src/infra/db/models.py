@@ -69,7 +69,9 @@ class MembershipModel(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     __tablename__ = "memberships"
     __table_args__ = (UniqueConstraint("user_id", "tenant_id", name="uq_memberships_user_id_tenant_id"),)
 
-    user_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
     tenant_id: Mapped[UUID] = mapped_column(
         PGUUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False
     )
@@ -378,7 +380,9 @@ class EBDStudentModel(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
     member_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     role: Mapped[str] = mapped_column(String(50), nullable=False, default="STUDENT")
-    enrolled_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
+    enrolled_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc)
+    )
 
 
 class EBDLessonModel(UUIDPrimaryKeyMixin, TimestampMixin, Base):

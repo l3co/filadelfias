@@ -1,16 +1,18 @@
-"""Pytest configuration for PostgreSQL-only backend tests."""
+"""Pytest configuration for backend tests."""
 
 import os
 from typing import AsyncGenerator, Generator
 
 import pytest
 import pytest_asyncio
-from alembic import command
 from alembic.config import Config
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
 from testcontainers.postgres import PostgresContainer
+
+from alembic import command
+
 
 @pytest.fixture(scope="session")
 def postgres_db() -> Generator[str, None, None]:
@@ -40,7 +42,11 @@ def postgres_db() -> Generator[str, None, None]:
 
 
 @pytest_asyncio.fixture(scope="function", autouse=True)
-async def clean_core_tables(postgres_db):
+async def clean_core_tables(request: pytest.FixtureRequest):
+    if request.node.get_closest_marker("integration") is None:
+        return
+
+    postgres_db = request.getfixturevalue("postgres_db")
     engine = create_async_engine(postgres_db, pool_pre_ping=True)
     async with engine.begin() as conn:
         await conn.execute(text("DELETE FROM user_reading_progress"))

@@ -4,6 +4,7 @@ Repository exports used across the application.
 
 from src.infra.repositories.member_repository import MemberRepository, member_repository
 from src.infra.repositories.membership_repository import MembershipRepository, membership_repository
+from src.infra.repositories.reading_plan_repository import ReadingPlanRepository
 from src.infra.repositories.tenant_repository import TenantRepository, tenant_repository
 from src.infra.repositories.user_repository import UserRepository, user_repository
 
@@ -12,6 +13,7 @@ __all__ = [
     "TenantRepository",
     "MemberRepository",
     "MembershipRepository",
+    "ReadingPlanRepository",
     "user_repository",
     "tenant_repository",
     "member_repository",

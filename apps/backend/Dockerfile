@@ -4,6 +4,7 @@ WORKDIR /app
 
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/app
+ARG INSTALL_DEV=false
 
 # Install system dependencies (curl for healthcheck)
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -14,15 +15,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN pip install --no-cache-dir --upgrade pip "poetry==2.1.1"
 
 # Copy dependency files
-COPY pyproject.toml poetry.lock* alembic.ini ./
+COPY pyproject.toml poetry.lock* alembic.ini pytest.ini ./
 
 # Install dependencies (no virtualenv)
 RUN poetry config virtualenvs.create false \
-    && poetry install --no-interaction --no-ansi --only main --no-root
+    && if [ "$INSTALL_DEV" = "true" ]; then \
+        poetry install --no-interaction --no-ansi --with dev --no-root; \
+    else \
+        poetry install --no-interaction --no-ansi --only main --no-root; \
+    fi
 
 # Copy application code
 COPY src ./src
 COPY alembic ./alembic
+COPY tests ./tests
 COPY entrypoint.sh ./entrypoint.sh
 
 RUN chmod +x /app/entrypoint.sh

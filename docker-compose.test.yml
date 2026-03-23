@@ -19,6 +19,8 @@ services:
     build:
       context: ./apps/backend
       dockerfile: Dockerfile
+      args:
+        INSTALL_DEV: "true"
     command: >
       sh -c "alembic upgrade head &&
              poetry run python src/scripts/seed_e2e_data.py &&

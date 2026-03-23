@@ -2,7 +2,7 @@ import { View, Text, FlatList, Pressable } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Download, ChevronLeft } from 'lucide-react-native';
+import { Download, ChevronLeft, Search } from 'lucide-react-native';
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { bibleService, BibleBook } from '@/services/bible';
 import { useBibleVersion } from '@/hooks/useBibleVersion';
@@ -64,22 +64,41 @@ export default function BibleBooksScreen() {
                 </View>
                 
                 {/* Botão de Download Offline */}
-                <Pressable 
-                    onPress={() => router.push('/(public)/downloads')}
-                    style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        backgroundColor: '#ecfdf5',
-                        paddingHorizontal: 12,
-                        paddingVertical: 8,
-                        borderRadius: 10,
-                    }}
-                >
-                    <Download size={18} color="#10b981" />
-                    <Text style={{ color: '#10b981', fontWeight: '600', fontSize: 13, marginLeft: 6 }}>
-                        Offline
-                    </Text>
-                </Pressable>
+                <View style={{ flexDirection: 'row', gap: 8 }}>
+                    <Pressable
+                        onPress={() => router.push('/(public)/bible/search')}
+                        style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            backgroundColor: '#eff6ff',
+                            paddingHorizontal: 12,
+                            paddingVertical: 8,
+                            borderRadius: 10,
+                        }}
+                    >
+                        <Search size={18} color="#2563eb" />
+                        <Text style={{ color: '#2563eb', fontWeight: '600', fontSize: 13, marginLeft: 6 }}>
+                            Buscar
+                        </Text>
+                    </Pressable>
+
+                    <Pressable 
+                        onPress={() => router.push('/(public)/downloads')}
+                        style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            backgroundColor: '#ecfdf5',
+                            paddingHorizontal: 12,
+                            paddingVertical: 8,
+                            borderRadius: 10,
+                        }}
+                    >
+                        <Download size={18} color="#10b981" />
+                        <Text style={{ color: '#10b981', fontWeight: '600', fontSize: 13, marginLeft: 6 }}>
+                            Offline
+                        </Text>
+                    </Pressable>
+                </View>
             </View>
 
             {/* Seletor de Versão */}

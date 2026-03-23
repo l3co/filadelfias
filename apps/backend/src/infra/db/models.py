@@ -8,8 +8,8 @@ from datetime import date, datetime, timezone
 from typing import Optional
 from uuid import UUID
 
-from sqlalchemy import Boolean, Date, DateTime, ForeignKey, String, Text, UniqueConstraint
-from sqlalchemy.dialects.postgresql import UUID as PGUUID
+from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy.dialects.postgresql import JSONB, UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.infra.db.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
@@ -413,3 +413,149 @@ class EBDCommentModel(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     parent_id: Mapped[Optional[UUID]] = mapped_column(
         PGUUID(as_uuid=True), ForeignKey("ebd_comments.id", ondelete="CASCADE"), nullable=True
     )
+
+
+class BibleVersionModel(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    __tablename__ = "bible_versions"
+
+    code: Mapped[str] = mapped_column(String(10), unique=True, nullable=False, index=True)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    is_remote: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+
+    books: Mapped[list["BibleBookModel"]] = relationship(
+        back_populates="version",
+        cascade="all, delete-orphan",
+    )
+
+
+class BibleBookModel(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    __tablename__ = "bible_books"
+    __table_args__ = (UniqueConstraint("version_id", "abbrev", name="uq_bible_books_version_id_abbrev"),)
+
+    version_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("bible_versions.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    abbrev: Mapped[str] = mapped_column(String(10), nullable=False)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    testament: Mapped[str] = mapped_column(String(10), nullable=False)
+    book_order: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
+
+    version: Mapped["BibleVersionModel"] = relationship(back_populates="books")
+    chapters: Mapped[list["BibleChapterModel"]] = relationship(
+        back_populates="book",
+        cascade="all, delete-orphan",
+    )
+
+
+class BibleChapterModel(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    __tablename__ = "bible_chapters"
+    __table_args__ = (UniqueConstraint("book_id", "chapter_number", name="uq_bible_chapters_book_id_chapter_number"),)
+
+    book_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("bible_books.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    chapter_number: Mapped[int] = mapped_column(Integer, nullable=False)
+    title: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+
+    book: Mapped["BibleBookModel"] = relationship(back_populates="chapters")
+    verses: Mapped[list["BibleVerseModel"]] = relationship(
+        back_populates="chapter",
+        cascade="all, delete-orphan",
+        order_by="BibleVerseModel.verse_number",
+    )
+
+
+class BibleVerseModel(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    __tablename__ = "bible_verses"
+    __table_args__ = (UniqueConstraint("chapter_id", "verse_number", name="uq_bible_verses_chapter_id_verse_number"),)
+
+    chapter_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("bible_chapters.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    verse_number: Mapped[int] = mapped_column(Integer, nullable=False)
+    text: Mapped[str] = mapped_column(Text, nullable=False)
+
+    chapter: Mapped["BibleChapterModel"] = relationship(back_populates="verses")
+
+
+class BibleNoteModel(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    __tablename__ = "bible_notes"
+
+    tenant_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    user_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    version_code: Mapped[str] = mapped_column(String(10), nullable=False, index=True)
+    book_abbrev: Mapped[str] = mapped_column(String(10), nullable=False, index=True)
+    chapter: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
+    verse: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    is_public: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+
+
+class BibleHighlightModel(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    __tablename__ = "bible_highlights"
+    __table_args__ = (
+        UniqueConstraint(
+            "user_id",
+            "tenant_id",
+            "version_code",
+            "book_abbrev",
+            "chapter",
+            "verse",
+            name="uq_bible_highlights_user_id_tenant_id",
+        ),
+    )
+
+    tenant_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    user_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    version_code: Mapped[str] = mapped_column(String(10), nullable=False, index=True)
+    book_abbrev: Mapped[str] = mapped_column(String(10), nullable=False, index=True)
+    chapter: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
+    verse: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
+    color: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    category: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+
+
+class ReadingPlanModel(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    __tablename__ = "reading_plans"
+
+    tenant_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    creator_id: Mapped[Optional[UUID]] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    duration_days: Mapped[int] = mapped_column(Integer, nullable=False)
+    is_public: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    readings: Mapped[list[dict]] = mapped_column(JSONB, nullable=False, default=list)
+
+
+class UserReadingProgressModel(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    __tablename__ = "user_reading_progress"
+    __table_args__ = (UniqueConstraint("user_id", "plan_id", name="uq_user_reading_progress_user_id_plan_id"),)
+
+    user_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    plan_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("reading_plans.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    current_day: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    completed_readings: Mapped[list[int]] = mapped_column(JSONB, nullable=False, default=list)
+    started_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )
+    completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)

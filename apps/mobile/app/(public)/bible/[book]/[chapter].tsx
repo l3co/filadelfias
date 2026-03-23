@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { View, Text, ScrollView, Pressable, StatusBar, PanResponder, Animated } from 'react-native';
+import { useMemo, useState, useRef } from 'react';
+import { View, Text, FlatList, Pressable, StatusBar, PanResponder, Animated } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -11,14 +11,26 @@ import { ChapterSelector } from '@/components/features/ChapterSelector';
 import { VerseActionMenu } from '@/components/features/VerseActionMenu';
 import { bibleService, BibleChapter } from '@/services/bible';
 import { offlineService } from '@/services/offline';
+import {
+    useBibleNotes,
+    useBibleHighlights,
+    useCreateBibleNote,
+    useUpdateBibleNote,
+    useDeleteBibleNote,
+    useCreateBibleHighlight,
+    useDeleteBibleHighlight,
+} from '@/hooks/useBible';
 import { useBibleSettings } from '@/hooks/useBibleSettings';
 import { useTTS } from '@/hooks/useTTS';
+import { useAuthStore } from '@/stores/authStore';
 import { colors } from '@/constants/colors';
 
 export default function BibleChapterScreen() {
     const { book, chapter } = useLocalSearchParams<{ book: string; chapter: string }>();
     const router = useRouter();
     const insets = useSafeAreaInsets();
+    const { getCurrentTenant, user } = useAuthStore();
+    const tenant = getCurrentTenant();
     const [showControls, setShowControls] = useState(false);
     const [showChapterSelector, setShowChapterSelector] = useState(false);
     const [selectedVerse, setSelectedVerse] = useState<{ index: number; text: string } | null>(null);
@@ -31,25 +43,52 @@ export default function BibleChapterScreen() {
     const swipeThreshold = 80;
     const dataRef = useRef<{ previous_chapter?: { book: string; chapter: number }; next_chapter?: { book: string; chapter: number } } | null>(null);
 
+    const bookCode = String(book || '');
+    const chapterNumber = Number.parseInt(String(chapter || ''), 10);
     const { data, isLoading } = useQuery({
-        queryKey: ['bible', 'chapter', book, chapter, settings.version],
+        queryKey: ['bible', 'chapter', bookCode, chapterNumber, settings.version],
         queryFn: async (): Promise<BibleChapter> => {
-            // Primeiro tenta buscar offline
-            const offlineData = await offlineService.getBibleChapterOffline(book, parseInt(chapter), settings.version);
+            const offlineData = await offlineService.getBibleChapterOffline(bookCode, chapterNumber, settings.version);
             if (offlineData) {
-                // Adiciona navegação para offline (simplificada)
-                const chapterNum = parseInt(chapter);
                 return {
                     ...offlineData,
-                    previous_chapter: chapterNum > 1 ? { book, chapter: chapterNum - 1 } : undefined,
-                    next_chapter: { book, chapter: chapterNum + 1 },
+                    previous_chapter: chapterNumber > 1 ? { book: bookCode, chapter: chapterNumber - 1 } : undefined,
+                    next_chapter: { book: bookCode, chapter: chapterNumber + 1 },
                 };
             }
-            // Se não tiver offline, busca da API
-            return bibleService.getChapter(book, parseInt(chapter), settings.version);
+
+            return bibleService.getChapter(bookCode, chapterNumber, settings.version);
         },
-        enabled: !!book && !!chapter,
+        enabled: Boolean(bookCode && Number.isFinite(chapterNumber)),
     });
+    const { data: notes = [] } = useBibleNotes(tenant?.id, {
+        version: settings.version,
+        book: bookCode,
+        chapter: chapterNumber,
+    });
+    const { data: highlights = [] } = useBibleHighlights(tenant?.id, {
+        version: settings.version,
+        book: bookCode,
+        chapter: chapterNumber,
+    });
+    const createNote = useCreateBibleNote();
+    const updateNote = useUpdateBibleNote();
+    const deleteNote = useDeleteBibleNote();
+    const createHighlight = useCreateBibleHighlight();
+    const deleteHighlight = useDeleteBibleHighlight();
+
+    const selectedNote = useMemo(
+        () => notes.find((item) => item.verse === selectedVerse?.index) ?? null,
+        [notes, selectedVerse?.index]
+    );
+    const selectedHighlight = useMemo(
+        () => highlights.find((item) => item.verse === selectedVerse?.index) ?? null,
+        [highlights, selectedVerse?.index]
+    );
+    const highlightByVerse = useMemo(
+        () => new Map(highlights.map((item) => [item.verse, item])),
+        [highlights]
+    );
 
     // Update ref when data changes
     dataRef.current = data || null;
@@ -99,6 +138,79 @@ export default function BibleChapterScreen() {
     const handleLongPress = (index: number, text: string) => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         setSelectedVerse({ index, text });
+    };
+
+    const handleSaveNote = (content: string) => {
+        if (!selectedVerse || !tenant?.id || !user?.id || !content) {
+            return;
+        }
+
+        if (selectedNote) {
+            updateNote.mutate({ id: selectedNote.id, content });
+            return;
+        }
+
+        createNote.mutate({
+            tenant_id: tenant.id,
+            version_code: settings.version,
+            book_abbrev: bookCode,
+            chapter: chapterNumber,
+            verse: selectedVerse.index,
+            content,
+            is_public: false,
+        });
+    };
+
+    const handleDeleteNote = () => {
+        if (!selectedNote) {
+            return;
+        }
+
+        deleteNote.mutate(selectedNote.id);
+    };
+
+    const handleToggleHighlight = (color: string) => {
+        if (!selectedVerse || !tenant?.id || !user?.id) {
+            return;
+        }
+
+        if (selectedHighlight?.color === color) {
+            deleteHighlight.mutate(selectedHighlight.id);
+            return;
+        }
+
+        if (selectedHighlight) {
+            deleteHighlight.mutate(selectedHighlight.id, {
+                onSuccess: () => {
+                    createHighlight.mutate({
+                        tenant_id: tenant.id,
+                        version_code: settings.version,
+                        book_abbrev: bookCode,
+                        chapter: chapterNumber,
+                        verse: selectedVerse.index,
+                        color,
+                    });
+                },
+            });
+            return;
+        }
+
+        createHighlight.mutate({
+            tenant_id: tenant.id,
+            version_code: settings.version,
+            book_abbrev: bookCode,
+            chapter: chapterNumber,
+            verse: selectedVerse.index,
+            color,
+        });
+    };
+
+    const handleDeleteHighlight = () => {
+        if (!selectedHighlight) {
+            return;
+        }
+
+        deleteHighlight.mutate(selectedHighlight.id);
     };
 
     const bgColor = settings.isDarkMode ? '#0f172a' : '#ffffff';
@@ -204,46 +316,60 @@ export default function BibleChapterScreen() {
                 style={{ flex: 1, transform: [{ translateX: panX }] }}
                 {...panResponder.panHandlers}
             >
-                <ScrollView 
-                    className="flex-1 px-5 py-6"
+                <FlatList
+                    data={data?.verses ?? []}
+                    keyExtractor={(_, index) => `${bookCode}-${chapterNumber}-${index + 1}`}
                     showsVerticalScrollIndicator={false}
-                >
-                    {data?.verses.map((verse, index) => (
-                        <Pressable
-                            key={index}
-                            onPress={() => speak(data.verses, index)}
-                            onLongPress={() => handleLongPress(index + 1, verse)}
-                            delayLongPress={400}
-                            className={`mb-1 py-1 px-2 -mx-2 rounded-lg ${
-                                currentVerseIndex === index 
-                                    ? settings.isDarkMode ? 'bg-emerald-900/30' : 'bg-emerald-50'
-                                    : ''
-                            }`}
-                        >
-                            <Text 
-                                style={{ 
-                                    fontSize: settings.fontSize, 
-                                    lineHeight: settings.fontSize * 1.8,
-                                    color: textColor,
-                                }}
+                    contentContainerStyle={{ paddingHorizontal: 20, paddingVertical: 24, paddingBottom: 80 }}
+                    initialNumToRender={24}
+                    windowSize={10}
+                    renderItem={({ item: verse, index }) => {
+                        const verseHighlight = highlightByVerse.get(index + 1);
+                        const highlightBackground =
+                            verseHighlight?.color === 'yellow'
+                                ? settings.isDarkMode ? 'rgba(250, 204, 21, 0.16)' : 'rgba(250, 204, 21, 0.20)'
+                                : verseHighlight?.color === 'green'
+                                  ? settings.isDarkMode ? 'rgba(74, 222, 128, 0.16)' : 'rgba(74, 222, 128, 0.20)'
+                                  : verseHighlight?.color === 'blue'
+                                    ? settings.isDarkMode ? 'rgba(96, 165, 250, 0.16)' : 'rgba(96, 165, 250, 0.20)'
+                                    : verseHighlight?.color === 'pink'
+                                      ? settings.isDarkMode ? 'rgba(244, 114, 182, 0.16)' : 'rgba(244, 114, 182, 0.20)'
+                                      : undefined;
+
+                        return (
+                            <Pressable
+                                onPress={() => speak(data?.verses || [], index)}
+                                onLongPress={() => handleLongPress(index + 1, verse)}
+                                delayLongPress={400}
+                                className={`mb-1 py-1 px-2 -mx-2 rounded-lg ${
+                                    currentVerseIndex === index
+                                        ? settings.isDarkMode ? 'bg-emerald-900/30' : 'bg-emerald-50'
+                                        : ''
+                                }`}
+                                style={highlightBackground ? { backgroundColor: highlightBackground } : undefined}
                             >
-                                <Text 
-                                    style={{ 
-                                        color: verseNumColor, 
-                                        fontWeight: '700',
-                                        fontSize: settings.fontSize * 0.75,
+                                <Text
+                                    style={{
+                                        fontSize: settings.fontSize,
+                                        lineHeight: settings.fontSize * 1.8,
+                                        color: textColor,
                                     }}
                                 >
-                                    {index + 1}{' '}
+                                    <Text
+                                        style={{
+                                            color: verseNumColor,
+                                            fontWeight: '700',
+                                            fontSize: settings.fontSize * 0.75,
+                                        }}
+                                    >
+                                        {index + 1}{' '}
+                                    </Text>
+                                    {verse}
                                 </Text>
-                                {verse}
-                            </Text>
-                        </Pressable>
-                    ))}
-                    
-                    {/* Espaço extra no final */}
-                    <View className="h-20" />
-                </ScrollView>
+                            </Pressable>
+                        );
+                    }}
+                />
             </Animated.View>
 
             {/* Navegação entre capítulos */}
@@ -314,6 +440,17 @@ export default function BibleChapterScreen() {
                     version={settings.version}
                     isDarkMode={settings.isDarkMode}
                     onSpeak={() => speak(data?.verses || [], selectedVerse.index - 1)}
+                    studyModeEnabled={Boolean(tenant?.id && user?.id)}
+                    note={selectedNote}
+                    highlight={selectedHighlight}
+                    onSaveNote={handleSaveNote}
+                    onDeleteNote={handleDeleteNote}
+                    onToggleHighlight={handleToggleHighlight}
+                    onDeleteHighlight={handleDeleteHighlight}
+                    isSavingNote={createNote.isPending || updateNote.isPending}
+                    isDeletingNote={deleteNote.isPending}
+                    isSavingHighlight={createHighlight.isPending}
+                    isDeletingHighlight={deleteHighlight.isPending}
                 />
             )}
 
@@ -321,8 +458,9 @@ export default function BibleChapterScreen() {
             <ChapterSelector
                 visible={showChapterSelector}
                 onClose={() => setShowChapterSelector(false)}
-                currentBook={book}
-                currentChapter={parseInt(chapter)}
+                currentBook={bookCode}
+                currentChapter={chapterNumber}
+                version={settings.version}
                 onSelect={(selectedBook, selectedChapter) => {
                     setShowChapterSelector(false);
                     navigateTo(selectedBook, selectedChapter);

@@ -7,6 +7,7 @@ import { queryClient } from "@/lib/queryClient";
 import { useAuthStore } from "@/stores/authStore";
 import { LoadingScreen } from "@/components/ui/LoadingScreen";
 import { initDatabase } from "@/lib/database";
+import { readingPlanNotifications } from "@/services/readingPlanNotifications";
 
 export default function RootLayout() {
     const { isAuthenticated, isLoading, user, checkAuth } = useAuthStore();
@@ -16,6 +17,7 @@ export default function RootLayout() {
     useEffect(() => {
         // Initialize database for offline support
         initDatabase();
+        readingPlanNotifications.configure();
         checkAuth();
     }, []);
 

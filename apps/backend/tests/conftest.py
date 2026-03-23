@@ -4,6 +4,7 @@ import os
 from typing import AsyncGenerator, Generator
 
 import pytest
+import pytest_asyncio
 from alembic import command
 from alembic.config import Config
 from httpx import ASGITransport, AsyncClient
@@ -13,6 +14,11 @@ from testcontainers.postgres import PostgresContainer
 
 @pytest.fixture(scope="session")
 def postgres_db() -> Generator[str, None, None]:
+    existing_database_url = os.environ.get("DATABASE_URL")
+    if existing_database_url:
+        yield existing_database_url
+        return
+
     print("🐘 Starting PostgreSQL container...")
 
     with PostgresContainer("postgres:16-alpine", dbname="filadelfias", username="postgres", password="postgres") as container:
@@ -33,19 +39,18 @@ def postgres_db() -> Generator[str, None, None]:
         yield async_url
 
 
-@pytest.fixture(scope="session")
-def event_loop():
-    import asyncio
-
-    loop = asyncio.new_event_loop()
-    yield loop
-    loop.close()
-
-
-@pytest.fixture(scope="function", autouse=True)
+@pytest_asyncio.fixture(scope="function", autouse=True)
 async def clean_core_tables(postgres_db):
     engine = create_async_engine(postgres_db, pool_pre_ping=True)
     async with engine.begin() as conn:
+        await conn.execute(text("DELETE FROM user_reading_progress"))
+        await conn.execute(text("DELETE FROM reading_plans"))
+        await conn.execute(text("DELETE FROM bible_highlights"))
+        await conn.execute(text("DELETE FROM bible_notes"))
+        await conn.execute(text("DELETE FROM bible_verses"))
+        await conn.execute(text("DELETE FROM bible_chapters"))
+        await conn.execute(text("DELETE FROM bible_books"))
+        await conn.execute(text("DELETE FROM bible_versions"))
         await conn.execute(text("DELETE FROM ebd_comments"))
         await conn.execute(text("DELETE FROM ebd_lessons"))
         await conn.execute(text("DELETE FROM ebd_students"))
@@ -69,7 +74,7 @@ async def clean_core_tables(postgres_db):
     await engine.dispose()
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def client(postgres_db) -> AsyncGenerator[AsyncClient, None]:
     from src.main import app
 
@@ -82,7 +87,7 @@ def auth_headers():
     return {"Authorization": "Bearer test-token"}
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def registered_user(client: AsyncClient) -> dict:
     import uuid
 
@@ -106,7 +111,7 @@ async def registered_user(client: AsyncClient) -> dict:
     }
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def tenant_with_admin(client: AsyncClient, registered_user: dict) -> dict:
     import uuid
 
@@ -125,7 +130,7 @@ async def tenant_with_admin(client: AsyncClient, registered_user: dict) -> dict:
     }
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def member_in_tenant(client: AsyncClient, tenant_with_admin: dict) -> dict:
     tenant_id = tenant_with_admin["tenant_id"]
     headers = tenant_with_admin["headers"]

@@ -1,4 +1,4 @@
-import { View, Text, Pressable, Modal, ScrollView, FlatList } from 'react-native';
+import { View, Text, Pressable, Modal, FlatList } from 'react-native';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -11,6 +11,7 @@ interface ChapterSelectorProps {
     currentBook: string;
     currentChapter: number;
     onSelect: (book: string, chapter: number) => void;
+    version?: string;
     isDarkMode?: boolean;
 }
 
@@ -20,14 +21,15 @@ export function ChapterSelector({
     currentBook,
     currentChapter,
     onSelect,
+    version = 'nvi',
     isDarkMode = false,
 }: ChapterSelectorProps) {
     const insets = useSafeAreaInsets();
     const [selectedBook, setSelectedBook] = useState<string | null>(null);
 
     const { data: books } = useQuery({
-        queryKey: ['bible', 'books'],
-        queryFn: () => bibleService.getBooks(),
+        queryKey: ['bible', 'books', version],
+        queryFn: () => bibleService.getBooks(version),
     });
 
     const bgColor = isDarkMode ? '#1e293b' : '#ffffff';

@@ -325,7 +325,9 @@ Then('o botão {string} deve estar desabilitado', async ({ page }, buttonText: s
 Then('devo ver {string}', async ({ page }, text: string) => {
     // Wait for any modals to close and page to stabilize
     await page.waitForTimeout(500);
-    await expect(page.getByText(new RegExp(text, 'i')).first()).toBeVisible({ timeout: 10000 });
+    await expect(
+        page.getByText(new RegExp(text, 'i')).filter({ visible: true }).first()
+    ).toBeVisible({ timeout: 10000 });
 });
 
 Then('devo ver o título {string}', async ({ page }, title: string) => {

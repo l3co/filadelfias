@@ -19,7 +19,7 @@ __pycache__/
 build/
 develop-eggs/
 dist/
-downloads/
+/downloads/
 eggs/
 .eggs/
 /lib/
@@ -191,3 +191,4 @@ temp/
 npm-debug.*
 yarn-debug.*
 yarn-error.*
+*.crt

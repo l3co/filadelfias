@@ -25,6 +25,7 @@ slowapi = "^0.1.9"
 sqlalchemy = "^2.0.44"
 asyncpg = "^0.30.0"
 alembic = "^1.17.1"
+greenlet = "^3.2.4"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^9.0.2"

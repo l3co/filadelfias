@@ -356,6 +356,20 @@ class MeetingModel(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
+class MeetingVoteModel(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    __tablename__ = "meeting_votes"
+
+    tenant_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    meeting_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("meetings.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    agenda_index: Mapped[int] = mapped_column(nullable=False)
+    user_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    choice: Mapped[str] = mapped_column(String(20), nullable=False)
+
+
 class EBDClassModel(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     __tablename__ = "ebd_classes"
 

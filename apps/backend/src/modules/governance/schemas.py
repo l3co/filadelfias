@@ -90,3 +90,20 @@ class MeetingResponse(MeetingBase):
 
     class Config:
         from_attributes = True
+
+
+class VoteCastRequest(BaseModel):
+    choice: str = Field(..., pattern="^(yes|no|abstain)$")
+
+
+class VotingItemResponse(BaseModel):
+    id: str
+    title: str
+    description: str
+    assembly_id: str
+    yes_count: int
+    no_count: int
+    abstain_count: int
+    total_votes: int
+    status: str
+    user_vote: Optional[str] = None

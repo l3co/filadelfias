@@ -1,0 +1,18 @@
+{
+  "$schema": "https://schemas.tauri.app/config/capabilities",
+  "identifier": "default",
+  "description": "Permissoes padrao do Filadelfias",
+  "platforms": ["macOS", "windows", "linux", "android", "iOS"],
+  "permissions": [
+    "core:default",
+    "core:window:default",
+    "sql:default",
+    "store:default",
+    "notification:default",
+    "fs:default",
+    "haptics:default",
+    "clipboard-manager:default",
+    "os:default",
+    "process:default"
+  ]
+}

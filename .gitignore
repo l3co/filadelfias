@@ -191,3 +191,4 @@ temp/
 npm-debug.*
 yarn-debug.*
 yarn-error.*
+*.crt

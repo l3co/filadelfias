@@ -16,11 +16,7 @@ def split_agenda_items(agenda: str | None) -> list[str]:
     if not agenda:
         return []
 
-    return [
-        re.sub(r"^\s*\d+[\).\-\s]+", "", item).strip()
-        for item in agenda.splitlines()
-        if item.strip()
-    ]
+    return [re.sub(r"^\s*\d+[\).\-\s]+", "", item).strip() for item in agenda.splitlines() if item.strip()]
 
 
 class CouncilRepository(SQLAlchemyRepository):

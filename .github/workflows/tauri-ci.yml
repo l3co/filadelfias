@@ -49,7 +49,7 @@ jobs:
         working-directory: apps/tauri
 
       - name: Build Tauri (desktop)
-        run: cargo tauri build
+        run: npm run tauri -- build
         working-directory: apps/tauri
         env:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}

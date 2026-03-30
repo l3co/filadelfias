@@ -61,6 +61,7 @@ async def clean_core_tables(request: pytest.FixtureRequest):
         await conn.execute(text("DELETE FROM ebd_lessons"))
         await conn.execute(text("DELETE FROM ebd_students"))
         await conn.execute(text("DELETE FROM ebd_classes"))
+        await conn.execute(text("DELETE FROM meeting_votes"))
         await conn.execute(text("DELETE FROM meetings"))
         await conn.execute(text("DELETE FROM councils"))
         await conn.execute(text("DELETE FROM transactions"))

@@ -1,14 +1,26 @@
 import json
 import logging
+import re
 from datetime import date, datetime
 from typing import List
 
 from sqlalchemy import select
 
-from src.infra.db.models import CouncilModel, MeetingModel
+from src.infra.db.models import CouncilModel, MeetingModel, MeetingVoteModel
 from src.infra.repositories.sqlalchemy_repository import SQLAlchemyRepository
 
 logger = logging.getLogger(__name__)
+
+
+def split_agenda_items(agenda: str | None) -> list[str]:
+    if not agenda:
+        return []
+
+    return [
+        re.sub(r"^\s*\d+[\).\-\s]+", "", item).strip()
+        for item in agenda.splitlines()
+        if item.strip()
+    ]
 
 
 class CouncilRepository(SQLAlchemyRepository):
@@ -244,3 +256,106 @@ class MeetingRepository(SQLAlchemyRepository):
 
 council_repository = CouncilRepository()
 meeting_repository = MeetingRepository()
+
+
+class MeetingVoteRepository(SQLAlchemyRepository):
+    fields = ["id", "tenant_id", "meeting_id", "agenda_index", "user_id", "choice", "created_at", "updated_at"]
+
+    async def list_voting_items(self, tenant_id: str, meeting_id: str, current_user_id: str) -> list[dict]:
+        async with self.session() as session:
+            meeting = await self._first(
+                session,
+                select(MeetingModel).where(
+                    MeetingModel.id == self._maybe_uuid(meeting_id),
+                    MeetingModel.tenant_id == self._maybe_uuid(tenant_id),
+                ),
+            )
+            if not meeting:
+                return []
+
+            votes_result = await session.execute(
+                select(MeetingVoteModel).where(
+                    MeetingVoteModel.meeting_id == meeting.id,
+                    MeetingVoteModel.tenant_id == meeting.tenant_id,
+                )
+            )
+            votes = votes_result.scalars().all()
+
+            agenda_items = split_agenda_items(meeting.agenda) or [meeting.agenda or "Deliberação geral da reunião"]
+            status = "closed" if meeting.status == "COMPLETED" else "open"
+            items: list[dict] = []
+
+            for index, description in enumerate(agenda_items, start=1):
+                item_votes = [vote for vote in votes if vote.agenda_index == index]
+                yes_count = sum(1 for vote in item_votes if vote.choice == "yes")
+                no_count = sum(1 for vote in item_votes if vote.choice == "no")
+                abstain_count = sum(1 for vote in item_votes if vote.choice == "abstain")
+                user_vote = next((vote.choice for vote in item_votes if vote.user_id == current_user_id), None)
+
+                items.append(
+                    {
+                        "id": f"{meeting_id}:{index}",
+                        "title": f"Pauta {index}",
+                        "description": description,
+                        "assembly_id": str(meeting.id),
+                        "yes_count": yes_count,
+                        "no_count": no_count,
+                        "abstain_count": abstain_count,
+                        "total_votes": len(item_votes),
+                        "status": status,
+                        "user_vote": user_vote,
+                    }
+                )
+
+            return items
+
+    async def cast_vote(self, tenant_id: str, meeting_id: str, agenda_index: int, user_id: str, choice: str) -> dict:
+        async with self.session() as session:
+            meeting = await self._first(
+                session,
+                select(MeetingModel).where(
+                    MeetingModel.id == self._maybe_uuid(meeting_id),
+                    MeetingModel.tenant_id == self._maybe_uuid(tenant_id),
+                ),
+            )
+            if not meeting:
+                raise ValueError("Meeting not found")
+
+            if meeting.status == "COMPLETED":
+                raise ValueError("Voting is closed for this meeting")
+
+            agenda_items = split_agenda_items(meeting.agenda) or [meeting.agenda or "Deliberação geral da reunião"]
+            if agenda_index < 1 or agenda_index > len(agenda_items):
+                raise ValueError("Agenda item not found")
+
+            vote = await self._first(
+                session,
+                select(MeetingVoteModel).where(
+                    MeetingVoteModel.meeting_id == meeting.id,
+                    MeetingVoteModel.agenda_index == agenda_index,
+                    MeetingVoteModel.user_id == user_id,
+                ),
+            )
+
+            if vote:
+                vote.choice = choice
+            else:
+                vote = MeetingVoteModel(
+                    tenant_id=meeting.tenant_id,
+                    meeting_id=meeting.id,
+                    agenda_index=agenda_index,
+                    user_id=user_id,
+                    choice=choice,
+                )
+                session.add(vote)
+
+            await session.commit()
+
+        items = await self.list_voting_items(tenant_id, meeting_id, user_id)
+        item = next((entry for entry in items if entry["id"] == f"{meeting_id}:{agenda_index}"), None)
+        if not item:
+            raise ValueError("Voting item not found")
+        return item
+
+
+meeting_vote_repository = MeetingVoteRepository()

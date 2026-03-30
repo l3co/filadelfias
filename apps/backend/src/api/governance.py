@@ -7,7 +7,7 @@ from src.middleware.permissions import (
     require_manage_governance,
     require_view_governance,
 )
-from src.modules.governance.repository import council_repository, meeting_repository
+from src.modules.governance.repository import council_repository, meeting_repository, meeting_vote_repository
 from src.modules.governance.schemas import (
     CouncilCreate,
     CouncilMemberAdd,
@@ -16,6 +16,8 @@ from src.modules.governance.schemas import (
     MeetingCreate,
     MeetingResponse,
     MeetingUpdate,
+    VoteCastRequest,
+    VotingItemResponse,
 )
 
 router = APIRouter(prefix="/governance", tags=["Governance"])
@@ -147,6 +149,58 @@ async def complete_meeting(
 
     result = await meeting_repository.complete_meeting(meeting_id)
     return result
+
+
+@router.get("/meetings/{meeting_id}/votes", response_model=List[VotingItemResponse])
+async def list_meeting_votes(
+    meeting_id: str,
+    tenant_id: str = Query(..., description="ID of the tenant/church"),
+    auth_context: dict = Depends(require_view_governance),
+):
+    """
+    List voting items and current scoreboard for a meeting.
+    Requires: Pastor, Presbítero or Diácono (governance:view permission).
+    """
+    user = auth_context.get("user") or {}
+    user_id = user.get("id")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="User not authenticated")
+
+    meeting = await meeting_repository.get_by_id(meeting_id)
+    if not meeting or meeting.get("tenant_id") != tenant_id:
+        raise HTTPException(status_code=404, detail="Meeting not found")
+
+    return await meeting_vote_repository.list_voting_items(tenant_id, meeting_id, user_id)
+
+
+@router.post("/meetings/{meeting_id}/votes/{agenda_index}", response_model=VotingItemResponse)
+async def cast_meeting_vote(
+    meeting_id: str,
+    agenda_index: int,
+    data: VoteCastRequest,
+    tenant_id: str = Query(..., description="ID of the tenant/church"),
+    auth_context: dict = Depends(require_view_governance),
+):
+    """
+    Cast or update a vote for a specific agenda item.
+    Requires: governance:view permission.
+    """
+    user = auth_context.get("user") or {}
+    user_id = user.get("id")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="User not authenticated")
+
+    meeting = await meeting_repository.get_by_id(meeting_id)
+    if not meeting or meeting.get("tenant_id") != tenant_id:
+        raise HTTPException(status_code=404, detail="Meeting not found")
+
+    try:
+        return await meeting_vote_repository.cast_vote(tenant_id, meeting_id, agenda_index, user_id, data.choice)
+    except ValueError as exc:
+        message = str(exc)
+        if message == "Meeting not found":
+            raise HTTPException(status_code=404, detail=message) from exc
+        raise HTTPException(status_code=400, detail=message) from exc
 
 
 @router.patch("/councils/{council_id}", response_model=CouncilResponse)

@@ -13,8 +13,9 @@ pytestmark = pytest.mark.integration
 async def get_auth_token(client: AsyncClient):
     """Helper to register and login a user."""
     email = f"user_{uuid.uuid4().hex[:8]}@test.com"
-    await client.post("/auth/register", json={"email": email, "name": "Test User", "password": "password123"})
-    response = await client.post("/auth/login", data={"username": email, "password": "password123"})
+    password = "S3cureP@ssword!"
+    await client.post("/auth/register", json={"email": email, "name": "Test User", "password": password})
+    response = await client.post("/auth/login", data={"username": email, "password": password})
     return response.json()["access_token"]
 
 
@@ -302,3 +303,69 @@ class TestGovernanceEndpoints:
         )
         assert resp.status_code == 400
         assert "already completed" in resp.json()["detail"]
+
+    async def test_list_and_cast_votes(self, client: AsyncClient):
+        """Test listing voting items and casting a vote for a meeting agenda item."""
+        token = await get_auth_token(client)
+        headers = {"Authorization": f"Bearer {token}"}
+        tenant = await create_tenant(client, token)
+        tenant_id = tenant["id"]
+
+        _, meeting_data = await create_council_and_meeting(client, headers, tenant_id)
+        meeting_id = meeting_data["id"]
+
+        resp = await client.get(f"/governance/meetings/{meeting_id}/votes", params={"tenant_id": tenant_id}, headers=headers)
+        assert resp.status_code == 200
+        voting_items = resp.json()
+        assert len(voting_items) == 1
+        assert voting_items[0]["yes_count"] == 0
+        assert voting_items[0]["user_vote"] is None
+
+        resp = await client.post(
+            f"/governance/meetings/{meeting_id}/votes/1",
+            params={"tenant_id": tenant_id},
+            json={"choice": "yes"},
+            headers=headers,
+        )
+        assert resp.status_code == 200
+        voted_item = resp.json()
+        assert voted_item["yes_count"] == 1
+        assert voted_item["no_count"] == 0
+        assert voted_item["abstain_count"] == 0
+        assert voted_item["user_vote"] == "yes"
+
+        resp = await client.post(
+            f"/governance/meetings/{meeting_id}/votes/1",
+            params={"tenant_id": tenant_id},
+            json={"choice": "abstain"},
+            headers=headers,
+        )
+        assert resp.status_code == 200
+        updated_item = resp.json()
+        assert updated_item["yes_count"] == 0
+        assert updated_item["abstain_count"] == 1
+        assert updated_item["user_vote"] == "abstain"
+
+    async def test_cannot_vote_on_completed_meeting(self, client: AsyncClient):
+        """Test voting is blocked after a meeting is completed."""
+        token = await get_auth_token(client)
+        headers = {"Authorization": f"Bearer {token}"}
+        tenant = await create_tenant(client, token)
+        tenant_id = tenant["id"]
+
+        _, meeting_data = await create_council_and_meeting(client, headers, tenant_id)
+        meeting_id = meeting_data["id"]
+
+        resp = await client.post(
+            f"/governance/meetings/{meeting_id}/complete", params={"tenant_id": tenant_id}, headers=headers
+        )
+        assert resp.status_code == 200
+
+        resp = await client.post(
+            f"/governance/meetings/{meeting_id}/votes/1",
+            params={"tenant_id": tenant_id},
+            json={"choice": "yes"},
+            headers=headers,
+        )
+        assert resp.status_code == 400
+        assert "Voting is closed" in resp.json()["detail"]

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   addMonths,
   eachDayOfInterval,
@@ -14,17 +14,145 @@ import {
   subMonths,
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useEvents } from "@/hooks/useEvents";
+import { useCreateEvent, useEvents } from "@/hooks/useEvents";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+
+function NewEventSheet({
+  open,
+  onClose,
+  defaultDate,
+}: {
+  open: boolean;
+  onClose: () => void;
+  defaultDate: Date;
+}) {
+  const { mutate: createEvent, isPending } = useCreateEvent();
+  const [title, setTitle] = useState("");
+  const [date, setDate] = useState(format(defaultDate, "yyyy-MM-dd"));
+  const [timeStart, setTimeStart] = useState("09:00");
+  const [timeEnd, setTimeEnd] = useState("");
+  const [location, setLocation] = useState("");
+  const [description, setDescription] = useState("");
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!title.trim()) return;
+
+    const startsAt = new Date(`${date}T${timeStart}`).toISOString();
+    const endsAt = timeEnd ? new Date(`${date}T${timeEnd}`).toISOString() : undefined;
+
+    createEvent(
+      { title: title.trim(), starts_at: startsAt, ends_at: endsAt, location: location.trim() || undefined, description: description.trim() || undefined },
+      {
+        onSuccess: () => {
+          setTitle("");
+          setTimeEnd("");
+          setLocation("");
+          setDescription("");
+          onClose();
+        },
+      },
+    );
+  };
+
+  return (
+    <Sheet open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
+      <SheetContent side="bottom" className="max-h-[90vh] overflow-y-auto rounded-t-2xl">
+        <SheetHeader>
+          <SheetTitle>Novo evento</SheetTitle>
+        </SheetHeader>
+        <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+          <div className="space-y-1">
+            <label className="text-sm font-medium">Título *</label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+              placeholder="Nome do evento"
+              className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <label className="text-sm font-medium">Data *</label>
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                required
+                className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium">Hora início *</label>
+              <input
+                type="time"
+                value={timeStart}
+                onChange={(e) => setTimeStart(e.target.value)}
+                required
+                className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-sm font-medium">Hora fim <span className="text-muted-foreground">(opcional)</span></label>
+            <input
+              type="time"
+              value={timeEnd}
+              onChange={(e) => setTimeEnd(e.target.value)}
+              className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-sm font-medium">Local <span className="text-muted-foreground">(opcional)</span></label>
+            <input
+              type="text"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="Ex: Salão principal"
+              className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-sm font-medium">Descrição <span className="text-muted-foreground">(opcional)</span></label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={3}
+              placeholder="Detalhes do evento..."
+              className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+
+          <div className="flex gap-3 pb-2">
+            <Button type="button" variant="outline" className="flex-1" onClick={onClose}>
+              Cancelar
+            </Button>
+            <Button type="submit" className="flex-1" disabled={isPending || !title.trim()}>
+              {isPending ? "Salvando..." : "Criar evento"}
+            </Button>
+          </div>
+        </form>
+      </SheetContent>
+    </Sheet>
+  );
+}
 
 export function EventsScreen() {
   const navigate = useNavigate();
   const { data: events, isLoading } = useEvents();
   const [visibleMonth, setVisibleMonth] = useState(() => startOfMonth(new Date()));
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [showNewEvent, setShowNewEvent] = useState(false);
 
   const calendarDays = useMemo(() => {
     const firstDay = startOfWeek(startOfMonth(visibleMonth), { locale: ptBR });
@@ -49,11 +177,18 @@ export function EventsScreen() {
   }, [eventsByDay, selectedDate]);
 
   return (
-    <div className="space-y-4 p-4">
-      <div>
-        <h1 className="text-2xl font-bold">Calendario comunitario</h1>
-        <p className="text-sm text-muted-foreground">Agenda mensal da igreja com foco nos encontros da comunidade.</p>
+    <div className="relative space-y-4 p-4">
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Calendario comunitario</h1>
+          <p className="text-sm text-muted-foreground">Agenda mensal da igreja com foco nos encontros da comunidade.</p>
+        </div>
+        <Button size="icon" className="shrink-0" onClick={() => setShowNewEvent(true)}>
+          <Plus size={20} />
+        </Button>
       </div>
+
+      <NewEventSheet open={showNewEvent} onClose={() => setShowNewEvent(false)} defaultDate={selectedDate} />
 
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Carregando eventos...</p>

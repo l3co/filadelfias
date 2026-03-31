@@ -49,4 +49,18 @@ export const eventsService = {
     const { data } = await api.get<ApiEvent>(`/events/${eventId}`);
     return normalizeEvent(data);
   },
+
+  async createEvent(
+    churchId: string,
+    payload: {
+      title: string;
+      starts_at: string;
+      ends_at?: string;
+      location?: string;
+      description?: string;
+    },
+  ): Promise<Event> {
+    const { data } = await api.post<ApiEvent>("/events", payload, { params: { tenant_id: churchId } });
+    return normalizeEvent(data);
+  },
 };

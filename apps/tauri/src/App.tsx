@@ -29,7 +29,10 @@ function ThemeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     getDatabase()
       .then(() => setDbReady(true))
-      .catch(() => setDbReady(true)); // never block on DB error
+      .catch((error) => {
+        console.error("Database initialization failed:", error);
+        setDbReady(true); // never block on DB error
+      });
   }, []);
 
   useEffect(() => {

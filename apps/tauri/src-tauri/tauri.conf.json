@@ -24,7 +24,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self'"
+      "csp": "default-src 'self'; connect-src 'self' http://localhost:8000 https://api.filadelfias.com; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self'"
     }
   },
   "bundle": {

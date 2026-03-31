@@ -41,7 +41,7 @@ function normalizeEvent(event: ApiEvent): Event {
 
 export const eventsService = {
   async getEvents(churchId: string): Promise<Event[]> {
-    const { data } = await api.get<ApiEvent[]>(`/tenants/${churchId}/events`);
+    const { data } = await api.get<ApiEvent[]>("/events", { params: { tenant_id: churchId } });
     return data.map(normalizeEvent);
   },
 

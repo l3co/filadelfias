@@ -57,12 +57,12 @@ function normalizeTithe(record: ApiTitheRecord): Tithe {
 
 export const titheService = {
   async getTithes(churchId: string): Promise<Tithe[]> {
-    const { data } = await api.get<ApiTitheRecord[]>(`/tenants/${churchId}/my-tithes`);
+    const { data } = await api.get<ApiTitheRecord[]>("/tithe/records/me", { params: { tenant_id: churchId } });
     return data.map(normalizeTithe);
   },
 
   async getSummary(churchId: string): Promise<TitheSummary> {
-    const { data } = await api.get<TitheSummary>(`/tenants/${churchId}/my-tithes/summary`);
+    const { data } = await api.get<TitheSummary>("/tithe/records/me/summary", { params: { tenant_id: churchId } });
     return data;
   },
 
@@ -74,7 +74,7 @@ export const titheService = {
       notes?: string;
     },
   ): Promise<Tithe> {
-    const { data } = await api.post<ApiTitheRecord>(`/tenants/${churchId}/my-tithes`, payload);
+    const { data } = await api.post<ApiTitheRecord>("/tithe/records", payload, { params: { tenant_id: churchId } });
     return normalizeTithe(data);
   },
 };

@@ -81,7 +81,7 @@ export function ManualArticleScreen() {
         <Button
           variant="outline"
           disabled={!article.navigation.previous}
-          onClick={() => article.navigation.previous && navigate(`/manual/${article.navigation.previous.id}`)}
+          onClick={() => article.navigation.previous && navigate(`/manual/${encodeURIComponent(article.navigation.previous.id)}`)}
         >
           <ChevronLeft />
           <span className="ml-1">
@@ -92,7 +92,7 @@ export function ManualArticleScreen() {
         <Button
           variant="outline"
           disabled={!article.navigation.next}
-          onClick={() => article.navigation.next && navigate(`/manual/${article.navigation.next.id}`)}
+          onClick={() => article.navigation.next && navigate(`/manual/${encodeURIComponent(article.navigation.next.id)}`)}
         >
           <span className="mr-1">{article.navigation.next ? `Art. ${article.navigation.next.number}` : "Proximo"}</span>
           <ChevronRight />

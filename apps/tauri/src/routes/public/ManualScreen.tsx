@@ -98,7 +98,7 @@ export function ManualScreen() {
                       {chapter.articles.map((article) => (
                         <button
                           key={article.id}
-                          onClick={() => navigate(`/manual/${article.id}`)}
+                          onClick={() => navigate(`/manual/${encodeURIComponent(article.id)}`)}
                           className="rounded-md border px-3 py-1 text-sm transition-colors hover:bg-background"
                         >
                           Art. {article.number}
@@ -118,7 +118,7 @@ export function ManualScreen() {
                             {section.articles.map((article) => (
                               <button
                                 key={article.id}
-                                onClick={() => navigate(`/manual/${article.id}`)}
+                                onClick={() => navigate(`/manual/${encodeURIComponent(article.id)}`)}
                                 className="rounded-md border px-3 py-1 text-sm transition-colors hover:bg-muted"
                               >
                                 Art. {article.number}

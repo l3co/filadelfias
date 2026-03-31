@@ -83,6 +83,7 @@ function SectionLabel({ label }: { label: string }) {
 export function Sidebar() {
   const navigate = useNavigate();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isLoading = useAuthStore((state) => state.isLoading);
   const user = useAuthStore((state) => state.user);
   const currentChurchId = useAuthStore((state) => state.currentChurchId);
 
@@ -116,7 +117,7 @@ export function Sidebar() {
           ))}
         </div>
 
-        {isAuthenticated && (
+        {!isLoading && isAuthenticated && (
           <>
             <SectionLabel label={churchName} />
             <div className="space-y-0.5">
@@ -141,7 +142,7 @@ export function Sidebar() {
 
       {/* Footer */}
       <div className="border-t p-2">
-        {isAuthenticated && user ? (
+        {!isLoading && isAuthenticated && user ? (
           <div className="flex items-center gap-2.5 rounded-lg px-2 py-2">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-green-700 to-teal-600 text-sm font-bold text-white">
               {userInitial}
@@ -160,7 +161,7 @@ export function Sidebar() {
               <Settings size={14} />
             </NavLink>
           </div>
-        ) : (
+        ) : !isLoading ? (
           <button
             type="button"
             onClick={() => navigate("/auth/login")}
@@ -175,7 +176,7 @@ export function Sidebar() {
             </div>
             <span className="ml-auto text-green-400">→</span>
           </button>
-        )}
+        ) : null}
       </div>
     </aside>
   );

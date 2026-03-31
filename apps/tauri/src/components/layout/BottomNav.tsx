@@ -28,7 +28,8 @@ const authTabs: Tab[] = [
 
 export function BottomNav() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const tabs = isAuthenticated ? authTabs : publicTabs;
+  const isLoading = useAuthStore((state) => state.isLoading);
+  const tabs = !isLoading && isAuthenticated ? authTabs : publicTabs;
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-50 flex h-16 items-center justify-around border-t bg-white/95 px-2 backdrop-blur">

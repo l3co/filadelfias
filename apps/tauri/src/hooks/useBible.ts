@@ -23,3 +23,12 @@ export function useBibleChapter(version: string, book: string, chapter: number) 
     enabled: Boolean(version && book && chapter > 0),
   });
 }
+
+export function useBibleSearch(query: string, version: string, testament?: "OT" | "NT") {
+  return useQuery({
+    queryKey: ["bible-search", query, version, testament],
+    queryFn: () => bibleService.search(query, version, testament),
+    enabled: query.trim().length >= 2,
+    staleTime: 1000 * 30,
+  });
+}

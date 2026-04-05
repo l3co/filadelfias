@@ -60,7 +60,7 @@ jobs:
         working-directory: apps/tauri
 
       - name: Build and publish draft release
-        uses: tauri-apps/tauri-action@v0
+        uses: tauri-apps/tauri-action@v0.5.16
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
@@ -139,7 +139,7 @@ jobs:
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
-        run: cargo tauri android build --aab --target aarch64 --ci
+        run: npx tauri android build --aab --target aarch64 --ci
 
       - name: Upload Android bundle artifact
         uses: actions/upload-artifact@v4

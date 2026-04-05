@@ -1,9 +1,16 @@
 #[cfg(desktop)]
+use std::sync::Mutex;
+#[cfg(desktop)]
+use tauri::Emitter;
+#[cfg(desktop)]
 use tauri::Manager;
 #[cfg(desktop)]
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem, Submenu};
 #[cfg(desktop)]
-use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
+use tauri::tray::{MouseButton, MouseButtonState, TrayIcon, TrayIconBuilder, TrayIconEvent};
+
+#[cfg(desktop)]
+struct TrayState(Mutex<Option<TrayIcon<tauri::Wry>>>);
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -45,10 +52,6 @@ pub fn run() {
                 return;
             }
 
-            let Some(window) = app.get_webview_window("main") else {
-                return;
-            };
-
             let route = match event_id {
                 "nav_bible" => Some("/biblia"),
                 "nav_hymnal" => Some("/hinario"),
@@ -59,8 +62,7 @@ pub fn run() {
             };
 
             if let Some(route) = route {
-                let script = format!("window.location.href = '{}';", route);
-                let _ = window.eval(&script);
+                let _ = app.emit("navigate", route);
             }
         })
         .setup(|app| {
@@ -75,7 +77,7 @@ pub fn run() {
                 let tray_menu = Menu::with_items(handle, &[&show_item, &quit_item])?;
 
                 if let Some(icon) = app.default_window_icon() {
-                    let _tray = TrayIconBuilder::with_id("main-tray")
+                    let tray = TrayIconBuilder::with_id("main-tray")
                         .icon(icon.clone())
                         .tooltip("Filadelfias")
                         .menu(&tray_menu)
@@ -95,6 +97,8 @@ pub fn run() {
                             }
                         })
                         .build(app)?;
+                    // Keep TrayIcon alive for the lifetime of the app.
+                    app.manage(TrayState(Mutex::new(Some(tray))));
                 }
             }
 

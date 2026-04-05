@@ -45,3 +45,14 @@ export const useThemeStore = create<ThemeStore>()(
     },
   ),
 );
+
+// Re-apply the resolved theme whenever the OS preference changes.
+// Only takes effect when the user has selected "system" theme.
+if (typeof window !== "undefined") {
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+    const { theme, setTheme } = useThemeStore.getState();
+    if (theme === "system") {
+      setTheme("system");
+    }
+  });
+}

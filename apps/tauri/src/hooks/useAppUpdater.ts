@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { relaunch } from "@tauri-apps/plugin-process";
 import { check, type Update } from "@tauri-apps/plugin-updater";
 import { toast } from "sonner";
@@ -16,7 +16,7 @@ export function useAppUpdater(enabled: boolean) {
   const downloadedBytesRef = useRef(0);
   const totalBytesRef = useRef<number | null>(null);
 
-  const checkForUpdates = async ({ silent = false }: CheckOptions = {}) => {
+  const checkForUpdates = useCallback(async ({ silent = false }: CheckOptions = {}) => {
     if (!enabled || status === "checking" || status === "downloading" || status === "installing") {
       return null;
     }
@@ -52,7 +52,7 @@ export function useAppUpdater(enabled: boolean) {
 
       return null;
     }
-  };
+  }, [enabled, status]);
 
   const installUpdate = async () => {
     if (!enabled || !update || status === "installing") {
@@ -106,7 +106,7 @@ export function useAppUpdater(enabled: boolean) {
     }
 
     checkForUpdates({ silent: true }).catch(() => undefined);
-  }, [enabled]);
+  }, [enabled, checkForUpdates]);
 
   return {
     canCheck: enabled,

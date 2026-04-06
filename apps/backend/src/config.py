@@ -48,7 +48,7 @@ class Settings(BaseSettings):
     frontend_url: str | None = None
 
     # CORS - stored as string to avoid JSON parsing issues
-    cors_origins_str: str = "http://localhost:3000,http://localhost:5173,http://127.0.0.1:5173,http://127.0.0.1:4173,http://localhost:4173,https://filadelfias-6a116.web.app,https://filadelfias.com,https://www.filadelfias.com"
+    cors_origins_str: str = "http://localhost:3000,http://localhost:5173,http://127.0.0.1:5173,http://127.0.0.1:4173,http://localhost:4173,https://filadelfias-6a116.web.app,https://filadelfias.com,https://www.filadelfias.com,tauri://localhost"
 
     @property
     def cors_origins(self) -> list[str]:

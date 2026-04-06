@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Platform = "mobile" | "desktop";
 
@@ -14,12 +14,16 @@ function detectFallbackPlatform(): Platform {
 
 export function usePlatform(): Platform {
   const [platform, setPlatform] = useState<Platform>(detectFallbackPlatform);
+  // Tracks whether the authoritative Tauri OS detection has resolved.
+  // Once true, the resize fallback listener becomes a no-op.
+  const tauriResolved = useRef(false);
 
   useEffect(() => {
     try {
       import("@tauri-apps/plugin-os")
         .then(({ platform: getPlatform }) => {
           const mobilePlatforms = ["android", "ios"];
+          tauriResolved.current = true;
           setPlatform(mobilePlatforms.includes(getPlatform()) ? "mobile" : "desktop");
         })
         .catch(() => {
@@ -31,7 +35,11 @@ export function usePlatform(): Platform {
   }, []);
 
   useEffect(() => {
-    const onResize = () => setPlatform(detectFallbackPlatform());
+    const onResize = () => {
+      if (!tauriResolved.current) {
+        setPlatform(detectFallbackPlatform());
+      }
+    };
     window.addEventListener("resize", onResize);
 
     return () => window.removeEventListener("resize", onResize);

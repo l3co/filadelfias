@@ -1,0 +1,143 @@
+<h2>Tema visual do app Tauri</h2>
+<p class="subtitle">Qual direção melhor representa a identidade do Filadélfias?</p>
+
+<div class="split" style="gap:24px;align-items:flex-start">
+
+  <!-- ATUAL: Azul shadcn -->
+  <div class="mockup" data-choice="atual" onclick="toggleSelect(this)" style="cursor:pointer;transition:box-shadow .2s">
+    <div class="mockup-header" style="background:#1e293b;color:#fff">Atual — shadcn azul</div>
+    <div class="mockup-body" style="background:#f8fafc;display:flex;height:460px;font-family:Inter,sans-serif">
+      <!-- Sidebar -->
+      <aside style="width:220px;background:#fff;border-right:1px solid #e2e8f0;display:flex;flex-direction:column;padding:0">
+        <div style="height:56px;display:flex;align-items:center;padding:0 16px;border-bottom:1px solid #e2e8f0">
+          <span style="font-weight:700;font-size:15px;color:#3b82f6">Filadelfias</span>
+        </div>
+        <nav style="padding:8px;flex:1">
+          <div style="padding:4px 8px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:#94a3b8;margin:8px 0 4px">Conteúdo</div>
+          <a style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;font-size:13px;color:#1e293b;background:#eff6ff;font-weight:600;margin-bottom:2px">
+            <span style="background:#3b82f6;color:#fff;border-radius:6px;padding:4px;display:flex">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            </span>
+            Início
+          </a>
+          <a style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;font-size:13px;color:#64748b;margin-bottom:2px">
+            <span style="background:#f1f5f9;color:#64748b;border-radius:6px;padding:4px;display:flex">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            </span>
+            Bíblia
+          </a>
+          <a style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;font-size:13px;color:#64748b;margin-bottom:2px">
+            <span style="background:#f1f5f9;color:#64748b;border-radius:6px;padding:4px;display:flex">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+            </span>
+            Hinário
+          </a>
+          <div style="padding:4px 8px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:#94a3b8;margin:12px 0 4px">Comunidade</div>
+          <a style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;font-size:13px;color:#64748b;margin-bottom:2px">
+            <span style="background:#f1f5f9;color:#64748b;border-radius:6px;padding:4px;display:flex">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            </span>
+            Oração
+          </a>
+        </nav>
+        <div style="border-top:1px solid #e2e8f0;padding:12px">
+          <a style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;font-size:13px;color:#64748b">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+            Configurações
+          </a>
+        </div>
+      </aside>
+      <!-- Main -->
+      <main style="flex:1;padding:20px">
+        <div style="height:32px;background:#e2e8f0;border-radius:6px;width:60%;margin-bottom:16px"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:16px">
+            <div style="width:40px;height:40px;background:#eff6ff;border-radius:8px;margin-bottom:10px"></div>
+            <div style="height:12px;background:#e2e8f0;border-radius:4px;width:70%;margin-bottom:6px"></div>
+            <div style="height:20px;background:#dbeafe;border-radius:4px;width:40%"></div>
+          </div>
+          <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:16px">
+            <div style="width:40px;height:40px;background:#f0fdf4;border-radius:8px;margin-bottom:10px"></div>
+            <div style="height:12px;background:#e2e8f0;border-radius:4px;width:80%;margin-bottom:6px"></div>
+            <div style="height:20px;background:#dcfce7;border-radius:4px;width:45%"></div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- PROPOSTA: Verde/Teal alinhado com web -->
+  <div class="mockup" data-choice="proposta" onclick="toggleSelect(this)" style="cursor:pointer;transition:box-shadow .2s">
+    <div class="mockup-header" style="background:#002333;color:#fff">Proposta — verde/teal (identidade web)</div>
+    <div class="mockup-body" style="background:#f8fafc;display:flex;height:460px;font-family:Inter,sans-serif">
+      <!-- Sidebar -->
+      <aside style="width:220px;background:#fff;border-right:1px solid #e2e8f0;display:flex;flex-direction:column;padding:0">
+        <div style="height:56px;display:flex;align-items:center;padding:0 16px;border-bottom:1px solid #e2e8f0;gap:8px">
+          <div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#15803d,#0d9488);display:flex;align-items:center;justify-content:center">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg>
+          </div>
+          <span style="font-weight:800;font-size:15px;background:linear-gradient(to right,#15803d,#0d9488);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Filadélfias</span>
+        </div>
+        <nav style="padding:8px;flex:1">
+          <div style="padding:4px 8px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:#94a3b8;margin:8px 0 4px">Conteúdo</div>
+          <a style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;font-size:13px;color:#15803d;background:linear-gradient(to right,#f0fdf4,#f0fdfa);font-weight:600;margin-bottom:2px">
+            <span style="background:linear-gradient(135deg,#15803d,#0d9488);color:#fff;border-radius:6px;padding:4px;display:flex">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            </span>
+            Início
+            <span style="margin-left:auto;width:6px;height:6px;border-radius:50%;background:#16a34a"></span>
+          </a>
+          <a style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;font-size:13px;color:#475569;margin-bottom:2px">
+            <span style="background:#f1f5f9;color:#64748b;border-radius:6px;padding:4px;display:flex">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            </span>
+            Bíblia
+          </a>
+          <a style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;font-size:13px;color:#475569;margin-bottom:2px">
+            <span style="background:#f1f5f9;color:#64748b;border-radius:6px;padding:4px;display:flex">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+            </span>
+            Hinário
+          </a>
+          <div style="padding:4px 8px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:#94a3b8;margin:12px 0 4px">Comunidade <span style="background:#dcfce7;color:#15803d;border-radius:4px;padding:1px 5px;font-size:9px;vertical-align:middle">login</span></div>
+          <a style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;font-size:13px;color:#94a3b8;margin-bottom:2px;opacity:.5">
+            <span style="background:#f1f5f9;color:#94a3b8;border-radius:6px;padding:4px;display:flex">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            </span>
+            Oração
+            <svg style="margin-left:auto" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </a>
+        </nav>
+        <div style="border-top:1px solid #e2e8f0;padding:12px">
+          <a style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;font-size:13px;color:#475569">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+            Configurações
+          </a>
+        </div>
+      </aside>
+      <!-- Main -->
+      <main style="flex:1;padding:20px">
+        <div style="height:32px;background:linear-gradient(to right,#dcfce7,#ccfbf1);border-radius:6px;width:60%;margin-bottom:16px"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:16px">
+            <div style="width:40px;height:40px;background:linear-gradient(135deg,#dcfce7,#ccfbf1);border-radius:8px;margin-bottom:10px"></div>
+            <div style="height:12px;background:#e2e8f0;border-radius:4px;width:70%;margin-bottom:6px"></div>
+            <div style="height:20px;background:linear-gradient(to right,#bbf7d0,#99f6e4);border-radius:4px;width:40%"></div>
+          </div>
+          <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:16px">
+            <div style="width:40px;height:40px;background:linear-gradient(135deg,#f0fdf4,#f0fdfa);border-radius:8px;margin-bottom:10px"></div>
+            <div style="height:12px;background:#e2e8f0;border-radius:4px;width:80%;margin-bottom:6px"></div>
+            <div style="height:20px;background:linear-gradient(to right,#bbf7d0,#99f6e4);border-radius:4px;width:45%"></div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+</div>
+
+<div style="margin-top:20px;padding:16px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0">
+  <p style="margin:0;font-size:13px;color:#64748b">
+    <strong style="color:#1e293b">Nota:</strong> A opção B já inclui o conceito de navegação por autenticação — itens da área de membro aparecem bloqueados (ícone de cadeado) até o login. Isso será detalhado na próxima tela.
+  </p>
+</div>

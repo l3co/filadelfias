@@ -56,13 +56,13 @@ function normalizeLesson(item: ApiEBDLesson, classId?: string): EBDLesson {
 
 export const ebdService = {
   async getClasses(churchId: string): Promise<EBDClass[]> {
-    const { data } = await api.get<ApiEBDClass[]>(`/tenants/${churchId}/ebd/classes`);
+    const { data } = await api.get<ApiEBDClass[]>("/ebd/classes", { params: { tenant_id: churchId } });
     return data.map(normalizeClass);
   },
 
   async getMyClass(churchId: string): Promise<EBDClass | null> {
     try {
-      const { data } = await api.get<ApiEBDClass>(`/tenants/${churchId}/ebd/my-class`);
+      const { data } = await api.get<ApiEBDClass>("/ebd/my-class", { params: { tenant_id: churchId } });
       return normalizeClass(data);
     } catch {
       return null;
@@ -70,7 +70,7 @@ export const ebdService = {
   },
 
   async getLessons(churchId: string, classId: string): Promise<EBDLesson[]> {
-    const { data } = await api.get<ApiEBDLesson[]>(`/tenants/${churchId}/ebd/classes/${classId}/lessons`);
+    const { data } = await api.get<ApiEBDLesson[]>(`/ebd/classes/${classId}/lessons`, { params: { tenant_id: churchId } });
     return data.map((lesson) => normalizeLesson(lesson, classId));
   },
 

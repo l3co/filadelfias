@@ -1,0 +1,134 @@
+<h2>Navegação sem login — como tratar?</h2>
+<p class="subtitle">Como a sidebar/bottom nav deve aparecer para um usuário não autenticado?</p>
+
+<div class="cards">
+
+  <!-- Opção A: Ocultar completamente -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#f8fafc;padding:16px;font-family:Inter,sans-serif">
+      <aside style="width:100%;background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden">
+        <div style="height:44px;display:flex;align-items:center;padding:0 12px;border-bottom:1px solid #e2e8f0;gap:8px">
+          <div style="width:20px;height:20px;border-radius:5px;background:linear-gradient(135deg,#15803d,#0d9488)"></div>
+          <span style="font-weight:800;font-size:13px;background:linear-gradient(to right,#15803d,#0d9488);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Filadélfias</span>
+        </div>
+        <nav style="padding:6px">
+          <div style="padding:3px 6px;font-size:9px;font-weight:600;text-transform:uppercase;color:#94a3b8;margin:4px 0 2px">Conteúdo</div>
+          <div style="display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;background:linear-gradient(to right,#f0fdf4,#f0fdfa);margin-bottom:2px">
+            <span style="font-size:11px;color:#15803d;font-weight:600">🏠 Início</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;margin-bottom:2px">
+            <span style="font-size:11px;color:#475569">📖 Bíblia</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;margin-bottom:2px">
+            <span style="font-size:11px;color:#475569">🎵 Hinário</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;margin-bottom:2px">
+            <span style="font-size:11px;color:#475569">📚 Manual IPB</span>
+          </div>
+        </nav>
+        <div style="border-top:1px solid #e2e8f0;padding:8px">
+          <div style="display:flex;align-items:center;justify-content:center;gap:6px;padding:8px;border-radius:8px;background:linear-gradient(135deg,#15803d,#0d9488);color:#fff">
+            <span style="font-size:11px;font-weight:600">→ Entrar na minha igreja</span>
+          </div>
+        </div>
+      </aside>
+    </div>
+    <div class="card-body">
+      <h3>A — Ocultar seções de membro</h3>
+      <p>Sem login: só aparece conteúdo público (Bíblia, Hinário, Manual). Um botão CTA "Entrar na minha igreja" no rodapé convida ao login.</p>
+      <div class="pros-cons" style="margin-top:8px">
+        <div class="pros"><h4>Prós</h4><ul><li>Interface limpa</li><li>Sem confusão</li></ul></div>
+        <div class="cons"><h4>Contras</h4><ul><li>Usuário não sabe o que existe na área de membro</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Opção B: Mostrar bloqueado -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#f8fafc;padding:16px;font-family:Inter,sans-serif">
+      <aside style="width:100%;background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden">
+        <div style="height:44px;display:flex;align-items:center;padding:0 12px;border-bottom:1px solid #e2e8f0;gap:8px">
+          <div style="width:20px;height:20px;border-radius:5px;background:linear-gradient(135deg,#15803d,#0d9488)"></div>
+          <span style="font-weight:800;font-size:13px;background:linear-gradient(to right,#15803d,#0d9488);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Filadélfias</span>
+        </div>
+        <nav style="padding:6px">
+          <div style="padding:3px 6px;font-size:9px;font-weight:600;text-transform:uppercase;color:#94a3b8;margin:4px 0 2px">Conteúdo Público</div>
+          <div style="display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;background:linear-gradient(to right,#f0fdf4,#f0fdfa);margin-bottom:2px">
+            <span style="font-size:11px;color:#15803d;font-weight:600">🏠 Início</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;margin-bottom:2px">
+            <span style="font-size:11px;color:#475569">📖 Bíblia</span>
+          </div>
+          <div style="padding:3px 6px;font-size:9px;font-weight:600;text-transform:uppercase;color:#94a3b8;margin:8px 0 2px">Minha Igreja <span style="background:#fef9c3;color:#a16207;border-radius:3px;padding:1px 4px;font-size:8px">requer login</span></div>
+          <div style="display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;margin-bottom:2px;opacity:.45">
+            <span style="font-size:11px;color:#94a3b8">🙏 Oração <span style="font-size:9px">🔒</span></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;margin-bottom:2px;opacity:.45">
+            <span style="font-size:11px;color:#94a3b8">📅 Eventos <span style="font-size:9px">🔒</span></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;margin-bottom:2px;opacity:.45">
+            <span style="font-size:11px;color:#94a3b8">👥 Diretório <span style="font-size:9px">🔒</span></span>
+          </div>
+        </nav>
+      </aside>
+    </div>
+    <div class="card-body">
+      <h3>B — Mostrar itens bloqueados</h3>
+      <p>Itens da área de membro ficam visíveis mas desabilitados/acinzentados com ícone de cadeado. Clicar redireciona para login.</p>
+      <div class="pros-cons" style="margin-top:8px">
+        <div class="pros"><h4>Prós</h4><ul><li>Usuário descobre o que existe</li><li>Incentiva o cadastro</li></ul></div>
+        <div class="cons"><h4>Contras</h4><ul><li>Interface mais carregada</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Opção C: Entrada única "Minha Igreja" -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#f8fafc;padding:16px;font-family:Inter,sans-serif">
+      <aside style="width:100%;background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden">
+        <div style="height:44px;display:flex;align-items:center;padding:0 12px;border-bottom:1px solid #e2e8f0;gap:8px">
+          <div style="width:20px;height:20px;border-radius:5px;background:linear-gradient(135deg,#15803d,#0d9488)"></div>
+          <span style="font-weight:800;font-size:13px;background:linear-gradient(to right,#15803d,#0d9488);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Filadélfias</span>
+        </div>
+        <nav style="padding:6px">
+          <div style="padding:3px 6px;font-size:9px;font-weight:600;text-transform:uppercase;color:#94a3b8;margin:4px 0 2px">Conteúdo</div>
+          <div style="display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;background:linear-gradient(to right,#f0fdf4,#f0fdfa);margin-bottom:2px">
+            <span style="font-size:11px;color:#15803d;font-weight:600">🏠 Início</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;margin-bottom:2px">
+            <span style="font-size:11px;color:#475569">📖 Bíblia</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;margin-bottom:2px">
+            <span style="font-size:11px;color:#475569">🎵 Hinário</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;margin-bottom:2px">
+            <span style="font-size:11px;color:#475569">📚 Manual IPB</span>
+          </div>
+        </nav>
+        <div style="border-top:1px solid #e2e8f0;padding:8px 6px">
+          <div style="display:flex;align-items:center;gap:6px;padding:8px;border-radius:8px;border:1px solid #bbf7d0;background:#f0fdf4">
+            <div style="width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,#15803d,#0d9488);display:flex;align-items:center;justify-content:center">
+              <span style="color:#fff;font-size:12px">⛪</span>
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:600;color:#15803d">Minha Igreja</div>
+              <div style="font-size:9px;color:#16a34a">Entrar para acessar</div>
+            </div>
+            <span style="margin-left:auto;font-size:10px;color:#86efac">→</span>
+          </div>
+        </div>
+      </aside>
+    </div>
+    <div class="card-body">
+      <h3>C — Entrada única "Minha Igreja"</h3>
+      <p>Um único item especial no rodapé da sidebar agrupa toda a área de membro. Após login, expande para mostrar todos os itens (Oração, Eventos, Diretório, etc.).</p>
+      <div class="pros-cons" style="margin-top:8px">
+        <div class="pros"><h4>Prós</h4><ul><li>Interface mais limpa</li><li>Convite claro ao login</li><li>Revela conteúdo progressivamente</li></ul></div>
+        <div class="cons"><h4>Contras</h4><ul><li>Um clique a mais para navegar</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<p style="margin-top:16px;font-size:12px;color:#94a3b8;text-align:center">Clique em uma opção para selecionar • Isso se aplica tanto à sidebar (desktop) quanto ao bottom nav (mobile)</p>

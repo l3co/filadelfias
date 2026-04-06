@@ -31,26 +31,19 @@ import { NewExpenseScreen } from "@/routes/member/NewExpenseScreen";
 import { NewTitheScreen } from "@/routes/member/NewTitheScreen";
 import { BibleChapterScreen } from "@/routes/public/BibleChapterScreen";
 import { BibleScreen } from "@/routes/public/BibleScreen";
+import { HomeScreen } from "@/routes/public/HomeScreen";
 import { TithesScreen } from "@/routes/member/TithesScreen";
 import { HymnScreen } from "@/routes/public/HymnScreen";
 import { HymnalScreen } from "@/routes/public/HymnalScreen";
 import { ManualArticleScreen } from "@/routes/public/ManualArticleScreen";
 import { ManualScreen } from "@/routes/public/ManualScreen";
 
-function Placeholder({ name }: { name: string }) {
-  return (
-    <div className="flex h-full min-h-[calc(100vh-3.5rem)] items-center justify-center p-8 text-center text-muted-foreground">
-      {name} - em construcao
-    </div>
-  );
-}
-
 export const router = createBrowserRouter([
   {
     path: "/",
     element: <AppShell />,
     children: [
-      { index: true, element: <Placeholder name="Inicio" /> },
+      { index: true, element: <HomeScreen /> },
       { path: "biblia", element: <BibleScreen /> },
       { path: "biblia/:version/:book/:chapter", element: <BibleChapterScreen /> },
       { path: "hinario", element: <HymnalScreen /> },
@@ -75,8 +68,8 @@ export const router = createBrowserRouter([
           { path: "member/missions", element: <MissionsScreen /> },
           { path: "member/missions/:missionId", element: <MissionDetailScreen /> },
           { path: "member/prayer", element: <PrayerScreen /> },
-          { path: "member/prayer/:prayerId", element: <PrayerDetailScreen /> },
           { path: "member/prayer/new", element: <NewPrayerScreen /> },
+          { path: "member/prayer/:prayerId", element: <PrayerDetailScreen /> },
           { path: "member/tithes", element: <TithesScreen /> },
           { path: "member/tithes/new", element: <NewTitheScreen /> },
           { path: "member/expenses", element: <ExpensesScreen /> },

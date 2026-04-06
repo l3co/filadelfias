@@ -31,7 +31,7 @@ function normalizeMember(member: ApiMember): Member {
 
 export const membersService = {
   async getMembers(churchId: string, filters?: { office?: string; search?: string }): Promise<Member[]> {
-    const { data } = await api.get<ApiMember[]>(`/tenants/${churchId}/members`, { params: filters });
+    const { data } = await api.get<ApiMember[]>("/members", { params: { tenant_id: churchId, ...filters } });
     return data.map(normalizeMember);
   },
 
@@ -41,7 +41,7 @@ export const membersService = {
   },
 
   async getProfile(): Promise<Member> {
-    const { data } = await api.get<ApiMember>("/members/me");
+    const { data } = await api.get<ApiMember>("/auth/me");
     return normalizeMember(data);
   },
 
@@ -50,7 +50,7 @@ export const membersService = {
       full_name: payload.name,
       phone: payload.phone,
     };
-    const { data } = await api.patch<ApiMember>("/members/me", requestBody);
+    const { data } = await api.patch<ApiMember>("/auth/me", requestBody);
     return normalizeMember(data);
   },
 };

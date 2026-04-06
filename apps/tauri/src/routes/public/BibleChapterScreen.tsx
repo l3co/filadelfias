@@ -1,14 +1,30 @@
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, Volume2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Minus, Plus, Volume2 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useBibleChapter } from "@/hooks/useBible";
+
+const FONT_MIN = 14;
+const FONT_MAX = 32;
+const FONT_KEY = "bible-font-size";
 
 export function BibleChapterScreen() {
   const navigate = useNavigate();
   const { version = "ARC", book = "gn", chapter = "1" } = useParams();
   const [selectedVerse, setSelectedVerse] = useState<number | null>(null);
+  const [fontSize, setFontSize] = useState<number>(() => {
+    const stored = localStorage.getItem(FONT_KEY);
+    return stored ? Number.parseInt(stored, 10) : 18;
+  });
   const chapterNumber = Number.parseInt(chapter, 10);
+
+  const handleFontSize = (delta: number) => {
+    setFontSize((current) => {
+      const next = Math.min(FONT_MAX, Math.max(FONT_MIN, current + delta));
+      localStorage.setItem(FONT_KEY, String(next));
+      return next;
+    });
+  };
   const { data, isLoading } = useBibleChapter(version, book, chapterNumber);
 
   const speak = (text: string) => {
@@ -50,10 +66,21 @@ export function BibleChapterScreen() {
         </Button>
       </div>
 
+      <div className="mb-3 flex items-center justify-end gap-1">
+        <Button variant="ghost" size="icon" className="h-7 w-7" disabled={fontSize <= FONT_MIN} onClick={() => handleFontSize(-2)}>
+          <Minus size={14} />
+        </Button>
+        <span className="w-8 text-center text-xs text-muted-foreground">{fontSize}</span>
+        <Button variant="ghost" size="icon" className="h-7 w-7" disabled={fontSize >= FONT_MAX} onClick={() => handleFontSize(2)}>
+          <Plus size={14} />
+        </Button>
+      </div>
+
       <div className="space-y-3">
         {data.verses.map((verse) => (
           <p
             key={verse.number}
+            style={{ fontSize: `${fontSize}px` }}
             className="cursor-pointer leading-relaxed"
             onClick={() => setSelectedVerse((current) => (current === verse.number ? null : verse.number))}
           >

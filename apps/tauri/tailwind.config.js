@@ -16,6 +16,15 @@ export default {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
         },
+        mint: {
+          50: "#DEEFE7",
+        },
+        navy: {
+          900: "#002333",
+        },
+        teal: {
+          500: "#159A9C",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

@@ -25,21 +25,18 @@ function normalizeDevotional(devotional: ApiDevotional): Devotional {
 
 export const devotionalsService = {
   async getDevotionals(churchId?: string): Promise<Devotional[]> {
-    const endpoint = churchId ? `/tenants/${churchId}/devotionals` : "/devotionals";
-    const { data } = await api.get<ApiDevotional[]>(endpoint);
+    const { data } = await api.get<ApiDevotional[]>("/devotionals", churchId ? { params: { tenant_id: churchId } } : undefined);
     return data.map(normalizeDevotional);
   },
 
   async getDevotional(id: string, churchId?: string): Promise<Devotional> {
-    const endpoint = churchId ? `/tenants/${churchId}/devotionals/${id}` : `/devotionals/${id}`;
-    const { data } = await api.get<ApiDevotional>(endpoint);
+    const { data } = await api.get<ApiDevotional>(`/devotionals/${id}`, churchId ? { params: { tenant_id: churchId } } : undefined);
     return normalizeDevotional(data);
   },
 
   async getTodayDevotional(churchId?: string): Promise<Devotional | null> {
     try {
-      const endpoint = churchId ? `/tenants/${churchId}/devotionals/today` : "/devotionals/today";
-      const { data } = await api.get<ApiDevotional>(endpoint);
+      const { data } = await api.get<ApiDevotional>("/devotionals/today", churchId ? { params: { tenant_id: churchId } } : undefined);
       return normalizeDevotional(data);
     } catch {
       const devotionals = await this.getDevotionals(churchId);

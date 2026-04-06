@@ -52,6 +52,14 @@ function normalizeChapterResponse(data: BibleChapter | { verses: string[] }): Bi
   };
 }
 
+export interface BibleSearchResult {
+  reference: string;
+  book_abbrev: string;
+  chapter: number;
+  verse: number;
+  text: string;
+}
+
 export const bibleService = {
   getVersions: async (): Promise<BibleVersion[]> => {
     const { data } = await api.get("/bible/versions");
@@ -86,28 +94,20 @@ export const bibleService = {
     return normalizeChapterResponse(data);
   },
 
-  search: async (query: string, version: string): Promise<BibleVerse[]> => {
-    const database = await getDatabase();
-    const offline = await database.select<
-      { verse_text: string; verse_number: number }[]
-    >("SELECT verse_text, verse_number FROM bible_fts WHERE bible_fts MATCH ? LIMIT 50", [query]);
-
-    if (offline.length > 0) {
-      return offline.map((verse) => ({
-        number: verse.verse_number,
-        text: verse.verse_text,
-      }));
-    }
-
+  search: async (query: string, version: string, testament?: "OT" | "NT"): Promise<{ results: BibleSearchResult[]; total: number }> => {
     const { data } = await api.get("/bible/search", {
-      params: { q: query, version, limit: 50 },
+      params: { q: query, version, testament, limit: 30 },
     });
 
-    const results = Array.isArray(data?.results) ? data.results : data;
-
-    return results.map((result: { verse?: number; number?: number; text: string }) => ({
-      number: result.verse || result.number || 0,
-      text: result.text,
+    const rawResults = Array.isArray(data?.results) ? data.results : (Array.isArray(data) ? data : []);
+    const results = rawResults.map((r: Record<string, unknown>) => ({
+      reference: String(r.reference ?? ""),
+      book_abbrev: String(r.book_abbrev ?? r.book ?? ""),
+      chapter: Number(r.chapter ?? 1),
+      verse: Number(r.verse ?? r.number ?? 0),
+      text: String(r.text ?? ""),
     }));
+
+    return { results, total: Number(data?.total ?? results.length) };
   },
 };

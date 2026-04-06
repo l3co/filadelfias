@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { eventsService } from "@/services/events";
 import { useAuthStore } from "@/stores/authStore";
 
@@ -17,5 +17,18 @@ export function useEvent(eventId?: string) {
     queryKey: ["event", eventId],
     queryFn: () => eventsService.getEvent(eventId!),
     enabled: Boolean(eventId),
+  });
+}
+
+export function useCreateEvent() {
+  const queryClient = useQueryClient();
+  const churchId = useAuthStore((state) => state.currentChurchId);
+
+  return useMutation({
+    mutationFn: (payload: { title: string; starts_at: string; ends_at?: string; location?: string; description?: string }) =>
+      eventsService.createEvent(churchId!, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["events", churchId] });
+    },
   });
 }

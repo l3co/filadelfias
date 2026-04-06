@@ -7,27 +7,126 @@ on:
   workflow_dispatch:
 
 jobs:
-  release-desktop:
+  create-release:
     permissions:
       contents: write
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - platform: macos-latest
-            args: "--target aarch64-apple-darwin"
-            rust_targets: "aarch64-apple-darwin,x86_64-apple-darwin"
-          - platform: macos-latest
-            args: "--target x86_64-apple-darwin"
-            rust_targets: "aarch64-apple-darwin,x86_64-apple-darwin"
-          - platform: ubuntu-22.04
-            args: "--bundles deb,rpm,appimage"
-            rust_targets: ""
-          - platform: windows-latest
-            args: "--bundles msi,nsis"
-            rust_targets: ""
-    runs-on: ${{ matrix.platform }}
+    runs-on: ubuntu-22.04
+    outputs:
+      release_id: ${{ steps.create.outputs.id }}
+    steps:
+      - uses: actions/checkout@v4
 
+      - name: Create GitHub Release
+        id: create
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ID=$(gh release create ${{ github.ref_name }} \
+            --title "Filadelfias ${{ github.ref_name }}" \
+            --notes "Veja as notas de versao." \
+            --latest)
+          echo "id=$ID" >> $GITHUB_OUTPUT
+
+  build-linux:
+    needs: create-release
+    permissions:
+      contents: write
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: apps/tauri/package-lock.json
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: "apps/tauri/src-tauri -> target"
+
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev \
+            libappindicator3-dev librsvg2-dev patchelf rpm
+
+      - name: Install frontend deps
+        run: npm ci
+        working-directory: apps/tauri
+
+      - name: Build Linux
+        uses: tauri-apps/tauri-action@v0.5.16
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: "Filadelfias ${{ github.ref_name }}"
+          releaseBody: "Veja as notas de versao."
+          releaseDraft: false
+          prerelease: false
+          projectPath: apps/tauri
+          args: --bundles deb,rpm,appimage
+
+  build-windows:
+    needs: create-release
+    permissions:
+      contents: write
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: apps/tauri/package-lock.json
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: "apps/tauri/src-tauri -> target"
+
+      - name: Install frontend deps
+        run: npm ci
+        working-directory: apps/tauri
+
+      - name: Build Windows
+        uses: tauri-apps/tauri-action@v0.5.16
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE_BASE64 }}
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: "Filadelfias ${{ github.ref_name }}"
+          releaseBody: "Veja as notas de versao."
+          releaseDraft: false
+          prerelease: false
+          projectPath: apps/tauri
+          args: --bundles msi,nsis
+
+  build-macos-arm:
+    needs: create-release
+    permissions:
+      contents: write
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -41,26 +140,18 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: ${{ matrix.rust_targets }}
+          targets: aarch64-apple-darwin,x86_64-apple-darwin
 
       - name: Rust cache
         uses: swatinem/rust-cache@v2
         with:
           workspaces: "apps/tauri/src-tauri -> target"
 
-      - name: Install Linux dependencies
-        if: matrix.platform == 'ubuntu-22.04'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev \
-            libappindicator3-dev librsvg2-dev patchelf \
-            rpm
-
       - name: Install frontend deps
         run: npm ci
         working-directory: apps/tauri
 
-      - name: Build and publish release
+      - name: Build macOS (Apple Silicon)
         uses: tauri-apps/tauri-action@v0.5.16
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -72,8 +163,6 @@ jobs:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE_BASE64 }}
-          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
           VITE_API_URL: ${{ vars.VITE_API_URL }}
         with:
           tagName: ${{ github.ref_name }}
@@ -82,14 +171,64 @@ jobs:
           releaseDraft: false
           prerelease: false
           projectPath: apps/tauri
-          args: ${{ matrix.args }}
+          args: --target aarch64-apple-darwin
 
-  release-android:
-    needs: release-desktop
+  build-macos-x86:
+    needs: create-release
+    permissions:
+      contents: write
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: apps/tauri/package-lock.json
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin,x86_64-apple-darwin
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: "apps/tauri/src-tauri -> target"
+
+      - name: Install frontend deps
+        run: npm ci
+        working-directory: apps/tauri
+
+      - name: Build macOS (Intel)
+        uses: tauri-apps/tauri-action@v0.5.16
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE_BASE64 }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: "Filadelfias ${{ github.ref_name }}"
+          releaseBody: "Veja as notas de versao."
+          releaseDraft: false
+          prerelease: false
+          projectPath: apps/tauri
+          args: --target x86_64-apple-darwin
+
+  build-android:
+    needs: create-release
     permissions:
       contents: write
     runs-on: ubuntu-22.04
-
     steps:
       - uses: actions/checkout@v4
 
@@ -135,7 +274,7 @@ jobs:
           mkdir -p apps/tauri/src-tauri/gen/android/keystore
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > apps/tauri/src-tauri/gen/android/keystore/release.jks
 
-      - name: Build signed Android AAB
+      - name: Build Android AAB
         working-directory: apps/tauri
         env:
           ANDROID_HOME: /usr/local/lib/android/sdk

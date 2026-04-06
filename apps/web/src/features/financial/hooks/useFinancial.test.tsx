@@ -1,5 +1,5 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createTestQueryClient, createWrapper } from '../../../test/utils';
 import { useFinancialData } from './useFinancial';
 import { financialService } from '../../../services/financial';
@@ -25,6 +25,12 @@ const mockFinancialService = vi.mocked(financialService);
 describe('useFinancialData', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-03-15T12:00:00Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('loads accounts, categories and transactions and derives total balance', async () => {

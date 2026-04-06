@@ -141,10 +141,19 @@ jobs:
           ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
         run: npx tauri android build --aab --target aarch64 --ci
 
+      - name: Find Android AAB
+        id: find_aab
+        run: |
+          AAB=$(find apps/tauri/src-tauri/gen/android/app/build/outputs/bundle \
+            -name "*.aab" | head -1)
+          echo "path=$AAB" >> $GITHUB_OUTPUT
+          echo "Found AAB: $AAB"
+
       - name: Upload Android AAB to release
+        if: startsWith(github.ref, 'refs/tags/')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release upload ${{ github.ref_name }} \
-            apps/tauri/src-tauri/gen/android/app/build/outputs/bundle/arm64Release/app-arm64-release.aab \
+            "${{ steps.find_aab.outputs.path }}" \
             --clobber

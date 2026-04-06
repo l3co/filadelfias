@@ -10,6 +10,7 @@ use tauri::menu::{Menu, MenuItem, PredefinedMenuItem, Submenu};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIcon, TrayIconBuilder, TrayIconEvent};
 
 #[cfg(desktop)]
+#[allow(dead_code)]
 struct TrayState(Mutex<Option<TrayIcon<tauri::Wry>>>);
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]

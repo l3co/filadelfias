@@ -14,12 +14,13 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - platform: macos-latest
-            args: "--target aarch64-apple-darwin"
-            rust_targets: "aarch64-apple-darwin,x86_64-apple-darwin"
-          - platform: macos-latest
-            args: "--target x86_64-apple-darwin"
-            rust_targets: "aarch64-apple-darwin,x86_64-apple-darwin"
+          # macOS builds desabilitados - aguardando ativação da conta Apple Developer
+          # - platform: macos-latest
+          #   args: "--target aarch64-apple-darwin"
+          #   rust_targets: "aarch64-apple-darwin,x86_64-apple-darwin"
+          # - platform: macos-latest
+          #   args: "--target x86_64-apple-darwin"
+          #   rust_targets: "aarch64-apple-darwin,x86_64-apple-darwin"
           - platform: ubuntu-22.04
             args: ""
             rust_targets: ""
@@ -108,7 +109,7 @@ jobs:
 
       - name: Install Android packages
         run: |
-          sdkmanager "platforms;android-36" "build-tools;36.0.0" "ndk;27.1.12297006"
+          sdkmanager "platforms;android-36" "build-tools;36.0.0" "ndk;29.0.14206865"
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
@@ -124,6 +125,9 @@ jobs:
         run: npm ci
         working-directory: apps/tauri
 
+      - name: Install tauri-cli
+        run: cargo install tauri-cli --locked --version "^2"
+
       - name: Restore Android keystore
         run: |
           mkdir -p apps/tauri/src-tauri/gen/android/keystore
@@ -134,7 +138,7 @@ jobs:
         env:
           ANDROID_HOME: /usr/local/lib/android/sdk
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
-          NDK_HOME: /usr/local/lib/android/sdk/ndk/27.1.12297006
+          NDK_HOME: /usr/local/lib/android/sdk/ndk/29.0.14206865
           ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/apps/tauri/src-tauri/gen/android/keystore/release.jks
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}

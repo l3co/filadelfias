@@ -25,7 +25,7 @@ const mockFinancialService = vi.mocked(financialService);
 describe('useFinancialData', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.useFakeTimers();
+    vi.useFakeTimers({ shouldAdvanceTime: true });
     vi.setSystemTime(new Date('2026-03-15T12:00:00Z'));
   });
 
@@ -59,8 +59,8 @@ describe('useFinancialData', () => {
       month: 3,
       year: 2026,
       page: 1,
-        pageSize: 10,
-      });
+      pageSize: 10,
+    });
     expect(result.current.totalBalance).toBe(350.5);
     expect(result.current.filters).toEqual({
       month: 3,

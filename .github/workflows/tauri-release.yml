@@ -84,6 +84,7 @@ jobs:
           args: ${{ matrix.args }}
 
   release-android:
+    needs: release-desktop
     permissions:
       contents: write
     runs-on: ubuntu-22.04
@@ -145,8 +146,10 @@ jobs:
           ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
         run: npx tauri android build --aab --target aarch64 --ci
 
-      - name: Upload Android bundle artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: filadelfias-android-aab
-          path: apps/tauri/src-tauri/gen/android/app/build/outputs/bundle/universalRelease/app-universal-release.aab
+      - name: Upload Android AAB to release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload ${{ github.ref_name }} \
+            apps/tauri/src-tauri/gen/android/app/build/outputs/bundle/arm64Release/app-arm64-release.aab \
+            --clobber

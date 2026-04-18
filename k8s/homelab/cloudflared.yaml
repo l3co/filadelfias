@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: cloudflared
-          image: cloudflare/cloudflared:latest
+          image: cloudflare/cloudflared:2026.3.0
           imagePullPolicy: Always
           args:
             - tunnel
@@ -41,6 +41,8 @@ spec:
               command:
                 - cloudflared
                 - tunnel
+                - --metrics
+                - localhost:20241
                 - ready
             initialDelaySeconds: 10
             periodSeconds: 10
@@ -49,6 +51,8 @@ spec:
               command:
                 - cloudflared
                 - tunnel
+                - --metrics
+                - localhost:20241
                 - ready
             initialDelaySeconds: 30
             periodSeconds: 30

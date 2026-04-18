@@ -13,4 +13,4 @@ data:
   POSTGRES_USER: "filadelfias"
   API_URL: "https://api.filadelfias.com"
   FRONTEND_URL: "https://filadelfias.com"
-  CORS_ORIGINS_STR: "https://filadelfias.com"
+  CORS_ORIGINS_STR: "https://filadelfias.com,tauri://localhost,https://tauri.localhost,http://localhost"

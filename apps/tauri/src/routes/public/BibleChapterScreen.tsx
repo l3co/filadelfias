@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, BookOpen, ChevronLeft, ChevronRight, EyeOff, Minus, Monitor, MonitorOff, Plus, Settings2, Square, Volume2 } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { emit } from "@tauri-apps/api/event";
+import { emitTo } from "@tauri-apps/api/event";
 import { useBibleBooks, useBibleChapter } from "@/hooks/useBible";
 import { usePresentationStore } from "@/stores/presentationStore";
 import { openPresentationWindow, closePresentationWindow } from "@/lib/presentationWindow";
@@ -109,13 +109,13 @@ export function BibleChapterScreen() {
     const presented = { text: verseText, reference, verseNumber: verseNum };
     setCurrentVerse(presented);
     setBlank(false);
-    await emit("bible:present", { verse: presented, settings, isBlank: false });
+    await emitTo("presentation", "bible:present", { verse: presented, settings, isBlank: false });
   };
 
   const handleBlank = async () => {
     const next = !isBlank;
     setBlank(next);
-    await emit("bible:present", { verse: currentVerse, settings, isBlank: next });
+    await emitTo("presentation", "bible:present", { verse: currentVerse, settings, isBlank: next });
   };
 
   if (isLoading) {

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
+import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import type { PresentationSettings, PresentedVerse } from "@/stores/presentationStore";
 
 interface PresentationPayload {
@@ -20,15 +21,20 @@ export function PresentationWindow() {
   const [isBlank, setIsBlank] = useState(false);
 
   useEffect(() => {
-    const unlisten = listen<PresentationPayload>("bible:present", (event) => {
+    const unlistenPresent = listen<PresentationPayload>("bible:present", (event) => {
       const { verse: v, settings: s, isBlank: blank } = event.payload;
       setVerse(v);
       setSettings(s);
       setIsBlank(blank);
     });
 
+    const unlistenClose = listen("presentation:close", () => {
+      getCurrentWebviewWindow().close();
+    });
+
     return () => {
-      unlisten.then((fn) => fn());
+      unlistenPresent.then((fn) => fn());
+      unlistenClose.then((fn) => fn());
     };
   }, []);
 

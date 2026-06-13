@@ -1,42 +1,35 @@
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
+import { emitTo } from "@tauri-apps/api/event";
 
-let win: WebviewWindow | null = null;
+const LABEL = "presentation";
 
 export async function openPresentationWindow(): Promise<WebviewWindow> {
-  if (win) {
-    await win.show();
-    await win.setFocus();
-    return win;
+  const existing = await WebviewWindow.getByLabel(LABEL);
+  if (existing) {
+    await existing.show();
+    await existing.setFocus();
+    return existing;
   }
 
-  win = new WebviewWindow("presentation", {
+  const win = new WebviewWindow(LABEL, {
     url: "/presentation",
     title: "Filadelfias — Apresentação",
-    decorations: false,
+    decorations: true,
     alwaysOnTop: true,
     resizable: true,
-    width: 1920,
-    height: 1080,
+    width: 1280,
+    height: 720,
     center: true,
-  });
-
-  win.once("tauri://destroyed", () => {
-    win = null;
-  });
-  win.once("tauri://error", () => {
-    win = null;
   });
 
   return win;
 }
 
 export async function closePresentationWindow(): Promise<void> {
-  if (win) {
-    await win.destroy().catch(() => undefined);
-    win = null;
-  }
+  await emitTo(LABEL, "presentation:close").catch(() => undefined);
 }
 
-export function isPresentationWindowOpen(): boolean {
+export async function isPresentationWindowOpen(): Promise<boolean> {
+  const win = await WebviewWindow.getByLabel(LABEL);
   return win !== null;
 }

@@ -102,16 +102,16 @@ def get_manual_structure() -> dict[str, Any]:
     data = _load_manual_data()
     processed = _process_structure(data)
 
-    # Remove article texts from structure (keep only metadata)
+    # Keep first 100 chars as excerpt, remove full text and other heavy fields
     for part in processed["parts"]:
         for chapter in part["chapters"]:
             for section in chapter.get("sections", []):
                 for article in section.get("articles", []):
-                    article.pop("text", None)
+                    article["excerpt"] = (article.pop("text", "") or "")[:100]
                     article.pop("structure", None)
                     article.pop("notes", None)
             for article in chapter.get("articles", []):
-                article.pop("text", None)
+                article["excerpt"] = (article.pop("text", "") or "")[:100]
                 article.pop("structure", None)
                 article.pop("notes", None)
 
@@ -119,26 +119,35 @@ def get_manual_structure() -> dict[str, Any]:
 
 
 def get_article(article_id: str) -> dict[str, Any] | None:
-    """Get a specific article by ID."""
+    """Get a specific article by ID, including breadcrumb context."""
     data = _load_manual_data()
     processed = _process_structure(data)
 
-    all_articles = []
+    all_articles: list[tuple[dict[str, Any], dict[str, Any]]] = []
+
     for part in processed["parts"]:
         for chapter in part["chapters"]:
             for section in chapter.get("sections", []):
-                all_articles.extend(section.get("articles", []))
-            all_articles.extend(chapter.get("articles", []))
+                for article in section["articles"]:
+                    all_articles.append((article, {
+                        "part_title": part["title"],
+                        "chapter_title": chapter["title"],
+                        "section_title": section["title"],
+                    }))
+            for article in chapter.get("articles", []):
+                all_articles.append((article, {
+                    "part_title": part["title"],
+                    "chapter_title": chapter["title"],
+                    "section_title": None,
+                }))
 
-    # Find the article
-    for idx, article in enumerate(all_articles):
+    for idx, (article, context) in enumerate(all_articles):
         if article["id"] == article_id:
-            # Add navigation
-            prev_article = all_articles[idx - 1] if idx > 0 else None
-            next_article = all_articles[idx + 1] if idx < len(all_articles) - 1 else None
-
+            prev_article = all_articles[idx - 1][0] if idx > 0 else None
+            next_article = all_articles[idx + 1][0] if idx < len(all_articles) - 1 else None
             return {
                 **article,
+                "context": context,
                 "navigation": {
                     "previous": {"id": prev_article["id"], "number": prev_article["number"]} if prev_article else None,
                     "next": {"id": next_article["id"], "number": next_article["number"]} if next_article else None,

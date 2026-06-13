@@ -58,6 +58,7 @@ export function PresentationWindow() {
               color: settings.textColor,
               fontSize: `${settings.fontSize}px`,
               lineHeight: 1.35,
+              whiteSpace: "pre-line",
             }}
           >
             {verse.text}

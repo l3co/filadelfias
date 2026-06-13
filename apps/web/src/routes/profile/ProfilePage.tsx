@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { User, Mail, Phone, Calendar, Shield, Church, Camera, Eye, EyeOff, Lock, X, Briefcase } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useMembers } from '../../features/members/hooks/useMembers';
+import { membersService } from '../../services/members';
 import { PageHeaderWithIcon } from '../../components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
@@ -14,6 +16,7 @@ import { useAuth } from '../../contexts/AuthContext';
 
 export function ProfilePage() {
   const { user, tenant, membership } = useAuth();
+  const queryClient = useQueryClient();
   const [showEditModal, setShowEditModal] = useState(false);
   const [editForm, setEditForm] = useState({
     name: '',
@@ -94,9 +97,25 @@ export function ProfilePage() {
   };
 
   const handleSaveProfile = async () => {
+    if (!tenant?.id || !currentMember?.id) {
+      toast.error('Perfil de membro não encontrado');
+      return;
+    }
     setIsSaving(true);
     try {
-      // TODO: Implementar atualização do perfil via API
+      await membersService.updateMember(tenant.id, currentMember.id, {
+        full_name: editForm.name || undefined,
+        phone: editForm.phone || undefined,
+        birth_date: editForm.birth_date || undefined,
+        street: editForm.street || undefined,
+        number: editForm.number || undefined,
+        complement: editForm.complement || undefined,
+        neighborhood: editForm.neighborhood || undefined,
+        city: editForm.city || undefined,
+        state: editForm.state || undefined,
+        postal_code: editForm.postal_code || undefined,
+      });
+      await queryClient.invalidateQueries({ queryKey: ['members', tenant.id] });
       toast.success('Perfil atualizado com sucesso!');
       setShowEditModal(false);
     } catch {
@@ -518,12 +537,31 @@ export function ProfilePage() {
                       onChange={(e) => setEditForm({ ...editForm, number: e.target.value })}
                     />
                   </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="editComplement">Complemento</Label>
+                    <Input
+                      id="editComplement"
+                      value={editForm.complement}
+                      onChange={(e) => setEditForm({ ...editForm, complement: e.target.value })}
+                      placeholder="Apto, Sala..."
+                    />
+                  </div>
                   <div className="col-span-2 space-y-2">
                     <Label htmlFor="editNeighborhood">Bairro</Label>
                     <Input
                       id="editNeighborhood"
                       value={editForm.neighborhood}
                       onChange={(e) => setEditForm({ ...editForm, neighborhood: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="editPostalCode">CEP</Label>
+                    <Input
+                      id="editPostalCode"
+                      value={editForm.postal_code}
+                      onChange={(e) => setEditForm({ ...editForm, postal_code: e.target.value })}
+                      placeholder="00000-000"
+                      maxLength={9}
                     />
                   </div>
                   <div className="space-y-2">

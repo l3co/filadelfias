@@ -35,7 +35,22 @@ pub fn run() {
 
             let app_menu = Submenu::with_items(handle, "App", true, &[&PredefinedMenuItem::quit(handle, None)?])?;
 
-            Menu::with_items(handle, &[&app_menu, &navigate_menu])
+            let edit_menu = Submenu::with_items(
+                handle,
+                "Editar",
+                true,
+                &[
+                    &PredefinedMenuItem::undo(handle, None)?,
+                    &PredefinedMenuItem::redo(handle, None)?,
+                    &PredefinedMenuItem::separator(handle)?,
+                    &PredefinedMenuItem::cut(handle, None)?,
+                    &PredefinedMenuItem::copy(handle, None)?,
+                    &PredefinedMenuItem::paste(handle, None)?,
+                    &PredefinedMenuItem::select_all(handle, None)?,
+                ],
+            )?;
+
+            Menu::with_items(handle, &[&app_menu, &edit_menu, &navigate_menu])
         })
         .on_menu_event(|app, event| {
             let event_id = event.id().0.as_str();

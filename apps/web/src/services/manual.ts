@@ -9,6 +9,13 @@ export interface ManualMetadata {
 export interface ManualArticleSummary {
     id: string;
     number: string;
+    excerpt?: string;
+}
+
+export interface ArticleContext {
+    part_title: string;
+    chapter_title: string;
+    section_title: string | null;
 }
 
 export interface ManualSection {
@@ -66,6 +73,7 @@ export interface ManualArticle {
     structure: ArticleStructure[];
     notes: ArticleNote[];
     navigation: ArticleNavigation;
+    context: ArticleContext;
 }
 
 export interface SearchResult {

@@ -18,8 +18,8 @@ export function TopBar({ title, showBack = false, onBack }: TopBarProps) {
   const showUpdateProgress = updater.isInstalling && updater.progress !== null;
 
   return (
-    <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
-      <div className="flex h-14 items-center justify-between px-4">
+    <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/80 backdrop-blur-md shadow-sm shadow-gray-100/50 dark:border-gray-800 dark:bg-gray-900/80">
+      <div className="flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-2">
           {showBack ? (
             <Button variant="ghost" size="icon" onClick={onBack} aria-label="Voltar">
@@ -66,8 +66,9 @@ export function TopBar({ title, showBack = false, onBack }: TopBarProps) {
           >
             {resolvedTheme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
           </Button>
-          <Button variant="ghost" size="icon" aria-label="Notificacoes">
+          <Button variant="ghost" size="icon" aria-label="Notificacoes" className="relative">
             <Bell size={18} />
+            <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-green-500 ring-2 ring-white dark:ring-gray-900" aria-hidden="true" />
           </Button>
         </div>
       </div>

@@ -67,6 +67,27 @@ def _process_structure(data: dict[str, Any]) -> dict[str, Any]:
                     chapter_articles.append(article_data)
                     all_articles.append(article_data)
 
+            processed_sections = []
+            for section in chapter.get("sections", []):
+                section_articles = []
+                for article in section.get("articles", []):
+                    if article.get("text"):
+                        section_articles.append({
+                            "id": article.get("id", ""),
+                            "number": article.get("number", ""),
+                            "text": article.get("text", ""),
+                            "structure": article.get("structure", []),
+                            "notes": article.get("notes", []),
+                        })
+                        all_articles.append(section_articles[-1])
+                if section_articles:
+                    processed_sections.append({
+                        "id": section.get("id", ""),
+                        "number": section.get("number", ""),
+                        "title": section.get("title", ""),
+                        "articles": section_articles,
+                    })
+
             # Only add chapter if it has articles
             if chapter_articles:
                 processed_chapters.append(
@@ -74,7 +95,7 @@ def _process_structure(data: dict[str, Any]) -> dict[str, Any]:
                         "id": chapter.get("id", ""),
                         "number": chapter.get("number", ""),
                         "title": _clean_title(chapter.get("title", "")),
-                        "sections": chapter.get("sections", []),
+                        "sections": processed_sections,
                         "articles": chapter_articles,
                     }
                 )

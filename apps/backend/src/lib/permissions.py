@@ -204,6 +204,13 @@ SYSTEM_ROLE_PERMISSIONS: dict[str, Set[str]] = {
         "members:create",
         "members:edit",
     },
+    "MEMBER": {
+        "members:view",
+        "governance:view",
+        "ebd:view",
+        "missions:view",
+        "events:view",
+    },
     "ATTENDEE": set(),
 }
 

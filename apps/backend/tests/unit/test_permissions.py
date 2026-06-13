@@ -197,6 +197,21 @@ class TestSystemRolePermissions:
         # Should NOT have manage
         assert "settings:manage" not in permissions
 
+    def test_member_role_basic_view_permissions(self):
+        """MEMBER role should grant basic view permissions even without a linked member profile."""
+        permissions = get_member_permissions(None, "MEMBER")
+
+        assert "members:view" in permissions
+        assert "governance:view" in permissions
+        assert "ebd:view" in permissions
+        assert "missions:view" in permissions
+        assert "events:view" in permissions
+
+        # Should NOT have manage or financial permissions
+        assert "members:manage" not in permissions
+        assert "financial:view" not in permissions
+        assert "settings:view" not in permissions
+
     def test_attendee_no_extra_permissions(self):
         """ATTENDEE role should not add any extra permissions."""
         member = {"office": "MEMBRO", "functions": []}

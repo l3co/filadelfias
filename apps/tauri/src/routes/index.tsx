@@ -1,5 +1,6 @@
 import { AdminRoute } from "@/components/auth/AdminRoute";
 import { createBrowserRouter, Navigate } from "react-router-dom";
+import { PresentationWindow } from "@/routes/presentation/PresentationWindow";
 import { AppShell } from "@/components/layout/AppShell";
 import { AdminDashboard } from "@/routes/admin/AdminDashboard";
 import { ExpenseApprovalsScreen } from "@/routes/admin/ExpenseApprovalsScreen";
@@ -39,6 +40,10 @@ import { ManualArticleScreen } from "@/routes/public/ManualArticleScreen";
 import { ManualScreen } from "@/routes/public/ManualScreen";
 
 export const router = createBrowserRouter([
+  {
+    path: "/presentation",
+    element: <PresentationWindow />,
+  },
   {
     path: "/",
     element: <AppShell />,

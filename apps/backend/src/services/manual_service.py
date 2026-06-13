@@ -89,7 +89,7 @@ def _process_structure(data: dict[str, Any]) -> dict[str, Any]:
                     })
 
             # Only add chapter if it has articles
-            if chapter_articles:
+            if chapter_articles or processed_sections:
                 processed_chapters.append(
                     {
                         "id": chapter.get("id", ""),

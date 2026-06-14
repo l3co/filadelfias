@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 """
-Script para extrair o conteúdo completo do Manual Presbiteriano 2019 do PDF.
-Gera um arquivo JSON estruturado com todos os artigos, parágrafos e notas.
+Extrator do Manual Presbiteriano 2019 — v3
 
-Melhorias v2:
-- Quebra parágrafos jurídicos (§ 1º, § 2º, etc.)
-- Extrai notas numéricas do texto
-- Gera IDs estáveis para anchors
-- Valida integridade da extração
+Usa get_text("dict") para separar o texto dos artigos das notas de rodapé
+com base no tamanho da fonte, produzindo uma estrutura hierárquica fiel ao
+documento original (Partes → Capítulos → Seções → Artigos).
+
+Classificação de fontes:
+  size >= 30           → título de parte (Constituição, Código de Disciplina, etc.)
+  size >= 9.5          → conteúdo principal (artigos, cabeçalhos de capítulo/seção)
+  size < 7.0           → marcador de nota inline (superscript no corpo do artigo)
+  5.2 + 9.0 mesma linha → definição de nota de rodapé
+  size 9.0 linha só    → continuação de nota ou cabeçalho de página (ignorar)
 """
 
 import json
@@ -15,447 +19,510 @@ import re
 from pathlib import Path
 
 try:
-    import fitz  # PyMuPDF
+    import fitz
 except ImportError:
-    print("Instalando PyMuPDF...")
     import subprocess
     subprocess.check_call(["pip", "install", "PyMuPDF"])
     import fitz
 
 
-# Índice global de notas
-notes_index: dict[str, dict] = {}
+# ─────────────────────────────────────────────────────────────────────────────
+# Helpers de classificação
+# ─────────────────────────────────────────────────────────────────────────────
+
+PAGE_HEADER_RE = re.compile(
+    r"^(\d+\s*[–-]\s*Manual Presbiteriano"
+    r"|Manual Presbiteriano\s*[–-]\s*\d+"
+    r"|Constituição\s*[–-]\s*\d+"
+    r"|Código de Disciplina\s*[–-]\s*\d+"
+    r"|Liturgia\s*[–-]\s*\d+"
+    r"|Estatuto\s*[–-]\s*\d+"
+    r"|Regimento Interno\s*[–-]\s*\d+"
+    r"|Modelo de\s*.+[–-]\s*\d+)$",
+    re.IGNORECASE,
+)
 
 
-def extract_text_from_pdf(pdf_path: str) -> list[dict]:
-    """Extrai texto de todas as páginas do PDF."""
-    doc = fitz.open(pdf_path)
-    pages = []
-    
-    for page_num in range(len(doc)):
-        page = doc[page_num]
-        text = page.get_text("text")
-        pages.append({
-            "page": page_num + 1,
-            "text": text
-        })
-    
-    doc.close()
-    return pages
+def is_bold(span: dict) -> bool:
+    font = span.get("font", "")
+    return "Bold" in font or "bold" in font
 
 
-def clean_text(text: str) -> str:
-    """Limpa o texto removendo quebras de linha desnecessárias e hifenização."""
-    # Remove hífen seguido de quebra de linha (palavra dividida)
-    text = re.sub(r'-\s*\n\s*', '', text)
-    # Remove hífen "soft" (­) usado para quebra de linha
-    text = text.replace('­', '')
-    # Remove hífen seguido de espaços (quebra de linha do PDF)
-    text = re.sub(r'-\s{2,}', '', text)
-    # Substitui múltiplas quebras de linha por espaço
-    text = re.sub(r'\n+', ' ', text)
-    # Remove espaços múltiplos
-    text = re.sub(r'\s+', ' ', text)
-    # Remove espaços antes de pontuação
-    text = re.sub(r'\s+([.,;:!?)])', r'\1', text)
-    # Adiciona espaço após pontuação se seguido de letra
-    text = re.sub(r'([.,;:!?])([A-Za-zÀ-ÿ])', r'\1 \2', text)
+def dominant_size(spans: list[dict]) -> float:
+    sizes = [round(s["size"], 1) for s in spans if s["text"].strip()]
+    return sizes[0] if sizes else 0.0
+
+
+def line_text_from_spans(spans: list[dict], main_only: bool = False) -> str:
+    """Concatena spans. Se main_only=True, ignora spans de footnote (< 7.0)."""
+    parts = []
+    for span in spans:
+        txt = span["text"]
+        size = round(span["size"], 1)
+        if main_only and size < 7.0:
+            continue
+        parts.append(txt)
+    return "".join(parts)
+
+
+def footnote_markers_in_spans(spans: list[dict]) -> list[str]:
+    """Extrai números de notas inline (spans com size < 7.0)."""
+    markers = []
+    for span in spans:
+        if round(span["size"], 1) < 7.0:
+            num = span["text"].strip()
+            if num.isdigit():
+                markers.append(num)
+    return markers
+
+
+def clean(text: str) -> str:
+    """Limpeza básica: remove soft-hyphens, normaliza espaços."""
+    text = text.replace("­", "")  # soft hyphen
+    text = text.replace(" ", " ")  # en space
+    text = re.sub(r"-\s*\n\s*", "", text)
+    text = re.sub(r"\s+", " ", text)
     return text.strip()
 
 
-def extract_notes_from_text(text: str, article_id: str) -> tuple[str, list[dict]]:
-    """
-    Extrai notas numéricas do texto e retorna texto limpo + lista de notas.
-    Exemplo: "membros em plena comunhão31 e se reunirá" 
-    -> ("membros em plena comunhão e se reunirá", [{"id": "note-31", "number": "31"}])
-    """
-    notes = []
-    
-    # Padrão para notas: número após letra/pontuação (sem espaço antes)
-    # Ex: "comunhão31" ou "concílios.14" ou "assembleia,7"
-    # Captura: letra ou pontuação + número de 1-3 dígitos
-    note_pattern = r'([a-zA-ZÀ-ÿ.,;:!?)])(\d{1,3})(?=\s|[.,;:!?)\]]|$)'
-    
-    def replace_note(match):
-        char_before = match.group(1)
-        note_num = match.group(2)
-        note_id = f"{article_id}-note-{note_num}"
-        
-        # Adiciona ao índice global
-        if note_id not in notes_index:
-            notes_index[note_id] = {
-                "id": note_id,
-                "number": note_num,
-                "source": article_id,
-                "text": ""  # Será preenchido se encontrarmos o texto da nota
-            }
-        
-        notes.append({
-            "id": note_id,
-            "number": note_num
-        })
-        
-        return char_before  # Remove o número, mantém a letra/pontuação
-    
-    # Aplica múltiplas vezes para pegar notas consecutivas
-    prev_text = ""
-    clean = text
-    while prev_text != clean:
-        prev_text = clean
-        clean = re.sub(note_pattern, replace_note, clean)
-    
-    return clean, notes
+def is_chapter_header(line_text: str, spans: list[dict]) -> bool:
+    stripped = line_text.strip()
+    if not stripped:
+        return False
+    bold_flag = any(is_bold(s) for s in spans if s["text"].strip())
+    size = dominant_size(spans)
+    if not bold_flag or size < 9.5:
+        return False
+    upper = stripped.upper()
+    return (
+        re.match(r"^CAPÍTULO\s+", upper)
+        or upper in ("PREÂMBULO", "DISPOSIÇÕES GERAIS", "DISPOSIÇÕES TRANSITÓRIAS")
+        or re.match(r"^ÍNDICE REMISSIVO", upper)
+    )
 
 
-def parse_paragraphs(text: str, article_num: str) -> list[dict]:
-    """
-    Quebra o texto em parágrafos jurídicos.
-    Identifica: § 1º, § 2º, alíneas a), b), etc.
-    """
-    paragraphs = []
-    article_id = f"art-{article_num}"
-    
-    # Primeiro, limpa o texto
-    text = clean_text(text)
-    
-    # Padrão para parágrafos: § seguido de número
-    para_pattern = r'(§\s*\d+[º°]?)'
-    
-    # Padrão para alíneas: letra seguida de )
-    alinea_pattern = r'\b([a-z])\)'
-    
-    # Divide o texto por parágrafos
-    parts = re.split(para_pattern, text)
-    
-    current_para_num = 0
-    
-    for i, part in enumerate(parts):
-        part = part.strip()
-        if not part:
+def is_section_header(line_text: str, spans: list[dict]) -> bool:
+    stripped = line_text.strip()
+    bold_flag = any(is_bold(s) for s in spans if s["text"].strip())
+    size = dominant_size(spans)
+    return bool(
+        bold_flag
+        and size >= 9.5
+        and re.match(r"^Seção\s+\d", stripped)
+    )
+
+
+def is_article_start(spans: list[dict]) -> tuple[bool, str]:
+    """Retorna (is_article, article_number)."""
+    for span in spans:
+        if round(span["size"], 1) < 9.5:
             continue
-        
-        # Verifica se é um marcador de parágrafo
-        if re.match(para_pattern, part):
-            # É um marcador, o próximo item será o conteúdo
+        txt = span["text"].strip()
+        m = re.match(r"^Art\.\s*(\d+)[º°]?", txt)
+        if m:
+            return True, m.group(1)
+    return False, ""
+
+
+def is_paragraph_marker(spans: list[dict]) -> tuple[bool, str]:
+    """Retorna (is_paragraph, marker_text) para § ou alíneas."""
+    for span in spans:
+        if round(span["size"], 1) < 9.5:
             continue
-        
-        # Verifica se o item anterior era um marcador
-        marker = None
-        para_type = "paragraph"
-        
-        if i > 0 and re.match(para_pattern, parts[i-1].strip()):
-            marker = parts[i-1].strip()
-            para_type = "section"
-            current_para_num += 1
-        elif current_para_num == 0:
-            # Primeiro parágrafo (caput do artigo)
-            para_type = "caput"
-        
-        # Extrai notas do texto
-        clean_part, notes = extract_notes_from_text(part, article_id)
-        
-        # Gera ID estável para anchor
-        if marker:
-            para_id = f"{article_id}-par-{current_para_num}"
-        else:
-            para_id = f"{article_id}-caput" if para_type == "caput" else f"{article_id}-p-{len(paragraphs)}"
-        
-        paragraphs.append({
-            "id": para_id,
-            "type": para_type,
-            "marker": marker,
-            "text": clean_part,
-            "notes": notes
-        })
-    
-    # Se não conseguiu quebrar, retorna o texto inteiro como um parágrafo
-    if not paragraphs:
-        clean_text_result, notes = extract_notes_from_text(text, article_id)
-        paragraphs.append({
-            "id": f"{article_id}-caput",
-            "type": "caput",
-            "marker": None,
-            "text": clean_text_result,
-            "notes": notes
-        })
-    
-    return paragraphs
-
-
-def extract_articles_from_pages(pages: list[dict]) -> list[dict]:
-    """Extrai artigos das páginas do PDF."""
-    full_text = "\n\n".join([p["text"] for p in pages])
-    
-    # Padrão para encontrar artigos: "Art. X" no início de linha ou após quebra
-    # Evita capturar referências como "Art. 1º do estatuto"
-    article_pattern = r'(?:^|\n)\s*Art\.\s*(\d+)[º°]?\s*[–\-.]?\s*'
-    
-    # Encontra todas as posições de artigos
-    matches = list(re.finditer(article_pattern, full_text))
-    
-    # Deduplica - mantém apenas a primeira ocorrência de cada número
-    seen_numbers = set()
-    unique_matches = []
-    for match in matches:
-        num = match.group(1)
-        if num not in seen_numbers:
-            seen_numbers.add(num)
-            unique_matches.append(match)
-    
-    articles = []
-    for i, match in enumerate(unique_matches):
-        article_num = match.group(1)
-        start = match.end()
-        
-        # Fim é o início do próximo artigo ou fim do texto
-        if i + 1 < len(unique_matches):
-            end = unique_matches[i + 1].start()
-        else:
-            end = len(full_text)
-        
-        article_text = full_text[start:end].strip()
-        
-        # Remove texto muito curto (provavelmente referência, não artigo)
-        if len(article_text) < 50:
+        if not is_bold(span):
             continue
-        
-        # Limita o tamanho para evitar pegar muito texto
-        if len(article_text) > 8000:
-            article_text = article_text[:8000] + "..."
-        
-        if article_text:
-            # Parse parágrafos jurídicos e extrai notas
-            structure = parse_paragraphs(article_text, article_num)
-            
-            # Texto limpo (sem notas) para exibição
-            clean_article_text = " ".join([p["text"] for p in structure])
-            
-            # Coleta todas as notas do artigo
-            all_notes = []
-            for para in structure:
-                all_notes.extend(para.get("notes", []))
-            
-            articles.append({
-                "id": f"art-{article_num}",
-                "type": "article",
-                "number": article_num,
-                "text": clean_article_text,
-                "structure": structure,
-                "notes": all_notes
-            })
-    
-    return articles
+        txt = span["text"].strip()
+        if re.match(r"^§\s*\d+[º°ª]?", txt):
+            return True, txt
+        if re.match(r"^Parágrafo único", txt, re.IGNORECASE):
+            return True, txt
+    return False, ""
 
 
-def build_manual_structure(articles: list[dict]) -> dict:
-    """Constrói a estrutura do manual com todos os artigos extraídos."""
-    
-    structure = {
+# ─────────────────────────────────────────────────────────────────────────────
+# Extração principal
+# ─────────────────────────────────────────────────────────────────────────────
+
+def extract_manual(pdf_path: str) -> dict:
+    doc = fitz.open(pdf_path)
+
+    parts: list[dict] = []
+    current_part: dict | None = None
+    current_chapter: dict | None = None
+    current_section: dict | None = None
+    current_article: dict | None = None
+    current_paragraph: dict | None = None
+    footnotes: dict[str, str] = {}  # number → text
+    pending_footnote_num: str | None = None
+    expecting_chapter_subtitle = False
+
+    def flush_paragraph():
+        nonlocal current_paragraph
+        if current_paragraph and current_article is not None:
+            text = clean(current_paragraph["text"])
+            if text:
+                current_paragraph["text"] = text
+                current_article["structure"].append(current_paragraph)
+        current_paragraph = None
+
+    def flush_article():
+        nonlocal current_article
+        flush_paragraph()
+        if current_article is not None:
+            # Build final article text from structure
+            if not current_article["text"]:
+                current_article["text"] = " ".join(
+                    p["text"] for p in current_article["structure"]
+                )
+            current_article["text"] = clean(current_article["text"])
+            target = (
+                current_section["articles"]
+                if current_section is not None
+                else current_chapter["articles"] if current_chapter is not None
+                else None
+            )
+            if target is not None and current_article["text"]:
+                # note_markers kept for later resolution (footnotes may not be
+                # collected yet — they appear at page bottom, after article body)
+                target.append(current_article)
+        current_article = None
+
+    def flush_section():
+        nonlocal current_section
+        flush_article()
+        if current_section is not None and current_chapter is not None:
+            if current_section["articles"]:
+                current_chapter["sections"].append(current_section)
+        current_section = None
+
+    def flush_chapter():
+        nonlocal current_chapter
+        flush_section()
+        flush_article()
+        if current_chapter is not None and current_part is not None:
+            has_content = (
+                current_chapter["articles"]
+                or current_chapter["sections"]
+            )
+            if has_content:
+                current_part["chapters"].append(current_chapter)
+        current_chapter = None
+
+    def flush_part():
+        nonlocal current_part
+        flush_chapter()
+        if current_part is not None and (
+            current_part["chapters"] or current_part.get("_pending_title")
+        ):
+            if current_part["chapters"]:
+                parts.append(current_part)
+        current_part = None
+
+    for page_num in range(len(doc)):
+        page = doc[page_num]
+        blocks = page.get_text("dict")["blocks"]
+
+        # Reset footnote continuation state per page
+        pending_footnote_num = None
+
+        for block in blocks:
+            if block.get("type") != 0:
+                continue
+
+            for line in block.get("lines", []):
+                spans = line.get("spans", [])
+                if not spans:
+                    continue
+
+                raw_text = "".join(s["text"] for s in spans)
+                if not raw_text.strip():
+                    continue
+
+                d_size = dominant_size(spans)
+
+                # ── Part title (36pt) ──────────────────────────────────────
+                if d_size >= 28.0:
+                    flush_part()
+                    part_title = raw_text.strip()
+                    # Parts can span multiple lines — accumulate in _pending_title
+                    # We create the part lazily so we can join multi-line titles
+                    if current_part is None:
+                        current_part = {
+                            "id": f"p{len(parts)}",
+                            "title": part_title,
+                            "chapters": [],
+                            "_pending_title": part_title,
+                        }
+                    else:
+                        current_part["_pending_title"] += " " + part_title
+                        current_part["title"] = current_part["_pending_title"]
+                    pending_footnote_num = None
+                    expecting_chapter_subtitle = False
+                    continue
+
+                # ── Page header / footer (skip) ────────────────────────────
+                line_for_check = clean(raw_text)
+                if PAGE_HEADER_RE.match(line_for_check):
+                    continue
+                # Also skip lines like "C" + "onstituição" split header
+                if len(line_for_check) <= 2 and d_size == 9.0:
+                    continue
+
+                # ── Footnote definition lines (5.2 number + 9.0 text) ──────
+                # These appear at the bottom of pages
+                has_tiny = any(round(s["size"], 1) <= 5.5 for s in spans if s["text"].strip())
+                if has_tiny:
+                    # Collect footnote number from tiny span
+                    tiny_text = ""
+                    rest_text = ""
+                    for span in spans:
+                        if round(span["size"], 1) <= 5.5:
+                            tiny_text += span["text"].strip()
+                        else:
+                            rest_text += span["text"]
+                    if tiny_text.isdigit():
+                        pending_footnote_num = tiny_text
+                        rest = clean(rest_text)
+                        footnotes[pending_footnote_num] = rest
+                    else:
+                        # Could be inline superscript inside article text handled below
+                        pass
+                    continue
+
+                # ── Footnote continuation (9.0 lines after a definition) ───
+                if d_size <= 9.5 and d_size >= 7.0:
+                    if pending_footnote_num is not None:
+                        # Continuation of last footnote
+                        footnotes[pending_footnote_num] = (
+                            footnotes.get(pending_footnote_num, "") + " " + clean(raw_text)
+                        ).strip()
+                    # If no pending footnote, skip (page header or noise)
+                    continue
+
+                # ─────────────────────────────────────────────────────────────
+                # Main content lines (size >= 9.5)
+                # ─────────────────────────────────────────────────────────────
+                pending_footnote_num = None
+
+                main_text = line_text_from_spans(spans, main_only=True).strip()
+                markers = footnote_markers_in_spans(spans)
+
+                # ── Chapter header ─────────────────────────────────────────
+                if is_chapter_header(main_text, spans):
+                    flush_chapter()
+                    flush_section()
+                    chapter_id = f"ch{len(current_part['chapters']) if current_part else 0}"
+                    # Count globally across parts for stable IDs
+                    total_chapters = sum(len(p["chapters"]) for p in parts)
+                    if current_part:
+                        total_chapters += len(current_part["chapters"])
+                    current_chapter = {
+                        "id": f"ch{total_chapters}",
+                        "number": "",
+                        "title": main_text,
+                        "subtitle": "",
+                        "sections": [],
+                        "articles": [],
+                    }
+                    # Extract chapter number if present
+                    m = re.match(r"^CAPÍTULO\s+([IVXLCivxlc\d]+)", main_text, re.IGNORECASE)
+                    if m:
+                        current_chapter["number"] = m.group(1)
+                        current_chapter["title"] = main_text
+                    expecting_chapter_subtitle = True
+                    continue
+
+                # ── Chapter subtitle (line immediately after chapter header) ─
+                if (
+                    expecting_chapter_subtitle
+                    and current_chapter is not None
+                    and not main_text.startswith("Art.")
+                    and not re.match(r"^§", main_text)
+                ):
+                    current_chapter["subtitle"] = main_text
+                    current_chapter["title"] = main_text  # use subtitle as display title
+                    expecting_chapter_subtitle = False
+                    continue
+
+                expecting_chapter_subtitle = False
+
+                # ── Section header (Seção Nª) ──────────────────────────────
+                if is_section_header(main_text, spans):
+                    flush_section()
+                    # Next line is the section subtitle
+                    m = re.match(r"^(Seção\s+\d+[ªaAº°]?)", main_text)
+                    sec_number = m.group(1) if m else main_text
+                    # Rest of line (after "Seção Nª – ...") if inline
+                    sec_rest = re.sub(r"^Seção\s+\d+[ªaAº°]?\s*[–\-]?\s*", "", main_text).strip()
+                    current_section = {
+                        "id": f"sec{len(current_chapter['sections']) if current_chapter else 0}",
+                        "number": sec_number,
+                        "title": sec_rest or sec_number,
+                        "articles": [],
+                    }
+                    expecting_chapter_subtitle = True  # re-use flag for section subtitle
+                    continue
+
+                # ── Article start ──────────────────────────────────────────
+                is_art, art_num = is_article_start(spans)
+                if is_art:
+                    flush_article()
+                    # Article text = everything in this line after "Art. Xº"
+                    text_after = re.sub(r"^Art\.\s*\d+[º°]?\s*", "", main_text).strip()
+                    current_article = {
+                        "id": "",  # filled later
+                        "number": art_num,
+                        "text": text_after,
+                        "structure": [],
+                        "note_markers": list(markers),
+                        "notes": [],
+                    }
+                    if text_after:
+                        current_paragraph = {
+                            "id": f"art{art_num}-caput",
+                            "type": "caput",
+                            "marker": None,
+                            "text": text_after,
+                        }
+                    continue
+
+                # ── Paragraph marker (§) ───────────────────────────────────
+                is_par, par_marker = is_paragraph_marker(spans)
+                if is_par and current_article is not None:
+                    flush_paragraph()
+                    par_text = re.sub(
+                        r"^(§\s*\d+[º°ª]?|Parágrafo único)\s*", "", main_text
+                    ).strip()
+                    current_paragraph = {
+                        "id": f"art{current_article['number']}-par",
+                        "type": "section",
+                        "marker": par_marker,
+                        "text": par_text,
+                    }
+                    if current_article:
+                        current_article["note_markers"].extend(markers)
+                    continue
+
+                # ── Article body continuation ──────────────────────────────
+                if current_article is not None:
+                    if current_paragraph is not None:
+                        current_paragraph["text"] += " " + main_text
+                    else:
+                        current_article["text"] += " " + main_text
+                    current_article["note_markers"].extend(markers)
+                    continue
+
+    # Flush remaining state
+    flush_part()
+    doc.close()
+
+    return parts, footnotes
+
+
+def _resolve_notes(
+    markers: list[str], footnotes: dict[str, str]
+) -> list[dict]:
+    seen = set()
+    result = []
+    for num in markers:
+        if num in seen:
+            continue
+        seen.add(num)
+        text = footnotes.get(num, "")
+        result.append({"id": f"note-{num}", "number": num, "text": text})
+    return result
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Assign stable IDs and clean up
+# ─────────────────────────────────────────────────────────────────────────────
+
+def assign_ids(parts: list[dict], footnotes: dict[str, str]) -> dict:
+    total_articles = 0
+    for pi, part in enumerate(parts):
+        part["id"] = f"p{pi}"
+        part.pop("_pending_title", None)
+        for ci, chapter in enumerate(part["chapters"]):
+            chapter["id"] = f"p{pi}/ch{ci}"
+            for si, section in enumerate(chapter["sections"]):
+                section["id"] = f"p{pi}/ch{ci}/sec{si}"
+                for ai, article in enumerate(section["articles"]):
+                    article["id"] = f"p{pi}/ch{ci}/sec{si}/art{ai}"
+                    article["notes"] = _resolve_notes(article.pop("note_markers", []), footnotes)
+                    total_articles += 1
+            for ai, article in enumerate(chapter["articles"]):
+                article["id"] = f"p{pi}/ch{ci}/art{ai}"
+                article["notes"] = _resolve_notes(article.pop("note_markers", []), footnotes)
+                total_articles += 1
+
+    return {
         "metadata": {
             "title": "Manual Presbiteriano",
             "editionYear": 2019,
             "language": "pt-BR",
-            "source": {
-                "type": "pdf",
-                "fileName": "Manual-Presbiteriano-2019.pdf"
-            },
-            "schemaVersion": "3.0.0"  # Nova versão com parágrafos e notas
+            "source": {"type": "pdf", "fileName": "Manual-Presbiteriano-2019.pdf"},
+            "schemaVersion": "4.0.0",
         },
-        "parts": [],
-        "notesIndex": {}  # Índice global de notas
+        "parts": parts,
+        "total_articles": total_articles,
     }
-    
-    # Separa artigos por faixas de numeração (diferentes partes do Manual)
-    # Constituição: Art. 1-152
-    # Código de Disciplina: Art. 1-xxx (reinicia numeração)
-    # Princípios de Liturgia: Art. 1-xxx
-    # etc.
-    
-    constituicao_arts = []
-    outros_arts = []
-    
-    for article in articles:
-        try:
-            art_num = int(article["number"])
-            # Artigos 1-200 são provavelmente da Constituição
-            # Artigos com números muito altos (>1000) são de outras seções
-            if art_num <= 200:
-                constituicao_arts.append(article)
-            else:
-                outros_arts.append(article)
-        except ValueError:
-            continue
-    
-    # Ordena artigos da Constituição
-    constituicao_arts.sort(key=lambda a: int(a["number"]))
-    
-    # Agrupa artigos da Constituição em capítulos de 50
-    chapters = []
-    chapter_num = 0
-    
-    for i in range(0, len(constituicao_arts), 50):
-        batch = constituicao_arts[i:i+50]
-        if batch:
-            first_num = batch[0]["number"]
-            last_num = batch[-1]["number"]
-            
-            chapter = {
-                "id": f"ch{chapter_num}",
-                "number": str(chapter_num + 1),
-                "title": f"Artigos {first_num} a {last_num}",
-                "sections": [],
-                "articles": []
-            }
-            
-            for article in batch:
-                article_copy = article.copy()
-                article_copy["id"] = f"ch{chapter_num}/art{article['number']}"
-                chapter["articles"].append(article_copy)
-            
-            chapters.append(chapter)
-            chapter_num += 1
-    
-    # Adiciona artigos de outras seções como capítulo separado (se houver)
-    if outros_arts:
-        outros_arts.sort(key=lambda a: int(a["number"]))
-        chapter = {
-            "id": f"ch{chapter_num}",
-            "number": str(chapter_num + 1),
-            "title": "Outras Disposições",
-            "sections": [],
-            "articles": []
-        }
-        for article in outros_arts:
-            article_copy = article.copy()
-            article_copy["id"] = f"ch{chapter_num}/art{article['number']}"
-            chapter["articles"].append(article_copy)
-        chapters.append(chapter)
-    
-    # Cria uma única parte com todos os capítulos
-    part = {
-        "id": "p0",
-        "title": "Constituição da Igreja Presbiteriana do Brasil",
-        "chapters": chapters
-    }
-    
-    structure["parts"].append(part)
-    
-    # Adiciona índice global de notas
-    structure["notesIndex"] = notes_index
-    
-    return structure
 
 
-def validate_extraction(manual: dict) -> dict:
-    """
-    Valida a extração garantindo:
-    - Nenhum artigo sem parágrafos
-    - Nenhuma nota órfã
-    """
-    issues = {
-        "articles_without_paragraphs": [],
-        "orphan_notes": [],
-        "empty_texts": [],
-        "total_articles": 0,
-        "total_paragraphs": 0,
-        "total_notes": 0,
-        "valid": True
-    }
-    
-    all_note_refs = set()
-    
-    for part in manual.get("parts", []):
-        for chapter in part.get("chapters", []):
-            for article in chapter.get("articles", []):
-                issues["total_articles"] += 1
-                
-                # Verifica se tem parágrafos
-                structure = article.get("structure", [])
-                if not structure:
-                    issues["articles_without_paragraphs"].append(article["id"])
-                    issues["valid"] = False
-                
-                issues["total_paragraphs"] += len(structure)
-                
-                # Verifica texto vazio
-                if not article.get("text", "").strip():
-                    issues["empty_texts"].append(article["id"])
-                    issues["valid"] = False
-                
-                # Coleta referências de notas
-                for note in article.get("notes", []):
-                    all_note_refs.add(note["id"])
-                    issues["total_notes"] += 1
-    
-    # Verifica notas órfãs (no índice mas não referenciadas)
-    notes_index = manual.get("notesIndex", {})
-    for note_id in notes_index:
-        if note_id not in all_note_refs:
-            issues["orphan_notes"].append(note_id)
-    
-    return issues
+# ─────────────────────────────────────────────────────────────────────────────
+# Validation
+# ─────────────────────────────────────────────────────────────────────────────
 
+def validate(manual: dict) -> None:
+    total = 0
+    empty = []
+    for part in manual["parts"]:
+        for chapter in part["chapters"]:
+            for section in chapter.get("sections", []):
+                for article in section["articles"]:
+                    total += 1
+                    if not article["text"].strip():
+                        empty.append(article["id"])
+            for article in chapter["articles"]:
+                total += 1
+                if not article["text"].strip():
+                    empty.append(article["id"])
+
+    print(f"  Partes:   {len(manual['parts'])}")
+    print(f"  Artigos:  {total}")
+    if empty:
+        print(f"  ⚠  Artigos sem texto: {len(empty)} — {empty[:5]}")
+    else:
+        print("  ✅ Todos os artigos têm texto")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Main
+# ─────────────────────────────────────────────────────────────────────────────
 
 def main():
-    # Caminhos
     script_dir = Path(__file__).parent
     project_root = script_dir.parent
     pdf_path = project_root / "references" / "Manual-Presbiteriano-2019.pdf"
     output_path = project_root / "apps" / "backend" / "src" / "assets" / "manual_2019.json"
-    validation_path = project_root / "references" / "manual_2019_validation_report.json"
-    
+
     if not pdf_path.exists():
-        print(f"Erro: PDF não encontrado em {pdf_path}")
+        print(f"❌ PDF não encontrado: {pdf_path}")
         return
-    
-    # Limpa o índice global de notas
-    global notes_index
-    notes_index = {}
-    
-    print(f"Extraindo texto do PDF: {pdf_path}")
-    pages = extract_text_from_pdf(str(pdf_path))
-    print(f"Total de páginas: {len(pages)}")
-    
-    print("Extraindo artigos com parágrafos e notas...")
-    articles = extract_articles_from_pages(pages)
-    print(f"Total de artigos encontrados: {len(articles)}")
-    
-    print("Construindo estrutura do manual...")
-    manual = build_manual_structure(articles)
-    
-    # Valida a extração
-    print("Validando extração...")
-    validation = validate_extraction(manual)
-    
-    print(f"\n=== Relatório de Validação ===")
-    print(f"Total de artigos: {validation['total_articles']}")
-    print(f"Total de parágrafos: {validation['total_paragraphs']}")
-    print(f"Total de notas: {validation['total_notes']}")
-    print(f"Notas no índice: {len(manual.get('notesIndex', {}))}")
-    
-    if validation["articles_without_paragraphs"]:
-        print(f"⚠️  Artigos sem parágrafos: {len(validation['articles_without_paragraphs'])}")
-    if validation["empty_texts"]:
-        print(f"⚠️  Artigos com texto vazio: {len(validation['empty_texts'])}")
-    if validation["orphan_notes"]:
-        print(f"⚠️  Notas órfãs: {len(validation['orphan_notes'])}")
-    
-    if validation["valid"]:
-        print("✅ Extração válida!")
-    else:
-        print("❌ Extração com problemas - verifique o relatório")
-    
-    # Salva relatório de validação
-    with open(validation_path, "w", encoding="utf-8") as f:
-        json.dump(validation, f, ensure_ascii=False, indent=2)
-    print(f"\nRelatório salvo em: {validation_path}")
-    
-    # Salva o JSON do manual
-    print(f"Salvando JSON em: {output_path}")
+
+    print(f"Extraindo: {pdf_path.name}")
+    parts, footnotes = extract_manual(str(pdf_path))
+
+    print(f"Montando estrutura...")
+    manual = assign_ids(parts, footnotes)
+
+    print("Validando...")
+    validate(manual)
+
+    print(f"Salvando em: {output_path}")
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(manual, f, ensure_ascii=False, indent=2)
-    
-    print("\n✅ Extração concluída!")
+
+    print("✅ Concluído!")
 
 
 if __name__ == "__main__":

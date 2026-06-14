@@ -15,3 +15,12 @@ export function useManualArticle(articleId?: string) {
     enabled: Boolean(articleId),
   });
 }
+
+export function useManualSearch(query: string) {
+  return useQuery({
+    queryKey: ["manual-search", query],
+    queryFn: () => manualService.search(query),
+    enabled: query.length >= 2,
+    staleTime: 30000,
+  });
+}

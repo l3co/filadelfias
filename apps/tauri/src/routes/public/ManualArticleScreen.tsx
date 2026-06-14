@@ -166,9 +166,9 @@ export function ManualArticleScreen() {
 
       {/* Floating navigation */}
       <div className="sticky bottom-4 z-10 flex justify-between">
-        {article.navigation.previous ? (
+        {article.navigation?.previous ? (
           <button
-            onClick={() => navigate(`/manual/${encodeURIComponent(article.navigation.previous!.id)}`)}
+            onClick={() => navigate(`/manual/${encodeURIComponent(article.navigation!.previous!.id)}`)}
             className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-green-700 shadow-lg transition-all hover:-translate-x-0.5 hover:border-green-200 hover:bg-green-50"
           >
             <ChevronLeft size={18} />
@@ -176,9 +176,9 @@ export function ManualArticleScreen() {
           </button>
         ) : <div />}
 
-        {article.navigation.next ? (
+        {article.navigation?.next ? (
           <button
-            onClick={() => navigate(`/manual/${encodeURIComponent(article.navigation.next!.id)}`)}
+            onClick={() => navigate(`/manual/${encodeURIComponent(article.navigation!.next!.id)}`)}
             className="flex items-center gap-2 rounded-full bg-green-700 px-6 py-3 text-sm font-medium text-white shadow-lg shadow-green-700/20 transition-all hover:translate-x-0.5 hover:bg-green-800"
           >
             <span className="hidden sm:inline">Art. {article.navigation.next.number}</span>

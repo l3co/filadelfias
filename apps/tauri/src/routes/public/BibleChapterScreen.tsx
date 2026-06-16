@@ -3,6 +3,7 @@ import { ArrowLeft, BookOpen, ChevronLeft, ChevronRight, EyeOff, Minus, Monitor,
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { emitTo } from "@tauri-apps/api/event";
 import { useBibleBooks, useBibleChapter } from "@/hooks/useBible";
+import { usePlatform } from "@/hooks/usePlatform";
 import { usePresentationStore } from "@/stores/presentationStore";
 import { openPresentationWindow, closePresentationWindow } from "@/lib/presentationWindow";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -35,6 +36,7 @@ export function BibleChapterScreen() {
 
   const { data, isLoading } = useBibleChapter(version, book, chapterNum);
   const { data: books } = useBibleBooks(version);
+  const platform = usePlatform();
 
   const currentBook = useMemo(() => books?.find((b) => b.abbrev === book), [books, book]);
   const totalChapters = currentBook?.chapters_count ?? 0;
@@ -63,7 +65,7 @@ export function BibleChapterScreen() {
 
   useEffect(() => {
     return () => {
-      window.speechSynthesis.cancel();
+      window.speechSynthesis?.cancel();
       setIsSpeaking(false);
     };
   }, [book, chapterNum]);
@@ -77,6 +79,7 @@ export function BibleChapterScreen() {
   };
 
   const toggleAudio = () => {
+    if (!window.speechSynthesis) return;
     if (isSpeaking) {
       window.speechSynthesis.cancel();
       setIsSpeaking(false);
@@ -209,17 +212,19 @@ export function BibleChapterScreen() {
               {isSpeaking ? <Square size={13} className="fill-current" /> : <Volume2 size={13} />}
               {isSpeaking ? "Parar" : "Ouvir"}
             </button>
-            <button
-              onClick={handleTogglePresentation}
-              className={`flex h-8 items-center gap-1.5 rounded-lg border px-3 text-xs font-medium transition ${
-                isPresenting
-                  ? "border-green-300 bg-green-700 text-white hover:bg-green-800"
-                  : "border-gray-200 text-gray-700 hover:border-green-200 hover:bg-green-50 hover:text-green-700"
-              }`}
-            >
-              {isPresenting ? <MonitorOff size={13} /> : <Monitor size={13} />}
-              {isPresenting ? "Encerrar" : "Apresentar"}
-            </button>
+            {platform === "desktop" && (
+              <button
+                onClick={handleTogglePresentation}
+                className={`flex h-8 items-center gap-1.5 rounded-lg border px-3 text-xs font-medium transition ${
+                  isPresenting
+                    ? "border-green-300 bg-green-700 text-white hover:bg-green-800"
+                    : "border-gray-200 text-gray-700 hover:border-green-200 hover:bg-green-50 hover:text-green-700"
+                }`}
+              >
+                {isPresenting ? <MonitorOff size={13} /> : <Monitor size={13} />}
+                {isPresenting ? "Encerrar" : "Apresentar"}
+              </button>
+            )}
             {isPresenting && (
               <button
                 onClick={() => setShowSettings(true)}

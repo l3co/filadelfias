@@ -3,6 +3,7 @@ import { ArrowLeft, ChevronLeft, ChevronRight, EyeOff, Minus, Monitor, MonitorOf
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { emitTo } from "@tauri-apps/api/event";
 import { useHymn } from "@/hooks/useHymnal";
+import { usePlatform } from "@/hooks/usePlatform";
 import type { HymnLyricLine } from "@/services/hymnal";
 import { usePresentationStore } from "@/stores/presentationStore";
 import { openPresentationWindow, closePresentationWindow } from "@/lib/presentationWindow";
@@ -26,6 +27,7 @@ export function HymnScreen() {
   const navigate = useNavigate();
   const hymnNumber = number ? parseInt(number, 10) : undefined;
   const { data: hymn, isLoading } = useHymn(hymnNumber);
+  const platform = usePlatform();
 
   const [fontSize, setFontSize] = useState<number>(() => {
     const stored = localStorage.getItem(FONT_KEY);
@@ -47,6 +49,7 @@ export function HymnScreen() {
   };
 
   const toggleAudio = () => {
+    if (!window.speechSynthesis) return;
     if (isSpeaking) {
       window.speechSynthesis.cancel();
       setIsSpeaking(false);
@@ -160,17 +163,19 @@ export function HymnScreen() {
               {isSpeaking ? <Square size={13} className="fill-current" /> : <Volume2 size={13} />}
               {isSpeaking ? "Parar" : "Ouvir"}
             </button>
-            <button
-              onClick={handleTogglePresentation}
-              className={`flex h-8 items-center gap-1.5 rounded-lg border px-3 text-xs font-medium transition ${
-                isPresenting
-                  ? "border-green-300 bg-green-700 text-white hover:bg-green-800"
-                  : "border-gray-200 text-gray-700 hover:border-green-200 hover:bg-green-50 hover:text-green-700"
-              }`}
-            >
-              {isPresenting ? <MonitorOff size={13} /> : <Monitor size={13} />}
-              {isPresenting ? "Encerrar" : "Apresentar"}
-            </button>
+            {platform === "desktop" && (
+              <button
+                onClick={handleTogglePresentation}
+                className={`flex h-8 items-center gap-1.5 rounded-lg border px-3 text-xs font-medium transition ${
+                  isPresenting
+                    ? "border-green-300 bg-green-700 text-white hover:bg-green-800"
+                    : "border-gray-200 text-gray-700 hover:border-green-200 hover:bg-green-50 hover:text-green-700"
+                }`}
+              >
+                {isPresenting ? <MonitorOff size={13} /> : <Monitor size={13} />}
+                {isPresenting ? "Encerrar" : "Apresentar"}
+              </button>
+            )}
             {isPresenting && (
               <button
                 onClick={() => setShowSettings(true)}

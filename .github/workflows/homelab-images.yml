@@ -84,23 +84,3 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-  deploy:
-    name: Deploy to Homelab
-    runs-on: [self-hosted, homelab]
-    needs: [backend, web]
-    steps:
-      - name: Install kubectl
-        run: |
-          if ! command -v kubectl &>/dev/null; then
-            curl -LO "https://dl.k8s.io/release/$(curl -Ls https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-            chmod +x kubectl && sudo mv kubectl /usr/local/bin/kubectl
-          fi
-
-      - name: Rollout restart
-        run: |
-          kubectl rollout restart deployment/web deployment/backend -n filadelfias
-
-      - name: Wait for rollout
-        run: |
-          kubectl rollout status deployment/web -n filadelfias --timeout=120s
-          kubectl rollout status deployment/backend -n filadelfias --timeout=120s

@@ -25,10 +25,10 @@ val hasReleaseSigning =
 
 android {
     compileSdk = 36
-    namespace = "com.filadelfias"
+    namespace = "com.filadelfias.app"
     defaultConfig {
         manifestPlaceholders["usesCleartextTraffic"] = "false"
-        applicationId = "com.filadelfias"
+        applicationId = "com.filadelfias.app"
         minSdk = 24
         targetSdk = 36
         versionCode = tauriProperties.getProperty("tauri.android.versionCode", "1").toInt()
@@ -63,7 +63,6 @@ android {
                     .plus(getDefaultProguardFile("proguard-android-optimize.txt"))
                     .toList().toTypedArray()
             )
-
             if (hasReleaseSigning) {
                 signingConfig = signingConfigs.getByName("release")
             }

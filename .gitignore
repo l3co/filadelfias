@@ -158,6 +158,12 @@ service-account*.json
 .cursorignore
 .cursorindexingignore
 
+# Claude / AI Tooling
+.claude/
+.rtk/
+.superpowers/
+CLAUDE.md
+
 # ============================================
 # OS Files
 # ============================================

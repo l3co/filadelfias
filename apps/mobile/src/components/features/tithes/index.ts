@@ -1,1 +1,0 @@
-export { CreateTitheModal } from './CreateTitheModal';

@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: github-runner
+  namespace: actions-runner
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: github-runner
+  template:
+    metadata:
+      labels:
+        app: github-runner
+    spec:
+      serviceAccountName: deploy-runner
+      containers:
+        - name: runner
+          image: myoung34/github-runner:latest
+          imagePullPolicy: Always
+          env:
+            - name: REPO_URL
+              value: https://github.com/l3co/filadelfias
+            - name: ACCESS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: github-runner-secret
+                  key: access-token
+            - name: RUNNER_NAME
+              value: homelab-k8s
+            - name: RUNNER_WORKDIR
+              value: /tmp/runner/work
+            - name: LABELS
+              value: self-hosted,homelab
+            - name: RUNNER_SCOPE
+              value: repo
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"

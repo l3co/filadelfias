@@ -38,21 +38,11 @@ spec:
               cpu: "250m"
           readinessProbe:
             exec:
-              command:
-                - cloudflared
-                - tunnel
-                - --metrics
-                - localhost:20241
-                - ready
+              command: ["cloudflared", "tunnel", "--metrics", "localhost:20241", "ready"]
             initialDelaySeconds: 10
             periodSeconds: 10
           livenessProbe:
             exec:
-              command:
-                - cloudflared
-                - tunnel
-                - --metrics
-                - localhost:20241
-                - ready
+              command: ["cloudflared", "tunnel", "--metrics", "localhost:20241", "ready"]
             initialDelaySeconds: 30
             periodSeconds: 30

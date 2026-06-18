@@ -13,6 +13,7 @@ export default defineConfig(async () => ({
   server: {
     port: 5173,
     strictPort: true,
+    host: process.env.TAURI_DEV_HOST || "localhost",
     watch: {
       ignored: ["**/src-tauri/**"],
     },
